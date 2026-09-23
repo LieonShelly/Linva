@@ -48,6 +48,7 @@ private struct NodeTextEditor: NSViewRepresentable {
 
         let textView = CommitTextView()
         textView.delegate = context.coordinator
+        textView.allowsUndo = true
         textView.drawsBackground = false
         textView.isRichText = false
         textView.isAutomaticQuoteSubstitutionEnabled = false
