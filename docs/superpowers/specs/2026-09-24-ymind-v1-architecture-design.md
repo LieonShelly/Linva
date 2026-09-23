@@ -7,6 +7,8 @@
 
 本文描述 v1（覆盖 FR-1～16）的模块边界、数据流与实现顺序。不替代 PRD；实现计划见后续 `writing-plans` 产出。
 
+**绘图约定：** 架构与数据流图统一使用 [Mermaid](https://mermaid.js.org/)。
+
 ---
 
 ## 1. 目标与约束
@@ -37,36 +39,38 @@
 
 ## 2. 总体架构与模块边界
 
-```text
-┌─────────────────────────────────────────────────────────┐
-│  App Shell（SwiftUI）                                     │
-│  菜单 · 工具条 · 打开/保存确认 · 编辑浮层 TextField        │
-└────────────┬──────────────────────────────▲─────────────┘
-             │ 用户意图 / 文件 I/O            │ 选中态、脏标记、布局结果
-             ▼                              │
-┌─────────────────────────────────────────────────────────┐
-│  DocumentSession                                          │
-│  当前 URL · dirty · 新建/打开/保存 · 与 CommandBus 协作    │
-└────────────┬────────────────────────────────────────────┘
-             │
-             ▼
-┌──────────────────┐    ┌──────────────────┐
-│  MindMapModel    │◄───│  CommandBus      │
-│  树 · selectedId │    │  可逆命令 · Undo  │
-└────────┬─────────┘    └──────────────────┘
-         │ 变更后
-         ▼
-┌──────────────────┐    ┌──────────────────┐
-│  TextMeasure     │───►│  RadialLayout    │
-│  Core Text 量字  │    │  frame · 连线几何 │
-└──────────────────┘    └────────┬─────────┘
-                                 │ LayoutSnapshot
-                                 ▼
-┌──────────────────┐    ┌──────────────────┐
-│  CanvasView      │───►│  MetalRenderer   │
-│  相机 · 命中     │    │  线/框/文字纹理   │
-│  手势 → 命令/相机│    │  TextAtlas 缓存   │
-└──────────────────┘    └──────────────────┘
+```mermaid
+flowchart TB
+  subgraph Shell["App Shell（SwiftUI）"]
+    UI["菜单 · 工具条 · 打开/保存确认 · 编辑浮层"]
+  end
+
+  subgraph Session["DocumentSession"]
+    DS["当前 URL · dirty · 新建/打开/保存"]
+  end
+
+  subgraph Core["内核"]
+    Model["MindMapModel<br/>树 · selectedId"]
+    Bus["CommandBus<br/>可逆命令 · Undo"]
+    Measure["TextMeasure<br/>Core Text 量字"]
+    Layout["RadialLayout<br/>frame · 连线几何"]
+  end
+
+  subgraph Canvas["画布"]
+    CV["CanvasView<br/>相机 · 命中 · 手势"]
+    Metal["MetalRenderer<br/>线/框/文字纹理 · TextAtlas"]
+  end
+
+  UI -->|"用户意图 / 文件 I/O"| DS
+  DS -->|"选中态 · dirty · 布局结果"| UI
+  DS --> Model
+  Bus -->|"execute"| Model
+  Model -->|"变更后"| Measure
+  Measure --> Layout
+  Layout -->|"LayoutSnapshot"| Metal
+  CV -->|"命令 / 相机"| Bus
+  CV --> Metal
+  Model -.->|"只读快照路径"| Layout
 ```
 
 ### 2.1 依赖规则（硬约束）
@@ -90,18 +94,31 @@
 
 ### 3.1 运行时
 
-```text
-MindMapDocument
-  version: Int
-  root: Node
-
-Node
-  id: UUID
-  text: String          // 可含 \n
-  collapsed: Bool
-  children: [Node]      // 有序 = 同侧自上而下
-  side: Side?           // 仅 root 直接子节点：left | right
+```mermaid
+classDiagram
+  direction TB
+  class MindMapDocument {
+    +Int version
+    +Node root
+  }
+  class Node {
+    +UUID id
+    +String text
+    +Bool collapsed
+    +Side? side
+    +Node[] children
+  }
+  class Side {
+    <<enumeration>>
+    left
+    right
+  }
+  MindMapDocument "1" --> "1" Node : root
+  Node "1" --> "*" Node : children（有序）
+  Node --> Side : 仅 root 直接子节点
 ```
+
+说明：`text` 可含 `\n`；`side` 仅中心主题的直接子节点有效，更深层级为 `nil`。
 
 ### 3.2 会话态（不进文件）
 
@@ -174,12 +191,17 @@ Node
 
 ### 5.1 主链路
 
-```text
-用户操作 → CommandBus（或仅改 Camera）
-  → Model + isDirty
-  → TextMeasure
-  → RadialLayout → LayoutSnapshot
-  → MetalRenderer.draw(snapshot, camera, atlas)
+```mermaid
+flowchart LR
+  User["用户操作"] --> Branch{改树?}
+  Branch -->|是| Bus["CommandBus.execute"]
+  Branch -->|否·仅相机| Cam["更新 Camera"]
+  Bus --> Model["Model + isDirty"]
+  Model --> Measure["TextMeasure"]
+  Measure --> Layout["RadialLayout"]
+  Layout --> Snap["LayoutSnapshot"]
+  Snap --> Draw["MetalRenderer.draw"]
+  Cam --> Draw
 ```
 
 ### 5.2 Layout
@@ -193,13 +215,28 @@ Node
 ### 5.3 文字与 Metal
 
 - `TextAtlas`：键含节点 id、文案、字体、缩放分桶；改字或跨桶变缩放则失效重绘。
-- Pass：清屏 → 边 → 节点底 → 文字纹理 → 选中描边。
 - 编辑：浮层输入控件对准节点屏幕矩形；不做 Metal IME。
+
+绘制 Pass 顺序：
+
+```mermaid
+flowchart LR
+  C["清屏"] --> E["边"]
+  E --> B["节点底"]
+  B --> T["文字纹理"]
+  T --> S["选中描边"]
+```
 
 ### 5.4 相机与命中
 
-- 世界坐标由 Layout 给出；屏幕 = 世界 × scale + translation。
-- 命中：屏幕点逆变换后与节点 AABB 求交。
+```mermaid
+flowchart LR
+  Screen["屏幕点"] -->|"逆变换 camera"| World["世界坐标"]
+  World -->|"AABB 求交"| Hit["命中节点 / 空白"]
+  Layout["Layout 世界框"] --> WorldCoord["节点世界坐标"]
+  WorldCoord -->|"× scale + translation"| ScreenPos["屏幕矩形"]
+```
+
 - 滚轮缩放以指针为锚点（与原型一致）。
 
 ---
@@ -241,12 +278,16 @@ Node
 
 ## 9. 实现顺序
 
-1. Model + CommandBus + JSON 编解码（单测绿）
-2. TextMeasure + RadialLayout → Snapshot（单测绿）
-3. SwiftUI 壳 + DocumentSession（新建 / 打开 / 保存）
-4. MTKView：线 / 框 / 文字纹理 + 相机
-5. 命中、选中、编辑浮层、工具条与快捷键
-6. 菜单 Undo/Redo；脏标记与关闭确认打磨
+```mermaid
+flowchart TD
+  S1["1. Model + CommandBus + JSON<br/>单测绿"]
+  S2["2. TextMeasure + RadialLayout<br/>Snapshot 单测绿"]
+  S3["3. SwiftUI 壳 + DocumentSession<br/>新建 / 打开 / 保存"]
+  S4["4. MTKView：线 / 框 / 文字纹理 + 相机"]
+  S5["5. 命中、选中、编辑浮层、工具条与快捷键"]
+  S6["6. 菜单 Undo/Redo；脏标记与关闭确认"]
+  S1 --> S2 --> S3 --> S4 --> S5 --> S6
+```
 
 ---
 
@@ -271,3 +312,4 @@ FR 覆盖：壳 FR-1～2；树与布局 FR-3～11；相机 FR-12～13；快捷�
 | 日期 | 说明 |
 |------|------|
 | 2026-09-24 | 初稿：Brainstorming 确认后落盘 |
+| 2026-09-24 | 架构 / 模型 / 数据流 / Pass / 实现顺序改为 Mermaid |
