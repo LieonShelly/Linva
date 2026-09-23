@@ -32,6 +32,9 @@ final class MindMapModel {
         return (parent, path.index)
     }
 
+    func parentId(of id: UUID) -> UUID? { pathTo(id)?.parentId }
+    func indexInParent(of id: UUID) -> Int? { pathTo(id)?.index }
+
     @discardableResult
     func insertChild(parentId: UUID, text: String, side: Side?, at index: Int?) -> UUID {
         let newId = UUID()

@@ -1,0 +1,9 @@
+import Foundation
+
+enum MindMapCommand: Equatable {
+    case addChild(parentId: UUID, text: String)
+    case addSibling(selectedId: UUID, text: String)
+    case delete(id: UUID)
+    case setText(id: UUID, old: String, new: String)
+    case toggleCollapse(id: UUID)
+}
