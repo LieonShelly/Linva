@@ -17,17 +17,21 @@ struct CodecTests {
         let json = """
         {"version":99,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"x","collapsed":false,"children":[]}}
         """.data(using: .utf8)!
-        #expect(throws: YMindCodecError.self) {
+        #expect(throws: YMindCodecError.unsupportedVersion(99)) {
             _ = try YMindCodec.decode(json)
         }
     }
 
     @Test func stripsDeepSide() throws {
         let json = """
-        {"version":1,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[{"id":"00000000-0000-0000-0000-000000000002","text":"一","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000003","text":"二","collapsed":false,"side":"right","children":[]}]}]}}
+        {"version":1,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000002","text":"一","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000003","text":"二","collapsed":false,"side":"right","children":[]}]}]}}
         """.data(using: .utf8)!
-        let doc = try YMindCodec.decode(json)
+        var warnings: [String]? = []
+        let doc = try YMindCodec.decode(json, warnings: &warnings)
+        #expect(doc.root.side == nil)
         #expect(doc.root.children[0].side == .left)
         #expect(doc.root.children[0].children[0].side == nil)
+        #expect(warnings?.count == 1)
+        #expect(warnings?.first?.contains("side") == true)
     }
 }
