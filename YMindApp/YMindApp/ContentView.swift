@@ -12,12 +12,14 @@ struct ContentView: View {
     @State private var editingId: UUID?
     @State private var draft = ""
     @State private var originalText = ""
+    @State private var canvasFocusRequest = 0
 
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 CanvasMetalView(
                     session: session,
+                    focusRequest: canvasFocusRequest,
                     onSelect: handleSelection,
                     onEdit: startEditing,
                     onAddChild: addChild,
@@ -101,11 +103,17 @@ struct ContentView: View {
                 .setText(id: editingId, old: originalText, new: committedText)
             )
         }
+        requestCanvasFocus()
     }
 
     private func cancelEditing() {
         editingId = nil
         draft = originalText
+        requestCanvasFocus()
+    }
+
+    private func requestCanvasFocus() {
+        canvasFocusRequest += 1
     }
 
     private func addChild() {

@@ -24,8 +24,40 @@ private func hitTestNode(
         .id
 }
 
+struct CanvasDragPanState: Equatable {
+    private(set) var lastDragPoint: CGPoint?
+    private(set) var suppressUntilMouseUp = false
+
+    mutating func begin(at point: CGPoint, onNode: Bool) {
+        suppressUntilMouseUp = onNode
+        lastDragPoint = onNode ? nil : point
+    }
+
+    mutating func drag(to point: CGPoint) -> CGSize? {
+        guard !suppressUntilMouseUp else {
+            return nil
+        }
+        guard let lastDragPoint else {
+            self.lastDragPoint = point
+            return nil
+        }
+        let delta = CGSize(
+            width: point.x - lastDragPoint.x,
+            height: point.y - lastDragPoint.y
+        )
+        self.lastDragPoint = point
+        return delta
+    }
+
+    mutating func end() {
+        lastDragPoint = nil
+        suppressUntilMouseUp = false
+    }
+}
+
 struct CanvasMetalView: NSViewRepresentable {
     @ObservedObject var session: DocumentSession
+    var focusRequest: Int = 0
     let onSelect: (UUID?) -> Void
     let onEdit: (UUID) -> Void
     let onAddChild: () -> Void
@@ -86,6 +118,7 @@ struct CanvasMetalView: NSViewRepresentable {
         view.onDelete = onDelete
         view.fitContentIfNeeded(force: session.camera == Camera())
         view.setNeedsDisplay(view.bounds)
+        view.restoreKeyboardFocusIfNeeded(request: focusRequest)
     }
 }
 
@@ -101,7 +134,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     override var acceptsFirstResponder: Bool { true }
 
     private let renderer: MetalRenderer?
-    private var lastDragPoint: CGPoint?
+    private var dragPanState = CanvasDragPanState()
+    private var appliedFocusRequest = 0
     private var didFitContent = false
 
     init(
@@ -192,24 +226,30 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         if let hit, event.clickCount == 2 {
             onEdit(hit)
         }
-        lastDragPoint = hit == nil ? point : nil
+        dragPanState.begin(at: point, onNode: hit != nil)
     }
 
     override func mouseDragged(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        guard let lastDragPoint else {
-            self.lastDragPoint = point
+        guard let delta = dragPanState.drag(to: point) else {
             return
         }
 
-        session.camera.translation.x += point.x - lastDragPoint.x
-        session.camera.translation.y += point.y - lastDragPoint.y
-        self.lastDragPoint = point
+        session.camera.translation.x += delta.width
+        session.camera.translation.y += delta.height
         setNeedsDisplay(bounds)
     }
 
     override func mouseUp(with event: NSEvent) {
-        lastDragPoint = nil
+        dragPanState.end()
+    }
+
+    func restoreKeyboardFocusIfNeeded(request: Int) {
+        guard request != appliedFocusRequest else {
+            return
+        }
+        appliedFocusRequest = request
+        window?.makeFirstResponder(self)
     }
 
     override func scrollWheel(with event: NSEvent) {
