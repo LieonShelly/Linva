@@ -19,6 +19,11 @@ final class DocumentSession: ObservableObject {
 
     private let measure: TextMeasure
 
+    var windowTitle: String {
+        let name = fileURL?.lastPathComponent ?? "未命名"
+        return isDirty ? "\(name) •" : name
+    }
+
     init(model: MindMapModel? = nil, measure: TextMeasure = TextMeasure()) {
         let model = model ?? MindMapModel.makeNew()
         self.model = model

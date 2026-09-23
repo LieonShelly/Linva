@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var session = DocumentSession()
+    @ObservedObject var session: DocumentSession
     @State private var editingId: UUID?
     @State private var draft = ""
     @State private var originalText = ""
@@ -199,5 +199,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(session: DocumentSession())
 }
