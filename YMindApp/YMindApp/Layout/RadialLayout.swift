@@ -67,6 +67,7 @@ enum RadialLayout {
         ) {
             let frame = NodeFrame(
                 id: node.id,
+                text: node.text,
                 center: CGPoint(x: x, y: yCenter),
                 size: metadata.size,
                 isRoot: false,
@@ -109,6 +110,7 @@ enum RadialLayout {
         let rootMetadata = subtreeHeight(document.root, isRoot: true)
         let rootFrame = NodeFrame(
             id: document.root.id,
+            text: document.root.text,
             center: .zero,
             size: rootMetadata.size,
             isRoot: true,

@@ -3,6 +3,7 @@ import Foundation
 
 struct NodeFrame: Equatable {
     let id: UUID
+    let text: String
     let center: CGPoint
     let size: NodeSize
     let isRoot: Bool
