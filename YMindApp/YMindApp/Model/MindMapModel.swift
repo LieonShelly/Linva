@@ -2,7 +2,7 @@ import Foundation
 
 final class MindMapModel {
     var document: MindMapDocument
-    var selectedId: UUID
+    var selectedId: UUID?
 
     init(document: MindMapDocument, selectedId: UUID? = nil) {
         self.document = document
@@ -15,11 +15,13 @@ final class MindMapModel {
     }
 
     func select(_ id: UUID?) {
-        guard let id, node(id: id) != nil else {
-            selectedId = document.root.id
+        guard let id else {
+            selectedId = nil
             return
         }
-        selectedId = id
+        if node(id: id) != nil {
+            selectedId = id
+        }
     }
 
     func node(id: UUID) -> Node? {

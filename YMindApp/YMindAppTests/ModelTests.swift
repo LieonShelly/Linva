@@ -42,4 +42,12 @@ struct ModelTests {
         let model = MindMapModel.makeNew()
         #expect(model.remove(id: model.document.root.id) == nil)
     }
+
+    @Test func selectNil_clearsSelection() {
+        let model = MindMapModel.makeNew()
+
+        model.select(nil)
+
+        #expect(model.selectedId == nil)
+    }
 }

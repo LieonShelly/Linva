@@ -14,6 +14,7 @@ final class DocumentSession: ObservableObject {
     @Published var isDirty = false
     @Published var camera = Camera()
     @Published var snapshot: LayoutSnapshot
+    @Published private(set) var selectedId: UUID?
     @Published var errorMessage: String?
 
     private let measure: TextMeasure
@@ -24,6 +25,7 @@ final class DocumentSession: ObservableObject {
         self.commandBus = CommandBus(model: model)
         self.measure = measure
         self.snapshot = LayoutSnapshot(frames: [:], edges: [])
+        self.selectedId = model.selectedId
         wireCommandBus()
         relayout()
     }
@@ -32,6 +34,7 @@ final class DocumentSession: ObservableObject {
         let doc = MindMapDocument.blank()
         model.document = doc
         model.selectedId = doc.root.id
+        selectedId = doc.root.id
         commandBus.clearHistory()
         fileURL = nil
         isDirty = false
@@ -45,6 +48,7 @@ final class DocumentSession: ObservableObject {
         let doc = try YMindCodec.decode(data)
         model.document = doc
         model.selectedId = doc.root.id
+        selectedId = doc.root.id
         commandBus.clearHistory()
         fileURL = url
         isDirty = false
@@ -80,6 +84,11 @@ final class DocumentSession: ObservableObject {
         errorMessage = nil
     }
 
+    func select(_ id: UUID?) {
+        model.select(id)
+        selectedId = model.selectedId
+    }
+
     /// Returns whether the document can be replaced without prompting to discard unsaved changes.
     func prepareReplace() -> Bool {
         !isDirty
@@ -87,7 +96,9 @@ final class DocumentSession: ObservableObject {
 
     private func wireCommandBus() {
         commandBus.onChange = { [weak self] in
-            self?.markDirtyAndRelayout()
+            guard let self else { return }
+            selectedId = model.selectedId
+            markDirtyAndRelayout()
         }
     }
 }

@@ -2,13 +2,50 @@ import AppKit
 import MetalKit
 import SwiftUI
 
+func hitTest(
+    screenPoint: CGPoint,
+    snapshot: LayoutSnapshot,
+    camera: Camera
+) -> UUID? {
+    hitTestNode(screenPoint: screenPoint, snapshot: snapshot, camera: camera)
+}
+
+private func hitTestNode(
+    screenPoint: CGPoint,
+    snapshot: LayoutSnapshot,
+    camera: Camera
+) -> UUID? {
+    let worldPoint = camera.screenToWorld(screenPoint)
+    return snapshot.frames.values
+        .filter { $0.rect.contains(worldPoint) }
+        .min {
+            $0.rect.width * $0.rect.height < $1.rect.width * $1.rect.height
+        }?
+        .id
+}
+
 struct CanvasMetalView: NSViewRepresentable {
     @ObservedObject var session: DocumentSession
+    let onSelect: (UUID?) -> Void
+    let onEdit: (UUID) -> Void
+    let onAddChild: () -> Void
+    let onAddSibling: () -> Void
+    let onDelete: () -> Void
 
     func makeNSView(context: Context) -> CanvasMTKView {
         guard let device = MTLCreateSystemDefaultDevice() else {
             session.errorMessage = "无法初始化 Metal"
-            return CanvasMTKView(frame: .zero, device: nil, renderer: nil, session: session)
+            return CanvasMTKView(
+                frame: .zero,
+                device: nil,
+                renderer: nil,
+                session: session,
+                onSelect: onSelect,
+                onEdit: onEdit,
+                onAddChild: onAddChild,
+                onAddSibling: onAddSibling,
+                onDelete: onDelete
+            )
         }
 
         do {
@@ -17,16 +54,36 @@ struct CanvasMetalView: NSViewRepresentable {
                 frame: .zero,
                 device: device,
                 renderer: renderer,
-                session: session
+                session: session,
+                onSelect: onSelect,
+                onEdit: onEdit,
+                onAddChild: onAddChild,
+                onAddSibling: onAddSibling,
+                onDelete: onDelete
             )
         } catch {
             session.errorMessage = "无法初始化 Metal：\(error.localizedDescription)"
-            return CanvasMTKView(frame: .zero, device: device, renderer: nil, session: session)
+            return CanvasMTKView(
+                frame: .zero,
+                device: device,
+                renderer: nil,
+                session: session,
+                onSelect: onSelect,
+                onEdit: onEdit,
+                onAddChild: onAddChild,
+                onAddSibling: onAddSibling,
+                onDelete: onDelete
+            )
         }
     }
 
     func updateNSView(_ view: CanvasMTKView, context: Context) {
         view.session = session
+        view.onSelect = onSelect
+        view.onEdit = onEdit
+        view.onAddChild = onAddChild
+        view.onAddSibling = onAddSibling
+        view.onDelete = onDelete
         view.fitContentIfNeeded(force: session.camera == Camera())
         view.setNeedsDisplay(view.bounds)
     }
@@ -34,6 +91,11 @@ struct CanvasMetalView: NSViewRepresentable {
 
 final class CanvasMTKView: MTKView, MTKViewDelegate {
     var session: DocumentSession
+    var onSelect: (UUID?) -> Void
+    var onEdit: (UUID) -> Void
+    var onAddChild: () -> Void
+    var onAddSibling: () -> Void
+    var onDelete: () -> Void
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
@@ -46,10 +108,20 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         frame: CGRect,
         device: MTLDevice?,
         renderer: MetalRenderer?,
-        session: DocumentSession
+        session: DocumentSession,
+        onSelect: @escaping (UUID?) -> Void,
+        onEdit: @escaping (UUID) -> Void,
+        onAddChild: @escaping () -> Void,
+        onAddSibling: @escaping () -> Void,
+        onDelete: @escaping () -> Void
     ) {
         self.renderer = renderer
         self.session = session
+        self.onSelect = onSelect
+        self.onEdit = onEdit
+        self.onAddChild = onAddChild
+        self.onAddSibling = onAddSibling
+        self.onDelete = onDelete
         super.init(frame: frame, device: device)
 
         colorPixelFormat = .bgra8Unorm
@@ -97,7 +169,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             in: view,
             snapshot: session.snapshot,
             camera: session.camera,
-            selectedId: session.model.selectedId
+            selectedId: session.selectedId
         )
     }
 
@@ -110,7 +182,17 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
 
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
-        lastDragPoint = convert(event.locationInWindow, from: nil)
+        let point = convert(event.locationInWindow, from: nil)
+        let hit = hitTestNode(
+            screenPoint: point,
+            snapshot: session.snapshot,
+            camera: session.camera
+        )
+        onSelect(hit)
+        if let hit, event.clickCount == 2 {
+            onEdit(hit)
+        }
+        lastDragPoint = hit == nil ? point : nil
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -143,5 +225,18 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             y: anchor.y - worldAnchor.y * newScale
         )
         setNeedsDisplay(bounds)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        switch event.keyCode {
+        case 48:
+            onAddChild()
+        case 36, 76:
+            onAddSibling()
+        case 51, 117:
+            onDelete()
+        default:
+            super.keyDown(with: event)
+        }
     }
 }
