@@ -24,6 +24,9 @@ struct YMindAppApp: App {
         WindowGroup {
             ContentView(session: session)
                 .background(WindowStateBridge(session: session))
+                .onOpenURL { url in
+                    DocumentWorkflow.open(url, in: session)
+                }
         }
         .commands {
             DocumentCommands(session: session)
@@ -61,16 +64,24 @@ private struct DocumentCommands: Commands {
 
         CommandGroup(replacing: .undoRedo) {
             Button("撤销") {
-                session.commandBus.undo()
+                if session.editingId != nil {
+                    NSApp.sendAction(Selector(("undo:")), to: nil, from: nil)
+                } else {
+                    session.commandBus.undo()
+                }
             }
             .keyboardShortcut("z", modifiers: .command)
-            .disabled(!session.commandBus.canUndo)
+            .disabled(session.editingId == nil && !session.commandBus.canUndo)
 
             Button("重做") {
-                session.commandBus.redo()
+                if session.editingId != nil {
+                    NSApp.sendAction(Selector(("redo:")), to: nil, from: nil)
+                } else {
+                    session.commandBus.redo()
+                }
             }
             .keyboardShortcut("z", modifiers: [.command, .shift])
-            .disabled(!session.commandBus.canRedo)
+            .disabled(session.editingId == nil && !session.commandBus.canRedo)
         }
     }
 }
@@ -92,10 +103,22 @@ private enum DocumentWorkflow {
         panel.canChooseFiles = true
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        defer { url.stopAccessingSecurityScopedResource() }
 
         do {
-            try session.load(from: url)
+            try session.load(from: url, securityScopeAlreadyActive: true)
+        } catch {
+            session.errorMessage = error.localizedDescription
+        }
+    }
+
+    static func open(_ url: URL, in session: DocumentSession) {
+        guard url.pathExtension.lowercased() == "ymind",
+              confirmReplacement(of: session) else {
+            return
+        }
+
+        do {
+            try session.load(from: url, securityScopeAlreadyActive: true)
         } catch {
             session.errorMessage = error.localizedDescription
         }
@@ -124,10 +147,9 @@ private enum DocumentWorkflow {
         panel.nameFieldStringValue = suggestedFilename(for: session)
 
         guard panel.runModal() == .OK, let url = panel.url else { return false }
-        defer { url.stopAccessingSecurityScopedResource() }
 
         do {
-            try session.saveAs(to: url)
+            try session.saveAs(to: url, securityScopeAlreadyActive: true)
             return true
         } catch {
             session.errorMessage = error.localizedDescription
@@ -140,7 +162,7 @@ private enum DocumentWorkflow {
 
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "要保存对“\(session.windowTitle.replacingOccurrences(of: " •", with: ""))”的更改吗？"
+        alert.messageText = "要保存对“\(session.windowTitle)”的更改吗？"
         alert.informativeText = "如果不保存，更改将会丢失。"
         alert.addButton(withTitle: "保存")
         alert.addButton(withTitle: "取消")
@@ -228,6 +250,18 @@ private struct WindowStateBridge: NSViewRepresentable {
                 return false
             }
             return previousDelegate?.windowShouldClose?(sender) ?? true
+        }
+
+        override func responds(to aSelector: Selector!) -> Bool {
+            super.responds(to: aSelector)
+                || previousDelegate?.responds(to: aSelector) == true
+        }
+
+        override func forwardingTarget(for aSelector: Selector!) -> Any? {
+            if previousDelegate?.responds(to: aSelector) == true {
+                return previousDelegate
+            }
+            return super.forwardingTarget(for: aSelector)
         }
     }
 }

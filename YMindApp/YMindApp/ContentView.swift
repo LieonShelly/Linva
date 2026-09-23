@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var session: DocumentSession
-    @State private var editingId: UUID?
     @State private var draft = ""
     @State private var originalText = ""
     @State private var canvasFocusRequest = 0
@@ -27,7 +26,7 @@ struct ContentView: View {
                     onDelete: deleteSelected
                 )
 
-                if let editingId,
+                if let editingId = session.editingId,
                    let frame = session.snapshot.frames[editingId] {
                     NodeEditorOverlay(
                         screenRect: screenRect(for: frame),
@@ -72,7 +71,7 @@ struct ContentView: View {
     }
 
     private func handleSelection(_ id: UUID?) {
-        if editingId != nil, editingId != id {
+        if session.editingId != nil, session.editingId != id {
             commitEditing()
         }
         session.select(id)
@@ -83,21 +82,21 @@ struct ContentView: View {
               session.snapshot.frames[id] != nil else {
             return
         }
-        if editingId != nil, editingId != id {
+        if session.editingId != nil, session.editingId != id {
             commitEditing()
         }
         session.select(id)
         originalText = node.text
         draft = node.text
-        editingId = id
+        session.editingId = id
     }
 
     private func commitEditing() {
-        guard let editingId else { return }
+        guard let editingId = session.editingId else { return }
         let committedText = draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? "未命名"
             : draft
-        self.editingId = nil
+        session.editingId = nil
         if committedText != originalText {
             session.commandBus.execute(
                 .setText(id: editingId, old: originalText, new: committedText)
@@ -107,7 +106,7 @@ struct ContentView: View {
     }
 
     private func cancelEditing() {
-        editingId = nil
+        session.editingId = nil
         draft = originalText
         requestCanvasFocus()
     }
@@ -117,7 +116,7 @@ struct ContentView: View {
     }
 
     private func addChild() {
-        if editingId != nil {
+        if session.editingId != nil {
             commitEditing()
         }
         guard let selectedId = session.selectedId else { return }
@@ -131,7 +130,7 @@ struct ContentView: View {
     }
 
     private func addSibling() {
-        if editingId != nil {
+        if session.editingId != nil {
             commitEditing()
         }
         guard let selectedId = session.selectedId,
@@ -145,7 +144,7 @@ struct ContentView: View {
     }
 
     private func toggleCollapse() {
-        if editingId != nil {
+        if session.editingId != nil {
             commitEditing()
         }
         guard let selectedId = session.selectedId,
@@ -156,7 +155,7 @@ struct ContentView: View {
     }
 
     private func deleteSelected() {
-        if editingId != nil {
+        if session.editingId != nil {
             commitEditing()
         }
         guard let selectedId = session.selectedId,
