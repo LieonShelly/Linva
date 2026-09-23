@@ -2,6 +2,29 @@ import AppKit
 import MetalKit
 import simd
 
+struct CollapseBadge: Equatable {
+    let nodeId: UUID
+    let text: String
+    let rect: CGRect
+
+    static func make(for frame: NodeFrame) -> CollapseBadge? {
+        guard frame.collapsed, frame.hiddenCount > 0 else { return nil }
+        let text = String(frame.hiddenCount)
+        let height: CGFloat = 20
+        let width = max(height, 10 + CGFloat(text.count) * 7)
+        return CollapseBadge(
+            nodeId: frame.id,
+            text: text,
+            rect: CGRect(
+                x: frame.rect.maxX - height + 7,
+                y: frame.rect.maxY - height + 7,
+                width: width,
+                height: height
+            )
+        )
+    }
+}
+
 final class MetalRenderer {
     enum RendererError: Error {
         case commandQueueUnavailable
@@ -29,6 +52,7 @@ final class MetalRenderer {
     private let texturedPipeline: MTLRenderPipelineState
     private let sampler: MTLSamplerState
     private let textAtlas = TextAtlas()
+    private let badgeAtlas = CollapseBadgeAtlas()
 
     init(device: MTLDevice) throws {
         self.device = device
@@ -102,7 +126,7 @@ final class MetalRenderer {
             size: SIMD2(Float(view.bounds.width), Float(view.bounds.height))
         )
 
-        // 绘制顺序：边 → 节点底色 → 文字 → 选中描边。
+        // 绘制顺序：边 → 节点底色 → 文字 → 折叠徽章 → 选中描边。
         drawSolid(
             edgeVertices(snapshot: snapshot, camera: camera),
             encoder: encoder,
@@ -114,6 +138,13 @@ final class MetalRenderer {
             viewport: &viewport
         )
         drawText(
+            snapshot: snapshot,
+            camera: camera,
+            view: view,
+            encoder: encoder,
+            viewport: &viewport
+        )
+        drawBadges(
             snapshot: snapshot,
             camera: camera,
             view: view,
@@ -231,6 +262,53 @@ final class MetalRenderer {
         }
     }
 
+    private func drawBadges(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        view: MTKView,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        let badges = orderedFrames(snapshot).compactMap(CollapseBadge.make(for:))
+        let badgeColor = rgba(.controlAccentColor)
+        drawSolid(
+            badges.flatMap {
+                pillVertices(rect: screenRect($0.rect, camera: camera), color: badgeColor)
+            },
+            encoder: encoder,
+            viewport: &viewport
+        )
+
+        let displayScale = view.window?.backingScaleFactor ?? 1
+        encoder.setRenderPipelineState(texturedPipeline)
+        encoder.setFragmentSamplerState(sampler, index: 0)
+        for badge in badges {
+            guard let texture = badgeAtlas.texture(
+                for: badge,
+                scale: displayScale,
+                device: device
+            ) else {
+                continue
+            }
+            let rect = screenRect(badge.rect, camera: camera)
+            let vertices = texturedQuad(rect: rect, color: rgba(.white))
+            guard let buffer = device.makeBuffer(
+                bytes: vertices,
+                length: MemoryLayout<TexturedVertex>.stride * vertices.count
+            ) else {
+                continue
+            }
+            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+            encoder.setVertexBytes(
+                &viewport,
+                length: MemoryLayout<ViewportUniforms>.stride,
+                index: 1
+            )
+            encoder.setFragmentTexture(texture, index: 0)
+            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        }
+    }
+
     private func fillVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
         orderedFrames(snapshot).flatMap { frame in
             let color = rgba(
@@ -270,7 +348,13 @@ final class MetalRenderer {
         camera: Camera,
         color: SIMD4<Float>
     ) -> [TexturedVertex] {
-        let rect = screenRect(frame.rect, camera: camera)
+        texturedQuad(rect: screenRect(frame.rect, camera: camera), color: color)
+    }
+
+    private func texturedQuad(
+        rect: CGRect,
+        color: SIMD4<Float>
+    ) -> [TexturedVertex] {
         let topLeft = SIMD2(Float(rect.minX), Float(rect.minY))
         let topRight = SIMD2(Float(rect.maxX), Float(rect.minY))
         let bottomLeft = SIMD2(Float(rect.minX), Float(rect.maxY))
@@ -285,6 +369,54 @@ final class MetalRenderer {
             TexturedVertex(position: bottomLeft, textureCoordinate: SIMD2(0, 0), color: color),
             TexturedVertex(position: bottomRight, textureCoordinate: SIMD2(1, 0), color: color),
         ]
+    }
+
+    private func pillVertices(rect: CGRect, color: SIMD4<Float>) -> [SolidVertex] {
+        let radius = min(rect.height / 2, rect.width / 2)
+        var vertices = rectangleQuad(
+            rect: CGRect(
+                x: rect.minX + radius,
+                y: rect.minY,
+                width: max(rect.width - radius * 2, 0),
+                height: rect.height
+            ),
+            color: color
+        )
+        vertices += rectangleQuad(
+            rect: CGRect(
+                x: rect.minX,
+                y: rect.minY + radius,
+                width: rect.width,
+                height: max(rect.height - radius * 2, 0)
+            ),
+            color: color
+        )
+        let corners: [(CGPoint, CGFloat)] = [
+            (CGPoint(x: rect.minX + radius, y: rect.minY + radius), .pi),
+            (CGPoint(x: rect.maxX - radius, y: rect.minY + radius), -.pi / 2),
+            (CGPoint(x: rect.maxX - radius, y: rect.maxY - radius), 0),
+            (CGPoint(x: rect.minX + radius, y: rect.maxY - radius), .pi / 2),
+        ]
+        for (center, startAngle) in corners {
+            for index in 0..<4 {
+                let first = startAngle + CGFloat(index) * .pi / 8
+                let second = startAngle + CGFloat(index + 1) * .pi / 8
+                vertices += [
+                    solidVertex(x: center.x, y: center.y, color: color),
+                    solidVertex(
+                        x: center.x + cos(first) * radius,
+                        y: center.y + sin(first) * radius,
+                        color: color
+                    ),
+                    solidVertex(
+                        x: center.x + cos(second) * radius,
+                        y: center.y + sin(second) * radius,
+                        color: color
+                    ),
+                ]
+            }
+        }
+        return vertices
     }
 
     private func rectangleQuad(rect: CGRect, color: SIMD4<Float>) -> [SolidVertex] {

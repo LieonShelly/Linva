@@ -9,8 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var session: DocumentSession
-    @State private var draft = ""
-    @State private var originalText = ""
     @State private var canvasFocusRequest = 0
 
     var body: some View {
@@ -31,7 +29,7 @@ struct ContentView: View {
                     NodeEditorOverlay(
                         screenRect: screenRect(for: frame),
                         isRoot: frame.isRoot,
-                        text: $draft,
+                        text: $session.draftText,
                         onCommit: commitEditing,
                         onCancel: cancelEditing
                     )
@@ -78,36 +76,17 @@ struct ContentView: View {
     }
 
     private func startEditing(_ id: UUID) {
-        guard let node = session.model.node(id: id),
-              session.snapshot.frames[id] != nil else {
-            return
-        }
-        if session.editingId != nil, session.editingId != id {
-            commitEditing()
-        }
-        session.select(id)
-        originalText = node.text
-        draft = node.text
-        session.editingId = id
+        session.startEditing(id)
     }
 
     private func commitEditing() {
-        guard let editingId = session.editingId else { return }
-        let committedText = draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? "未命名"
-            : draft
-        session.editingId = nil
-        if committedText != originalText {
-            session.commandBus.execute(
-                .setText(id: editingId, old: originalText, new: committedText)
-            )
+        if session.commitEditingIfNeeded() {
+            requestCanvasFocus()
         }
-        requestCanvasFocus()
     }
 
     private func cancelEditing() {
-        session.editingId = nil
-        draft = originalText
+        session.cancelEditing()
         requestCanvasFocus()
     }
 

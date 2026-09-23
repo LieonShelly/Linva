@@ -34,6 +34,35 @@ struct RadialLayoutTests {
         let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
         #expect(snap.frames[grand.id] == nil)
         #expect(snap.frames[child.id]?.hiddenCount == 1)
+        let badge = snap.frames[child.id].flatMap(CollapseBadge.make(for:))
+        #expect(badge?.text == "1")
+        #expect(badge?.nodeId == child.id)
+    }
+
+    @Test func collapseBadge_onlyAppearsForCollapsedNodesWithHiddenDescendants() {
+        let leaf = NodeFrame(
+            id: UUID(),
+            text: "叶",
+            center: .zero,
+            size: NodeSize(width: 80, height: 40),
+            isRoot: false,
+            side: .right,
+            collapsed: true,
+            hiddenCount: 0
+        )
+        let expanded = NodeFrame(
+            id: UUID(),
+            text: "展开",
+            center: .zero,
+            size: NodeSize(width: 80, height: 40),
+            isRoot: false,
+            side: .right,
+            collapsed: false,
+            hiddenCount: 3
+        )
+
+        #expect(CollapseBadge.make(for: leaf) == nil)
+        #expect(CollapseBadge.make(for: expanded) == nil)
     }
 
     @Test func siblingsOnSameSide_areVerticallyCenteredWithGap() throws {

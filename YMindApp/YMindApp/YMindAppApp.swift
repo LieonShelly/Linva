@@ -18,7 +18,14 @@ extension UTType {
 
 @main
 struct YMindAppApp: App {
-    @StateObject private var session = DocumentSession()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var session: DocumentSession
+
+    init() {
+        let session = DocumentSession()
+        _session = StateObject(wrappedValue: session)
+        appDelegate.session = session
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -31,6 +38,19 @@ struct YMindAppApp: App {
         .commands {
             DocumentCommands(session: session)
         }
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    weak var session: DocumentSession?
+    var confirmationHandler: (DocumentSession) -> Bool = {
+        DocumentWorkflow.confirmReplacement(of: $0)
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let session else { return .terminateNow }
+        return confirmationHandler(session) ? .terminateNow : .terminateCancel
     }
 }
 
@@ -87,7 +107,7 @@ private struct DocumentCommands: Commands {
 }
 
 @MainActor
-private enum DocumentWorkflow {
+enum DocumentWorkflow {
     static func newDocument(_ session: DocumentSession) {
         guard confirmReplacement(of: session) else { return }
         session.newDocument()
@@ -105,7 +125,7 @@ private enum DocumentWorkflow {
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
         do {
-            try session.load(from: url, securityScopeAlreadyActive: true)
+            try session.load(from: url)
         } catch {
             session.errorMessage = error.localizedDescription
         }
@@ -118,7 +138,7 @@ private enum DocumentWorkflow {
         }
 
         do {
-            try session.load(from: url, securityScopeAlreadyActive: true)
+            try session.load(from: url)
         } catch {
             session.errorMessage = error.localizedDescription
         }
@@ -141,6 +161,7 @@ private enum DocumentWorkflow {
 
     @discardableResult
     static func saveAs(_ session: DocumentSession) -> Bool {
+        session.commitEditingIfNeeded()
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.yMindDocument]
         panel.canCreateDirectories = true
@@ -149,7 +170,7 @@ private enum DocumentWorkflow {
         guard panel.runModal() == .OK, let url = panel.url else { return false }
 
         do {
-            try session.saveAs(to: url, securityScopeAlreadyActive: true)
+            try session.saveAs(to: url)
             return true
         } catch {
             session.errorMessage = error.localizedDescription
@@ -158,6 +179,7 @@ private enum DocumentWorkflow {
     }
 
     static func confirmReplacement(of session: DocumentSession) -> Bool {
+        session.commitEditingIfNeeded()
         guard session.isDirty else { return true }
 
         let alert = NSAlert()

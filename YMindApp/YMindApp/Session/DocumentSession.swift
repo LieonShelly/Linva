@@ -26,12 +26,41 @@ final class SecurityScopedAccess {
         release()
     }
 
-    /// Takes ownership of an already-active panel scope, or starts a new scope when possible.
-    func replace(with url: URL, accessAlreadyStarted: Bool) {
-        release()
-        if accessAlreadyStarted || startAccess(url) {
-            activeURL = url
+    /// Performs I/O while access is active, then adopts a successfully-started scope.
+    func replace<T>(with url: URL, operation: () throws -> T) rethrows -> T {
+        if activeURL == url {
+            return try operation()
         }
+
+        let didStart = startAccess(url)
+        do {
+            let result = try operation()
+            release()
+            if didStart {
+                activeURL = url
+            }
+            return result
+        } catch {
+            if didStart {
+                stopAccess(url)
+            }
+            throw error
+        }
+    }
+
+    /// Performs I/O using the held scope, or a balanced temporary scope.
+    func withAccess<T>(to url: URL, operation: () throws -> T) rethrows -> T {
+        if activeURL == url {
+            return try operation()
+        }
+
+        let didStart = startAccess(url)
+        defer {
+            if didStart {
+                stopAccess(url)
+            }
+        }
+        return try operation()
     }
 
     func release() {
@@ -51,12 +80,14 @@ final class DocumentSession: ObservableObject {
     @Published var camera = Camera()
     @Published var snapshot: LayoutSnapshot
     @Published private(set) var selectedId: UUID?
-    @Published var editingId: UUID?
+    @Published private(set) var editingId: UUID?
+    @Published var draftText = ""
     @Published var errorMessage: String?
 
     private let measure: TextMeasure
     private let securityScopedAccess: SecurityScopedAccess
     private var lastSavedDocument: MindMapDocument
+    private var originalEditingText = ""
 
     var windowTitle: String {
         fileURL?.lastPathComponent ?? "未命名"
@@ -80,6 +111,7 @@ final class DocumentSession: ObservableObject {
     }
 
     func newDocument() {
+        commitEditingIfNeeded()
         let doc = MindMapDocument.blank()
         model.document = doc
         model.selectedId = doc.root.id
@@ -91,26 +123,19 @@ final class DocumentSession: ObservableObject {
         lastSavedDocument = doc
         isDirty = false
         editingId = nil
+        draftText = ""
+        originalEditingText = ""
         camera = Camera()
         relayout()
         errorMessage = nil
     }
 
-    func load(from url: URL, securityScopeAlreadyActive: Bool = false) throws {
-        var adoptedScope = false
-        defer {
-            if securityScopeAlreadyActive && !adoptedScope {
-                url.stopAccessingSecurityScopedResource()
-            }
+    func load(from url: URL) throws {
+        commitEditingIfNeeded()
+        let doc = try securityScopedAccess.replace(with: url) {
+            let data = try Data(contentsOf: url)
+            return try YMindCodec.decode(data)
         }
-
-        let data = try Data(contentsOf: url)
-        let doc = try YMindCodec.decode(data)
-        securityScopedAccess.replace(
-            with: url,
-            accessAlreadyStarted: securityScopeAlreadyActive
-        )
-        adoptedScope = true
         model.document = doc
         model.selectedId = doc.root.id
         selectedId = doc.root.id
@@ -120,36 +145,32 @@ final class DocumentSession: ObservableObject {
         lastSavedDocument = doc
         isDirty = false
         editingId = nil
+        draftText = ""
+        originalEditingText = ""
         camera = Camera()
         relayout()
         errorMessage = nil
     }
 
     func save() throws {
+        commitEditingIfNeeded()
         guard let fileURL else {
             throw DocumentSessionError.noFileURL
         }
         let data = try YMindCodec.encode(model.document)
-        try data.write(to: fileURL, options: .atomic)
+        try securityScopedAccess.withAccess(to: fileURL) {
+            try data.write(to: fileURL, options: .atomic)
+        }
         lastSavedDocument = model.document
         isDirty = false
     }
 
-    func saveAs(to url: URL, securityScopeAlreadyActive: Bool = false) throws {
-        var adoptedScope = false
-        defer {
-            if securityScopeAlreadyActive && !adoptedScope {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-
+    func saveAs(to url: URL) throws {
+        commitEditingIfNeeded()
         let data = try YMindCodec.encode(model.document)
-        try data.write(to: url, options: .atomic)
-        securityScopedAccess.replace(
-            with: url,
-            accessAlreadyStarted: securityScopeAlreadyActive
-        )
-        adoptedScope = true
+        try securityScopedAccess.replace(with: url) {
+            try data.write(to: url, options: .atomic)
+        }
         fileURL = url
         lastSavedDocument = model.document
         isDirty = false
@@ -173,9 +194,46 @@ final class DocumentSession: ObservableObject {
         selectedId = model.selectedId
     }
 
+    func startEditing(_ id: UUID) {
+        guard let node = model.node(id: id),
+              snapshot.frames[id] != nil else {
+            return
+        }
+        if editingId != nil, editingId != id {
+            commitEditingIfNeeded()
+        }
+        select(id)
+        originalEditingText = node.text
+        draftText = node.text
+        editingId = id
+    }
+
+    @discardableResult
+    func commitEditingIfNeeded() -> Bool {
+        guard let editingId else { return false }
+        let committedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? "未命名"
+            : draftText
+        self.editingId = nil
+        if committedText != originalEditingText {
+            commandBus.execute(
+                .setText(id: editingId, old: originalEditingText, new: committedText)
+            )
+        }
+        originalEditingText = ""
+        return true
+    }
+
+    func cancelEditing() {
+        draftText = originalEditingText
+        originalEditingText = ""
+        editingId = nil
+    }
+
     /// Returns whether the document can be replaced without prompting to discard unsaved changes.
     func prepareReplace() -> Bool {
-        !isDirty
+        commitEditingIfNeeded()
+        return !isDirty
     }
 
     private func wireCommandBus() {

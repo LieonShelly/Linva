@@ -1,3 +1,4 @@
+import AppKit
 import Testing
 import Foundation
 @testable import YMindApp
@@ -81,28 +82,115 @@ struct DocumentSessionTests {
         try? FileManager.default.removeItem(at: url)
     }
 
-    @Test func securityScopedAccess_releasesScope_whenReplacingAndDeinitializing() {
+    @Test func editingDraft_saveCommitsBeforeWriting() throws {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ymind-edit-save-\(UUID().uuidString).ymind")
+
+        session.startEditing(rootId)
+        session.draftText = "保存前草稿"
+        try session.saveAs(to: url)
+
+        let loaded = DocumentSession()
+        try loaded.load(from: url)
+        #expect(loaded.model.document.root.text == "保存前草稿")
+        #expect(session.editingId == nil)
+        #expect(session.isDirty == false)
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    @Test func editingDraft_prepareReplaceCommitsAndBecomesDirty() {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+
+        session.startEditing(rootId)
+        session.draftText = "替换前草稿"
+
+        #expect(session.prepareReplace() == false)
+        #expect(session.model.document.root.text == "替换前草稿")
+        #expect(session.editingId == nil)
+        #expect(session.isDirty)
+    }
+
+    @Test func editingDraft_failedLoadStillCommitsCurrentDocument() throws {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ymind-edit-open-\(UUID().uuidString).ymind")
+        try Data("not-json".utf8).write(to: url)
+        session.startEditing(rootId)
+        session.draftText = "打开前草稿"
+
+        #expect(throws: YMindCodecError.decodingFailed) {
+            try session.load(from: url)
+        }
+        #expect(session.model.document.root.text == "打开前草稿")
+        #expect(session.isDirty)
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    @Test func securityScopedAccess_startsBeforeOperation_andBalancesOwnedScopes() throws {
         let first = URL(fileURLWithPath: "/tmp/first.ymind")
         let second = URL(fileURLWithPath: "/tmp/second.ymind")
-        var started: [URL] = []
-        var stopped: [URL] = []
+        var events: [String] = []
 
         var access: SecurityScopedAccess? = SecurityScopedAccess(
             startAccess: {
-                started.append($0)
+                events.append("start:\($0.lastPathComponent)")
                 return true
             },
-            stopAccess: { stopped.append($0) }
+            stopAccess: { events.append("stop:\($0.lastPathComponent)") }
         )
 
-        access?.replace(with: first, accessAlreadyStarted: true)
-        #expect(started.isEmpty)
-        access?.replace(with: second, accessAlreadyStarted: false)
-        #expect(started == [second])
-        #expect(stopped == [first])
+        access?.replace(with: first) {
+            events.append("io:first.ymind")
+        }
+        access?.replace(with: second) {
+            events.append("io:second.ymind")
+        }
+        #expect(events == [
+            "start:first.ymind",
+            "io:first.ymind",
+            "start:second.ymind",
+            "io:second.ymind",
+            "stop:first.ymind",
+        ])
 
         access = nil
-        #expect(stopped == [first, second])
+        #expect(events.last == "stop:second.ymind")
+    }
+
+    @Test func securityScopedAccess_failedStart_neverStops() throws {
+        let url = URL(fileURLWithPath: "/tmp/no-scope.ymind")
+        var events: [String] = []
+        let access = SecurityScopedAccess(
+            startAccess: { _ in
+                events.append("start")
+                return false
+            },
+            stopAccess: { _ in events.append("stop") }
+        )
+
+        access.withAccess(to: url) {
+            events.append("io")
+        }
+
+        #expect(events == ["start", "io"])
+    }
+
+    @MainActor
+    @Test func terminateConfirmation_cancelReturnsTerminateCancel() {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+        session.commandBus.execute(.setText(id: rootId, old: "中心主题", new: "未保存"))
+        let delegate = AppDelegate()
+        delegate.session = session
+        delegate.confirmationHandler = { _ in false }
+
+        let reply = delegate.applicationShouldTerminate(NSApplication.shared)
+
+        #expect(reply == .terminateCancel)
     }
 
     @Test func load_unsupportedVersion_leavesDocument() throws {
