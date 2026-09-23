@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "skills": {
+    "axiom-apple-docs": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-apple-docs/SKILL.md",
+      "computedHash": "f97c186eed6555053b68f578244b18a3c4e2544669ed3a0fcb6d2d469c52a3b8"
+    },
+    "axiom-build": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-build/SKILL.md",
+      "computedHash": "206f69f57e1a59a0d723827fe6127ab7f9e49261b48712d352d724174fc8ae1d"
+    },
+    "axiom-concurrency": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-concurrency/SKILL.md",
+      "computedHash": "0ec503c0b3012a771c05fb1f2346569d3e4ea121abb5bb6862a497e331abcba0"
+    },
+    "axiom-games": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-games/SKILL.md",
+      "computedHash": "368c6b3ed1e71c29d913cecccd3fba7b43bdaa833b8de617fcdde1e92e7ea302"
+    },
+    "axiom-graphics": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-graphics/SKILL.md",
+      "computedHash": "e218995a15eb781f41a036d637caad17749ecef6b47f9ef9ea7be5975277e5d0"
+    },
+    "axiom-macos": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-macos/SKILL.md",
+      "computedHash": "47d496a023942e459d68c3223c8a08138dc74582e679b192289b267aafeb1232"
+    },
+    "axiom-performance": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-performance/SKILL.md",
+      "computedHash": "2ce87683aef94446576999a5fd3fad3e60672d0feff5c3584aeba654260f113a"
+    },
+    "axiom-swiftui": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-swiftui/SKILL.md",
+      "computedHash": "30a8a59a0c5a30f8ed1b1d697b45abbf4821889889f9a64712fd71db2988fbd5"
+    },
+    "axiom-xcode-mcp": {
+      "source": "charleswiltgen/axiom",
+      "sourceType": "github",
+      "skillPath": ".claude-plugin/plugins/axiom/skills/axiom-xcode-mcp/SKILL.md",
+      "computedHash": "cc601d87b24080386cbf11696b2905b944d70d9c719509ee3c30463e6b5d0500"
+    },
+    "bmad-prd": {
+      "source": "bmad-code-org/bmad-method",
+      "sourceType": "github",
+      "skillPath": "skills/bmad-prd/SKILL.md",
+      "computedHash": "4b08a499c001f54a0771d6b62db9c17ae725e8d340565856016dc7405fd45f6a"
+    },
+    "bmad-product-brief": {
+      "source": "bmad-code-org/bmad-method",
+      "sourceType": "github",
+      "skillPath": "skills/bmad-product-brief/SKILL.md",
+      "computedHash": "359cde16f2b2c9b9f078c843c3b62881a9607d918d67fc819042e8b8b22cc3cc"
+    },
+    "core-animation": {
+      "source": "prisma-labs-dev/apple-skills",
+      "sourceType": "github",
+      "skillPath": "skills/core-animation/SKILL.md",
+      "computedHash": "fcead8d4780b0d900a41f380cc5cff49165f00d5887a603756212f81a1d1aabe"
+    },
+    "debugging-instruments": {
+      "source": "dpearson2699/swift-ios-skills",
+      "sourceType": "github",
+      "skillPath": "skills/debugging-instruments/SKILL.md",
+      "computedHash": "ccaa83079af0dd3be7e2a80503f8b419de470a0c5497b6e6053a6a6eb2fa35b7"
+    },
+    "ios-debugger-agent": {
+      "source": "dimillian/skills",
+      "sourceType": "github",
+      "skillPath": "ios-debugger-agent/SKILL.md",
+      "computedHash": "cc28bb00c138bf1d8c841c5a137185a63d05a4b3197f5d360de0534b5e492c1a"
+    },
+    "macos-build": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "build/SKILL.md",
+      "computedHash": "de7a069d100ebb3453269f0d4871401021f3d6eb46bd3dfc1668460bbab0f0bc"
+    },
+    "macos-design-guidelines": {
+      "source": "ehmo/platform-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/macos/SKILL.md",
+      "computedHash": "fdbeb208feb60e5ed08226e4e1e714eade6cfe6530ad27c792992823de63ca0d"
+    },
+    "macos-development": {
+      "source": "rshankras/claude-code-apple-skills",
+      "sourceType": "github",
+      "skillPath": "skills/macos/SKILL.md",
+      "computedHash": "294b31742ef3f87e13859714c402081845eaebd52e4691c716f5ed38c4013936"
+    },
+    "macos-patterns": {
+      "source": "fayazara/macos-app-skills",
+      "sourceType": "github",
+      "skillPath": "macos-patterns/SKILL.md",
+      "computedHash": "ae976dcae49d6a40b131b75104ad58491d9cc076a68c6175f6daba60a266acaf"
+    },
+    "macos-spm-app-packaging": {
+      "source": "dimillian/skills",
+      "sourceType": "github",
+      "skillPath": "macos-spm-app-packaging/SKILL.md",
+      "computedHash": "dd9fba9ca23b45f1c12db08470da9726b294bd6fb334f63d3447872efdf392c3"
+    },
+    "metal-gpu": {
+      "source": "ios-agent/iosagent.dev",
+      "sourceType": "github",
+      "skillPath": "metal/SKILL.md",
+      "computedHash": "3ee626b4e524e50a114191c760b651968824e9aa2d3c83a690dca2b483dd5358"
+    },
+    "metal-shader-expert": {
+      "source": "curiositech/some_claude_skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/metal-shader-expert/SKILL.md",
+      "computedHash": "e9e5ff818f454a9d9d70c464a9ee34c430f074c97987896b08a546f3b624dc5f"
+    },
+    "spm-build-analysis": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/spm-build-analysis/SKILL.md",
+      "computedHash": "9785f2113e45cd29aedc4c1e7e5763735157ff1e4c99a4ca4a65d4f625814c55"
+    },
+    "swift-concurrency": {
+      "source": "avdlee/swift-concurrency-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/swift-concurrency/SKILL.md",
+      "computedHash": "49e4df69412710a0ca320c21a9d26cf4abb6d2c553960cffaceea5a09e3be792"
+    },
+    "swift-testing-expert": {
+      "source": "avdlee/swift-testing-agent-skill",
+      "sourceType": "github",
+      "skillPath": "swift-testing-expert/SKILL.md",
+      "computedHash": "ee2a73c7148264cb7e0a0819d3063225541e57162353d97707d9fab830d27ba6"
+    },
+    "swiftui-expert-skill": {
+      "source": "avdlee/swiftui-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/swiftui-expert-skill/SKILL.md",
+      "computedHash": "26ee28fcfa0434b1ad66ae742e8a82a16cc2a0e40b9a9a02ea550e597366c7eb"
+    },
+    "swiftui-performance-audit": {
+      "source": "dimillian/skills",
+      "sourceType": "github",
+      "skillPath": "swiftui-performance-audit/SKILL.md",
+      "computedHash": "4c153a7401d4d878fad3b7b83ca3d29f43245f8404dd34b7beb400cdfcab46f7"
+    },
+    "swiftui-pro": {
+      "source": "twostraws/swiftui-agent-skill",
+      "sourceType": "github",
+      "skillPath": "swiftui-pro/SKILL.md",
+      "computedHash": "07033426e384295a4b49cf0b2ffdefd4098cae4af53fef16bc1f2d9281118c41"
+    },
+    "swiftui-ui-patterns": {
+      "source": "dimillian/skills",
+      "sourceType": "github",
+      "skillPath": "swiftui-ui-patterns/SKILL.md",
+      "computedHash": "f58d51fe4569f9eff10c45a4ed6859c9f5e3eefca7827e819de840141da67995"
+    },
+    "xcode-build-benchmark": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-build-benchmark/SKILL.md",
+      "computedHash": "e132c38adbb8a74e3e0474c0e34566b209fa3bf29532604af97d715b8c721ec8"
+    },
+    "xcode-build-fixer": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-build-fixer/SKILL.md",
+      "computedHash": "7d1c68154af030a24b7420c9f9c7805e6009e0012da34b9a16c0cfef3396b608"
+    },
+    "xcode-build-orchestrator": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-build-orchestrator/SKILL.md",
+      "computedHash": "d03e65e314a8fbe0ae0cf7469fa1a4280b5d335a7f163fdc7a7a91dbb0fd1b2b"
+    },
+    "xcode-compilation-analyzer": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-compilation-analyzer/SKILL.md",
+      "computedHash": "9857f081cf044a06f93f382ea1a53c3fe9699ac0d0686abbabea67696c2eff6a"
+    },
+    "xcode-project-analyzer": {
+      "source": "avdlee/xcode-build-optimization-agent-skill",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-project-analyzer/SKILL.md",
+      "computedHash": "dfe1901df149b68d8869a48143508444605ed8ba20b448d1faec1d6218d58859"
+    },
+    "xcodebuildmcp": {
+      "source": "getsentry/xcodebuildmcp",
+      "sourceType": "github",
+      "skillPath": "skills/xcodebuildmcp/SKILL.md",
+      "computedHash": "cb153f421215de51d3b2fb0a1b6ebbd5c97f2268eba2e1eb70cfd623cc3a2ccb"
+    },
+    "xcodebuildmcp-cli": {
+      "source": "getsentry/xcodebuildmcp",
+      "sourceType": "github",
+      "skillPath": "skills/xcodebuildmcp-cli/SKILL.md",
+      "computedHash": "4bdeb5d978bf410d4e99a7b89dda396e49ef457945633174f7f9ad0eff056cfb"
+    }
+  }
+}

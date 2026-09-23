@@ -1,0 +1,22 @@
+# XcodeBuildMCP project config for YMind (macOS mind-map app).
+# Docs: https://www.xcodebuildmcp.com/docs/configuration
+schemaVersion: 1
+
+# Default MCP only enables "simulator". YMind is a Mac app — enable macOS + related workflows.
+enabledWorkflows:
+  - macos
+  - swift-package
+  - project-discovery
+  - debugging
+  - ui-automation
+  - utilities
+  # Keep simulator available if we later share code with iOS; not required for v1.
+  # - simulator
+
+# Fill these in once the Xcode / SwiftPM app target exists.
+# sessionDefaults:
+#   projectPath: ./YMind.xcodeproj   # or workspacePath: ./YMind.xcworkspace
+#   scheme: YMind
+#   platform: macOS
+#   configuration: Debug
+#   arch: arm64
