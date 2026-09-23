@@ -9,10 +9,12 @@ struct CommandBusTests {
         let bus = CommandBus(model: model)
         bus.execute(.addChild(parentId: model.document.root.id, text: "子"))
         #expect(model.document.root.children.count == 1)
+        let childId = model.document.root.children[0].id
         bus.undo()
         #expect(model.document.root.children.isEmpty)
         bus.redo()
         #expect(model.document.root.children.count == 1)
+        #expect(model.document.root.children[0].id == childId)
         #expect(model.document.root.children[0].text == "子")
     }
 
@@ -24,6 +26,8 @@ struct CommandBusTests {
         #expect(model.document.root.text == "会议")
         bus.undo()
         #expect(model.document.root.text == "中心主题")
+        bus.redo()
+        #expect(model.document.root.text == "会议")
     }
 
     @Test func delete_root_isNoOp() {
