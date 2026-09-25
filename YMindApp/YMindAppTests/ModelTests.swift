@@ -172,4 +172,54 @@ struct ModelTests {
         #expect(copy.children[0].id != c)
         #expect(copy.children[0].id != copy.id)
     }
+
+    @Test func reparent_movesUnderTarget_andExpands() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        model.setCollapsed(id: b, to: true)
+
+        let records = model.reparent(ids: [a], to: b)
+
+        #expect(records.count == 1)
+        #expect(model.node(id: b)?.children.map(\.id) == [a])
+        #expect(model.node(id: b)?.collapsed == false)
+    }
+
+    @Test func reparent_toOwnDescendant_isNoOp() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+
+        let records = model.reparent(ids: [a], to: g)
+
+        #expect(records.isEmpty)
+        #expect(model.parentId(of: a) == root)
+    }
+
+    @Test func reparent_toRoot_assignsSide() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let p = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let c = model.insertChild(parentId: p, text: "C", side: nil, at: nil)
+
+        let records = model.reparent(ids: [c], to: root)
+
+        #expect(records.count == 1)
+        #expect(model.node(id: c)?.side != nil)
+    }
+
+    @Test func isValidDropTarget_rejectsSelfAndDescendant() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+
+        #expect(model.isValidDropTarget(root, movingIds: [a]))          // 根可作目标
+        #expect(!model.isValidDropTarget(a, movingIds: [a]))            // 自身
+        #expect(!model.isValidDropTarget(g, movingIds: [a]))            // 后代
+        #expect(model.isValidDropTarget(g, movingIds: [a, g]) == false) // 目标在被搬集内
+    }
 }

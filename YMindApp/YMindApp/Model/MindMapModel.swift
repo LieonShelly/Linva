@@ -1,5 +1,11 @@
 import Foundation
 
+struct ReparentRecord: Equatable {
+    let parentId: UUID
+    let index: Int
+    let node: Node
+}
+
 final class MindMapModel {
     var document: MindMapDocument
     var selectedIds: Set<UUID> = []
@@ -200,6 +206,58 @@ final class MindMapModel {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))
         }
+    }
+
+    /// 把可搬顶层整体搬到 targetId 下（末尾）；守卫 targetId 不为被搬节点自身/后代。
+    /// 目标为中心主题时按 v1「侧」均衡规则分配 left/right；成功后 target.collapsed = false。
+    @discardableResult
+    func reparent(ids: [UUID], to targetId: UUID) -> [ReparentRecord] {
+        let moving = movableTopLevel(ids: Set(ids))
+        guard !moving.isEmpty,
+              node(id: targetId) != nil,
+              !moving.contains(targetId),
+              !moving.contains(where: { isDescendant(targetId, of: $0) }) else {
+            return []
+        }
+
+        var records: [ReparentRecord] = []
+        for id in moving {
+            guard let path = pathTo(id),
+                  let oldParent = path.parentId,
+                  let node = node(id: id) else { continue }
+            _ = removeWithoutChangingSelection(id: id)
+            records.append(ReparentRecord(parentId: oldParent, index: path.index, node: node))
+            attachChild(node, to: targetId)
+        }
+        _ = mutate(id: targetId) { $0.collapsed = false }
+        return records
+    }
+
+    /// 把既有节点追加为 parentId 的子；目标为中心主题时自动分侧。不改选中。
+    func attachChild(_ node: Node, to parentId: UUID) {
+        _ = mutate(id: parentId) { parent in
+            var n = node
+            if parentId == document.root.id { n.side = nextSide() }
+            parent.children.append(n)
+        }
+    }
+
+    /// 移除但不改选中（供粘贴 Undo 等）。
+    func removeWithoutSelection(id: UUID) -> (parentId: UUID, index: Int, node: Node)? {
+        removeWithoutChangingSelection(id: id)
+    }
+
+    /// nodeId 是否在 ancestorId 的子树中（不含 ancestorId 自身）。
+    func isDescendant(_ nodeId: UUID, of ancestorId: UUID) -> Bool {
+        guard nodeId != ancestorId,
+              let ancestor = node(id: ancestorId) else { return false }
+        return Self.find(id: nodeId, in: ancestor) != nil
+    }
+
+    /// 拖放/粘贴目标合法性：存在、不在被搬集内、不是任一被搬节点的后代。
+    func isValidDropTarget(_ target: UUID, movingIds: Set<UUID>) -> Bool {
+        guard node(id: target) != nil, !movingIds.contains(target) else { return false }
+        return !movingIds.contains { isDescendant(target, of: $0) }
     }
 
     // MARK: - Private tree helpers
