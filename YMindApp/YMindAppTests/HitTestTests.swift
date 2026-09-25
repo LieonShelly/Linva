@@ -130,6 +130,57 @@ struct HitTestTests {
         #expect(hit == .branchToggle(nodeId: nodeId))
     }
 
+    @Test func hitTestCanvas_coversWidenedCollapsedPillButKeepsNodeClickable() {
+        let nodeId = UUID()
+        let frame = NodeFrame(
+            id: nodeId, text: "P", center: .zero,
+            size: NodeSize(width: 80, height: 40),
+            isRoot: false, side: .right,
+            collapsed: true, hiddenCount: 12
+        )
+        let collapsedToggle = BranchToggle(
+            nodeId: nodeId, side: .right,
+            center: CGPoint(x: 58, y: 0),
+            collapsed: true, hiddenCount: 12
+        )
+        let expandedToggle = BranchToggle(
+            nodeId: nodeId, side: .right,
+            center: CGPoint(x: 58, y: 0),
+            collapsed: false, hiddenCount: 0
+        )
+        let collapsedSnapshot = LayoutSnapshot(
+            frames: [nodeId: frame], edges: [], branchToggles: [collapsedToggle]
+        )
+        let expandedSnapshot = LayoutSnapshot(
+            frames: [nodeId: frame], edges: [], branchToggles: [expandedToggle]
+        )
+
+        // 「−12」把胶囊加宽到 15，其末端必须仍可命中。
+        #expect(
+            hitTestCanvas(
+                screenPoint: CGPoint(x: 43.5, y: 0),
+                snapshot: collapsedSnapshot,
+                camera: Camera()
+            ) == .branchToggle(nodeId: nodeId)
+        )
+        // 同一位置在未加宽（＋）时属于空白。
+        #expect(
+            hitTestCanvas(
+                screenPoint: CGPoint(x: 43.5, y: 0),
+                snapshot: expandedSnapshot,
+                camera: Camera()
+            ) == .empty
+        )
+        // 节点内部仍归节点。
+        #expect(
+            hitTestCanvas(
+                screenPoint: CGPoint(x: 20, y: 0),
+                snapshot: collapsedSnapshot,
+                camera: Camera()
+            ) == .node(nodeId)
+        )
+    }
+
     private func makeFrame(id: UUID, size: NodeSize) -> NodeFrame {
         NodeFrame(
             id: id,

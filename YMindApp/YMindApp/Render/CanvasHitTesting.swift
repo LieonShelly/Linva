@@ -7,6 +7,28 @@ enum CanvasHit: Equatable {
     case empty
 }
 
+/// 分叉控件的胶囊外框（世界坐标）。宽度随「−N」位数增长，封顶到与节点的间隙，
+/// 保证命中区不会盖到节点上。
+func branchToggleWorldRect(_ toggle: BranchToggle) -> CGRect {
+    let digits = toggle.collapsed ? String(toggle.hiddenCount).count : 0
+    let radius = LayoutConstants.branchToggleVisualRadius
+    let halfWidth = min(radius + CGFloat(digits) * 2, LayoutConstants.branchToggleGap)
+    return CGRect(
+        x: toggle.center.x - halfWidth,
+        y: toggle.center.y - radius,
+        width: halfWidth * 2,
+        height: radius * 2
+    )
+}
+
+/// 命中区 = 视觉外框外扩 (视觉半径 → 命中半径) 的余量。
+func branchToggleHitContains(_ toggle: BranchToggle, worldPoint: CGPoint) -> Bool {
+    let margin = LayoutConstants.branchToggleHitRadius - LayoutConstants.branchToggleVisualRadius
+    return branchToggleWorldRect(toggle)
+        .insetBy(dx: -margin, dy: -margin)
+        .contains(worldPoint)
+}
+
 /// 命中顺序：分叉控件 → 节点 → 空白。世界坐标判定，控件命中半径略大于视觉圆。
 func hitTestCanvas(
     screenPoint: CGPoint,
@@ -14,12 +36,8 @@ func hitTestCanvas(
     camera: Camera
 ) -> CanvasHit {
     let world = camera.screenToWorld(screenPoint)
-    let hitRadius = LayoutConstants.branchToggleHitRadius
-    let hitRadiusSquared = hitRadius * hitRadius
     if let toggle = snapshot.branchToggles.first(where: {
-        let dx = world.x - $0.center.x
-        let dy = world.y - $0.center.y
-        return dx * dx + dy * dy <= hitRadiusSquared
+        branchToggleHitContains($0, worldPoint: world)
     }) {
         return .branchToggle(nodeId: toggle.nodeId)
     }

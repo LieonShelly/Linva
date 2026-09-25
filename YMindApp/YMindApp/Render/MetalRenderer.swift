@@ -318,18 +318,15 @@ final class MetalRenderer {
         drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
 
-    /// 控件外框（屏幕坐标）。宽度随「−N」位数增加，与视觉圆同高。
+    /// 控件外框（屏幕坐标）；几何来源与命中测试共享。
     private func toggleScreenRect(_ toggle: BranchToggle, camera: Camera) -> CGRect {
-        let center = camera.worldToScreen(toggle.center)
-        let radius = LayoutConstants.branchToggleVisualRadius * camera.scale
-        let diameter = radius * 2
-        let digits = toggle.collapsed ? String(toggle.hiddenCount).count : 0
-        let width = max(diameter, diameter + CGFloat(digits) * 4 * camera.scale)
+        let world = branchToggleWorldRect(toggle)
+        let origin = camera.worldToScreen(world.origin)
         return CGRect(
-            x: center.x - width / 2,
-            y: center.y - radius,
-            width: width,
-            height: diameter
+            x: origin.x,
+            y: origin.y,
+            width: world.width * camera.scale,
+            height: world.height * camera.scale
         )
     }
 
