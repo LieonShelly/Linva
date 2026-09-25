@@ -27,7 +27,12 @@ struct ContentView: View {
                         selectAll: selectAll,
                         addChild: addChild,
                         addSibling: addSibling,
-                        delete: deleteSelected
+                        delete: deleteSelected,
+                        move: move,
+                        copy: copySelection,
+                        cut: cutSelection,
+                        paste: paste,
+                        cancelCut: cancelCut
                     )
                 )
 
@@ -57,10 +62,16 @@ struct ContentView: View {
                     canAddChild: canAddChild,
                     canAddSibling: canAddSibling,
                     canDelete: canDelete,
+                    canCut: session.canCut,
+                    canCopy: session.canCopy,
+                    canPaste: session.canPaste,
                     zoomPercent: Int((session.camera.scale * 100).rounded()),
                     addChild: addChild,
                     addSibling: addSibling,
                     delete: deleteSelected,
+                    cut: cutSelection,
+                    copy: copySelection,
+                    paste: paste,
                     zoomOut: { zoom(by: 1 / 1.12, viewport: geometry.size) },
                     zoomIn: { zoom(by: 1.12, viewport: geometry.size) },
                     fit: { fit(viewport: geometry.size) }
@@ -188,6 +199,30 @@ struct ContentView: View {
         let ids = Array(session.selectedIds)
         guard ids.contains(where: { $0 != session.model.document.root.id }) else { return }
         session.commandBus.execute(.delete(ids: ids))
+    }
+
+    private func move(_ ids: [UUID], to targetId: UUID) {
+        if session.editingId != nil { commitEditing() }
+        session.move(ids, to: targetId)
+    }
+
+    private func copySelection() {
+        if session.editingId != nil { commitEditing() }
+        session.copySelection()
+    }
+
+    private func cutSelection() {
+        if session.editingId != nil { commitEditing() }
+        session.cutSelection()
+    }
+
+    private func paste() {
+        if session.editingId != nil { commitEditing() }
+        session.pasteToPrimary()
+    }
+
+    private func cancelCut() {
+        session.cancelCut()
     }
 
     private func zoom(by factor: CGFloat, viewport: CGSize) {

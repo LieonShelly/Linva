@@ -350,6 +350,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             )
             actions.marqueeSelect(ids, additive)
         }
+        // 手势复位（defer）后放置高亮消失，主动重绘一次，不依赖 SwiftUI 间接链路。
+        setNeedsDisplay(bounds)
     }
 
     private func computeDropTarget(at point: CGPoint, movingIds: Set<UUID>) -> UUID? {
@@ -398,14 +400,12 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         if flags.contains(.command),
            let key = event.charactersIgnoringModifiers?.lowercased() {
             switch key {
-            case "a":
-                actions.selectAll()
-                return
-            case ".":
-                actions.toggleCollapseSelection()
-                return
-            default:
-                break
+            case "c": actions.copy(); return
+            case "x": actions.cut(); return
+            case "v": actions.paste(); return
+            case "a": actions.selectAll(); return
+            case ".": actions.toggleCollapseSelection(); return
+            default: break
             }
         }
 
@@ -417,7 +417,11 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case 51, 117:
             actions.delete()
         case 53:
-            actions.select(nil, .replace)
+            if !session.cutSourceIds.isEmpty {
+                actions.cancelCut()
+            } else {
+                actions.select(nil, .replace)
+            }
         case 44:
             actions.toggleCollapseSelection()
         default:

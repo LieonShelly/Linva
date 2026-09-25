@@ -5,10 +5,16 @@ struct MainToolbar: ToolbarContent {
     let canAddChild: Bool
     let canAddSibling: Bool
     let canDelete: Bool
+    let canCut: Bool
+    let canCopy: Bool
+    let canPaste: Bool
     let zoomPercent: Int
     let addChild: () -> Void
     let addSibling: () -> Void
     let delete: () -> Void
+    let cut: () -> Void
+    let copy: () -> Void
+    let paste: () -> Void
     let zoomOut: () -> Void
     let zoomIn: () -> Void
     let fit: () -> Void
@@ -37,6 +43,24 @@ struct MainToolbar: ToolbarContent {
             }
             .disabled(!canDelete)
             .help("删除主题（Delete）")
+
+            Button(action: cut) {
+                Label("剪切", systemImage: "scissors")
+            }
+            .disabled(!canCut)
+            .help("剪切主题（⌘X）")
+
+            Button(action: copy) {
+                Label("复制", systemImage: "doc.on.doc")
+            }
+            .disabled(!canCopy)
+            .help("复制主题（⌘C）")
+
+            Button(action: paste) {
+                Label("粘贴", systemImage: "doc.on.clipboard")
+            }
+            .disabled(!canPaste)
+            .help("粘贴为主题子节点（⌘V）")
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {
