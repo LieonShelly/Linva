@@ -46,14 +46,13 @@ struct ContentView: View {
             }
             .toolbar {
                 MainToolbar(
-                    hasSelection: selectedNode != nil,
-                    isRootSelected: session.selectedId == session.model.document.root.id,
-                    canToggleCollapse: !(selectedNode?.children.isEmpty ?? true),
-                    isCollapsed: selectedNode?.collapsed ?? false,
+                    selectionCount: session.selectedIds.count,
+                    canAddChild: canAddChild,
+                    canAddSibling: canAddSibling,
+                    canDelete: canDelete,
                     zoomPercent: Int((session.camera.scale * 100).rounded()),
                     addChild: addChild,
                     addSibling: addSibling,
-                    toggleCollapse: toggleCollapse,
                     delete: deleteSelected,
                     zoomOut: { zoom(by: 1 / 1.12, viewport: geometry.size) },
                     zoomIn: { zoom(by: 1.12, viewport: geometry.size) },
@@ -64,15 +63,24 @@ struct ContentView: View {
         .frame(minWidth: 640, minHeight: 420)
     }
 
-    private var selectedNode: Node? {
-        session.selectedId.flatMap(session.model.node(id:))
+    private var isMulti: Bool { session.selectedIds.count > 1 }
+
+    private var canAddChild: Bool { !isMulti && session.primarySelectedId != nil }
+
+    private var canAddSibling: Bool {
+        guard !isMulti, let id = session.primarySelectedId else { return false }
+        return id != session.model.document.root.id
+    }
+
+    private var canDelete: Bool {
+        session.selectedIds.contains { $0 != session.model.document.root.id }
     }
 
     private func handleSelection(_ id: UUID?) {
         if session.editingId != nil, session.editingId != id {
             commitEditing()
         }
-        session.select(id)
+        session.selectOnly(id)
     }
 
     private func startEditing(_ id: UUID) {
@@ -98,12 +106,12 @@ struct ContentView: View {
         if session.editingId != nil {
             commitEditing()
         }
-        guard let selectedId = session.selectedId else { return }
+        guard !isMulti, let selectedId = session.primarySelectedId else { return }
         if session.model.node(id: selectedId)?.collapsed == true {
             session.commandBus.execute(.toggleCollapse(id: selectedId))
         }
         session.commandBus.execute(.addChild(parentId: selectedId, text: "新主题"))
-        if let newId = session.selectedId {
+        if let newId = session.primarySelectedId {
             startEditing(newId)
         }
     }
@@ -112,32 +120,22 @@ struct ContentView: View {
         if session.editingId != nil {
             commitEditing()
         }
-        guard let selectedId = session.selectedId,
+        guard !isMulti,
+              let selectedId = session.primarySelectedId,
               selectedId != session.model.document.root.id else {
             return
         }
         session.commandBus.execute(.addSibling(selectedId: selectedId, text: "新主题"))
-        if let newId = session.selectedId {
+        if let newId = session.primarySelectedId {
             startEditing(newId)
         }
-    }
-
-    private func toggleCollapse() {
-        if session.editingId != nil {
-            commitEditing()
-        }
-        guard let selectedId = session.selectedId,
-              session.model.node(id: selectedId)?.children.isEmpty == false else {
-            return
-        }
-        session.commandBus.execute(.toggleCollapse(id: selectedId))
     }
 
     private func deleteSelected() {
         if session.editingId != nil {
             commitEditing()
         }
-        guard let selectedId = session.selectedId,
+        guard let selectedId = session.primarySelectedId,
               selectedId != session.model.document.root.id else {
             return
         }

@@ -5,6 +5,17 @@ import Foundation
 
 @Suite("DocumentSession")
 struct DocumentSessionTests {
+    @Test func selectOnly_mirrorsSelectedIds() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let child = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        session.selectOnly(child)
+        #expect(session.selectedIds == [child])
+        #expect(session.selectionAnchorId == child)
+        session.toggleInSelection(root)
+        #expect(session.selectedIds == [child, root])
+    }
+
     @Test func commandChanges_refreshUndoState_andReturnToCleanSnapshot() {
         let session = DocumentSession()
         let rootId = session.model.document.root.id

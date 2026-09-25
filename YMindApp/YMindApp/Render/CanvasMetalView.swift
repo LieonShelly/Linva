@@ -228,7 +228,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             in: view,
             snapshot: session.snapshot,
             camera: session.camera,
-            selectedId: session.selectedId
+            selectedId: session.primarySelectedId
         )
     }
 

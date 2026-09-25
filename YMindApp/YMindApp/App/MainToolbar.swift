@@ -1,14 +1,13 @@
 import SwiftUI
 
 struct MainToolbar: ToolbarContent {
-    let hasSelection: Bool
-    let isRootSelected: Bool
-    let canToggleCollapse: Bool
-    let isCollapsed: Bool
+    let selectionCount: Int
+    let canAddChild: Bool
+    let canAddSibling: Bool
+    let canDelete: Bool
     let zoomPercent: Int
     let addChild: () -> Void
     let addSibling: () -> Void
-    let toggleCollapse: () -> Void
     let delete: () -> Void
     let zoomOut: () -> Void
     let zoomIn: () -> Void
@@ -16,33 +15,27 @@ struct MainToolbar: ToolbarContent {
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .automatic) {
+            if selectionCount > 1 {
+                Text("已选 \(selectionCount)")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("已选 \(selectionCount) 个主题")
+            }
             Button(action: addChild) {
                 Label("子主题", systemImage: "arrow.turn.down.right")
             }
-            .disabled(!hasSelection)
+            .disabled(!canAddChild)
             .help("添加子主题（Tab）")
 
             Button(action: addSibling) {
                 Label("同级主题", systemImage: "plus.rectangle.on.rectangle")
             }
-            .disabled(!hasSelection || isRootSelected)
+            .disabled(!canAddSibling)
             .help("添加同级主题（Return）")
-
-            Button(action: toggleCollapse) {
-                Label(
-                    isCollapsed ? "展开" : "折叠",
-                    systemImage: isCollapsed
-                        ? "rectangle.expand.vertical"
-                        : "rectangle.compress.vertical"
-                )
-            }
-            .disabled(!hasSelection || !canToggleCollapse)
-            .help(isCollapsed ? "展开子主题" : "折叠子主题")
 
             Button(role: .destructive, action: delete) {
                 Label("删除", systemImage: "trash")
             }
-            .disabled(!hasSelection || isRootSelected)
+            .disabled(!canDelete)
             .help("删除主题（Delete）")
         }
 

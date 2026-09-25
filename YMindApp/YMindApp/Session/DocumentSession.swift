@@ -79,7 +79,8 @@ final class DocumentSession: ObservableObject {
     @Published private(set) var undoRevision = 0
     @Published var camera = Camera()
     @Published var snapshot: LayoutSnapshot
-    @Published private(set) var selectedId: UUID?
+    @Published private(set) var selectedIds: Set<UUID> = []
+    @Published private(set) var selectionAnchorId: UUID?
     @Published private(set) var editingId: UUID?
     @Published var draftText = ""
     @Published var errorMessage: String?
@@ -88,6 +89,8 @@ final class DocumentSession: ObservableObject {
     private let securityScopedAccess: SecurityScopedAccess
     private var lastSavedDocument: MindMapDocument
     private var originalEditingText = ""
+
+    var primarySelectedId: UUID? { model.primarySelectedId }
 
     var windowTitle: String {
         fileURL?.lastPathComponent ?? "未命名"
@@ -105,7 +108,8 @@ final class DocumentSession: ObservableObject {
         self.securityScopedAccess = securityScopedAccess
         self.lastSavedDocument = model.document
         self.snapshot = LayoutSnapshot(frames: [:], edges: [])
-        self.selectedId = model.selectedId
+        self.selectedIds = model.selectedIds
+        self.selectionAnchorId = model.selectionAnchorId
         wireCommandBus()
         relayout()
     }
@@ -114,8 +118,8 @@ final class DocumentSession: ObservableObject {
         commitEditingIfNeeded()
         let doc = MindMapDocument.blank()
         model.document = doc
-        model.selectedId = doc.root.id
-        selectedId = doc.root.id
+        model.selectOnly(doc.root.id)
+        syncSelectionFromModel()
         commandBus.clearHistory()
         undoRevision += 1
         securityScopedAccess.release()
@@ -137,8 +141,8 @@ final class DocumentSession: ObservableObject {
             return try YMindCodec.decode(data)
         }
         model.document = doc
-        model.selectedId = doc.root.id
-        selectedId = doc.root.id
+        model.selectOnly(doc.root.id)
+        syncSelectionFromModel()
         commandBus.clearHistory()
         undoRevision += 1
         fileURL = url
@@ -189,9 +193,39 @@ final class DocumentSession: ObservableObject {
         errorMessage = nil
     }
 
+    func syncSelectionFromModel() {
+        selectedIds = model.selectedIds
+        selectionAnchorId = model.selectionAnchorId
+    }
+
+    func selectOnly(_ id: UUID?) {
+        model.selectOnly(id)
+        syncSelectionFromModel()
+    }
+
+    func toggleInSelection(_ id: UUID) {
+        model.toggleInSelection(id)
+        syncSelectionFromModel()
+    }
+
+    func selectSiblingRange(to id: UUID) {
+        model.selectSiblingRange(to: id)
+        syncSelectionFromModel()
+    }
+
+    func replaceSelection(_ ids: Set<UUID>, anchorId: UUID?) {
+        model.replaceSelection(ids, anchorId: anchorId)
+        syncSelectionFromModel()
+    }
+
+    func clearSelection() {
+        model.clearSelection()
+        syncSelectionFromModel()
+    }
+
+    /// 兼容旧调用点：等价于 selectOnly
     func select(_ id: UUID?) {
-        model.select(id)
-        selectedId = model.selectedId
+        selectOnly(id)
     }
 
     func startEditing(_ id: UUID) {
@@ -202,7 +236,7 @@ final class DocumentSession: ObservableObject {
         if editingId != nil, editingId != id {
             commitEditingIfNeeded()
         }
-        select(id)
+        selectOnly(id)
         originalEditingText = node.text
         draftText = node.text
         editingId = id
@@ -239,7 +273,7 @@ final class DocumentSession: ObservableObject {
     private func wireCommandBus() {
         commandBus.onChange = { [weak self] in
             guard let self else { return }
-            selectedId = model.selectedId
+            syncSelectionFromModel()
             undoRevision += 1
             markDirtyAndRelayout()
         }
