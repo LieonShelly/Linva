@@ -360,14 +360,14 @@ final class MetalRenderer {
         let bottomLeft = SIMD2(Float(rect.minX), Float(rect.maxY))
         let bottomRight = SIMD2(Float(rect.maxX), Float(rect.maxY))
 
-        // Core Graphics 位图的首行是底边，因此这里翻转纹理 V 坐标。
+        // 上传前已把位图翻成「首行=顶边」，与 Metal 采样 (0,0)=纹理顶边一致。
         return [
-            TexturedVertex(position: topLeft, textureCoordinate: SIMD2(0, 1), color: color),
-            TexturedVertex(position: bottomLeft, textureCoordinate: SIMD2(0, 0), color: color),
-            TexturedVertex(position: topRight, textureCoordinate: SIMD2(1, 1), color: color),
-            TexturedVertex(position: topRight, textureCoordinate: SIMD2(1, 1), color: color),
-            TexturedVertex(position: bottomLeft, textureCoordinate: SIMD2(0, 0), color: color),
-            TexturedVertex(position: bottomRight, textureCoordinate: SIMD2(1, 0), color: color),
+            TexturedVertex(position: topLeft, textureCoordinate: SIMD2(0, 0), color: color),
+            TexturedVertex(position: bottomLeft, textureCoordinate: SIMD2(0, 1), color: color),
+            TexturedVertex(position: topRight, textureCoordinate: SIMD2(1, 0), color: color),
+            TexturedVertex(position: topRight, textureCoordinate: SIMD2(1, 0), color: color),
+            TexturedVertex(position: bottomLeft, textureCoordinate: SIMD2(0, 1), color: color),
+            TexturedVertex(position: bottomRight, textureCoordinate: SIMD2(1, 1), color: color),
         ]
     }
 

@@ -1,5 +1,4 @@
 import AppKit
-import CoreText
 import Metal
 
 final class TextAtlas {
@@ -39,110 +38,56 @@ final class TextAtlas {
             return cached.texture
         }
 
-        guard let bitmap = makeBitmap(
-            frame: frame,
-            text: text,
-            displayScale: displayScale,
+        let font = NSFont.systemFont(
+            ofSize: frame.isRoot ? 18.4 : 14.7,
+            weight: frame.isRoot ? .bold : .medium
+        )
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        paragraph.lineBreakMode = .byCharWrapping
+        let attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: NSColor.white,
+                .paragraphStyle: paragraph,
+            ]
+        )
+
+        let horizontalPadding: CGFloat = frame.isRoot
+            ? LayoutConstants.rootPadX
+            : LayoutConstants.nodePadX
+        let verticalPadding: CGFloat = frame.isRoot
+            ? LayoutConstants.rootPadY
+            : LayoutConstants.nodePadY
+        let textRect = CGRect(
+            x: horizontalPadding,
+            y: verticalPadding,
+            width: max(frame.size.width - horizontalPadding * 2, 1),
+            height: max(frame.size.height - verticalPadding * 2, 1)
+        )
+
+        guard let bitmap = TextTextureRasterizer.makeBitmap(
             width: width,
-            height: height
+            height: height,
+            displayScale: displayScale,
+            draw: { attributedText.draw(in: textRect) }
         ) else {
             return nil
         }
 
-        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .bgra8Unorm,
+        guard let texture = TextTextureRasterizer.makeTexture(
+            device: device,
             width: width,
             height: height,
-            mipmapped: false
-        )
-        descriptor.storageMode = .shared
-        descriptor.usage = .shaderRead
-        guard let texture = device.makeTexture(descriptor: descriptor) else {
+            bitmap: bitmap,
+            label: "文字纹理 \(frame.id)"
+        ) else {
             return nil
         }
 
-        texture.label = "文字纹理 \(frame.id)"
-        texture.replace(
-            region: MTLRegionMake2D(0, 0, width, height),
-            mipmapLevel: 0,
-            withBytes: bitmap,
-            bytesPerRow: width * 4
-        )
         entries[frame.id] = CacheEntry(key: key, texture: texture)
         return texture
-    }
-
-    private func makeBitmap(
-        frame: NodeFrame,
-        text: String,
-        displayScale: CGFloat,
-        width: Int,
-        height: Int
-    ) -> [UInt8]? {
-        var bitmap = [UInt8](repeating: 0, count: width * height * 4)
-        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
-            return nil
-        }
-
-        let created = bitmap.withUnsafeMutableBytes { bytes -> Bool in
-            guard let baseAddress = bytes.baseAddress,
-                  let context = CGContext(
-                    data: baseAddress,
-                    width: width,
-                    height: height,
-                    bitsPerComponent: 8,
-                    bytesPerRow: width * 4,
-                    space: colorSpace,
-                    bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue
-                        | CGImageAlphaInfo.premultipliedFirst.rawValue
-                  ) else {
-                return false
-            }
-
-            context.clear(CGRect(x: 0, y: 0, width: width, height: height))
-            context.scaleBy(x: displayScale, y: displayScale)
-
-            let font = NSFont.systemFont(
-                ofSize: frame.isRoot ? 18.4 : 14.7,
-                weight: frame.isRoot ? .bold : .medium
-            )
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.alignment = .center
-            paragraph.lineBreakMode = .byCharWrapping
-            let attributedText = NSAttributedString(
-                string: text,
-                attributes: [
-                    .font: font,
-                    .foregroundColor: NSColor.white,
-                    .paragraphStyle: paragraph,
-                ]
-            )
-
-            let horizontalPadding: CGFloat = frame.isRoot
-                ? LayoutConstants.rootPadX
-                : LayoutConstants.nodePadX
-            let verticalPadding: CGFloat = frame.isRoot
-                ? LayoutConstants.rootPadY
-                : LayoutConstants.nodePadY
-            let textRect = CGRect(
-                x: horizontalPadding,
-                y: verticalPadding,
-                width: max(frame.size.width - horizontalPadding * 2, 1),
-                height: max(frame.size.height - verticalPadding * 2, 1)
-            )
-            let framesetter = CTFramesetterCreateWithAttributedString(attributedText)
-            let path = CGPath(rect: textRect, transform: nil)
-            let textFrame = CTFramesetterCreateFrame(
-                framesetter,
-                CFRange(location: 0, length: attributedText.length),
-                path,
-                nil
-            )
-            CTFrameDraw(textFrame, context)
-            return true
-        }
-
-        return created ? bitmap : nil
     }
 }
 
@@ -179,10 +124,60 @@ final class CollapseBadgeAtlas {
             return cached.texture
         }
 
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        let attributedText = NSAttributedString(
+            string: badge.text,
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 10.5, weight: .semibold),
+                .foregroundColor: NSColor.white,
+                .paragraphStyle: paragraph,
+            ]
+        )
+        let textRect = CGRect(
+            x: 0,
+            y: 3,
+            width: badge.rect.width,
+            height: badge.rect.height - 3
+        )
+
+        guard let bitmap = TextTextureRasterizer.makeBitmap(
+            width: width,
+            height: height,
+            displayScale: displayScale,
+            draw: { attributedText.draw(in: textRect) }
+        ) else {
+            return nil
+        }
+
+        guard let texture = TextTextureRasterizer.makeTexture(
+            device: device,
+            width: width,
+            height: height,
+            bitmap: bitmap,
+            label: "折叠徽章纹理 \(badge.nodeId)"
+        ) else {
+            return nil
+        }
+
+        entries[badge.nodeId] = CacheEntry(key: key, texture: texture)
+        return texture
+    }
+}
+
+/// 用翻转的 AppKit 图形上下文栅格化文字，再把像素行翻成「首行=顶边」以上传 Metal。
+enum TextTextureRasterizer {
+    static func makeBitmap(
+        width: Int,
+        height: Int,
+        displayScale: CGFloat,
+        draw: () -> Void
+    ) -> [UInt8]? {
         var bitmap = [UInt8](repeating: 0, count: width * height * 4)
         guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
             return nil
         }
+
         let created = bitmap.withUnsafeMutableBytes { bytes -> Bool in
             guard let baseAddress = bytes.baseAddress,
                   let context = CGContext(
@@ -199,36 +194,46 @@ final class CollapseBadgeAtlas {
             }
 
             context.clear(CGRect(x: 0, y: 0, width: width, height: height))
-            context.scaleBy(x: displayScale, y: displayScale)
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.alignment = .center
-            let attributedText = NSAttributedString(
-                string: badge.text,
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 10.5, weight: .semibold),
-                    .foregroundColor: NSColor.white,
-                    .paragraphStyle: paragraph,
-                ]
-            )
-            let textRect = CGRect(
-                x: 0,
-                y: 3,
-                width: badge.rect.width,
-                height: badge.rect.height - 3
-            )
-            let framesetter = CTFramesetterCreateWithAttributedString(attributedText)
-            let path = CGPath(rect: textRect, transform: nil)
-            let textFrame = CTFramesetterCreateFrame(
-                framesetter,
-                CFRange(location: 0, length: attributedText.length),
-                path,
-                nil
-            )
-            CTFrameDraw(textFrame, context)
+
+            let nsContext = NSGraphicsContext(cgContext: context, flipped: true)
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = nsContext
+            defer { NSGraphicsContext.restoreGraphicsState() }
+
+            let transform = NSAffineTransform()
+            transform.scaleX(by: displayScale, yBy: displayScale)
+            transform.concat()
+
+            draw()
             return true
         }
-        guard created else { return nil }
 
+        guard created else { return nil }
+        flipVertically(&bitmap, width: width, height: height)
+        return bitmap
+    }
+
+    /// CG/AppKit 位图缓冲往往底行在前；翻成顶行在前，与 Metal 纹理第 0 行一致。
+    private static func flipVertically(_ bitmap: inout [UInt8], width: Int, height: Int) {
+        let rowBytes = width * 4
+        guard height > 1, rowBytes > 0 else { return }
+        var temp = [UInt8](repeating: 0, count: rowBytes)
+        for y in 0..<(height / 2) {
+            let top = y * rowBytes
+            let bottom = (height - 1 - y) * rowBytes
+            temp.replaceSubrange(0..<rowBytes, with: bitmap[top..<(top + rowBytes)])
+            bitmap.replaceSubrange(top..<(top + rowBytes), with: bitmap[bottom..<(bottom + rowBytes)])
+            bitmap.replaceSubrange(bottom..<(bottom + rowBytes), with: temp[0..<rowBytes])
+        }
+    }
+
+    static func makeTexture(
+        device: MTLDevice,
+        width: Int,
+        height: Int,
+        bitmap: [UInt8],
+        label: String
+    ) -> MTLTexture? {
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,
             width: width,
@@ -240,14 +245,13 @@ final class CollapseBadgeAtlas {
         guard let texture = device.makeTexture(descriptor: descriptor) else {
             return nil
         }
-        texture.label = "折叠徽章纹理 \(badge.nodeId)"
+        texture.label = label
         texture.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
             withBytes: bitmap,
             bytesPerRow: width * 4
         )
-        entries[badge.nodeId] = CacheEntry(key: key, texture: texture)
         return texture
     }
 }

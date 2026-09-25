@@ -40,7 +40,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   height: 100%;
 }
 
@@ -139,6 +139,116 @@ body {
   color: var(--ink-muted);
 }
 
+.toolbar-group.selection-meta {
+  background: transparent;
+  padding: 0;
+}
+
+.selection-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  letter-spacing: 0.01em;
+}
+
+.selection-count[hidden] {
+  display: none;
+}
+
+/* —— Search bar —— */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  background: color-mix(in srgb, var(--panel) 94%, white);
+  border-bottom: 1px solid color-mix(in srgb, var(--node-border) 70%, transparent);
+  z-index: 3;
+}
+
+.search-bar[hidden] {
+  display: none;
+}
+
+.search-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 22rem;
+  appearance: none;
+  border: 1.5px solid var(--node-border);
+  border-radius: 999px;
+  background: var(--node);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-count {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+.search-bar button {
+  appearance: none;
+  border: 0;
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.search-bar button:hover:not(:disabled) {
+  background: var(--node);
+}
+
+.search-bar button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.node.is-search-hit {
+  border-color: #c4782a;
+  box-shadow:
+    0 0 0 3px rgba(196, 120, 42, 0.28),
+    var(--shadow);
+  z-index: 3;
+}
+
+.node.is-root.is-search-hit {
+  box-shadow:
+    0 0 0 3px rgba(196, 120, 42, 0.4),
+    var(--shadow);
+}
+
 /* —— Stage / canvas —— */
 .stage {
   position: relative;
@@ -155,6 +265,24 @@ body {
 
 .stage.is-panning {
   cursor: grabbing;
+}
+
+.stage.is-marquee {
+  cursor: crosshair;
+}
+
+.stage.is-space-pan {
+  cursor: grab;
+}
+
+.marquee {
+  position: absolute;
+  z-index: 5;
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 4px;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .canvas-world {
@@ -230,6 +358,21 @@ body {
   z-index: 2;
 }
 
+.node.is-selected.is-root {
+  box-shadow:
+    0 0 0 3px rgba(159, 212, 192, 0.45),
+    var(--shadow);
+}
+
+.node.is-anchor:not(.is-editing)::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  pointer-events: none;
+}
+
 .node.is-root {
   background: var(--root-fill);
   border-color: var(--root-fill);
@@ -256,6 +399,63 @@ body {
   outline: none;
 }
 
+.node.is-cut {
+  opacity: 0.42;
+  border-style: dashed;
+}
+
+.node.is-drop-target {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--node));
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow);
+  z-index: 3;
+}
+
+.node.is-root.is-drop-target {
+  background: color-mix(in srgb, var(--accent) 28%, var(--root-fill));
+  box-shadow:
+    0 0 0 3px rgba(159, 212, 192, 0.55),
+    var(--shadow);
+}
+
+.node.is-drop-edge {
+  /* 同级插入时节点本体弱高亮，主信号在插入线 */
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--node-border));
+  box-shadow: var(--shadow);
+  z-index: 3;
+}
+
+.insert-line {
+  position: absolute;
+  z-index: 6;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.insert-line[hidden] {
+  display: none;
+}
+
+.node.is-dragging {
+  opacity: 0.55;
+  cursor: grabbing;
+  z-index: 4;
+}
+
+.stage.is-node-dragging {
+  cursor: grabbing;
+}
+
+.stage.is-node-dragging .node {
+  cursor: grabbing;
+}
+
 .node.is-editing {
   cursor: text;
   box-shadow:
@@ -272,20 +472,70 @@ body {
 }
 
 .collapsed-badge {
+  display: none; /* 折叠数量并入分叉处 toggle */
+}
+
+.branch-toggles {
   position: absolute;
-  right: -0.45rem;
-  bottom: -0.45rem;
-  min-width: 1.25rem;
-  height: 1.25rem;
-  padding: 0 0.3rem;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.branch-toggle {
+  position: absolute;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.28rem;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--node-border));
   border-radius: 999px;
-  background: var(--accent);
-  color: white;
-  font-size: 0.65rem;
+  background: var(--node);
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
   font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 6px rgba(26, 28, 25, 0.2);
+  box-shadow: 0 2px 8px rgba(26, 28, 25, 0.12);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.branch-toggle.has-count {
+  min-width: 1.7rem;
+  padding: 0 0.35rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.branch-toggle:hover {
+  background: color-mix(in srgb, var(--accent-soft) 80%, white);
+  border-color: var(--accent);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.branch-toggle:active {
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.branch-toggle.is-collapsed {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 2px 10px rgba(47, 111, 94, 0.35);
+}
+
+.branch-toggle .toggle-label {
+  display: block;
+  margin-top: -1px;
 }
 
 .hint {

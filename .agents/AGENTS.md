@@ -7,6 +7,12 @@ macOS 思维导图应用。技术栈：**Swift + SwiftUI（壳）+ Metal（画�
 
 另请阅读：[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)
 
+
+## 基础约束
+- 优先使用 **codegraph mcp** 进行代码检索
+- 优先使用 **Mermaid** 进行图形绘制，如：流程图，类关系图，架构图等等需要诠释代码关系的相关操作
+
+
 ## 强制约束：文档语言
 
 **以后本仓库所有文档一律优先使用中文。**

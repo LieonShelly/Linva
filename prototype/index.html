@@ -15,14 +15,23 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-name">YMind</span>
-        <span class="brand-tag">Prototype</span>
+        <span class="brand-tag">Search</span>
       </div>
 
       <div class="toolbar-group" role="group" aria-label="节点操作">
         <button type="button" id="btn-add-child" title="添加子主题 (Tab)">子主题</button>
         <button type="button" id="btn-add-sibling" title="添加同级 (Enter)">同级</button>
-        <button type="button" id="btn-toggle" title="折叠 / 展开">折叠</button>
-        <button type="button" id="btn-delete" class="danger" title="删除 (⌫)">删除</button>
+        <button type="button" id="btn-delete" class="danger" title="删除 (⌫)（多选时对整组生效）">删除</button>
+      </div>
+
+      <div class="toolbar-group" role="group" aria-label="剪贴板">
+        <button type="button" id="btn-cut" title="剪切 (⌘X)">剪切</button>
+        <button type="button" id="btn-copy" title="复制 (⌘C)">复制</button>
+        <button type="button" id="btn-paste" title="粘贴为子主题 (⌘V)">粘贴</button>
+      </div>
+
+      <div class="toolbar-group selection-meta" role="status" aria-live="polite">
+        <span class="selection-count" id="selection-count" hidden>已选 0</span>
       </div>
 
       <div class="toolbar-group" role="group" aria-label="视图">
@@ -33,14 +42,34 @@
       </div>
     </header>
 
+    <div class="search-bar" id="search-bar" hidden>
+      <label class="search-label" for="search-input">搜索</label>
+      <input
+        type="search"
+        id="search-input"
+        class="search-input"
+        placeholder="搜索主题…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span class="search-count" id="search-count" aria-live="polite">0 / 0</span>
+      <button type="button" id="btn-search-prev" title="上一项 (⇧Enter)">↑</button>
+      <button type="button" id="btn-search-next" title="下一项 (Enter)">↓</button>
+      <button type="button" id="btn-search-close" title="关闭 (Esc)">×</button>
+    </div>
+
     <main class="stage" id="stage">
       <div class="canvas-world" id="world">
         <svg class="edges" id="edges" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="nodes" id="nodes"></div>
+        <div class="branch-toggles" id="branch-toggles"></div>
+        <div class="insert-line" id="insert-line" hidden></div>
       </div>
 
+      <div class="marquee" id="marquee" hidden></div>
+
       <div class="hint" id="hint">
-        拖动画布平移 · 滚轮缩放 · 双击编辑 · Tab 子主题 · Enter 同级
+        ⌘F 搜索 · 拖中部成子/上下边插同级 · ⌘C/X/V · 框选 · 空格平移
       </div>
     </main>
   </div>

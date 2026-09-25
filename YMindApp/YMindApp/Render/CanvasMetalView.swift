@@ -66,8 +66,7 @@ struct CanvasMetalView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> CanvasMTKView {
         guard let device = MTLCreateSystemDefaultDevice() else {
-            session.errorMessage = "无法初始化 Metal"
-            return CanvasMTKView(
+            let view = CanvasMTKView(
                 frame: .zero,
                 device: nil,
                 renderer: nil,
@@ -78,6 +77,11 @@ struct CanvasMetalView: NSViewRepresentable {
                 onAddSibling: onAddSibling,
                 onDelete: onDelete
             )
+            // 不能在 view update 期间同步写 @Published。
+            DispatchQueue.main.async {
+                session.errorMessage = "无法初始化 Metal"
+            }
+            return view
         }
 
         do {
@@ -94,8 +98,8 @@ struct CanvasMetalView: NSViewRepresentable {
                 onDelete: onDelete
             )
         } catch {
-            session.errorMessage = "无法初始化 Metal：\(error.localizedDescription)"
-            return CanvasMTKView(
+            let message = error.localizedDescription
+            let view = CanvasMTKView(
                 frame: .zero,
                 device: device,
                 renderer: nil,
@@ -106,6 +110,10 @@ struct CanvasMetalView: NSViewRepresentable {
                 onAddSibling: onAddSibling,
                 onDelete: onDelete
             )
+            DispatchQueue.main.async {
+                session.errorMessage = "无法初始化 Metal：\(message)"
+            }
+            return view
         }
     }
 
@@ -116,7 +124,11 @@ struct CanvasMetalView: NSViewRepresentable {
         view.onAddChild = onAddChild
         view.onAddSibling = onAddSibling
         view.onDelete = onDelete
-        view.fitContentIfNeeded(force: session.camera == Camera())
+        // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates。
+        if session.camera == Camera() {
+            view.markNeedsFitContent()
+        }
+        view.scheduleFitContentIfNeeded()
         view.setNeedsDisplay(view.bounds)
         view.restoreKeyboardFocusIfNeeded(request: focusRequest)
     }
@@ -137,6 +149,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     private var dragPanState = CanvasDragPanState()
     private var appliedFocusRequest = 0
     private var didFitContent = false
+    private var fitContentScheduled = false
 
     init(
         frame: CGRect,
@@ -174,28 +187,40 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
 
     override func layout() {
         super.layout()
-        fitContentIfNeeded()
+        scheduleFitContentIfNeeded()
         setNeedsDisplay(bounds)
     }
 
-    func fitContentIfNeeded(force: Bool = false) {
+    func markNeedsFitContent() {
+        didFitContent = false
+    }
+
+    func scheduleFitContentIfNeeded() {
+        guard !didFitContent, !fitContentScheduled else {
+            return
+        }
         guard bounds.width > 0, bounds.height > 0 else {
             return
         }
-        if force {
-            didFitContent = false
-        }
-        guard !didFitContent else {
-            return
-        }
 
+        fitContentScheduled = true
         let contentBounds = session.snapshot.frames.values.reduce(CGRect.null) {
             $0.union($1.rect)
         }
-        var camera = session.camera
-        camera.fit(contentBounds: contentBounds, viewport: bounds.size)
-        session.camera = camera
-        didFitContent = true
+        let viewport = bounds.size
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.fitContentScheduled = false
+            guard !self.didFitContent else { return }
+            guard self.bounds.width > 0, self.bounds.height > 0 else { return }
+
+            var camera = self.session.camera
+            camera.fit(contentBounds: contentBounds, viewport: viewport)
+            self.session.camera = camera
+            self.didFitContent = true
+            self.setNeedsDisplay(self.bounds)
+        }
     }
 
     func draw(in view: MTKView) {
