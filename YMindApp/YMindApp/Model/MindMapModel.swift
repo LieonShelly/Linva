@@ -142,6 +142,19 @@ final class MindMapModel {
         }
     }
 
+    /// 可搬顶层：排除中心主题，祖先已在集内则不再单列（语义与批量删除一致）。
+    func movableTopLevel(ids: Set<UUID>) -> [UUID] {
+        topLevelDeletableIds(from: ids)
+    }
+
+    /// 深拷贝子树并递归换新 UUID（Node 为值类型，结构天然深拷贝，只需换 id）。
+    func duplicate(_ node: Node) -> Node {
+        var copy = node
+        copy.id = UUID()
+        copy.children = node.children.map { duplicate($0) }
+        return copy
+    }
+
     /// Removes nodes without thrashing selection mid-loop; then selects first surviving parent or clears.
     @discardableResult
     func removeMany(ids: [UUID]) -> [(parentId: UUID, index: Int, node: Node)] {

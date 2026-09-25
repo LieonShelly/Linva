@@ -146,4 +146,30 @@ struct ModelTests {
         #expect(model.node(id: m) == nil)
         #expect(model.node(id: z) == nil)
     }
+
+    @Test func movableTopLevel_excludesRoot_andDedupsAncestors() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let p = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let c = model.insertChild(parentId: p, text: "C", side: nil, at: nil)
+        let ids = model.movableTopLevel(ids: [root, p, c])
+        #expect(ids == [p])
+    }
+
+    @Test func duplicate_preservesStructure_withNewIds() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let p = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let c = model.insertChild(parentId: p, text: "C", side: nil, at: nil)
+        let src = model.node(id: p)!
+
+        let copy = model.duplicate(src)
+
+        #expect(copy.text == "P")
+        #expect(copy.children.count == 1)
+        #expect(copy.children[0].text == "C")
+        #expect(copy.id != src.id)
+        #expect(copy.children[0].id != c)
+        #expect(copy.children[0].id != copy.id)
+    }
 }
