@@ -2,28 +2,6 @@ import AppKit
 import MetalKit
 import SwiftUI
 
-func hitTest(
-    screenPoint: CGPoint,
-    snapshot: LayoutSnapshot,
-    camera: Camera
-) -> UUID? {
-    hitTestNode(screenPoint: screenPoint, snapshot: snapshot, camera: camera)
-}
-
-private func hitTestNode(
-    screenPoint: CGPoint,
-    snapshot: LayoutSnapshot,
-    camera: Camera
-) -> UUID? {
-    let worldPoint = camera.screenToWorld(screenPoint)
-    return snapshot.frames.values
-        .filter { $0.rect.contains(worldPoint) }
-        .min {
-            $0.rect.width * $0.rect.height < $1.rect.width * $1.rect.height
-        }?
-        .id
-}
-
 struct CanvasDragPanState: Equatable {
     private(set) var lastDragPoint: CGPoint?
     private(set) var suppressUntilMouseUp = false
@@ -60,6 +38,7 @@ struct CanvasMetalView: NSViewRepresentable {
     var focusRequest: Int = 0
     let onSelect: (UUID?) -> Void
     let onEdit: (UUID) -> Void
+    let onToggleCollapse: (UUID) -> Void
     let onAddChild: () -> Void
     let onAddSibling: () -> Void
     let onDelete: () -> Void
@@ -73,6 +52,7 @@ struct CanvasMetalView: NSViewRepresentable {
                 session: session,
                 onSelect: onSelect,
                 onEdit: onEdit,
+                onToggleCollapse: onToggleCollapse,
                 onAddChild: onAddChild,
                 onAddSibling: onAddSibling,
                 onDelete: onDelete
@@ -93,6 +73,7 @@ struct CanvasMetalView: NSViewRepresentable {
                 session: session,
                 onSelect: onSelect,
                 onEdit: onEdit,
+                onToggleCollapse: onToggleCollapse,
                 onAddChild: onAddChild,
                 onAddSibling: onAddSibling,
                 onDelete: onDelete
@@ -106,6 +87,7 @@ struct CanvasMetalView: NSViewRepresentable {
                 session: session,
                 onSelect: onSelect,
                 onEdit: onEdit,
+                onToggleCollapse: onToggleCollapse,
                 onAddChild: onAddChild,
                 onAddSibling: onAddSibling,
                 onDelete: onDelete
@@ -121,6 +103,7 @@ struct CanvasMetalView: NSViewRepresentable {
         view.session = session
         view.onSelect = onSelect
         view.onEdit = onEdit
+        view.onToggleCollapse = onToggleCollapse
         view.onAddChild = onAddChild
         view.onAddSibling = onAddSibling
         view.onDelete = onDelete
@@ -138,6 +121,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     var session: DocumentSession
     var onSelect: (UUID?) -> Void
     var onEdit: (UUID) -> Void
+    var onToggleCollapse: (UUID) -> Void
     var onAddChild: () -> Void
     var onAddSibling: () -> Void
     var onDelete: () -> Void
@@ -158,6 +142,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         session: DocumentSession,
         onSelect: @escaping (UUID?) -> Void,
         onEdit: @escaping (UUID) -> Void,
+        onToggleCollapse: @escaping (UUID) -> Void,
         onAddChild: @escaping () -> Void,
         onAddSibling: @escaping () -> Void,
         onDelete: @escaping () -> Void
@@ -166,6 +151,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         self.session = session
         self.onSelect = onSelect
         self.onEdit = onEdit
+        self.onToggleCollapse = onToggleCollapse
         self.onAddChild = onAddChild
         self.onAddSibling = onAddSibling
         self.onDelete = onDelete
@@ -228,7 +214,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             in: view,
             snapshot: session.snapshot,
             camera: session.camera,
-            selectedId: session.primarySelectedId
+            selectedIds: session.selectedIds,
+            selectionAnchorId: session.selectionAnchorId
         )
     }
 
@@ -242,16 +229,24 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow, from: nil)
-        let hit = hitTestNode(
+        switch hitTestCanvas(
             screenPoint: point,
             snapshot: session.snapshot,
             camera: session.camera
-        )
-        onSelect(hit)
-        if let hit, event.clickCount == 2 {
-            onEdit(hit)
+        ) {
+        case let .branchToggle(nodeId):
+            onToggleCollapse(nodeId)
+            dragPanState.begin(at: point, onNode: true)
+        case let .node(id):
+            onSelect(id)
+            if event.clickCount == 2 {
+                onEdit(id)
+            }
+            dragPanState.begin(at: point, onNode: true)
+        case .empty:
+            onSelect(nil)
+            dragPanState.begin(at: point, onNode: false)
         }
-        dragPanState.begin(at: point, onNode: hit != nil)
     }
 
     override func mouseDragged(with event: NSEvent) {

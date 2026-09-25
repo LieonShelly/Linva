@@ -19,6 +19,7 @@ struct ContentView: View {
                     focusRequest: canvasFocusRequest,
                     onSelect: handleSelection,
                     onEdit: startEditing,
+                    onToggleCollapse: toggleCollapse,
                     onAddChild: addChild,
                     onAddSibling: addSibling,
                     onDelete: deleteSelected
@@ -85,6 +86,13 @@ struct ContentView: View {
 
     private func startEditing(_ id: UUID) {
         session.startEditing(id)
+    }
+
+    private func toggleCollapse(_ id: UUID) {
+        if session.editingId != nil {
+            commitEditing()
+        }
+        session.commandBus.execute(.toggleCollapse(id: id))
     }
 
     private func commitEditing() {

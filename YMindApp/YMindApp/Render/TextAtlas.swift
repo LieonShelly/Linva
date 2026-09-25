@@ -91,12 +91,13 @@ final class TextAtlas {
     }
 }
 
-final class CollapseBadgeAtlas {
+final class BranchToggleAtlas {
     private struct CacheKey: Equatable {
         let text: String
         let width: Int
         let height: Int
         let scale: Int
+        let collapsed: Bool
     }
 
     private struct CacheEntry {
@@ -104,48 +105,66 @@ final class CollapseBadgeAtlas {
         let texture: MTLTexture
     }
 
-    private var entries: [UUID: CacheEntry] = [:]
+    private var entries: [String: CacheEntry] = [:]
+
+    static func label(for toggle: BranchToggle) -> String {
+        if toggle.collapsed {
+            return toggle.hiddenCount > 0 ? "−\(toggle.hiddenCount)" : "−"
+        }
+        return "＋"
+    }
 
     func texture(
-        for badge: CollapseBadge,
+        for toggle: BranchToggle,
+        size: CGSize,
         scale: CGFloat,
         device: MTLDevice
     ) -> MTLTexture? {
         let displayScale = max(scale, 1)
-        let width = max(Int(ceil(badge.rect.width * displayScale)), 1)
-        let height = max(Int(ceil(badge.rect.height * displayScale)), 1)
+        let width = max(Int(ceil(size.width * displayScale)), 1)
+        let height = max(Int(ceil(size.height * displayScale)), 1)
+        let text = Self.label(for: toggle)
+        let cacheId = "\(toggle.nodeId.uuidString)-\(toggle.side.rawValue)"
         let key = CacheKey(
-            text: badge.text,
+            text: text,
             width: width,
             height: height,
-            scale: Int((displayScale * 100).rounded())
+            scale: Int((displayScale * 100).rounded()),
+            collapsed: toggle.collapsed
         )
-        if let cached = entries[badge.nodeId], cached.key == key {
+        if let cached = entries[cacheId], cached.key == key {
             return cached.texture
         }
 
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center
         let attributedText = NSAttributedString(
-            string: badge.text,
+            string: text,
             attributes: [
-                .font: NSFont.systemFont(ofSize: 10.5, weight: .semibold),
+                .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
                 .foregroundColor: NSColor.white,
                 .paragraphStyle: paragraph,
             ]
         )
-        let textRect = CGRect(
-            x: 0,
-            y: 3,
-            width: badge.rect.width,
-            height: badge.rect.height - 3
-        )
+        let textRect = CGRect(origin: .zero, size: size)
 
         guard let bitmap = TextTextureRasterizer.makeBitmap(
             width: width,
             height: height,
             displayScale: displayScale,
-            draw: { attributedText.draw(in: textRect) }
+            draw: {
+                let bounding = attributedText.boundingRect(
+                    with: textRect.size,
+                    options: [.usesLineFragmentOrigin]
+                )
+                let drawRect = CGRect(
+                    x: (textRect.width - bounding.width) / 2,
+                    y: (textRect.height - bounding.height) / 2,
+                    width: bounding.width,
+                    height: bounding.height
+                )
+                attributedText.draw(with: drawRect, options: [.usesLineFragmentOrigin])
+            }
         ) else {
             return nil
         }
@@ -155,12 +174,12 @@ final class CollapseBadgeAtlas {
             width: width,
             height: height,
             bitmap: bitmap,
-            label: "折叠徽章纹理 \(badge.nodeId)"
+            label: "分叉控件纹理 \(cacheId)"
         ) else {
             return nil
         }
 
-        entries[badge.nodeId] = CacheEntry(key: key, texture: texture)
+        entries[cacheId] = CacheEntry(key: key, texture: texture)
         return texture
     }
 }

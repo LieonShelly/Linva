@@ -33,7 +33,7 @@ struct ModelTests {
         let model = MindMapModel.makeNew()
         let rootId = model.document.root.id
         let child = model.insertChild(parentId: rootId, text: "X", side: .right, at: nil)
-        model.select(child)
+        model.selectOnly(child)
         let removed = model.remove(id: child)
         #expect(removed != nil)
         #expect(model.selectedIds == [rootId])

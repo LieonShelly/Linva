@@ -12,22 +12,14 @@ final class MindMapModel {
         return selectedIds.min { $0.uuidString < $1.uuidString }
     }
 
-    /// Temporary bridge until Session migrates in Task 2.
-    var selectedId: UUID? {
-        get { primarySelectedId }
-        set { selectOnly(newValue) }
-    }
-
-    init(document: MindMapDocument, selectedId: UUID? = nil) {
+    init(document: MindMapDocument) {
         self.document = document
-        let initial = selectedId ?? document.root.id
-        selectedIds = [initial]
-        selectionAnchorId = initial
+        selectedIds = [document.root.id]
+        selectionAnchorId = document.root.id
     }
 
     static func makeNew() -> MindMapModel {
-        let doc = MindMapDocument.blank()
-        return MindMapModel(document: doc, selectedId: doc.root.id)
+        MindMapModel(document: .blank())
     }
 
     func selectOnly(_ id: UUID?) {
@@ -40,9 +32,6 @@ final class MindMapModel {
         selectedIds = [id]
         selectionAnchorId = id
     }
-
-    /// 兼容旧调用点：等价于 selectOnly
-    func select(_ id: UUID?) { selectOnly(id) }
 
     func clearSelection() { selectOnly(nil) }
 

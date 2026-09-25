@@ -28,6 +28,7 @@ struct CanvasInteractionTests {
             session: session,
             onSelect: { _ in },
             onEdit: { _ in },
+            onToggleCollapse: { _ in },
             onAddChild: {},
             onAddSibling: {},
             onDelete: {}

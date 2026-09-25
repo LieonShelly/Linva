@@ -2,29 +2,6 @@ import AppKit
 import MetalKit
 import simd
 
-struct CollapseBadge: Equatable {
-    let nodeId: UUID
-    let text: String
-    let rect: CGRect
-
-    static func make(for frame: NodeFrame) -> CollapseBadge? {
-        guard frame.collapsed, frame.hiddenCount > 0 else { return nil }
-        let text = String(frame.hiddenCount)
-        let height: CGFloat = 20
-        let width = max(height, 10 + CGFloat(text.count) * 7)
-        return CollapseBadge(
-            nodeId: frame.id,
-            text: text,
-            rect: CGRect(
-                x: frame.rect.maxX - height + 7,
-                y: frame.rect.maxY - height + 7,
-                width: width,
-                height: height
-            )
-        )
-    }
-}
-
 final class MetalRenderer {
     enum RendererError: Error {
         case commandQueueUnavailable
@@ -52,7 +29,7 @@ final class MetalRenderer {
     private let texturedPipeline: MTLRenderPipelineState
     private let sampler: MTLSamplerState
     private let textAtlas = TextAtlas()
-    private let badgeAtlas = CollapseBadgeAtlas()
+    private let branchToggleAtlas = BranchToggleAtlas()
 
     init(device: MTLDevice) throws {
         self.device = device
@@ -97,7 +74,8 @@ final class MetalRenderer {
         in view: MTKView,
         snapshot: LayoutSnapshot,
         camera: Camera,
-        selectedId: UUID?
+        selectedIds: Set<UUID>,
+        selectionAnchorId: UUID?
     ) {
         guard view.bounds.width > 0,
               view.bounds.height > 0,
@@ -126,7 +104,7 @@ final class MetalRenderer {
             size: SIMD2(Float(view.bounds.width), Float(view.bounds.height))
         )
 
-        // 绘制顺序：边 → 节点底色 → 文字 → 折叠徽章 → 选中描边。
+        // 绘制顺序：边 → 节点底色 → 文字 → 分叉控件 → 多选描边。
         drawSolid(
             edgeVertices(snapshot: snapshot, camera: camera),
             encoder: encoder,
@@ -144,20 +122,21 @@ final class MetalRenderer {
             encoder: encoder,
             viewport: &viewport
         )
-        drawBadges(
+        drawBranchToggles(
             snapshot: snapshot,
             camera: camera,
             view: view,
             encoder: encoder,
             viewport: &viewport
         )
-        if let selectedId, let selectedFrame = snapshot.frames[selectedId] {
-            drawSolid(
-                strokeVertices(frame: selectedFrame, camera: camera),
-                encoder: encoder,
-                viewport: &viewport
-            )
-        }
+        drawSelectionStrokes(
+            snapshot: snapshot,
+            camera: camera,
+            selectedIds: selectedIds,
+            selectionAnchorId: selectionAnchorId,
+            encoder: encoder,
+            viewport: &viewport
+        )
 
         encoder.endEncoding()
         commandBuffer.present(drawable)
@@ -247,51 +226,59 @@ final class MetalRenderer {
         }
     }
 
-    private func edgeVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
-        let color = rgba(.separatorColor)
-        let thickness = max(1.25, min(3, 2 * camera.scale))
-        return snapshot.edges.flatMap { edge in
-            zip(edge.points, edge.points.dropFirst()).flatMap { start, end in
-                segmentQuad(
-                    from: camera.worldToScreen(start),
-                    to: camera.worldToScreen(end),
-                    thickness: thickness,
-                    color: color
-                )
-            }
-        }
-    }
-
-    private func drawBadges(
+    private func drawBranchToggles(
         snapshot: LayoutSnapshot,
         camera: Camera,
         view: MTKView,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        let badges = orderedFrames(snapshot).compactMap(CollapseBadge.make(for:))
-        let badgeColor = rgba(.controlAccentColor)
-        drawSolid(
-            badges.flatMap {
-                pillVertices(rect: screenRect($0.rect, camera: camera), color: badgeColor)
-            },
-            encoder: encoder,
-            viewport: &viewport
-        )
+        let toggles = snapshot.branchToggles
+        guard !toggles.isEmpty else { return }
+
+        let fill = rgba(.controlBackgroundColor)
+        let accent = rgba(.controlAccentColor)
+        let border = rgba(NSColor.controlAccentColor.withAlphaComponent(0.55))
+        let borderThickness = max(1, 1.5 * camera.scale)
+
+        var solidVertices: [SolidVertex] = []
+        var rects: [(toggle: BranchToggle, rect: CGRect)] = []
+        for toggle in toggles {
+            let rect = toggleScreenRect(toggle, camera: camera)
+            rects.append((toggle, rect))
+            if toggle.collapsed {
+                // 折叠态：强调色实心（对齐原型 .is-collapsed）。
+                solidVertices += pillVertices(rect: rect, color: accent)
+            } else {
+                solidVertices += pillVertices(rect: rect, color: fill)
+                solidVertices += strokeVertices(
+                    rect: rect,
+                    thickness: borderThickness,
+                    color: border
+                )
+            }
+        }
+        drawSolid(solidVertices, encoder: encoder, viewport: &viewport)
 
         let displayScale = view.window?.backingScaleFactor ?? 1
+        let rasterScale = displayScale * Self.rasterBucket(camera.scale)
         encoder.setRenderPipelineState(texturedPipeline)
         encoder.setFragmentSamplerState(sampler, index: 0)
-        for badge in badges {
-            guard let texture = badgeAtlas.texture(
-                for: badge,
-                scale: displayScale,
+        for (toggle, rect) in rects {
+            let size = CGSize(
+                width: rect.width / max(camera.scale, 0.001),
+                height: rect.height / max(camera.scale, 0.001)
+            )
+            guard let texture = branchToggleAtlas.texture(
+                for: toggle,
+                size: size,
+                scale: rasterScale,
                 device: device
             ) else {
                 continue
             }
-            let rect = screenRect(badge.rect, camera: camera)
-            let vertices = texturedQuad(rect: rect, color: rgba(.white))
+            let color = rgba(toggle.collapsed ? .white : .controlAccentColor)
+            let vertices = texturedQuad(rect: rect, color: color)
             guard let buffer = device.makeBuffer(
                 bytes: vertices,
                 length: MemoryLayout<TexturedVertex>.stride * vertices.count
@@ -309,6 +296,76 @@ final class MetalRenderer {
         }
     }
 
+    /// 控件外框（屏幕坐标）。宽度随「−N」位数增加，与视觉圆同高。
+    private func toggleScreenRect(_ toggle: BranchToggle, camera: Camera) -> CGRect {
+        let center = camera.worldToScreen(toggle.center)
+        let radius = LayoutConstants.branchToggleVisualRadius * camera.scale
+        let diameter = radius * 2
+        let digits = toggle.collapsed ? String(toggle.hiddenCount).count : 0
+        let width = max(diameter, diameter + CGFloat(digits) * 4 * camera.scale)
+        return CGRect(
+            x: center.x - width / 2,
+            y: center.y - radius,
+            width: width,
+            height: diameter
+        )
+    }
+
+    /// 栅格倍率量化到档位：缩放抖动时不重复栅格化，同时保证高缩放下文字不糊。
+    private static func rasterBucket(_ cameraScale: CGFloat) -> CGFloat {
+        switch cameraScale {
+        case ..<1.25: return 1
+        case ..<1.75: return 1.5
+        case ..<2.5: return 2
+        default: return 3
+        }
+    }
+
+    private func drawSelectionStrokes(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        selectedIds: Set<UUID>,
+        selectionAnchorId: UUID?,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        let memberColor = rgba(.keyboardFocusIndicatorColor)
+        let anchorColor = rgba(.controlAccentColor)
+        let distinguishAnchor = selectedIds.count > 1
+        let thickness = max(1.5, 2 * camera.scale)
+        var vertices: [SolidVertex] = []
+        for id in selectedIds {
+            guard let frame = snapshot.frames[id] else { continue }
+            let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
+            vertices += strokeVertices(rect: rect, thickness: thickness, color: memberColor)
+            if distinguishAnchor, id == selectionAnchorId {
+                vertices += dashedStrokeVertices(
+                    rect: rect.insetBy(dx: -4, dy: -4),
+                    thickness: thickness,
+                    dash: 5 * camera.scale,
+                    gap: 3 * camera.scale,
+                    color: anchorColor
+                )
+            }
+        }
+        drawSolid(vertices, encoder: encoder, viewport: &viewport)
+    }
+
+    private func edgeVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
+        let color = rgba(.separatorColor)
+        let thickness = max(1.25, min(3, 2 * camera.scale))
+        return snapshot.edges.flatMap { edge in
+            zip(edge.points, edge.points.dropFirst()).flatMap { start, end in
+                segmentQuad(
+                    from: camera.worldToScreen(start),
+                    to: camera.worldToScreen(end),
+                    thickness: thickness,
+                    color: color
+                )
+            }
+        }
+    }
+
     private func fillVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
         orderedFrames(snapshot).flatMap { frame in
             let color = rgba(
@@ -320,10 +377,11 @@ final class MetalRenderer {
         }
     }
 
-    private func strokeVertices(frame: NodeFrame, camera: Camera) -> [SolidVertex] {
-        let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
-        let color = rgba(.keyboardFocusIndicatorColor)
-        let thickness: CGFloat = 2
+    private func strokeVertices(
+        rect: CGRect,
+        thickness: CGFloat,
+        color: SIMD4<Float>
+    ) -> [SolidVertex] {
         let top = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: thickness)
         let bottom = CGRect(
             x: rect.minX,
@@ -341,6 +399,46 @@ final class MetalRenderer {
         return [top, bottom, left, right].flatMap {
             rectangleQuad(rect: $0, color: color)
         }
+    }
+
+    /// 沿矩形四边顺时针铺 dash，转角处不强行对齐（视觉上无碍，锚点仅作区分）。
+    private func dashedStrokeVertices(
+        rect: CGRect,
+        thickness: CGFloat,
+        dash: CGFloat,
+        gap: CGFloat,
+        color: SIMD4<Float>
+    ) -> [SolidVertex] {
+        let corners = [
+            CGPoint(x: rect.minX, y: rect.minY),
+            CGPoint(x: rect.maxX, y: rect.minY),
+            CGPoint(x: rect.maxX, y: rect.maxY),
+            CGPoint(x: rect.minX, y: rect.maxY),
+            CGPoint(x: rect.minX, y: rect.minY),
+        ]
+        let step = max(dash + gap, 0.5)
+        var vertices: [SolidVertex] = []
+        for (start, end) in zip(corners, corners.dropFirst()) {
+            let length = hypot(end.x - start.x, end.y - start.y)
+            guard length > 0 else { continue }
+            let ux = (end.x - start.x) / length
+            let uy = (end.y - start.y) / length
+            var offset: CGFloat = 0
+            while offset < length {
+                let segment = min(dash, length - offset)
+                vertices += segmentQuad(
+                    from: CGPoint(x: start.x + ux * offset, y: start.y + uy * offset),
+                    to: CGPoint(
+                        x: start.x + ux * (offset + segment),
+                        y: start.y + uy * (offset + segment)
+                    ),
+                    thickness: thickness,
+                    color: color
+                )
+                offset += step
+            }
+        }
+        return vertices
     }
 
     private func texturedQuad(

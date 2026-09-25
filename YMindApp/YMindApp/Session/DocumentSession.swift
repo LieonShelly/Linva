@@ -223,11 +223,6 @@ final class DocumentSession: ObservableObject {
         syncSelectionFromModel()
     }
 
-    /// 兼容旧调用点：等价于 selectOnly
-    func select(_ id: UUID?) {
-        selectOnly(id)
-    }
-
     func startEditing(_ id: UUID) {
         guard let node = model.node(id: id),
               snapshot.frames[id] != nil else {

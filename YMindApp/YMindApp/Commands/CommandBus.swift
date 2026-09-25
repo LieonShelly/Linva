@@ -50,7 +50,7 @@ final class CommandBus {
             undo: { _ = self.model.remove(id: id) },
             redo: {
                 self.model.restoreChild(parentId: parentId, index: index, node: snapshot)
-                self.model.select(snapshot.id)
+                self.model.selectOnly(snapshot.id)
             }
         )
     }

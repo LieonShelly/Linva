@@ -65,32 +65,6 @@ struct RadialLayoutTests {
         #expect(snap.frames.count == 1)
     }
 
-    @Test func collapseBadge_onlyAppearsForCollapsedNodesWithHiddenDescendants() {
-        let leaf = NodeFrame(
-            id: UUID(),
-            text: "叶",
-            center: .zero,
-            size: NodeSize(width: 80, height: 40),
-            isRoot: false,
-            side: .right,
-            collapsed: true,
-            hiddenCount: 0
-        )
-        let expanded = NodeFrame(
-            id: UUID(),
-            text: "展开",
-            center: .zero,
-            size: NodeSize(width: 80, height: 40),
-            isRoot: false,
-            side: .right,
-            collapsed: false,
-            hiddenCount: 3
-        )
-
-        #expect(CollapseBadge.make(for: leaf) == nil)
-        #expect(CollapseBadge.make(for: expanded) == nil)
-    }
-
     @Test func siblingsOnSameSide_areVerticallyCenteredWithGap() throws {
         var doc = MindMapDocument.blank()
         let first = Node(text: "A", side: .right)
