@@ -162,4 +162,73 @@ struct CommandBusTests {
         bus.undo()
         #expect(model.node(id: leaf)?.collapsed == true)
     }
+
+    @Test func moveToParent_undoRestoresPosition_andSelection() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.moveToParent(ids: [a], parentId: b))
+        #expect(model.node(id: b)?.children.map(\.id) == [a])
+        #expect(Set(model.selectedIds) == [a])
+
+        bus.undo()
+        #expect(model.parentId(of: a) == root)
+        #expect(Set(model.selectedIds) == [a])
+
+        bus.redo()
+        #expect(model.node(id: b)?.children.map(\.id) == [a])
+    }
+
+    @Test func pasteAsChild_undoRemovesCopies_redoReinsertsSameIds() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let target = model.insertChild(parentId: root, text: "T", side: .left, at: nil)
+        let src = model.node(id: a)!
+        bus.clearHistory()
+
+        bus.execute(.pasteAsChild(payload: [src], parentId: target))
+        let pastedId = model.node(id: target)!.children[0].id
+        #expect(model.node(id: target)?.children.count == 1)
+        #expect(pastedId != a)
+        #expect(Set(model.selectedIds) == [pastedId])
+
+        bus.undo()
+        #expect(model.node(id: target)?.children.isEmpty == true)
+        #expect(model.node(id: pastedId) == nil)
+
+        bus.redo()
+        #expect(model.node(id: target)?.children.map(\.id) == [pastedId])
+    }
+
+    // R4：两兄弟 moveToParent 的 Undo 回归——移除时刻下标捕获 + 逆序恢复。
+    @Test func moveToParent_twoSiblings_undoRestoresBothUnderRoot() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let x = model.insertChild(parentId: root, text: "X", side: nil, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.moveToParent(ids: [a, b], parentId: x))
+        let xChildren = model.node(id: x)?.children.map(\.id) ?? []
+        #expect(xChildren.count == 2)
+        #expect(Set(xChildren) == [a, b])
+        #expect(Set(model.selectedIds) == [a, b])
+
+        bus.undo()
+        #expect(model.parentId(of: a) == root)
+        #expect(model.parentId(of: b) == root)
+        #expect(model.node(id: x)?.children.isEmpty == true)
+        #expect(Set(model.document.root.children.map(\.id)) == [a, b, x])
+        // A、B 恢复为兄弟（相对顺序不要求）：
+        let rootChildIds = model.document.root.children.map(\.id)
+        #expect(rootChildIds.filter { $0 == a || $0 == b }.count == 2)
+    }
 }

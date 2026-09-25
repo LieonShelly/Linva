@@ -139,6 +139,69 @@ final class CommandBus {
                     }
                 }
             )
+
+        case let .moveToParent(ids, parentId):
+            let priorCollapsed = model.node(id: parentId)?.collapsed
+            let records = model.reparent(ids: ids, to: parentId)
+            guard !records.isEmpty else { return nil }
+            let movedIds = Set(records.map(\.node.id))
+            let anchor = movedIds.min { $0.uuidString < $1.uuidString }
+            model.replaceSelection(movedIds, anchorId: anchor)
+            return Entry(
+                undo: {
+                    // 先从目标父移除被搬节点，再按原父/原下标恢复，避免节点同时存在于新旧两处。
+                    for r in records.sorted(by: { $0.index < $1.index }) {
+                        _ = self.model.removeWithoutSelection(id: r.node.id)
+                        self.model.restoreChild(parentId: r.parentId, index: r.index, node: r.node)
+                    }
+                    if let priorCollapsed {
+                        self.model.setCollapsed(id: parentId, to: priorCollapsed)
+                    }
+                    self.model.replaceSelection(movedIds, anchorId: anchor)
+                },
+                redo: {
+                    _ = self.model.reparent(ids: ids, to: parentId)
+                    self.model.replaceSelection(movedIds, anchorId: anchor)
+                }
+            )
+
+        case let .pasteAsChild(payload, parentId):
+            let priorSelection = model.selectedIds
+            let priorAnchor = model.selectionAnchorId
+            let priorCollapsed = model.node(id: parentId)?.collapsed
+            var inserted: [Node] = []
+            for node in payload {
+                let copy = model.duplicate(node)
+                model.attachChild(copy, to: parentId)
+                inserted.append(copy)
+            }
+            guard !inserted.isEmpty else { return nil }
+            let insertedIds = Set(inserted.map(\.id))
+            let anchor = insertedIds.min { $0.uuidString < $1.uuidString }
+            if model.node(id: parentId)?.collapsed == true {
+                model.setCollapsed(id: parentId, to: false)
+            }
+            model.replaceSelection(insertedIds, anchorId: anchor)
+            return Entry(
+                undo: {
+                    for n in inserted {
+                        _ = self.model.removeWithoutSelection(id: n.id)
+                    }
+                    if let priorCollapsed {
+                        self.model.setCollapsed(id: parentId, to: priorCollapsed)
+                    }
+                    self.model.replaceSelection(priorSelection, anchorId: priorAnchor)
+                },
+                redo: {
+                    for n in inserted {
+                        self.model.attachChild(n, to: parentId)
+                    }
+                    if self.model.node(id: parentId)?.collapsed == true {
+                        self.model.setCollapsed(id: parentId, to: false)
+                    }
+                    self.model.replaceSelection(insertedIds, anchorId: anchor)
+                }
+            )
         }
     }
 }
