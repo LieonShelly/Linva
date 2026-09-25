@@ -28,7 +28,26 @@ struct EdgeGeometry: Equatable {
     let points: [CGPoint]
 }
 
+struct BranchToggle: Equatable {
+    let nodeId: UUID
+    let side: Side
+    let center: CGPoint
+    let collapsed: Bool
+    let hiddenCount: Int
+}
+
 struct LayoutSnapshot: Equatable {
     let frames: [UUID: NodeFrame]
     let edges: [EdgeGeometry]
+    let branchToggles: [BranchToggle]
+
+    init(
+        frames: [UUID: NodeFrame],
+        edges: [EdgeGeometry],
+        branchToggles: [BranchToggle] = []
+    ) {
+        self.frames = frames
+        self.edges = edges
+        self.branchToggles = branchToggles
+    }
 }

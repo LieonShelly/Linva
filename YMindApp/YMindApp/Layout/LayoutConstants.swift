@@ -11,4 +11,7 @@ enum LayoutConstants {
     static let nodeMaxTextWidth: CGFloat = 188
     static let rootLineHeight: CGFloat = 24
     static let nodeLineHeight: CGFloat = 20
+    static let branchToggleGap: CGFloat = 18
+    static let branchToggleVisualRadius: CGFloat = 11
+    static let branchToggleHitRadius: CGFloat = 14
 }

@@ -123,7 +123,11 @@ enum RadialLayout {
         frames[document.root.id] = rootFrame
 
         guard !document.root.collapsed else {
-            return LayoutSnapshot(frames: frames, edges: edges)
+            return LayoutSnapshot(
+                frames: frames,
+                edges: edges,
+                branchToggles: makeBranchToggles(frames: frames, root: document.root)
+            )
         }
 
         var leftBranches: [(Node, BranchMetadata)] = []
@@ -168,7 +172,71 @@ enum RadialLayout {
 
         placeSide(leftBranches, side: .left)
         placeSide(rightBranches, side: .right)
-        return LayoutSnapshot(frames: frames, edges: edges)
+        return LayoutSnapshot(
+            frames: frames,
+            edges: edges,
+            branchToggles: makeBranchToggles(frames: frames, root: document.root)
+        )
+    }
+
+    private static func makeBranchToggles(
+        frames: [UUID: NodeFrame],
+        root: Node
+    ) -> [BranchToggle] {
+        var toggles: [BranchToggle] = []
+        var nodesById: [UUID: Node] = [:]
+
+        func index(_ node: Node) {
+            nodesById[node.id] = node
+            for child in node.children {
+                index(child)
+            }
+        }
+        index(root)
+
+        for (id, frame) in frames {
+            guard let node = nodesById[id] else { continue }
+            appendToggles(for: node, frame: frame, into: &toggles)
+        }
+        return toggles
+    }
+
+    private static func appendToggles(
+        for node: Node,
+        frame: NodeFrame,
+        into toggles: inout [BranchToggle]
+    ) {
+        guard !node.children.isEmpty else { return }
+        if frame.isRoot {
+            let hasLeft = node.children.contains { $0.side == .left }
+            let hasRight = node.children.contains { $0.side != .left }
+            if node.collapsed || hasLeft {
+                toggles.append(makeToggle(node: node, frame: frame, side: .left))
+            }
+            if node.collapsed || hasRight {
+                toggles.append(makeToggle(node: node, frame: frame, side: .right))
+            }
+        } else if let side = frame.side {
+            toggles.append(makeToggle(node: node, frame: frame, side: side))
+        }
+    }
+
+    private static func makeToggle(
+        node: Node,
+        frame: NodeFrame,
+        side: Side
+    ) -> BranchToggle {
+        let dir: CGFloat = side == .left ? -1 : 1
+        return BranchToggle(
+            nodeId: node.id,
+            side: side,
+            center: CGPoint(
+                x: frame.center.x + dir * (frame.size.width / 2 + LayoutConstants.branchToggleGap),
+                y: frame.center.y
+            ),
+            collapsed: node.collapsed,
+            hiddenCount: node.collapsed ? countDescendants(node) : 0
+        )
     }
 
     private static func countDescendants(_ node: Node) -> Int {

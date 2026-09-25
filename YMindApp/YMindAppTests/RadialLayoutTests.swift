@@ -34,9 +34,35 @@ struct RadialLayoutTests {
         let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
         #expect(snap.frames[grand.id] == nil)
         #expect(snap.frames[child.id]?.hiddenCount == 1)
-        let badge = snap.frames[child.id].flatMap(CollapseBadge.make(for:))
-        #expect(badge?.text == "1")
-        #expect(badge?.nodeId == child.id)
+        let toggle = snap.branchToggles.first { $0.nodeId == child.id }
+        #expect(toggle?.collapsed == true)
+        #expect(toggle?.hiddenCount == 1)
+        #expect(toggle?.side == .right)
+    }
+
+    @Test func branchToggle_onExpandedParent_showsPlusSemanticsFields() {
+        var doc = MindMapDocument.blank()
+        let child = Node(text: "子", side: .right, children: [Node(text: "孙")])
+        doc.root.children = [child]
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        let toggles = snap.branchToggles.filter { $0.nodeId == child.id }
+        #expect(toggles.count == 1)
+        #expect(toggles[0].collapsed == false)
+        #expect(toggles[0].side == .right)
+        #expect(toggles[0].center.x > snap.frames[child.id]!.rect.maxX)
+    }
+
+    @Test func root_collapsed_stillHasLeftAndRightToggles() {
+        var doc = MindMapDocument.blank()
+        doc.root.children = [
+            Node(text: "L", side: .left),
+            Node(text: "R", side: .right),
+        ]
+        doc.root.collapsed = true
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        let sides = Set(snap.branchToggles.filter { $0.nodeId == doc.root.id }.map(\.side))
+        #expect(sides == [.left, .right])
+        #expect(snap.frames.count == 1)
     }
 
     @Test func collapseBadge_onlyAppearsForCollapsedNodesWithHiddenDescendants() {
