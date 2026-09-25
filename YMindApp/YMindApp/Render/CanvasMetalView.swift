@@ -2,111 +2,83 @@ import AppKit
 import MetalKit
 import SwiftUI
 
-struct CanvasDragPanState: Equatable {
-    private(set) var lastDragPoint: CGPoint?
-    private(set) var suppressUntilMouseUp = false
+/// 单击语义：由画布按修饰键判定，壳层只负责落到选中集 API。
+enum CanvasSelectIntent: Equatable {
+    case replace
+    case toggle
+    case range
+}
 
-    mutating func begin(at point: CGPoint, onNode: Bool) {
-        suppressUntilMouseUp = onNode
-        lastDragPoint = onNode ? nil : point
-    }
+/// 画布指针手势状态。纯值类型，便于推演与测试。
+enum CanvasPointerGesture: Equatable {
+    case none
+    /// 平移相机：`lastPoint` 为上一次的视图坐标。
+    case pan(lastPoint: CGPoint)
+    /// 框选：`tracking == false` 表示忽略拖动（编辑态下不框选）。
+    case marquee(origin: CGPoint, current: CGPoint, additive: Bool, tracking: Bool)
 
-    mutating func drag(to point: CGPoint) -> CGSize? {
-        guard !suppressUntilMouseUp else {
+    var marqueeScreenRect: CGRect? {
+        guard case let .marquee(origin, current, _, tracking) = self, tracking else {
             return nil
         }
-        guard let lastDragPoint else {
-            self.lastDragPoint = point
-            return nil
-        }
-        let delta = CGSize(
-            width: point.x - lastDragPoint.x,
-            height: point.y - lastDragPoint.y
-        )
-        self.lastDragPoint = point
-        return delta
+        let rect = marqueeRect(from: origin, to: current)
+        return isClickLike(rect) ? nil : rect
     }
+}
 
-    mutating func end() {
-        lastDragPoint = nil
-        suppressUntilMouseUp = false
-    }
+/// 画布 → 壳层的全部回调；默认空实现，便于测试与预览。
+struct CanvasActions {
+    var select: (UUID?, CanvasSelectIntent) -> Void = { _, _ in }
+    var marqueeSelect: (Set<UUID>, Bool) -> Void = { _, _ in }
+    var edit: (UUID) -> Void = { _ in }
+    var commitEditing: () -> Void = {}
+    var toggleCollapse: (UUID) -> Void = { _ in }
+    var toggleCollapseSelection: () -> Void = {}
+    var selectAll: () -> Void = {}
+    var addChild: () -> Void = {}
+    var addSibling: () -> Void = {}
+    var delete: () -> Void = {}
 }
 
 struct CanvasMetalView: NSViewRepresentable {
     @ObservedObject var session: DocumentSession
     var focusRequest: Int = 0
-    let onSelect: (UUID?) -> Void
-    let onEdit: (UUID) -> Void
-    let onToggleCollapse: (UUID) -> Void
-    let onAddChild: () -> Void
-    let onAddSibling: () -> Void
-    let onDelete: () -> Void
+    var actions = CanvasActions()
 
     func makeNSView(context: Context) -> CanvasMTKView {
-        guard let device = MTLCreateSystemDefaultDevice() else {
-            let view = CanvasMTKView(
-                frame: .zero,
-                device: nil,
-                renderer: nil,
-                session: session,
-                onSelect: onSelect,
-                onEdit: onEdit,
-                onToggleCollapse: onToggleCollapse,
-                onAddChild: onAddChild,
-                onAddSibling: onAddSibling,
-                onDelete: onDelete
-            )
-            // 不能在 view update 期间同步写 @Published。
+        let device = MTLCreateSystemDefaultDevice()
+        let renderer: MetalRenderer?
+        if let device {
+            do {
+                renderer = try MetalRenderer(device: device)
+            } catch {
+                renderer = nil
+                let message = error.localizedDescription
+                // 不能在 view update 期间同步写 @Published。
+                DispatchQueue.main.async {
+                    session.errorMessage = "无法初始化 Metal：\(message)"
+                }
+            }
+        } else {
+            renderer = nil
             DispatchQueue.main.async {
                 session.errorMessage = "无法初始化 Metal"
             }
-            return view
         }
 
-        do {
-            let renderer = try MetalRenderer(device: device)
-            return CanvasMTKView(
-                frame: .zero,
-                device: device,
-                renderer: renderer,
-                session: session,
-                onSelect: onSelect,
-                onEdit: onEdit,
-                onToggleCollapse: onToggleCollapse,
-                onAddChild: onAddChild,
-                onAddSibling: onAddSibling,
-                onDelete: onDelete
-            )
-        } catch {
-            let message = error.localizedDescription
-            let view = CanvasMTKView(
-                frame: .zero,
-                device: device,
-                renderer: nil,
-                session: session,
-                onSelect: onSelect,
-                onEdit: onEdit,
-                onToggleCollapse: onToggleCollapse,
-                onAddChild: onAddChild,
-                onAddSibling: onAddSibling,
-                onDelete: onDelete
-            )
-            DispatchQueue.main.async {
-                session.errorMessage = "无法初始化 Metal：\(message)"
-            }
-            return view
-        }
+        let view = CanvasMTKView(
+            frame: .zero,
+            device: device,
+            renderer: renderer,
+            session: session
+        )
+        view.actions = actions
+        return view
     }
 
     func updateNSView(_ view: CanvasMTKView, context: Context) {
         view.session = session
-        view.onSelect = onSelect
-        view.onEdit = onEdit
-        view.onToggleCollapse = onToggleCollapse
-        view.onAddChild = onAddChild
-        view.onAddSibling = onAddSibling
-        view.onDelete = onDelete
+        view.actions = actions
         // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates。
         if session.camera == Camera() {
             view.markNeedsFitContent()
@@ -119,18 +91,14 @@ struct CanvasMetalView: NSViewRepresentable {
 
 final class CanvasMTKView: MTKView, MTKViewDelegate {
     var session: DocumentSession
-    var onSelect: (UUID?) -> Void
-    var onEdit: (UUID) -> Void
-    var onToggleCollapse: (UUID) -> Void
-    var onAddChild: () -> Void
-    var onAddSibling: () -> Void
-    var onDelete: () -> Void
+    var actions = CanvasActions()
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
 
     private let renderer: MetalRenderer?
-    private var dragPanState = CanvasDragPanState()
+    private var gesture: CanvasPointerGesture = .none
+    private var isSpaceHeld = false
     private var appliedFocusRequest = 0
     private var didFitContent = false
     private var fitContentScheduled = false
@@ -139,22 +107,10 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         frame: CGRect,
         device: MTLDevice?,
         renderer: MetalRenderer?,
-        session: DocumentSession,
-        onSelect: @escaping (UUID?) -> Void,
-        onEdit: @escaping (UUID) -> Void,
-        onToggleCollapse: @escaping (UUID) -> Void,
-        onAddChild: @escaping () -> Void,
-        onAddSibling: @escaping () -> Void,
-        onDelete: @escaping () -> Void
+        session: DocumentSession
     ) {
         self.renderer = renderer
         self.session = session
-        self.onSelect = onSelect
-        self.onEdit = onEdit
-        self.onToggleCollapse = onToggleCollapse
-        self.onAddChild = onAddChild
-        self.onAddSibling = onAddSibling
-        self.onDelete = onDelete
         super.init(frame: frame, device: device)
 
         colorPixelFormat = .bgra8Unorm
@@ -215,7 +171,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             snapshot: session.snapshot,
             camera: session.camera,
             selectedIds: session.selectedIds,
-            selectionAnchorId: session.selectionAnchorId
+            selectionAnchorId: session.selectionAnchorId,
+            marquee: gesture.marqueeScreenRect
         )
     }
 
@@ -226,42 +183,196 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         view.setNeedsDisplay(view.bounds)
     }
 
+    // MARK: - 指针
+
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
-        let point = convert(event.locationInWindow, from: nil)
-        switch hitTestCanvas(
-            screenPoint: point,
-            snapshot: session.snapshot,
-            camera: session.camera
-        ) {
-        case let .branchToggle(nodeId):
-            onToggleCollapse(nodeId)
-            dragPanState.begin(at: point, onNode: true)
-        case let .node(id):
-            onSelect(id)
-            if event.clickCount == 2 {
-                onEdit(id)
-            }
-            dragPanState.begin(at: point, onNode: true)
-        case .empty:
-            onSelect(nil)
-            dragPanState.begin(at: point, onNode: false)
-        }
+        guard event.buttonNumber == 0 else { return }
+        beginPointerGesture(with: event)
     }
 
     override func mouseDragged(with event: NSEvent) {
-        let point = convert(event.locationInWindow, from: nil)
-        guard let delta = dragPanState.drag(to: point) else {
-            return
-        }
-
-        session.camera.translation.x += delta.width
-        session.camera.translation.y += delta.height
-        setNeedsDisplay(bounds)
+        continuePointerGesture(with: event, point: convert(event.locationInWindow, from: nil))
     }
 
     override func mouseUp(with event: NSEvent) {
-        dragPanState.end()
+        endPointerGesture()
+    }
+
+    /// 中键（及其他鼠标键）拖拽始终平移相机。
+    override func otherMouseDown(with event: NSEvent) {
+        window?.makeFirstResponder(self)
+        gesture = .pan(lastPoint: convert(event.locationInWindow, from: nil))
+    }
+
+    override func otherMouseDragged(with event: NSEvent) {
+        continuePointerGesture(with: event, point: convert(event.locationInWindow, from: nil))
+    }
+
+    override func otherMouseUp(with event: NSEvent) {
+        gesture = .none
+    }
+
+    private func beginPointerGesture(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        let hit = hitTestCanvas(
+            screenPoint: point,
+            snapshot: session.snapshot,
+            camera: session.camera
+        )
+        let wasEditing = session.editingId != nil
+
+        if wasEditing {
+            // 编辑排他：点在编辑节点上不动；点别处先提交编辑。
+            if case let .node(id) = hit, id == session.editingId {
+                return
+            }
+            actions.commitEditing()
+        }
+
+        switch hit {
+        case let .branchToggle(nodeId):
+            actions.toggleCollapse(nodeId)
+            gesture = .none
+        case let .node(id):
+            let intent = wasEditing ? .replace : selectIntent(for: event)
+            actions.select(id, intent)
+            if event.clickCount == 2 {
+                actions.edit(id)
+            }
+            gesture = .none
+        case .empty:
+            if isSpaceHeld {
+                gesture = .pan(lastPoint: point)
+            } else {
+                gesture = .marquee(
+                    origin: point,
+                    current: point,
+                    additive: !wasEditing && isAdditive(event),
+                    tracking: !wasEditing
+                )
+            }
+        }
+    }
+
+    private func continuePointerGesture(with event: NSEvent, point: CGPoint) {
+        switch gesture {
+        case .none:
+            break
+        case let .pan(lastPoint):
+            session.camera.translation.x += point.x - lastPoint.x
+            session.camera.translation.y += point.y - lastPoint.y
+            gesture = .pan(lastPoint: point)
+            setNeedsDisplay(bounds)
+        case let .marquee(origin, _, additive, tracking):
+            guard tracking else { return }
+            gesture = .marquee(
+                origin: origin,
+                current: point,
+                additive: additive,
+                tracking: true
+            )
+            setNeedsDisplay(bounds)
+        }
+    }
+
+    private func endPointerGesture() {
+        defer { gesture = .none }
+        guard case let .marquee(origin, current, additive, tracking) = gesture else {
+            return
+        }
+
+        let rect = marqueeRect(from: origin, to: current)
+        if !tracking || isClickLike(rect) {
+            // 几乎没拖动：视为点空白取消选中（追加模式不强制清空）。
+            if !additive {
+                actions.select(nil, .replace)
+            }
+            return
+        }
+
+        let ids = marqueeIntersectingIds(
+            worldRect: worldRect(fromScreenRect: rect, camera: session.camera),
+            snapshot: session.snapshot
+        )
+        actions.marqueeSelect(ids, additive)
+    }
+
+    private func selectIntent(for event: NSEvent) -> CanvasSelectIntent {
+        let flags = event.modifierFlags
+        if flags.contains(.command) || flags.contains(.control) {
+            return .toggle
+        }
+        if flags.contains(.shift) {
+            return .range
+        }
+        return .replace
+    }
+
+    private func isAdditive(_ event: NSEvent) -> Bool {
+        let flags = event.modifierFlags
+        return flags.contains(.command) || flags.contains(.control)
+    }
+
+    // MARK: - 键盘
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 49 {
+            // 空格按住 = 平移修饰键；吞掉以免系统响铃。
+            if !event.isARepeat, session.editingId == nil {
+                isSpaceHeld = true
+            }
+            return
+        }
+
+        // 编辑排他：编辑浮层获得焦点时不抢快捷键。
+        guard session.editingId == nil else {
+            super.keyDown(with: event)
+            return
+        }
+
+        let flags = event.modifierFlags
+        if flags.contains(.command),
+           let key = event.charactersIgnoringModifiers?.lowercased() {
+            switch key {
+            case "a":
+                actions.selectAll()
+                return
+            case ".":
+                actions.toggleCollapseSelection()
+                return
+            default:
+                break
+            }
+        }
+
+        switch event.keyCode {
+        case 48:
+            actions.addChild()
+        case 36, 76:
+            actions.addSibling()
+        case 51, 117:
+            actions.delete()
+        case 53:
+            actions.select(nil, .replace)
+        case 44:
+            actions.toggleCollapseSelection()
+        default:
+            super.keyDown(with: event)
+        }
+    }
+
+    override func keyUp(with event: NSEvent) {
+        if event.keyCode == 49 {
+            isSpaceHeld = false
+            return
+        }
+        super.keyUp(with: event)
+    }
+
+    override func resignFirstResponder() -> Bool {
+        isSpaceHeld = false
+        return super.resignFirstResponder()
     }
 
     func restoreKeyboardFocusIfNeeded(request: Int) {
@@ -285,18 +396,5 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             y: anchor.y - worldAnchor.y * newScale
         )
         setNeedsDisplay(bounds)
-    }
-
-    override func keyDown(with event: NSEvent) {
-        switch event.keyCode {
-        case 48:
-            onAddChild()
-        case 36, 76:
-            onAddSibling()
-        case 51, 117:
-            onDelete()
-        default:
-            super.keyDown(with: event)
-        }
     }
 }

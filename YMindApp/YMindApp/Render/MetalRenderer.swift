@@ -75,7 +75,8 @@ final class MetalRenderer {
         snapshot: LayoutSnapshot,
         camera: Camera,
         selectedIds: Set<UUID>,
-        selectionAnchorId: UUID?
+        selectionAnchorId: UUID?,
+        marquee: CGRect?
     ) {
         guard view.bounds.width > 0,
               view.bounds.height > 0,
@@ -137,6 +138,9 @@ final class MetalRenderer {
             encoder: encoder,
             viewport: &viewport
         )
+        if let marquee {
+            drawMarquee(marquee, encoder: encoder, viewport: &viewport)
+        }
 
         encoder.endEncoding()
         commandBuffer.present(drawable)
@@ -294,6 +298,24 @@ final class MetalRenderer {
             encoder.setFragmentTexture(texture, index: 0)
             encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         }
+    }
+
+    /// 框选矩形（视图坐标），画在最上层。
+    private func drawMarquee(
+        _ rect: CGRect,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        var vertices = rectangleQuad(
+            rect: rect,
+            color: rgba(NSColor.controlAccentColor.withAlphaComponent(0.12))
+        )
+        vertices += strokeVertices(
+            rect: rect,
+            thickness: 1.5,
+            color: rgba(NSColor.controlAccentColor.withAlphaComponent(0.8))
+        )
+        drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
 
     /// 控件外框（屏幕坐标）。宽度随「−N」位数增加，与视觉圆同高。

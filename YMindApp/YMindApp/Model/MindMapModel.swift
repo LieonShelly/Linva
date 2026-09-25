@@ -178,6 +178,10 @@ final class MindMapModel {
         _ = mutate(id: id) { $0.collapsed.toggle() }
     }
 
+    func setCollapsed(id: UUID, to collapsed: Bool) {
+        _ = mutate(id: id) { $0.collapsed = collapsed }
+    }
+
     func restoreChild(parentId: UUID, index: Int, node: Node) {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))

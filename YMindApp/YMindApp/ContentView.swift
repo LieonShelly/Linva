@@ -17,12 +17,18 @@ struct ContentView: View {
                 CanvasMetalView(
                     session: session,
                     focusRequest: canvasFocusRequest,
-                    onSelect: handleSelection,
-                    onEdit: startEditing,
-                    onToggleCollapse: toggleCollapse,
-                    onAddChild: addChild,
-                    onAddSibling: addSibling,
-                    onDelete: deleteSelected
+                    actions: CanvasActions(
+                        select: handleSelection,
+                        marqueeSelect: handleMarqueeSelect,
+                        edit: startEditing,
+                        commitEditing: commitEditing,
+                        toggleCollapse: toggleCollapse,
+                        toggleCollapseSelection: toggleCollapseSelection,
+                        selectAll: selectAll,
+                        addChild: addChild,
+                        addSibling: addSibling,
+                        delete: deleteSelected
+                    )
                 )
 
                 if let editingId = session.editingId,
@@ -77,11 +83,47 @@ struct ContentView: View {
         session.selectedIds.contains { $0 != session.model.document.root.id }
     }
 
-    private func handleSelection(_ id: UUID?) {
-        if session.editingId != nil, session.editingId != id {
-            commitEditing()
+    private func handleSelection(_ id: UUID?, intent: CanvasSelectIntent) {
+        guard let id else {
+            session.clearSelection()
+            return
         }
-        session.selectOnly(id)
+        switch intent {
+        case .replace:
+            session.selectOnly(id)
+        case .toggle:
+            session.toggleInSelection(id)
+        case .range:
+            session.selectSiblingRange(to: id)
+        }
+    }
+
+    private func handleMarqueeSelect(_ ids: Set<UUID>, additive: Bool) {
+        let anchor = ids.min { $0.uuidString < $1.uuidString }
+        if additive {
+            session.replaceSelection(
+                session.selectedIds.union(ids),
+                anchorId: anchor ?? session.selectionAnchorId
+            )
+        } else {
+            session.replaceSelection(ids, anchorId: anchor)
+        }
+    }
+
+    private func selectAll() {
+        let ids = Set(session.snapshot.frames.keys)
+        guard !ids.isEmpty else { return }
+        session.replaceSelection(ids, anchorId: session.model.document.root.id)
+    }
+
+    /// `/` · `⌘.`：选中集中任一展开则全部折叠，否则全部展开。
+    private func toggleCollapseSelection() {
+        let targets = session.selectedIds
+            .filter { session.model.node(id: $0)?.children.isEmpty == false }
+            .sorted { $0.uuidString < $1.uuidString }
+        guard !targets.isEmpty else { return }
+        let anyExpanded = targets.contains { session.model.node(id: $0)?.collapsed == false }
+        session.commandBus.execute(.setCollapsed(ids: targets, collapsed: anyExpanded))
     }
 
     private func startEditing(_ id: UUID) {

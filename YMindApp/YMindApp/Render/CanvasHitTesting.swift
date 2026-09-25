@@ -54,3 +54,32 @@ func marqueeIntersectingIds(
             .map(\.id)
     )
 }
+
+/// 位移小于该阈值（视图点）视为「点空白」而非框选，对齐原型。
+let marqueeClickThreshold: CGFloat = 4
+
+/// 归一化框选矩形（视图坐标，左上/右下任意方向拖动皆可）。
+func marqueeRect(from start: CGPoint, to end: CGPoint) -> CGRect {
+    CGRect(
+        x: min(start.x, end.x),
+        y: min(start.y, end.y),
+        width: abs(end.x - start.x),
+        height: abs(end.y - start.y)
+    )
+}
+
+func isClickLike(_ rect: CGRect) -> Bool {
+    rect.width < marqueeClickThreshold && rect.height < marqueeClickThreshold
+}
+
+/// 视图矩形 → 世界矩形。`Camera.scale > 0`，min/max 顺序在变换后保持。
+func worldRect(fromScreenRect rect: CGRect, camera: Camera) -> CGRect {
+    let origin = camera.screenToWorld(rect.origin)
+    let corner = camera.screenToWorld(CGPoint(x: rect.maxX, y: rect.maxY))
+    return CGRect(
+        x: origin.x,
+        y: origin.y,
+        width: corner.x - origin.x,
+        height: corner.y - origin.y
+    )
+}

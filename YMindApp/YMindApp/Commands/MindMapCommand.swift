@@ -6,4 +6,5 @@ enum MindMapCommand: Equatable {
     case delete(ids: [UUID])
     case setText(id: UUID, old: String, new: String)
     case toggleCollapse(id: UUID)
+    case setCollapsed(ids: [UUID], collapsed: Bool)
 }

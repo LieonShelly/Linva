@@ -93,4 +93,56 @@ struct CommandBusTests {
         #expect(model.node(id: p)?.children[0].id == c)
         #expect(Set(model.selectedIds) == [p])
     }
+
+    @Test func setCollapsed_oneUndo_restoresEachNodePreviousValue() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        model.insertChild(parentId: a, text: "A 子", side: nil, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        model.insertChild(parentId: b, text: "B 子", side: nil, at: nil)
+        model.setCollapsed(id: a, to: true)
+        bus.clearHistory()
+
+        bus.execute(.setCollapsed(ids: [a, b], collapsed: true))
+        #expect(model.node(id: a)?.collapsed == true)
+        #expect(model.node(id: b)?.collapsed == true)
+
+        bus.undo()
+        #expect(model.node(id: a)?.collapsed == true)
+        #expect(model.node(id: b)?.collapsed == false)
+
+        bus.redo()
+        #expect(model.node(id: b)?.collapsed == true)
+    }
+
+    @Test func setCollapsed_skipsLeaves_andNoOpWhenValueUnchanged() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let leaf = model.insertChild(parentId: root, text: "叶", side: .right, at: nil)
+        let branch = model.insertChild(parentId: root, text: "枝", side: .left, at: nil)
+        model.insertChild(parentId: branch, text: "孙", side: nil, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.setCollapsed(ids: [leaf], collapsed: true))
+        #expect(!bus.canUndo)
+        #expect(model.node(id: leaf)?.collapsed == false)
+
+        bus.execute(.setCollapsed(ids: [branch], collapsed: false))
+        #expect(!bus.canUndo)
+    }
+
+    @Test func collapseCommands_onChildlessNode_areNoOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let leaf = model.insertChild(parentId: model.document.root.id, text: "叶", side: .right, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.toggleCollapse(id: leaf))
+
+        #expect(!bus.canUndo)
+        #expect(model.node(id: leaf)?.collapsed == false)
+    }
 }

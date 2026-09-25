@@ -100,10 +100,40 @@ final class CommandBus {
             )
 
         case let .toggleCollapse(id):
+            guard let node = model.node(id: id), !node.children.isEmpty else { return nil }
             model.toggleCollapse(id: id)
             return Entry(
                 undo: { self.model.toggleCollapse(id: id) },
                 redo: { self.model.toggleCollapse(id: id) }
+            )
+
+        case let .setCollapsed(ids, collapsed):
+            // 只作用于有子节点的节点；目标值无变化时视为 no-op，不入栈。
+            var seen = Set<UUID>()
+            let targets = ids
+                .filter { seen.insert($0).inserted }
+                .filter { model.node(id: $0)?.children.isEmpty == false }
+                .sorted { $0.uuidString < $1.uuidString }
+            guard targets.contains(where: { model.node(id: $0)?.collapsed != collapsed }) else {
+                return nil
+            }
+            let previousValues = targets.map { id in
+                (id: id, collapsed: model.node(id: id)?.collapsed ?? false)
+            }
+            for id in targets {
+                model.setCollapsed(id: id, to: collapsed)
+            }
+            return Entry(
+                undo: {
+                    for item in previousValues {
+                        self.model.setCollapsed(id: item.id, to: item.collapsed)
+                    }
+                },
+                redo: {
+                    for id in targets {
+                        self.model.setCollapsed(id: id, to: collapsed)
+                    }
+                }
             )
         }
     }

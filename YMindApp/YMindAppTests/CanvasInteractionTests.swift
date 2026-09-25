@@ -5,18 +5,52 @@ import Testing
 
 @Suite("画布交互")
 struct CanvasInteractionTests {
-    @Test func dragPanState_nodePress_neverPansUntilMouseUp() {
-        var state = CanvasDragPanState()
-        state.begin(at: CGPoint(x: 10, y: 10), onNode: true)
+    @Test func marqueeRect_normalizesAnyDragDirection() {
+        let reversed = marqueeRect(from: CGPoint(x: 10, y: 20), to: CGPoint(x: 4, y: 5))
+        let forward = marqueeRect(from: CGPoint(x: 4, y: 5), to: CGPoint(x: 10, y: 20))
 
-        #expect(state.drag(to: CGPoint(x: 20, y: 20)) == nil)
-        #expect(state.drag(to: CGPoint(x: 30, y: 30)) == nil)
+        #expect(reversed == forward)
+        #expect(forward == CGRect(x: 4, y: 5, width: 6, height: 15))
+    }
 
-        state.end()
-        state.begin(at: CGPoint(x: 0, y: 0), onNode: false)
+    @Test func pointerGesture_drawsMarqueeOnlyWhenTrackingAndPastThreshold() {
+        let clickLike = CanvasPointerGesture.marquee(
+            origin: CGPoint(x: 10, y: 10),
+            current: CGPoint(x: 13, y: 12),
+            additive: false,
+            tracking: true
+        )
+        #expect(clickLike.marqueeScreenRect == nil)
 
-        #expect(state.drag(to: CGPoint(x: 5, y: 0)) == CGSize(width: 5, height: 0))
-        #expect(state.drag(to: CGPoint(x: 10, y: 5)) == CGSize(width: 5, height: 5))
+        let dragging = CanvasPointerGesture.marquee(
+            origin: CGPoint(x: 10, y: 10),
+            current: CGPoint(x: 40, y: 30),
+            additive: false,
+            tracking: true
+        )
+        #expect(dragging.marqueeScreenRect == CGRect(x: 10, y: 10, width: 30, height: 20))
+
+        // 编辑态：只记起点不框选。
+        let untracked = CanvasPointerGesture.marquee(
+            origin: CGPoint(x: 10, y: 10),
+            current: CGPoint(x: 40, y: 30),
+            additive: false,
+            tracking: false
+        )
+        #expect(untracked.marqueeScreenRect == nil)
+        #expect(CanvasPointerGesture.pan(lastPoint: .zero).marqueeScreenRect == nil)
+        #expect(CanvasPointerGesture.none.marqueeScreenRect == nil)
+    }
+
+    @Test func worldRect_undoesCameraTransform() {
+        let camera = Camera(translation: CGPoint(x: 100, y: 80), scale: 2)
+
+        let world = worldRect(
+            fromScreenRect: CGRect(x: 120, y: 100, width: 40, height: 20),
+            camera: camera
+        )
+
+        #expect(world == CGRect(x: 10, y: 10, width: 20, height: 10))
     }
 
     @Test @MainActor func canvasMTKView_restoreFocus_becomesFirstResponder() {
@@ -25,13 +59,7 @@ struct CanvasInteractionTests {
             frame: NSRect(x: 0, y: 0, width: 400, height: 300),
             device: nil,
             renderer: nil,
-            session: session,
-            onSelect: { _ in },
-            onEdit: { _ in },
-            onToggleCollapse: { _ in },
-            onAddChild: {},
-            onAddSibling: {},
-            onDelete: {}
+            session: session
         )
         let window = NSWindow(
             contentRect: canvas.frame,
