@@ -94,7 +94,7 @@ YMindApp/YMindAppTests/
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -destination 'platform=macOS' -only-testing:YMindAppTests/MindMapModel`
+Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -destination 'platform=macOS' -only-testing:YMindAppTests/ModelTests`
 Expected: FAIL（方法缺失 / 断言失败）。
 
 - [ ] **Step 3: 实现**
@@ -206,7 +206,7 @@ EOF
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `-only-testing:YMindAppTests/MindMapModel`。Expected: FAIL。
+Run: `-only-testing:YMindAppTests/ModelTests`。Expected: FAIL。
 
 - [ ] **Step 3: 实现**
 
@@ -357,7 +357,7 @@ EOF
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `-only-testing:YMindAppTests/CommandBus`。Expected: FAIL（case 缺失）。
+Run: `-only-testing:YMindAppTests/CommandBusTests`。Expected: FAIL（case 缺失）。
 
 - [ ] **Step 3: 实现**
 
@@ -372,8 +372,6 @@ Run: `-only-testing:YMindAppTests/CommandBus`。Expected: FAIL（case 缺失）�
 
 ```swift
         case let .moveToParent(ids, parentId):
-            let priorSelection = model.selectedIds
-            let priorAnchor = model.selectionAnchorId
             let priorCollapsed = model.node(id: parentId)?.collapsed
             let records = model.reparent(ids: ids, to: parentId)
             guard !records.isEmpty else { return nil }
@@ -382,13 +380,15 @@ Run: `-only-testing:YMindAppTests/CommandBus`。Expected: FAIL（case 缺失）�
             model.replaceSelection(movedIds, anchorId: anchor)
             return Entry(
                 undo: {
+                    // 先从目标父移除被搬节点，再按原父/原下标恢复，避免节点同时存在于新旧两处。
                     for r in records.sorted(by: { $0.index < $1.index }) {
+                        _ = self.model.removeWithoutSelection(id: r.node.id)
                         self.model.restoreChild(parentId: r.parentId, index: r.index, node: r.node)
                     }
                     if let priorCollapsed {
                         self.model.setCollapsed(id: parentId, to: priorCollapsed)
                     }
-                    self.model.replaceSelection(priorSelection, anchorId: priorAnchor)
+                    self.model.replaceSelection(movedIds, anchorId: anchor)
                 },
                 redo: {
                     _ = self.model.reparent(ids: ids, to: parentId)
@@ -401,7 +401,7 @@ Run: `-only-testing:YMindAppTests/CommandBus`。Expected: FAIL（case 缺失）�
             let priorAnchor = model.selectionAnchorId
             let priorCollapsed = model.node(id: parentId)?.collapsed
             var inserted: [Node] = []
-            for node in payload.nodes {
+            for node in payload {
                 let copy = model.duplicate(node)
                 model.attachChild(copy, to: parentId)
                 inserted.append(copy)
@@ -437,7 +437,7 @@ Run: `-only-testing:YMindAppTests/CommandBus`。Expected: FAIL（case 缺失）�
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/CommandBus` 与 `-only-testing:YMindAppTests/MindMapModel`。Expected: PASS。
+Run: `-only-testing:YMindAppTests/CommandBusTests` 与 `-only-testing:YMindAppTests/ModelTests`。Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
@@ -533,7 +533,7 @@ struct ClipboardTests {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `-only-testing:YMindAppTests/Clipboard`。Expected: FAIL（符号缺失）。
+Run: `-only-testing:YMindAppTests/ClipboardTests`。Expected: FAIL（符号缺失）。
 
 - [ ] **Step 3: 实现**
 
@@ -670,7 +670,7 @@ EOF
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `-only-testing:YMindAppTests/CanvasInteraction`. Expected: FAIL（函数缺失）。
+Run: `-only-testing:YMindAppTests/CanvasInteractionTests`. Expected: FAIL（函数缺失）。
 
 - [ ] **Step 3: 实现**
 
@@ -823,7 +823,7 @@ func hasExceededDragThreshold(from origin: CGPoint, to current: CGPoint) -> Bool
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/CanvasInteraction`。Expected: PASS（Task 6 未完成前可能因 draw 签名编译失败——如失败，先跳到 Task 6 完成签名，再回来验证本任务）。
+Run: `-only-testing:YMindAppTests/CanvasInteractionTests`。Expected: PASS（Task 6 未完成前可能因 draw 签名编译失败——如失败，先跳到 Task 6 完成签名，再回来验证本任务）。
 
 - [ ] **Step 5: Commit**
 
