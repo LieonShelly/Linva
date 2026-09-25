@@ -254,11 +254,11 @@ final class MetalRenderer {
                 // 折叠态：强调色实心（对齐原型 .is-collapsed）。
                 solidVertices += pillVertices(rect: rect, color: accent)
             } else {
-                solidVertices += pillVertices(rect: rect, color: fill)
-                solidVertices += strokeVertices(
-                    rect: rect,
-                    thickness: borderThickness,
-                    color: border
+                // 展开态：外圈描边色 + 内圈填充色，二者同为胶囊/圆，描边才跟着轮廓走。
+                solidVertices += pillVertices(rect: rect, color: border)
+                solidVertices += pillVertices(
+                    rect: rect.insetBy(dx: borderThickness, dy: borderThickness),
+                    color: fill
                 )
             }
         }
@@ -355,8 +355,9 @@ final class MetalRenderer {
             let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
             vertices += strokeVertices(rect: rect, thickness: thickness, color: memberColor)
             if distinguishAnchor, id == selectionAnchorId {
+                // 贴在成员描边外侧，虚线才不会被实线盖住；偏移随描边宽度缩放。
                 vertices += dashedStrokeVertices(
-                    rect: rect,
+                    rect: rect.insetBy(dx: -thickness, dy: -thickness),
                     thickness: thickness,
                     dash: 5 * camera.scale,
                     gap: 3 * camera.scale,
