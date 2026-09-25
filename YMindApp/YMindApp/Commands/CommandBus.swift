@@ -63,7 +63,7 @@ final class CommandBus {
         let restoredSelection = Set(removed.map(\.node.id))
         return Entry(
             undo: {
-                for item in removed.sorted(by: { $0.index < $1.index }) {
+                for item in removed.reversed() {
                     self.model.restoreChild(
                         parentId: item.parentId,
                         index: item.index,

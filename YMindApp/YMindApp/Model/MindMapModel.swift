@@ -146,7 +146,7 @@ final class MindMapModel {
             guard id != rootId, node(id: id) != nil else { return false }
             var parent = parentId(of: id)
             while let p = parent {
-                if ids.contains(p) { return false }
+                if p != rootId, ids.contains(p) { return false }
                 parent = parentId(of: p)
             }
             return true
