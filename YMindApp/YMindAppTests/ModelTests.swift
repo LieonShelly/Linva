@@ -9,7 +9,9 @@ struct ModelTests {
         #expect(model.document.version == MindMapDocument.currentVersion)
         #expect(model.document.root.text == "中心主题")
         #expect(model.document.root.children.isEmpty)
-        #expect(model.selectedId == model.document.root.id)
+        #expect(model.selectedIds == [model.document.root.id])
+        #expect(model.selectionAnchorId == model.document.root.id)
+        #expect(model.primarySelectedId == model.document.root.id)
     }
 
     @Test func insertChild_onRoot_assignsBalancedSide() {
@@ -34,7 +36,7 @@ struct ModelTests {
         model.select(child)
         let removed = model.remove(id: child)
         #expect(removed != nil)
-        #expect(model.selectedId == rootId)
+        #expect(model.selectedIds == [rootId])
         #expect(model.document.root.children.isEmpty)
     }
 
@@ -45,9 +47,45 @@ struct ModelTests {
 
     @Test func selectNil_clearsSelection() {
         let model = MindMapModel.makeNew()
+        model.selectOnly(nil)
+        #expect(model.selectedIds.isEmpty)
+        #expect(model.selectionAnchorId == nil)
+        #expect(model.primarySelectedId == nil)
+    }
 
-        model.select(nil)
+    @Test func toggleInSelection_addsAndRemoves() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .left, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        model.selectOnly(a)
+        model.toggleInSelection(b)
+        #expect(model.selectedIds == [a, b])
+        #expect(model.selectionAnchorId == b)
+        model.toggleInSelection(a)
+        #expect(model.selectedIds == [b])
+    }
 
-        #expect(model.selectedId == nil)
+    @Test func selectSiblingRange_sameParent_selectsInclusiveRange() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        let c = model.insertChild(parentId: root, text: "C", side: .right, at: nil)
+        model.selectOnly(a)
+        model.selectSiblingRange(to: c)
+        #expect(model.selectedIds == [a, b, c])
+    }
+
+    @Test func selectSiblingRange_differentParent_selectsOnlyTarget() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let parent = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let child = model.insertChild(parentId: parent, text: "C", side: nil, at: nil)
+        let other = model.insertChild(parentId: root, text: "O", side: .left, at: nil)
+        model.selectOnly(child)
+        model.selectSiblingRange(to: other)
+        #expect(model.selectedIds == [other])
+        #expect(model.selectionAnchorId == other)
     }
 }

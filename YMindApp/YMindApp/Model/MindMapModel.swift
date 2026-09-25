@@ -2,11 +2,27 @@ import Foundation
 
 final class MindMapModel {
     var document: MindMapDocument
-    var selectedId: UUID?
+    var selectedIds: Set<UUID> = []
+    var selectionAnchorId: UUID?
+
+    var primarySelectedId: UUID? {
+        if let selectionAnchorId, selectedIds.contains(selectionAnchorId) {
+            return selectionAnchorId
+        }
+        return selectedIds.min { $0.uuidString < $1.uuidString }
+    }
+
+    /// Temporary bridge until Session migrates in Task 2.
+    var selectedId: UUID? {
+        get { primarySelectedId }
+        set { selectOnly(newValue) }
+    }
 
     init(document: MindMapDocument, selectedId: UUID? = nil) {
         self.document = document
-        self.selectedId = selectedId ?? document.root.id
+        let initial = selectedId ?? document.root.id
+        selectedIds = [initial]
+        selectionAnchorId = initial
     }
 
     static func makeNew() -> MindMapModel {
@@ -14,13 +30,62 @@ final class MindMapModel {
         return MindMapModel(document: doc, selectedId: doc.root.id)
     }
 
-    func select(_ id: UUID?) {
+    func selectOnly(_ id: UUID?) {
         guard let id else {
-            selectedId = nil
+            selectedIds = []
+            selectionAnchorId = nil
             return
         }
-        if node(id: id) != nil {
-            selectedId = id
+        guard node(id: id) != nil else { return }
+        selectedIds = [id]
+        selectionAnchorId = id
+    }
+
+    /// 兼容旧调用点：等价于 selectOnly
+    func select(_ id: UUID?) { selectOnly(id) }
+
+    func clearSelection() { selectOnly(nil) }
+
+    func toggleInSelection(_ id: UUID) {
+        guard node(id: id) != nil else { return }
+        if selectedIds.contains(id) {
+            selectedIds.remove(id)
+            if selectionAnchorId == id {
+                selectionAnchorId = primarySelectedId
+            }
+        } else {
+            selectedIds.insert(id)
+            selectionAnchorId = id
+        }
+    }
+
+    func selectSiblingRange(to id: UUID) {
+        guard node(id: id) != nil else { return }
+        guard let anchor = selectionAnchorId,
+              let anchorParent = parentId(of: anchor),
+              let targetParent = parentId(of: id),
+              anchorParent == targetParent,
+              let parent = node(id: anchorParent) else {
+            selectOnly(id)
+            return
+        }
+        let ids = parent.children.map(\.id)
+        guard let i0 = ids.firstIndex(of: anchor),
+              let i1 = ids.firstIndex(of: id) else {
+            selectOnly(id)
+            return
+        }
+        let lo = min(i0, i1)
+        let hi = max(i0, i1)
+        selectedIds = Set(ids[lo...hi])
+    }
+
+    func replaceSelection(_ ids: Set<UUID>, anchorId: UUID?) {
+        selectedIds = Set(ids.filter { node(id: $0) != nil })
+        if let anchorId, selectedIds.contains(anchorId) {
+            selectionAnchorId = anchorId
+        } else {
+            selectionAnchorId = primarySelectedId
         }
     }
 
@@ -52,7 +117,7 @@ final class MindMapModel {
             let i = index ?? parent.children.count
             parent.children.insert(child, at: min(i, parent.children.count))
         }
-        selectedId = newId
+        selectOnly(newId)
         return newId
     }
 
@@ -77,7 +142,7 @@ final class MindMapModel {
             removed = parent.children.remove(at: path.index)
         }
         guard let removed else { return nil }
-        selectedId = parentId
+        selectOnly(parentId)
         return (parentId, path.index, removed)
     }
 
