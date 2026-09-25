@@ -135,11 +135,9 @@ struct ContentView: View {
         if session.editingId != nil {
             commitEditing()
         }
-        guard let selectedId = session.primarySelectedId,
-              selectedId != session.model.document.root.id else {
-            return
-        }
-        session.commandBus.execute(.delete(id: selectedId))
+        let ids = Array(session.selectedIds)
+        guard ids.contains(where: { $0 != session.model.document.root.id }) else { return }
+        session.commandBus.execute(.delete(ids: ids))
     }
 
     private func zoom(by factor: CGFloat, viewport: CGSize) {

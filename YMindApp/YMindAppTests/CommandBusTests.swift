@@ -33,7 +33,7 @@ struct CommandBusTests {
     @Test func delete_root_isNoOp() {
         let model = MindMapModel.makeNew()
         let bus = CommandBus(model: model)
-        bus.execute(.delete(id: model.document.root.id))
+        bus.execute(.delete(ids: [model.document.root.id]))
         #expect(model.document.root.children.isEmpty)
         #expect(!bus.canUndo)
     }
@@ -45,5 +45,19 @@ struct CommandBusTests {
         bus.clearHistory()
         #expect(!bus.canUndo)
         #expect(!bus.canRedo)
+    }
+
+    @Test func deleteMany_undo_restoresSubtreesInOneStep() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .left, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        bus.clearHistory()
+        bus.execute(.delete(ids: [a, b]))
+        #expect(model.document.root.children.isEmpty)
+        bus.undo()
+        #expect(Set(model.document.root.children.map(\.id)) == [a, b])
+        #expect(model.selectedIds == [a, b] || model.selectedIds.isSuperset(of: [a, b]))
     }
 }

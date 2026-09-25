@@ -55,6 +55,30 @@ final class CommandBus {
         )
     }
 
+    private func applyDelete(ids: [UUID]) -> Entry? {
+        let tops = model.topLevelDeletableIds(from: Set(ids))
+        guard !tops.isEmpty else { return nil }
+        let removed = model.removeMany(ids: tops)
+        guard !removed.isEmpty else { return nil }
+        let restoredSelection = Set(removed.map(\.node.id))
+        return Entry(
+            undo: {
+                for item in removed.sorted(by: { $0.index < $1.index }) {
+                    self.model.restoreChild(
+                        parentId: item.parentId,
+                        index: item.index,
+                        node: item.node
+                    )
+                }
+                self.model.replaceSelection(
+                    restoredSelection,
+                    anchorId: restoredSelection.min { $0.uuidString < $1.uuidString }
+                )
+            },
+            redo: { _ = self.model.removeMany(ids: tops) }
+        )
+    }
+
     private func applyForward(_ command: MindMapCommand) -> Entry? {
         switch command {
         case let .addChild(parentId, text):
@@ -65,19 +89,8 @@ final class CommandBus {
             guard let newId = model.insertSibling(of: selectedId, text: text) else { return nil }
             return entryForInsertedNode(id: newId)
 
-        case let .delete(id):
-            guard let removed = model.remove(id: id) else { return nil }
-            return Entry(
-                undo: {
-                    self.model.restoreChild(
-                        parentId: removed.parentId,
-                        index: removed.index,
-                        node: removed.node
-                    )
-                    self.model.select(removed.node.id)
-                },
-                redo: { _ = self.model.remove(id: id) }
-            )
+        case let .delete(ids):
+            return applyDelete(ids: ids)
 
         case let .setText(id, old, new):
             model.setText(id: id, new)

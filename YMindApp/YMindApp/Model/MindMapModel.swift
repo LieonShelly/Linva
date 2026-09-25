@@ -134,16 +134,51 @@ final class MindMapModel {
 
     @discardableResult
     func remove(id: UUID) -> (parentId: UUID, index: Int, node: Node)? {
-        guard id != document.root.id, let path = pathTo(id), let parentId = path.parentId else {
-            return nil
+        guard let removed = removeWithoutChangingSelection(id: id) else { return nil }
+        selectOnly(removed.parentId)
+        return removed
+    }
+
+    /// Non-root ids whose ancestors are not also in `ids` (delete those; skip nested duplicates).
+    func topLevelDeletableIds(from ids: Set<UUID>) -> [UUID] {
+        let rootId = document.root.id
+        return ids.filter { id in
+            guard id != rootId, node(id: id) != nil else { return false }
+            var parent = parentId(of: id)
+            while let p = parent {
+                if ids.contains(p) { return false }
+                parent = parentId(of: p)
+            }
+            return true
         }
-        var removed: Node?
-        _ = mutate(id: parentId) { parent in
-            removed = parent.children.remove(at: path.index)
+    }
+
+    /// Removes nodes without thrashing selection mid-loop; then selects first surviving parent or clears.
+    @discardableResult
+    func removeMany(ids: [UUID]) -> [(parentId: UUID, index: Int, node: Node)] {
+        let ordered = ids.compactMap { id -> (UUID, Int, UUID)? in
+            guard let p = parentId(of: id), let i = indexInParent(of: id) else { return nil }
+            return (p, i, id)
         }
-        guard let removed else { return nil }
-        selectOnly(parentId)
-        return (parentId, path.index, removed)
+        .sorted { lhs, rhs in
+            if lhs.0 == rhs.0 { return lhs.1 > rhs.1 }
+            return lhs.2.uuidString < rhs.2.uuidString
+        }
+
+        var removed: [(parentId: UUID, index: Int, node: Node)] = []
+        var parentCandidates: [UUID] = []
+        for (_, _, id) in ordered {
+            if let r = removeWithoutChangingSelection(id: id) {
+                removed.append(r)
+                parentCandidates.append(r.parentId)
+            }
+        }
+        if let keep = parentCandidates.first(where: { node(id: $0) != nil }) {
+            selectOnly(keep)
+        } else {
+            clearSelection()
+        }
+        return removed
     }
 
     func setText(id: UUID, _ text: String) {
@@ -161,6 +196,19 @@ final class MindMapModel {
     }
 
     // MARK: - Private tree helpers
+
+    @discardableResult
+    private func removeWithoutChangingSelection(id: UUID) -> (parentId: UUID, index: Int, node: Node)? {
+        guard id != document.root.id, let path = pathTo(id), let parentId = path.parentId else {
+            return nil
+        }
+        var removed: Node?
+        _ = mutate(id: parentId) { parent in
+            removed = parent.children.remove(at: path.index)
+        }
+        guard let removed else { return nil }
+        return (parentId, path.index, removed)
+    }
 
     private func nextSide() -> Side {
         let left = document.root.children.filter { $0.side == .left }.count

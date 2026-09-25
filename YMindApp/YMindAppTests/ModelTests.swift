@@ -88,4 +88,13 @@ struct ModelTests {
         #expect(model.selectedIds == [other])
         #expect(model.selectionAnchorId == other)
     }
+
+    @Test func topLevelDeletableIds_skipsDescendantsWhenAncestorSelected() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let p = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let c = model.insertChild(parentId: p, text: "C", side: nil, at: nil)
+        let ids = model.topLevelDeletableIds(from: [p, c, root])
+        #expect(ids == [p])
+    }
 }
