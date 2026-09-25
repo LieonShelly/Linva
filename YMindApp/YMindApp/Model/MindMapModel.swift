@@ -149,9 +149,10 @@ final class MindMapModel {
             guard let p = parentId(of: id), let i = indexInParent(of: id) else { return nil }
             return (p, i, id)
         }
+        // 严格全序：先按父 id 排序，同父再按下标降序，避免跨父分支时比较谓词成环。
         .sorted { lhs, rhs in
-            if lhs.0 == rhs.0 { return lhs.1 > rhs.1 }
-            return lhs.2.uuidString < rhs.2.uuidString
+            if lhs.0 != rhs.0 { return lhs.0.uuidString < rhs.0.uuidString }
+            return lhs.1 > rhs.1
         }
 
         var removed: [(parentId: UUID, index: Int, node: Node)] = []
@@ -198,6 +199,10 @@ final class MindMapModel {
         var removed: Node?
         _ = mutate(id: parentId) { parent in
             removed = parent.children.remove(at: path.index)
+            if parent.children.isEmpty {
+                // 维持「collapsed ⇒ 有子节点」不变量。
+                parent.collapsed = false
+            }
         }
         guard let removed else { return nil }
         return (parentId, path.index, removed)

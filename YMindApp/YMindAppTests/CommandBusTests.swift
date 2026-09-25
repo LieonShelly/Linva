@@ -145,4 +145,21 @@ struct CommandBusTests {
         #expect(!bus.canUndo)
         #expect(model.node(id: leaf)?.collapsed == false)
     }
+
+    @Test func toggleCollapse_collapsedChildless_expands() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let leaf = model.insertChild(parentId: root, text: "叶", side: .right, at: nil)
+        // 直接构造「已折叠但无子」状态（等价于文件中带 collapsed 的叶子）。
+        model.setCollapsed(id: leaf, to: true)
+        bus.clearHistory()
+
+        bus.execute(.toggleCollapse(id: leaf))
+
+        #expect(bus.canUndo)
+        #expect(model.node(id: leaf)?.collapsed == false)
+        bus.undo()
+        #expect(model.node(id: leaf)?.collapsed == true)
+    }
 }

@@ -100,7 +100,11 @@ final class CommandBus {
             )
 
         case let .toggleCollapse(id):
-            guard let node = model.node(id: id), !node.children.isEmpty else { return nil }
+            // 折叠方向要求有子节点；展开方向不受限（修复「已折叠但无子」的叶子，见 F1）。
+            guard let node = model.node(id: id),
+                  !node.children.isEmpty || node.collapsed else {
+                return nil
+            }
             model.toggleCollapse(id: id)
             return Entry(
                 undo: { self.model.toggleCollapse(id: id) },

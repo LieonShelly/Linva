@@ -97,4 +97,53 @@ struct ModelTests {
         let ids = model.topLevelDeletableIds(from: [p, c, root])
         #expect(ids == [p])
     }
+
+    @Test func removeLastChild_resetsCollapsed() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let branch = model.insertChild(parentId: root, text: "枝", side: .right, at: nil)
+        let child = model.insertChild(parentId: branch, text: "子", side: nil, at: nil)
+        model.setCollapsed(id: branch, to: true)
+
+        model.remove(id: child)
+
+        #expect(model.node(id: branch)?.children.isEmpty == true)
+        #expect(model.node(id: branch)?.collapsed == false)
+    }
+
+    @Test func removeMany_followsDeterministicTotalOrder() {
+        func node(_ id: UUID, text: String) -> Node {
+            Node(id: id, text: text)
+        }
+        let p1 = UUID(uuidString: "11111111-0000-0000-0000-000000000001")!
+        let p2 = UUID(uuidString: "22222222-0000-0000-0000-000000000002")!
+        let a = UUID(uuidString: "00000000-0000-0000-0000-000000000005")!
+        let m = UUID(uuidString: "00000000-0000-0000-0000-000000000008")!
+        let z = UUID(uuidString: "00000000-0000-0000-0000-000000000009")!
+        var doc = MindMapDocument.blank()
+        doc.root.children = [
+            Node(id: p1, text: "P1", children: (0..<10).map { i in
+                let id: UUID
+                switch i {
+                case 5: id = a
+                case 9: id = z
+                default:
+                    id = UUID(uuidString: String(
+                        format: "00000000-0000-0000-0000-000000000f%02d", i
+                    ))!
+                }
+                return node(id, text: "n\(i)")
+            }),
+            Node(id: p2, text: "P2", children: [node(m, text: "M")]),
+        ]
+        let model = MindMapModel(document: doc)
+
+        let removed = model.removeMany(ids: [a, m, z])
+
+        // 父按 uuid 升序，同父按下标降序；旧谓词会在 A<M<Z 时成环。
+        #expect(removed.map(\.node.id) == [z, a, m])
+        #expect(model.node(id: a) == nil)
+        #expect(model.node(id: m) == nil)
+        #expect(model.node(id: z) == nil)
+    }
 }
