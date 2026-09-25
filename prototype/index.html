@@ -15,7 +15,7 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-name">YMind</span>
-        <span class="brand-tag">Search</span>
+        <span class="brand-tag">Export</span>
       </div>
 
       <div class="toolbar-group" role="group" aria-label="节点操作">
@@ -24,10 +24,29 @@
         <button type="button" id="btn-delete" class="danger" title="删除 (⌫)（多选时对整组生效）">删除</button>
       </div>
 
+      <div class="toolbar-group fill-swatches" role="group" aria-label="填色">
+        <button type="button" class="swatch swatch-none" data-fill="" title="默认（无填色）" aria-label="默认"></button>
+        <button type="button" class="swatch" data-fill="sage" title="鼠尾草" aria-label="鼠尾草"></button>
+        <button type="button" class="swatch" data-fill="sky" title="天空" aria-label="天空"></button>
+        <button type="button" class="swatch" data-fill="sand" title="沙色" aria-label="沙色"></button>
+        <button type="button" class="swatch" data-fill="rose" title="玫瑰" aria-label="玫瑰"></button>
+        <button type="button" class="swatch" data-fill="lilac" title="丁香" aria-label="丁香"></button>
+      </div>
+
+      <div class="toolbar-group" role="group" aria-label="左右侧">
+        <button type="button" id="btn-side-left" title="放到左侧 (⌘←)">← 左侧</button>
+        <button type="button" id="btn-side-right" title="放到右侧 (⌘→)">右侧 →</button>
+      </div>
+
       <div class="toolbar-group" role="group" aria-label="剪贴板">
         <button type="button" id="btn-cut" title="剪切 (⌘X)">剪切</button>
         <button type="button" id="btn-copy" title="复制 (⌘C)">复制</button>
         <button type="button" id="btn-paste" title="粘贴为子主题 (⌘V)">粘贴</button>
+      </div>
+
+      <div class="toolbar-group" role="group" aria-label="导出">
+        <button type="button" id="btn-export-png" title="导出 PNG（全展开整图）">导出 PNG</button>
+        <button type="button" id="btn-export-md" title="导出 Markdown（标题层级）">导出 MD</button>
       </div>
 
       <div class="toolbar-group selection-meta" role="status" aria-live="polite">
@@ -64,12 +83,13 @@
         <div class="nodes" id="nodes"></div>
         <div class="branch-toggles" id="branch-toggles"></div>
         <div class="insert-line" id="insert-line" hidden></div>
+        <div class="side-guide" id="side-guide" hidden></div>
       </div>
 
       <div class="marquee" id="marquee" hidden></div>
 
       <div class="hint" id="hint">
-        ⌘F 搜索 · 拖中部成子/上下边插同级 · ⌘C/X/V · 框选 · 空格平移
+        导出 PNG / MD · 色点上色 · ⌘←/→ 改侧 · ⌘F 搜索
       </div>
     </main>
   </div>

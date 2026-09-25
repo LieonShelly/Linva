@@ -1,7 +1,7 @@
 /**
  * YMind HTML Prototype
  * Model → Radial Layout → DOM/SVG View
- * v1 核心 + 整理效率 + 搬枝/同级排序 + 搜索定位
+ * v1 核心 + 整理 + 搬枝/排序 + 搜索 + 改侧 + 填色 + 导出
  */
 
 (() => {
@@ -9,9 +9,12 @@
     crypto.randomUUID?.() ??
     `n_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
+  /** 预设填色 token；null = 默认（无填色） */
+  const FILL_PRESETS = ["sage", "sky", "sand", "rose", "lilac"];
+
   // —— Model ——
   function createNode(text, side = null, children = []) {
-    return { id: uid(), text, side, collapsed: false, children };
+    return { id: uid(), text, side, fill: null, collapsed: false, children };
   }
 
   function createDocument() {
@@ -94,6 +97,7 @@
       id: uid(),
       text: node.text,
       side: null,
+      fill: node.fill ?? null,
       collapsed: !!node.collapsed,
       children: (node.children || []).map(cloneSubtree),
     };
@@ -119,6 +123,18 @@
       }
       return !!findNode(id)?.parent;
     });
+  }
+
+  /** 选中集里父为中心主题的节点（改侧对象） */
+  function rootDirectChildIds(ids = selectedList()) {
+    return [...new Set(ids)].filter((id) => {
+      const hit = findNode(id);
+      return hit && hit.parent === doc.root;
+    });
+  }
+
+  function nodeSide(node) {
+    return node.side === "left" ? "left" : "right";
   }
 
   function canMoveOnto(targetId, movingIds) {
@@ -340,6 +356,7 @@
   const hint = document.getElementById("hint");
   const marqueeEl = document.getElementById("marquee");
   const insertLineEl = document.getElementById("insert-line");
+  const sideGuideEl = document.getElementById("side-guide");
   const selectionCountEl = document.getElementById("selection-count");
   const searchBarEl = document.getElementById("search-bar");
   const searchInputEl = document.getElementById("search-input");
@@ -359,8 +376,8 @@
    */
   let clipboard = null;
   /**
-   * 拖放意图：中部成子；上下边插同级。
-   * @type {{ targetId: string, mode: 'child'|'before'|'after' } | null}
+   * 拖放意图：中部成子；上下边插同级；中心左右半 / 空白过中线改侧。
+   * @type {{ targetId: string, mode: 'child'|'before'|'after'|'side-left'|'side-right', viaEmpty?: boolean } | null}
    */
   let dropIntent = null;
   /** 正在拖的节点 id 集（含多选顶层） */
@@ -499,14 +516,33 @@
       const isDropEdge =
         (dropIntent?.mode === "before" || dropIntent?.mode === "after") &&
         dropIntent.targetId === f.id;
+      const isDropSideLeft =
+        dropIntent?.mode === "side-left" &&
+        dropIntent.targetId === f.id &&
+        !dropIntent.viaEmpty;
+      const isDropSideRight =
+        dropIntent?.mode === "side-right" &&
+        dropIntent.targetId === f.id &&
+        !dropIntent.viaEmpty;
       el.classList.toggle("is-drop-target", isDropChild && !draggingIds.has(f.id));
       el.classList.toggle("is-drop-edge", isDropEdge && !draggingIds.has(f.id));
+      el.classList.toggle(
+        "is-drop-side-left",
+        isDropSideLeft && !draggingIds.has(f.id)
+      );
+      el.classList.toggle(
+        "is-drop-side-right",
+        isDropSideRight && !draggingIds.has(f.id)
+      );
       el.classList.toggle(
         "is-search-hit",
         search.open &&
           search.matches[search.index] === f.id &&
           editingId !== f.id
       );
+      const fill = node.fill && FILL_PRESETS.includes(node.fill) ? node.fill : "";
+      if (fill) el.dataset.fill = fill;
+      else delete el.dataset.fill;
       el.style.left = `${f.x}px`;
       el.style.top = `${f.y}px`;
       el.style.width = `${f.w}px`;
@@ -528,6 +564,7 @@
 
     renderBranchToggles(frames);
     syncInsertLine(frames);
+    syncSideGuide();
     syncToolbar();
   }
 
@@ -550,6 +587,21 @@
     insertLineEl.style.left = `${f.x}px`;
     insertLineEl.style.top = `${y}px`;
     insertLineEl.style.width = `${Math.max(f.w, 48)}px`;
+  }
+
+  function syncSideGuide() {
+    const show =
+      dropIntent &&
+      (dropIntent.mode === "side-left" || dropIntent.mode === "side-right") &&
+      dropIntent.viaEmpty;
+    if (!show) {
+      sideGuideEl.hidden = true;
+      sideGuideEl.classList.remove("is-left", "is-right");
+      return;
+    }
+    sideGuideEl.hidden = false;
+    sideGuideEl.classList.toggle("is-left", dropIntent.mode === "side-left");
+    sideGuideEl.classList.toggle("is-right", dropIntent.mode === "side-right");
   }
 
   /**
@@ -678,12 +730,47 @@
     document.getElementById("btn-paste").disabled =
       !clipboard?.items?.length || count === 0;
 
+    const rootKids = rootDirectChildIds(selectedList());
+    document.getElementById("btn-side-left").disabled = rootKids.length === 0;
+    document.getElementById("btn-side-right").disabled = rootKids.length === 0;
+
+    const swatches = document.querySelectorAll(".fill-swatches .swatch");
+    const noSel = count === 0;
+    let commonFill = null;
+    if (count === 1) {
+      commonFill = hits[0]?.node.fill ?? null;
+    } else if (count > 1) {
+      const fills = hits.map((h) => h.node.fill ?? null);
+      commonFill = fills.every((f) => f === fills[0]) ? fills[0] : undefined;
+    }
+    for (const btn of swatches) {
+      btn.disabled = noSel;
+      const token = btn.dataset.fill || null;
+      const active =
+        commonFill !== undefined &&
+        ((token === null && commonFill === null) ||
+          (token && token === commonFill));
+      btn.classList.toggle("is-active", !!active);
+    }
+
     if (count > 1) {
       selectionCountEl.hidden = false;
       selectionCountEl.textContent = `已选 ${count}`;
     } else {
       selectionCountEl.hidden = true;
     }
+  }
+
+  function setSelectedFill(fill) {
+    const ids = selectedList();
+    if (!ids.length) return;
+    const next =
+      fill && FILL_PRESETS.includes(fill) ? fill : null;
+    for (const id of ids) {
+      const hit = findNode(id);
+      if (hit) hit.node.fill = next;
+    }
+    render();
   }
 
   // —— Selection ——
@@ -930,6 +1017,49 @@
     return true;
   }
 
+  /**
+   * 将可搬顶层挂到中心主题并设定 left/right。
+   * 已是中心直接子则只改 side。
+   */
+  function applyRootSide(movingIds, side) {
+    const tops = topLevelMovableIds(movingIds);
+    if (!tops.length) return false;
+    let changed = false;
+    for (const id of tops) {
+      const hit = findNode(id);
+      if (!hit?.parent) continue;
+      if (hit.parent === doc.root) {
+        if (nodeSide(hit.node) !== side) {
+          hit.node.side = side;
+          changed = true;
+        }
+      } else {
+        const node = detachNode(id);
+        if (!node) continue;
+        node.side = side;
+        doc.root.children.push(node);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  /** 工具条 / 快捷键：仅对中心直接子改侧 */
+  function setSelectedSide(side) {
+    const ids = rootDirectChildIds();
+    if (!ids.length) return;
+    let changed = false;
+    for (const id of ids) {
+      const hit = findNode(id);
+      if (!hit) continue;
+      if (nodeSide(hit.node) !== side) {
+        hit.node.side = side;
+        changed = true;
+      }
+    }
+    if (changed) render();
+  }
+
   function copySelection() {
     const tops = topLevelMovableIds();
     if (!tops.length) return;
@@ -1090,6 +1220,228 @@
     );
   }
 
+  // —— Export ——
+  const FILL_PAINT = {
+    sage: {
+      bg: "#dfeadf",
+      border: "#8fa88a",
+      rootBg: "#3d5c48",
+      rootText: "#f4f1ea",
+    },
+    sky: {
+      bg: "#d7e5f0",
+      border: "#7a9bb5",
+      rootBg: "#355a78",
+      rootText: "#f4f1ea",
+    },
+    sand: {
+      bg: "#f0e4c4",
+      border: "#c4a86a",
+      rootBg: "#7a6230",
+      rootText: "#f4f1ea",
+    },
+    rose: {
+      bg: "#f0d8d5",
+      border: "#c48984",
+      rootBg: "#7a4040",
+      rootText: "#f4f1ea",
+    },
+    lilac: {
+      bg: "#e5dced",
+      border: "#9e8bb3",
+      rootBg: "#554868",
+      rootText: "#f4f1ea",
+    },
+  };
+
+  function safeFilename(base, ext) {
+    const name = String(base || "ymind")
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 48);
+    return `${name || "ymind"}.${ext}`;
+  }
+
+  function downloadBlob(filename, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadText(filename, text, mime) {
+    downloadBlob(filename, new Blob([text], { type: mime }));
+  }
+
+  /** 临时展开全树执行 fn，再恢复折叠态（不触发中间 render） */
+  function withFullyExpanded(fn) {
+    const saved = [];
+    walkAllNodes(doc.root, (node) => {
+      saved.push({ node, collapsed: !!node.collapsed });
+      node.collapsed = false;
+    });
+    try {
+      return fn();
+    } finally {
+      for (const s of saved) s.node.collapsed = s.collapsed;
+    }
+  }
+
+  /** 整树 → Markdown 标题层级（忽略折叠；深度 >6 仍用 ######） */
+  function treeToMarkdown(node = doc.root, depth = 1) {
+    const level = Math.min(Math.max(depth, 1), 6);
+    const title = String(node.text || "未命名")
+      .replace(/\r\n/g, "\n")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .join(" ");
+    let out = `${"#".repeat(level)} ${title || "未命名"}\n\n`;
+    for (const child of node.children || []) {
+      out += treeToMarkdown(child, depth + 1);
+    }
+    return out;
+  }
+
+  function exportMarkdown() {
+    const md = treeToMarkdown(doc.root, 1).trimEnd() + "\n";
+    downloadText(
+      safeFilename(doc.root.text, "md"),
+      md,
+      "text/markdown;charset=utf-8"
+    );
+  }
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
+
+  function wrapTextLines(ctx, text, maxW) {
+    const lines = [];
+    for (const para of String(text || " ").split("\n")) {
+      const chars = para.length ? para.split("") : [" "];
+      let current = "";
+      for (const ch of chars) {
+        const trial = current + ch;
+        if (ctx.measureText(trial).width > maxW && current) {
+          lines.push(current);
+          current = ch;
+        } else {
+          current = trial;
+        }
+      }
+      lines.push(current || " ");
+    }
+    return lines;
+  }
+
+  function paintExportCanvas(frames, edges) {
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (const f of frames.values()) {
+      minX = Math.min(minX, f.x - f.w / 2);
+      maxX = Math.max(maxX, f.x + f.w / 2);
+      minY = Math.min(minY, f.y - f.h / 2);
+      maxY = Math.max(maxY, f.y + f.h / 2);
+    }
+    const pad = 48;
+    const contentW = Math.max(maxX - minX, 1);
+    const contentH = Math.max(maxY - minY, 1);
+    const scale = Math.min(2, 2400 / Math.max(contentW, contentH));
+    const w = Math.ceil((contentW + pad * 2) * scale);
+    const h = Math.ceil((contentH + pad * 2) * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#e7e4dc";
+    ctx.fillRect(0, 0, w, h);
+
+    const tx = (x) => (x - minX + pad) * scale;
+    const ty = (y) => (y - minY + pad) * scale;
+
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#6d7568";
+    ctx.globalAlpha = 0.75;
+    ctx.lineWidth = Math.max(1.25, 1.75 * scale);
+    for (const e of edges) {
+      const dir = e.side === "left" ? -1 : 1;
+      const x1 = e.from.x + (dir * e.from.w) / 2;
+      const y1 = e.from.y;
+      const x2 = e.to.x - (dir * e.to.w) / 2;
+      const y2 = e.to.y;
+      const cx = (x1 + x2) / 2;
+      ctx.beginPath();
+      ctx.moveTo(tx(x1), ty(y1));
+      ctx.bezierCurveTo(tx(cx), ty(y1), tx(cx), ty(y2), tx(x2), ty(y2));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    for (const f of frames.values()) {
+      const node = findNode(f.id)?.node;
+      if (!node) continue;
+      const paint = node.fill ? FILL_PAINT[node.fill] : null;
+      const x = tx(f.x - f.w / 2);
+      const y = ty(f.y - f.h / 2);
+      const nw = f.w * scale;
+      const nh = f.h * scale;
+      const radius = (f.isRoot ? 18 : 14) * scale;
+
+      roundRectPath(ctx, x, y, nw, nh, radius);
+      if (f.isRoot) {
+        ctx.fillStyle = paint?.rootBg || "#1f2a24";
+        ctx.fill();
+      } else {
+        ctx.fillStyle = paint?.bg || "#fbfaf6";
+        ctx.fill();
+        ctx.strokeStyle = paint?.border || "#c8c2b4";
+        ctx.lineWidth = Math.max(1, 1.5 * scale);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = f.isRoot
+        ? paint?.rootText || "#f4f1ea"
+        : "#1a1c19";
+      ctx.font = f.isRoot
+        ? `700 ${18.4 * scale}px "Fraunces", Georgia, serif`
+        : `500 ${14.7 * scale}px "Outfit", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const maxTextW =
+        (f.isRoot ? 220 : 188) * scale;
+      const lines = wrapTextLines(ctx, node.text, maxTextW);
+      const lineH = (f.isRoot ? 24 : 20) * scale;
+      const startY = ty(f.y) - ((lines.length - 1) * lineH) / 2;
+      lines.forEach((line, i) => {
+        ctx.fillText(line, tx(f.x), startY + i * lineH);
+      });
+    }
+
+    return canvas;
+  }
+
+  function exportPng() {
+    const { frames, edges } = withFullyExpanded(() => layoutTree());
+    const canvas = paintExportCanvas(frames, edges);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      downloadBlob(safeFilename(doc.root.text, "png"), blob);
+    }, "image/png");
+  }
+
   function startEdit(id) {
     const el = nodesEl.querySelector(`.node[data-id="${id}"]`);
     if (!el) return;
@@ -1137,29 +1489,48 @@
   }
 
   /**
-   * 分区命中：中部 = 成子；上/下边 = 插到该节点前/后（中心主题仅成子）。
-   * @returns {{ targetId: string, mode: 'child'|'before'|'after' } | null}
+   * 分区命中：中部 = 成子；上/下边 = 插同级；
+   * 中心主题左/右约 1/3 = 挂到该侧；空白过中线 = 一级枝改侧。
    */
   function resolveDropIntent(clientX, clientY, movingIds) {
     const under = hitNodeIdAtClient(clientX, clientY);
-    if (!under || draggingIds.has(under)) return null;
+    if (!under || draggingIds.has(under)) {
+      return resolveEmptySideIntent(clientX, movingIds);
+    }
     const frame = layoutCache.frames.get(under);
     const hit = findNode(under);
-    if (!frame || !hit) return null;
+    if (!frame || !hit) {
+      return resolveEmptySideIntent(clientX, movingIds);
+    }
 
     const rect = stage.getBoundingClientRect();
+    const isRoot = hit.node === doc.root;
+
+    if (isRoot) {
+      const cx = rect.left + camera.x + frame.x * camera.scale;
+      const hw = (frame.w * camera.scale) / 2;
+      const left = cx - hw;
+      const width = Math.max(frame.w * camera.scale, 1);
+      const u = (clientX - left) / width;
+      if (u < 1 / 3) {
+        return { targetId: under, mode: "side-left" };
+      }
+      if (u > 2 / 3) {
+        return { targetId: under, mode: "side-right" };
+      }
+      if (!canMoveOnto(under, movingIds)) return null;
+      return { targetId: under, mode: "child" };
+    }
+
     const cy = rect.top + camera.y + frame.y * camera.scale;
     const hh = (frame.h * camera.scale) / 2;
     const top = cy - hh;
     const height = Math.max(frame.h * camera.scale, 1);
     const t = (clientY - top) / height;
 
-    const isRoot = hit.node === doc.root;
     let mode = "child";
-    if (!isRoot) {
-      if (t < DROP_EDGE_RATIO) mode = "before";
-      else if (t > 1 - DROP_EDGE_RATIO) mode = "after";
-    }
+    if (t < DROP_EDGE_RATIO) mode = "before";
+    else if (t > 1 - DROP_EDGE_RATIO) mode = "after";
 
     if (mode === "child") {
       if (!canMoveOnto(under, movingIds)) return null;
@@ -1169,13 +1540,32 @@
     return { targetId: under, mode };
   }
 
+  /** 拖一级枝到空白：按世界坐标 x 相对中心决定左右侧 */
+  function resolveEmptySideIntent(clientX, movingIds) {
+    const tops = topLevelMovableIds(movingIds);
+    if (!tops.length) return null;
+    for (const id of tops) {
+      const hit = findNode(id);
+      if (!hit || hit.parent !== doc.root) return null;
+    }
+    const rect = stage.getBoundingClientRect();
+    const worldX = (clientX - rect.left - camera.x) / camera.scale;
+    const side = worldX < 0 ? "left" : "right";
+    return {
+      targetId: doc.root.id,
+      mode: side === "left" ? "side-left" : "side-right",
+      viaEmpty: true,
+    };
+  }
+
   function setDropIntent(next) {
     const same =
       (!dropIntent && !next) ||
       (dropIntent &&
         next &&
         dropIntent.targetId === next.targetId &&
-        dropIntent.mode === next.mode);
+        dropIntent.mode === next.mode &&
+        !!dropIntent.viaEmpty === !!next.viaEmpty);
     if (same) return;
     dropIntent = next;
     render();
@@ -1189,14 +1579,30 @@
     draggingIds = new Set();
     dropIntent = null;
     insertLineEl.hidden = true;
+    sideGuideEl.hidden = true;
+    sideGuideEl.classList.remove("is-left", "is-right");
     stage.classList.remove("is-node-dragging");
 
     if (!cancelled && active && intent) {
       let ok = false;
       if (intent.mode === "child") {
         ok = reparentAsChildren(movingIds, intent.targetId);
-      } else {
+      } else if (intent.mode === "before" || intent.mode === "after") {
         ok = insertAsSiblings(movingIds, intent.targetId, intent.mode);
+      } else if (
+        intent.mode === "side-left" ||
+        intent.mode === "side-right"
+      ) {
+        const side = intent.mode === "side-left" ? "left" : "right";
+        if (intent.viaEmpty) {
+          // 空白改侧：只动已是中心直接子的枝
+          ok = applyRootSide(
+            movingIds.filter((id) => findNode(id)?.parent === doc.root),
+            side
+          );
+        } else {
+          ok = applyRootSide(movingIds, side);
+        }
       }
       if (ok) {
         if (clipboard?.mode === "cut") {
@@ -1208,7 +1614,6 @@
       }
     }
 
-    // 未形成拖拽：若点在已多选成员上，mouseup 收成单选
     if (!active && suppressClickSelect) {
       selectOnly(originId);
       return;
@@ -1478,6 +1883,17 @@
   document
     .getElementById("btn-paste")
     .addEventListener("click", pasteClipboard);
+  document
+    .getElementById("btn-side-left")
+    .addEventListener("click", () => setSelectedSide("left"));
+  document
+    .getElementById("btn-side-right")
+    .addEventListener("click", () => setSelectedSide("right"));
+  document.querySelectorAll(".fill-swatches .swatch").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setSelectedFill(btn.dataset.fill || null);
+    });
+  });
   document.getElementById("btn-zoom-in").addEventListener("click", () => {
     camera.scale = Math.min(2.5, camera.scale * 1.12);
     applyCamera();
@@ -1489,6 +1905,12 @@
   document.getElementById("btn-fit").addEventListener("click", () =>
     centerCameraOnContent(true)
   );
+  document
+    .getElementById("btn-export-png")
+    .addEventListener("click", exportPng);
+  document
+    .getElementById("btn-export-md")
+    .addEventListener("click", exportMarkdown);
 
   searchInputEl.addEventListener("input", () => {
     runSearch(searchInputEl.value);
@@ -1578,6 +2000,9 @@
     } else if (e.key === "v" && meta) {
       e.preventDefault();
       pasteClipboard();
+    } else if (meta && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault();
+      setSelectedSide(e.key === "ArrowLeft" ? "left" : "right");
     } else if (e.key === "Escape") {
       if (clipboard?.mode === "cut") {
         cancelCut();
