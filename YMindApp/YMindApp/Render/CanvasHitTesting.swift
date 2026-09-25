@@ -7,8 +7,8 @@ enum CanvasHit: Equatable {
     case empty
 }
 
-/// 分叉控件的胶囊外框（世界坐标）。宽度随「−N」位数增长，封顶到与节点的间隙，
-/// 保证命中区不会盖到节点上。
+/// 分叉控件的胶囊外框（世界坐标）。宽度随「−N」位数增长；中心恒在「节点边缘 + 间隙」处
+/// （规格 §4.1），因此宽度封顶到该间隙，避免药丸与节点矩形相接。
 func branchToggleWorldRect(_ toggle: BranchToggle) -> CGRect {
     let digits = toggle.collapsed ? String(toggle.hiddenCount).count : 0
     let radius = LayoutConstants.branchToggleVisualRadius
@@ -21,12 +21,14 @@ func branchToggleWorldRect(_ toggle: BranchToggle) -> CGRect {
     )
 }
 
-/// 命中区 = 视觉外框外扩 (视觉半径 → 命中半径) 的余量。
+/// 命中区 = 视觉外框外扩 (视觉半径 → 命中半径) 的余量，横向再封顶到节点间隙。
+/// 由此同时成立：命中区覆盖整颗药丸（含「−N」加宽后的两端），且不越界到节点矩形内。
 func branchToggleHitContains(_ toggle: BranchToggle, worldPoint: CGPoint) -> Bool {
+    let pill = branchToggleWorldRect(toggle)
     let margin = LayoutConstants.branchToggleHitRadius - LayoutConstants.branchToggleVisualRadius
-    return branchToggleWorldRect(toggle)
-        .insetBy(dx: -margin, dy: -margin)
-        .contains(worldPoint)
+    let halfWidth = min(pill.width / 2 + margin, LayoutConstants.branchToggleGap)
+    return abs(worldPoint.x - toggle.center.x) <= halfWidth
+        && abs(worldPoint.y - toggle.center.y) <= LayoutConstants.branchToggleHitRadius
 }
 
 /// 命中顺序：分叉控件 → 节点 → 空白。世界坐标判定，控件命中半径略大于视觉圆。

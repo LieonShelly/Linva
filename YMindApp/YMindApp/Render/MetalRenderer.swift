@@ -330,14 +330,11 @@ final class MetalRenderer {
         )
     }
 
-    /// 栅格倍率量化到档位：缩放抖动时不重复栅格化，同时保证高缩放下文字不糊。
+    /// 栅格倍率：按相机缩放向上量化到 0.5 档，并封顶 2×。
+    /// 向上量化保证每档 ≥ 实际缩放（不会被放大糊掉）；封顶限制高缩放下的纹理内存。
     private static func rasterBucket(_ cameraScale: CGFloat) -> CGFloat {
-        switch cameraScale {
-        case ..<1.25: return 1
-        case ..<1.75: return 1.5
-        case ..<2.5: return 2
-        default: return 3
-        }
+        let clamped = min(max(cameraScale, 1), 2)
+        return (clamped * 2).rounded(.up) / 2
     }
 
     private func drawSelectionStrokes(
@@ -359,7 +356,7 @@ final class MetalRenderer {
             vertices += strokeVertices(rect: rect, thickness: thickness, color: memberColor)
             if distinguishAnchor, id == selectionAnchorId {
                 vertices += dashedStrokeVertices(
-                    rect: rect.insetBy(dx: -4, dy: -4),
+                    rect: rect,
                     thickness: thickness,
                     dash: 5 * camera.scale,
                     gap: 3 * camera.scale,

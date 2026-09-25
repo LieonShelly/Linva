@@ -106,7 +106,7 @@ struct HitTestTests {
         )
     }
 
-    @Test func hitTest_prefersBranchToggleOverNode() {
+    @Test func hitTestCanvas_hitsBranchToggleAtFork() {
         let nodeId = UUID()
         let frame = NodeFrame(
             id: nodeId, text: "P", center: .zero,
@@ -179,6 +179,46 @@ struct HitTestTests {
                 camera: Camera()
             ) == .node(nodeId)
         )
+    }
+
+    @Test func hitTestCanvas_prefersBranchToggleWhenRegionsOverlap() {
+        let nodeId = UUID()
+        let frame = makeFrame(id: nodeId, size: NodeSize(width: 80, height: 40))
+        let overlapping = BranchToggle(
+            nodeId: nodeId,
+            side: .right,
+            center: .zero,
+            collapsed: false,
+            hiddenCount: 0
+        )
+        let snapshot = LayoutSnapshot(
+            frames: [nodeId: frame], edges: [], branchToggles: [overlapping]
+        )
+
+        #expect(
+            hitTestCanvas(screenPoint: .zero, snapshot: snapshot, camera: Camera())
+                == .branchToggle(nodeId: nodeId)
+        )
+    }
+
+    @Test func branchToggleHit_coversWholePill_withoutReachingNode() {
+        let nodeId = UUID()
+        // 节点宽 80 → 边缘在 ±40；控件中心按 gap=18 落在 ±58。
+        for hiddenCount in [0, 4, 12, 123, 99999] {
+            let toggle = BranchToggle(
+                nodeId: nodeId,
+                side: .right,
+                center: CGPoint(x: 58, y: 0),
+                collapsed: hiddenCount > 0,
+                hiddenCount: hiddenCount
+            )
+            let pill = branchToggleWorldRect(toggle)
+
+            #expect(branchToggleHitContains(toggle, worldPoint: CGPoint(x: pill.minX, y: 0)))
+            #expect(branchToggleHitContains(toggle, worldPoint: CGPoint(x: pill.maxX, y: 0)))
+            #expect(!branchToggleHitContains(toggle, worldPoint: CGPoint(x: 40 - 0.001, y: 0)))
+            #expect(!branchToggleHitContains(toggle, worldPoint: CGPoint(x: 58, y: 14.001)))
+        }
     }
 
     private func makeFrame(id: UUID, size: NodeSize) -> NodeFrame {
