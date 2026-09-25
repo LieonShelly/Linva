@@ -84,6 +84,8 @@ final class DocumentSession: ObservableObject {
     @Published private(set) var editingId: UUID?
     @Published var draftText = ""
     @Published var errorMessage: String?
+    @Published private(set) var clipboard: ClipboardPayload?
+    @Published private(set) var cutSourceIds: Set<UUID> = []
 
     private let measure: TextMeasure
     private let securityScopedAccess: SecurityScopedAccess
@@ -221,6 +223,66 @@ final class DocumentSession: ObservableObject {
     func clearSelection() {
         model.clearSelection()
         syncSelectionFromModel()
+    }
+
+    func copySelection() {
+        let tops = model.movableTopLevel(ids: model.selectedIds)
+        guard !tops.isEmpty else { return }
+        clipboard = ClipboardPayload(
+            mode: .copy,
+            nodes: tops.compactMap { model.node(id: $0) },
+            sourceIds: []
+        )
+    }
+
+    func cutSelection() {
+        let tops = model.movableTopLevel(ids: model.selectedIds)
+        guard !tops.isEmpty else { return }
+        clipboard = ClipboardPayload(
+            mode: .cut,
+            nodes: tops.compactMap { model.node(id: $0) },
+            sourceIds: tops
+        )
+        cutSourceIds = Set(tops)
+    }
+
+    func cancelCut() {
+        clipboard = nil
+        cutSourceIds = []
+    }
+
+    func pasteToPrimary() {
+        guard let clipboard, let target = primarySelectedId else { return }
+        switch clipboard.mode {
+        case .copy:
+            guard model.node(id: target) != nil else { return }
+            commandBus.execute(.pasteAsChild(payload: clipboard.nodes, parentId: target))
+        case .cut:
+            let alive = clipboard.sourceIds.filter { model.node(id: $0) != nil }
+            guard !alive.isEmpty,
+                  model.isValidDropTarget(target, movingIds: Set(alive)) else { return }
+            commandBus.execute(.moveToParent(ids: alive, parentId: target))
+            cancelCut()
+        }
+    }
+
+    func move(_ ids: [UUID], to targetId: UUID) {
+        guard model.isValidDropTarget(targetId, movingIds: Set(ids)) else { return }
+        commandBus.execute(.moveToParent(ids: ids, parentId: targetId))
+    }
+
+    var canCopy: Bool { !model.movableTopLevel(ids: model.selectedIds).isEmpty }
+    var canCut: Bool { canCopy }
+
+    var canPaste: Bool {
+        guard let clipboard, let target = primarySelectedId else { return false }
+        switch clipboard.mode {
+        case .copy:
+            return model.node(id: target) != nil
+        case .cut:
+            let alive = clipboard.sourceIds.filter { model.node(id: $0) != nil }
+            return !alive.isEmpty && model.isValidDropTarget(target, movingIds: Set(alive))
+        }
     }
 
     func startEditing(_ id: UUID) {
