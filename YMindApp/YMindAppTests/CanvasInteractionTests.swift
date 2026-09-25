@@ -13,6 +13,13 @@ struct CanvasInteractionTests {
         #expect(forward == CGRect(x: 4, y: 5, width: 6, height: 15))
     }
 
+    @Test func hasExceededDragThreshold_crossesAtFourPoints() {
+        let origin = CGPoint(x: 100, y: 100)
+        #expect(!hasExceededDragThreshold(from: origin, to: CGPoint(x: 103, y: 101)))
+        #expect(hasExceededDragThreshold(from: origin, to: CGPoint(x: 105, y: 100)))
+        #expect(hasExceededDragThreshold(from: origin, to: CGPoint(x: 100, y: 96)))
+    }
+
     @Test func pointerGesture_drawsMarqueeOnlyWhenTrackingAndPastThreshold() {
         let clickLike = CanvasPointerGesture.marquee(
             origin: CGPoint(x: 10, y: 10),

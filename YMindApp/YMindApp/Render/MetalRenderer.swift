@@ -76,6 +76,8 @@ final class MetalRenderer {
         camera: Camera,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
+        cutSourceIds: Set<UUID>,
+        dropTargetId: UUID?,
         marquee: CGRect?
     ) {
         guard view.bounds.width > 0,
@@ -135,6 +137,20 @@ final class MetalRenderer {
             camera: camera,
             selectedIds: selectedIds,
             selectionAnchorId: selectionAnchorId,
+            encoder: encoder,
+            viewport: &viewport
+        )
+        drawCutWeaken(
+            snapshot: snapshot,
+            camera: camera,
+            cutSourceIds: cutSourceIds,
+            encoder: encoder,
+            viewport: &viewport
+        )
+        drawDropHighlight(
+            snapshot: snapshot,
+            camera: camera,
+            dropTargetId: dropTargetId,
             encoder: encoder,
             viewport: &viewport
         )
@@ -365,6 +381,53 @@ final class MetalRenderer {
                 )
             }
         }
+        drawSolid(vertices, encoder: encoder, viewport: &viewport)
+    }
+
+    /// 剪切源弱化：半透明遮罩 + 虚线边框（对齐原型弱化/虚线）。
+    private func drawCutWeaken(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        cutSourceIds: Set<UUID>,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        guard !cutSourceIds.isEmpty else { return }
+        let fillColor = rgba(NSColor.windowBackgroundColor.withAlphaComponent(0.55))
+        let dashColor = rgba(.tertiaryLabelColor)
+        let thickness = max(1.5, 2 * camera.scale)
+        var vertices: [SolidVertex] = []
+        for id in cutSourceIds {
+            guard let frame = snapshot.frames[id] else { continue }
+            let rect = screenRect(frame.rect, camera: camera)
+            vertices += rectangleQuad(rect: rect, color: fillColor)
+            vertices += dashedStrokeVertices(
+                rect: rect.insetBy(dx: -3, dy: -3),
+                thickness: thickness,
+                dash: 5 * camera.scale,
+                gap: 3 * camera.scale,
+                color: dashColor
+            )
+        }
+        drawSolid(vertices, encoder: encoder, viewport: &viewport)
+    }
+
+    /// 放置目标高亮：强调色加粗描边。
+    private func drawDropHighlight(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        dropTargetId: UUID?,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        guard let dropTargetId,
+              let frame = snapshot.frames[dropTargetId] else { return }
+        let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
+        let vertices = strokeVertices(
+            rect: rect,
+            thickness: max(2.5, 3 * camera.scale),
+            color: rgba(.controlAccentColor)
+        )
         drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
 

@@ -92,6 +92,11 @@ func isClickLike(_ rect: CGRect) -> Bool {
     rect.width < marqueeClickThreshold && rect.height < marqueeClickThreshold
 }
 
+/// 位移超过拖拽阈值（与框选阈值一致的 4pt）才进入搬枝拖拽。
+func hasExceededDragThreshold(from origin: CGPoint, to current: CGPoint) -> Bool {
+    !isClickLike(marqueeRect(from: origin, to: current))
+}
+
 /// 视图矩形 → 世界矩形。`Camera.scale > 0`，min/max 顺序在变换后保持。
 func worldRect(fromScreenRect rect: CGRect, camera: Camera) -> CGRect {
     let origin = camera.screenToWorld(rect.origin)
