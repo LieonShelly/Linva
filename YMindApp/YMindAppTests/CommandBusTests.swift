@@ -231,4 +231,61 @@ struct CommandBusTests {
         let rootChildIds = model.document.root.children.map(\.id)
         #expect(rootChildIds.filter { $0 == a || $0 == b }.count == 2)
     }
+
+    @Test func insertSiblings_undoRestoresOriginalParentsAndOrder() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let g1 = model.insertChild(parentId: b, text: "G1", side: nil, at: nil)
+        let g2 = model.insertChild(parentId: b, text: "G2", side: nil, at: nil)
+
+        bus.execute(.insertSiblings(ids: [g1, g2], anchorId: a, position: .before))
+        #expect(model.parentId(of: g1) == root)
+
+        bus.undo()
+        #expect(model.parentId(of: g1) == b)
+        #expect(model.parentId(of: g2) == b)
+        let bKids = model.node(id: b)!.children.map(\.id)
+        #expect(bKids == [g1, g2])   // 原父/下标/顺序恢复
+
+        bus.redo()
+        #expect(model.parentId(of: g1) == root)
+    }
+
+    @Test func setSide_undoRestoresOldSide() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+
+        bus.execute(.setSide(ids: [a], side: .left))
+        #expect(model.node(id: a)?.side == .left)
+
+        bus.undo()
+        #expect(model.node(id: a)?.side == .right)
+
+        bus.redo()
+        #expect(model.node(id: a)?.side == .left)
+    }
+
+    @Test func applyRootSide_undoUnpromotes() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+
+        bus.execute(.applyRootSide(ids: [g], side: .left))
+        #expect(model.parentId(of: g) == root)
+        #expect(model.node(id: g)?.side == .left)
+
+        bus.undo()
+        #expect(model.parentId(of: g) == a)
+        #expect(model.node(id: g)?.side == nil)
+
+        bus.redo()
+        #expect(model.parentId(of: g) == root)
+    }
 }

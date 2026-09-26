@@ -165,6 +165,58 @@ final class CommandBus {
                 }
             )
 
+        case let .insertSiblings(ids, anchorId, position):
+            let records = model.insertSiblings(ids: ids, anchorId: anchorId, position: position)
+            guard !records.isEmpty else { return nil }
+            let movedIds = Set(records.map(\.node.id))
+            let anchor = movedIds.min { $0.uuidString < $1.uuidString }
+            model.replaceSelection(movedIds, anchorId: anchor)
+            return Entry(
+                undo: {
+                    for r in records.sorted(by: { $0.index < $1.index }) {
+                        _ = self.model.removeWithoutSelection(id: r.node.id)
+                        self.model.restoreChild(parentId: r.parentId, index: r.index, node: r.node)
+                    }
+                    self.model.replaceSelection(movedIds, anchorId: anchor)
+                },
+                redo: {
+                    _ = self.model.insertSiblings(ids: ids, anchorId: anchorId, position: position)
+                    self.model.replaceSelection(movedIds, anchorId: anchor)
+                }
+            )
+
+        case let .setSide(ids, side):
+            let changes = model.setSide(ids: ids, side: side)
+            guard !changes.isEmpty else { return nil }
+            return Entry(
+                undo: {
+                    for c in changes {
+                        _ = self.model.mutate(id: c.id) { $0.side = c.oldSide }
+                    }
+                },
+                redo: {
+                    _ = self.model.setSide(ids: ids, side: side)
+                }
+            )
+
+        case let .applyRootSide(ids, side):
+            let change = model.applyRootSide(ids: ids, side: side)
+            guard !change.sideChanges.isEmpty || !change.promotions.isEmpty else { return nil }
+            return Entry(
+                undo: {
+                    for p in change.promotions.sorted(by: { $0.index < $1.index }) {
+                        _ = self.model.removeWithoutSelection(id: p.node.id)
+                        self.model.restoreChild(parentId: p.parentId, index: p.index, node: p.node)
+                    }
+                    for c in change.sideChanges {
+                        _ = self.model.mutate(id: c.id) { $0.side = c.oldSide }
+                    }
+                },
+                redo: {
+                    _ = self.model.applyRootSide(ids: ids, side: side)
+                }
+            )
+
         case let .pasteAsChild(payload, parentId):
             let priorSelection = model.selectedIds
             let priorAnchor = model.selectionAnchorId

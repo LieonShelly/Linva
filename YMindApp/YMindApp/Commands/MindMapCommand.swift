@@ -8,5 +8,8 @@ enum MindMapCommand: Equatable {
     case toggleCollapse(id: UUID)
     case setCollapsed(ids: [UUID], collapsed: Bool)
     case moveToParent(ids: [UUID], parentId: UUID)
+    case insertSiblings(ids: [UUID], anchorId: UUID, position: BeforeAfter)
+    case setSide(ids: [UUID], side: Side)
+    case applyRootSide(ids: [UUID], side: Side)
     case pasteAsChild(payload: [Node], parentId: UUID)
 }

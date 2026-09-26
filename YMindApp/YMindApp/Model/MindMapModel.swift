@@ -423,7 +423,7 @@ final class MindMapModel {
     }
 
     @discardableResult
-    private func mutate(id: UUID, _ body: (inout Node) -> Void) -> Bool {
+    func mutate(id: UUID, _ body: (inout Node) -> Void) -> Bool {
         var root = document.root
         let ok = Self.mutate(&root, id: id, body)
         if ok { document.root = root }
