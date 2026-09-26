@@ -29,6 +29,18 @@ struct ContentView: View {
                         addSibling: addSibling,
                         delete: deleteSelected,
                         move: move,
+                        insertSiblings: { ids, anchorId, position in
+                            if session.editingId != nil { commitEditing() }
+                            session.commandBus.execute(.insertSiblings(ids: ids, anchorId: anchorId, position: position))
+                        },
+                        setSide: { ids, side in
+                            if session.editingId != nil { commitEditing() }
+                            session.commandBus.execute(.setSide(ids: ids, side: side))
+                        },
+                        applyRootSide: { ids, side in
+                            if session.editingId != nil { commitEditing() }
+                            session.commandBus.execute(.applyRootSide(ids: ids, side: side))
+                        },
                         copy: copySelection,
                         cut: cutSelection,
                         paste: paste,
@@ -45,6 +57,10 @@ struct ContentView: View {
                         onCommit: commitEditing,
                         onCancel: cancelEditing
                     )
+                }
+
+                if session.search.isOpen {
+                    SearchBar(session: session)
                 }
 
                 if let errorMessage = session.errorMessage {
@@ -65,6 +81,7 @@ struct ContentView: View {
                     canCut: session.canCut,
                     canCopy: session.canCopy,
                     canPaste: session.canPaste,
+                    canSetSide: session.canSetSide,
                     zoomPercent: Int((session.camera.scale * 100).rounded()),
                     addChild: addChild,
                     addSibling: addSibling,
@@ -72,6 +89,8 @@ struct ContentView: View {
                     cut: cutSelection,
                     copy: copySelection,
                     paste: paste,
+                    setSideLeft: { setSide(.left) },
+                    setSideRight: { setSide(.right) },
                     zoomOut: { zoom(by: 1 / 1.12, viewport: geometry.size) },
                     zoomIn: { zoom(by: 1.12, viewport: geometry.size) },
                     fit: { fit(viewport: geometry.size) }
@@ -204,6 +223,11 @@ struct ContentView: View {
     private func move(_ ids: [UUID], to targetId: UUID) {
         if session.editingId != nil { commitEditing() }
         session.move(ids, to: targetId)
+    }
+
+    private func setSide(_ side: Side) {
+        session.commitEditingIfNeeded()
+        session.commandBus.execute(.setSide(ids: Array(session.selectedIds), side: side))
     }
 
     private func copySelection() {

@@ -8,6 +8,7 @@ struct MainToolbar: ToolbarContent {
     let canCut: Bool
     let canCopy: Bool
     let canPaste: Bool
+    let canSetSide: Bool
     let zoomPercent: Int
     let addChild: () -> Void
     let addSibling: () -> Void
@@ -15,6 +16,8 @@ struct MainToolbar: ToolbarContent {
     let cut: () -> Void
     let copy: () -> Void
     let paste: () -> Void
+    let setSideLeft: () -> Void
+    let setSideRight: () -> Void
     let zoomOut: () -> Void
     let zoomIn: () -> Void
     let fit: () -> Void
@@ -61,6 +64,18 @@ struct MainToolbar: ToolbarContent {
             }
             .disabled(!canPaste)
             .help("粘贴为主题子节点（⌘V）")
+
+            Button(action: setSideLeft) {
+                Label("← 左侧", systemImage: "arrow.left.to.line")
+            }
+            .disabled(!canSetSide)
+            .help("放到左侧（⌘←）")
+
+            Button(action: setSideRight) {
+                Label("右侧 →", systemImage: "arrow.right.to.line")
+            }
+            .disabled(!canSetSide)
+            .help("放到右侧（⌘→）")
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {

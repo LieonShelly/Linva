@@ -103,6 +103,46 @@ private struct DocumentCommands: Commands {
             .keyboardShortcut("z", modifiers: [.command, .shift])
             .disabled(session.editingId == nil && !session.commandBus.canRedo)
         }
+
+        CommandGroup(after: .undoRedo) {
+            Button("搜索…") {
+                session.openSearch()
+            }
+            .keyboardShortcut("f", modifiers: .command)
+
+            Button("查找下一个") {
+                session.revealSearchMatch(session.search.index + 1)
+            }
+            .keyboardShortcut("g", modifiers: .command)
+
+            Button("查找上一个") {
+                session.revealSearchMatch(session.search.index - 1)
+            }
+            .keyboardShortcut("g", modifiers: [.command, .shift])
+
+            Divider()
+
+            Button("移到左侧") {
+                _ = setSide(session, .left)
+            }
+            .keyboardShortcut(.leftArrow, modifiers: .command)
+            .disabled(!session.canSetSide)
+
+            Button("移到右侧") {
+                _ = setSide(session, .right)
+            }
+            .keyboardShortcut(.rightArrow, modifiers: .command)
+            .disabled(!session.canSetSide)
+        }
+    }
+
+    @discardableResult
+    private func setSide(_ session: DocumentSession, _ side: Side) -> Bool {
+        session.commitEditingIfNeeded()
+        let ids = Array(session.selectedIds)
+        guard session.canSetSide else { return false }
+        session.commandBus.execute(.setSide(ids: ids, side: side))
+        return true
     }
 }
 
