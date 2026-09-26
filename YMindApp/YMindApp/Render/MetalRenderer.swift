@@ -77,7 +77,8 @@ final class MetalRenderer {
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
         cutSourceIds: Set<UUID>,
-        dropTargetId: UUID?,
+        intent: DropIntent?,
+        searchHitId: UUID?,
         marquee: CGRect?
     ) {
         guard view.bounds.width > 0,
@@ -147,12 +148,13 @@ final class MetalRenderer {
             encoder: encoder,
             viewport: &viewport
         )
-        drawDropHighlight(
-            snapshot: snapshot,
-            camera: camera,
-            dropTargetId: dropTargetId,
-            encoder: encoder,
-            viewport: &viewport
+        drawDropFeedback(
+            snapshot: snapshot, camera: camera, intent: intent,
+            encoder: encoder, viewport: &viewport
+        )
+        drawSearchHit(
+            snapshot: snapshot, camera: camera, searchHitId: searchHitId,
+            encoder: encoder, viewport: &viewport
         )
         if let marquee {
             drawMarquee(marquee, encoder: encoder, viewport: &viewport)
@@ -412,24 +414,103 @@ final class MetalRenderer {
         drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
 
-    /// 放置目标高亮：强调色加粗描边。
-    private func drawDropHighlight(
+    /// 放置反馈：child 整节点描边；before/after 弱边框+插入线；side 根镶边/中线引导。
+    private func drawDropFeedback(
         snapshot: LayoutSnapshot,
         camera: Camera,
-        dropTargetId: UUID?,
+        intent: DropIntent?,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        guard let dropTargetId,
-              let frame = snapshot.frames[dropTargetId] else { return }
-        let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
-        let vertices = strokeVertices(
-            rect: rect,
-            thickness: max(2.5, 3 * camera.scale),
-            color: rgba(.controlAccentColor)
-        )
+        guard let intent else { return }
+        let accent = rgba(.controlAccentColor)
+        var vertices: [SolidVertex] = []
+        switch intent {
+        case let .child(targetId):
+            guard let frame = snapshot.frames[targetId] else { return }
+            let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
+            vertices += strokeVertices(rect: rect, thickness: max(2.5, 3 * camera.scale), color: accent)
+
+        case let .before(targetId), let .after(targetId):
+            guard let frame = snapshot.frames[targetId] else { return }
+            let weakColor = rgba(NSColor.controlAccentColor.withAlphaComponent(0.45))
+            let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
+            vertices += strokeVertices(rect: rect, thickness: max(1.5, 2 * camera.scale), color: weakColor)
+            let y = intent == .before(targetId: targetId)
+                ? screenRect(frame.rect, camera: camera).minY
+                : screenRect(frame.rect, camera: camera).maxY
+            vertices += horizontalLineQuad(
+                center: CGPoint(x: screenRect(frame.rect, camera: camera).midX, y: y),
+                width: max(screenRect(frame.rect, camera: camera).width, 48),
+                thickness: 3,
+                color: accent
+            )
+
+        case let .sideLeft(targetId, viaEmpty), let .sideRight(targetId, viaEmpty):
+            guard let frame = snapshot.frames[targetId] else { return }
+            if viaEmpty {
+                // 中线引导：垂直贯穿线
+                let cx = screenRect(frame.rect, camera: camera).midX
+                vertices += verticalLineQuad(
+                    x: cx,
+                    top: 0,
+                    bottom: camera.scale > 0 ? 4000 * camera.scale : 0,
+                    thickness: 2,
+                    color: rgba(NSColor.controlAccentColor.withAlphaComponent(0.55))
+                )
+            } else if case .sideLeft = intent {
+                let rect = screenRect(frame.rect, camera: camera)
+                vertices += edgeInsetQuad(rect: rect, edge: .left, thickness: 6, color: accent)
+            } else {
+                let rect = screenRect(frame.rect, camera: camera)
+                vertices += edgeInsetQuad(rect: rect, edge: .right, thickness: 6, color: accent)
+            }
+        }
         drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
+
+    /// 搜索命中：琥珀色描边（对齐原型 .is-search-hit），可与普通选中并存。
+    private func drawSearchHit(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        searchHitId: UUID?,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        guard let searchHitId, let frame = snapshot.frames[searchHitId] else { return }
+        let amber = SIMD4<Float>(0.7686, 0.4706, 0.1647, 1)  // #C4782A
+        let rect = screenRect(frame.rect, camera: camera).insetBy(dx: -3, dy: -3)
+        let vertices = strokeVertices(rect: rect, thickness: max(2, 2.5 * camera.scale), color: amber)
+        drawSolid(vertices, encoder: encoder, viewport: &viewport)
+    }
+
+    /// 水平插入线：中心点 + 宽度。
+    private func horizontalLineQuad(center: CGPoint, width: CGFloat, thickness: CGFloat, color: SIMD4<Float>) -> [SolidVertex] {
+        rectangleQuad(
+            rect: CGRect(x: center.x - width / 2, y: center.y - thickness / 2, width: width, height: thickness),
+            color: color
+        )
+    }
+
+    /// 垂直贯穿线。
+    private func verticalLineQuad(x: CGFloat, top: CGFloat, bottom: CGFloat, thickness: CGFloat, color: SIMD4<Float>) -> [SolidVertex] {
+        rectangleQuad(
+            rect: CGRect(x: x - thickness / 2, y: top, width: thickness, height: max(bottom - top, 1)),
+            color: color
+        )
+    }
+
+    /// 根节点左右镶边。
+    private func edgeInsetQuad(rect: CGRect, edge: EdgeInset, thickness: CGFloat, color: SIMD4<Float>) -> [SolidVertex] {
+        switch edge {
+        case .left:
+            return rectangleQuad(rect: CGRect(x: rect.minX, y: rect.minY, width: thickness, height: rect.height), color: color)
+        case .right:
+            return rectangleQuad(rect: CGRect(x: rect.maxX - thickness, y: rect.minY, width: thickness, height: rect.height), color: color)
+        }
+    }
+
+    private enum EdgeInset { case left, right }
 
     private func edgeVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
         let color = rgba(.separatorColor)

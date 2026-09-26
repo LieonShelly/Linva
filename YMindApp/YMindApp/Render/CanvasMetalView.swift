@@ -18,11 +18,11 @@ enum CanvasPointerGesture: Equatable {
     case marquee(origin: CGPoint, current: CGPoint, additive: Bool, tracking: Bool)
     /// 节点按下未拖：`movingIds` 为待搬集；松手未拖则收成单选。
     case pendingDrag(origin: CGPoint, nodeId: UUID, movingIds: Set<UUID>)
-    /// 搬枝拖拽中：`dropTarget` 为当前合法放置目标（nil=空白/非法）。
-    case drag(movingIds: Set<UUID>, dropTarget: UUID?, lastPoint: CGPoint)
+    /// 搬枝拖拽中：`intent` 为当前合法放置意图（nil=空白/非法）。
+    case drag(movingIds: Set<UUID>, intent: DropIntent?, lastPoint: CGPoint)
 
-    var currentDropTargetId: UUID? {
-        if case let .drag(_, dropTarget, _) = self { return dropTarget }
+    var currentDropIntent: DropIntent? {
+        if case let .drag(_, intent, _) = self { return intent }
         return nil
     }
 
@@ -48,6 +48,9 @@ struct CanvasActions {
     var addSibling: () -> Void = {}
     var delete: () -> Void = {}
     var move: ([UUID], UUID) -> Void = { _, _ in }
+    var insertSiblings: ([UUID], UUID, BeforeAfter) -> Void = { _, _, _ in }
+    var setSide: ([UUID], Side) -> Void = { _, _ in }
+    var applyRootSide: ([UUID], Side) -> Void = { _, _ in }
     var copy: () -> Void = {}
     var cut: () -> Void = {}
     var paste: () -> Void = {}
@@ -187,7 +190,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             selectedIds: session.selectedIds,
             selectionAnchorId: session.selectionAnchorId,
             cutSourceIds: session.cutSourceIds,
-            dropTargetId: gesture.currentDropTargetId,
+            intent: gesture.currentDropIntent,
+            searchHitId: session.search.currentMatchId,
             marquee: gesture.marqueeScreenRect
         )
     }
@@ -311,13 +315,13 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             guard hasExceededDragThreshold(from: origin, to: point) else { return }
             gesture = .drag(
                 movingIds: movingIds,
-                dropTarget: computeDropTarget(at: point, movingIds: movingIds),
+                intent: computeDropIntent(at: point, movingIds: movingIds),
                 lastPoint: point
             )
             setNeedsDisplay(bounds)
         case let .drag(movingIds, _, lastPoint):
-            let target = computeDropTarget(at: point, movingIds: movingIds)
-            gesture = .drag(movingIds: movingIds, dropTarget: target, lastPoint: point)
+            let intent = computeDropIntent(at: point, movingIds: movingIds)
+            gesture = .drag(movingIds: movingIds, intent: intent, lastPoint: point)
             setNeedsDisplay(bounds)
         }
     }
@@ -330,11 +334,25 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case .pendingDrag(_, let nodeId, _):
             // 未拖出阈值：收成单击单选。
             actions.select(nodeId, .replace)
-        case .drag(let movingIds, let dropTarget, _):
-            if let dropTarget {
-                actions.move(Array(movingIds), dropTarget)
+        case .drag(let movingIds, let intent, _):
+            if let intent {
+                let ids = Array(movingIds)
+                switch intent {
+                case .child(let targetId):
+                    actions.move(ids, targetId)
+                case .before(let anchorId):
+                    actions.insertSiblings(ids, anchorId, .before)
+                case .after(let anchorId):
+                    actions.insertSiblings(ids, anchorId, .after)
+                case .sideLeft(_, let viaEmpty):
+                    if viaEmpty { actions.setSide(ids, .left) }
+                    else { actions.applyRootSide(ids, .left) }
+                case .sideRight(_, let viaEmpty):
+                    if viaEmpty { actions.setSide(ids, .right) }
+                    else { actions.applyRootSide(ids, .right) }
+                }
             }
-            // dropTarget == nil：取消搬移，树不变。
+            // intent == nil：取消搬移，树不变。
         case .marquee(let origin, let current, let additive, let tracking):
             let rect = marqueeRect(from: origin, to: current)
             if !tracking || isClickLike(rect) {
@@ -354,13 +372,14 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         setNeedsDisplay(bounds)
     }
 
-    private func computeDropTarget(at point: CGPoint, movingIds: Set<UUID>) -> UUID? {
-        guard case let .node(id) = hitTestCanvas(
+    private func computeDropIntent(at point: CGPoint, movingIds: Set<UUID>) -> DropIntent? {
+        resolveDropIntent(
             screenPoint: point,
+            movingIds: movingIds,
             snapshot: session.snapshot,
-            camera: session.camera
-        ) else { return nil }
-        return session.model.isValidDropTarget(id, movingIds: movingIds) ? id : nil
+            camera: session.camera,
+            model: session.model
+        )
     }
 
     private func selectIntent(for event: NSEvent) -> CanvasSelectIntent {
