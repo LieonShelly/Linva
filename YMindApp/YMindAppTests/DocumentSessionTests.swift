@@ -217,4 +217,58 @@ struct DocumentSessionTests {
         #expect(session.model.document.root.id == originalRoot)
         try? FileManager.default.removeItem(at: url)
     }
+
+    @Test func search_revealExpandsAncestors_andSelectsMatch() {
+        let model = MindMapModel.makeNew()
+        let session = DocumentSession(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "技术方案", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "命中测试", side: nil, at: nil)
+        model.setCollapsed(id: a, to: true)
+        session.syncSelectionFromModel()
+
+        session.runSearch(query: "命中")
+        #expect(session.search.matches == [g])
+        #expect(session.search.index == 0)
+
+        session.revealSearchMatch(0)
+        #expect(model.node(id: a)?.collapsed == false)   // 祖先展开
+        #expect(session.selectedIds == [g])              // 选中收敛
+    }
+
+    @Test func search_noMatch_showsZeroAndNoJump() {
+        let session = DocumentSession()
+        session.runSearch(query: "不存在xyz")
+        #expect(session.search.matches.isEmpty)
+        #expect(session.search.index == -1)
+        #expect(session.search.currentMatchId == nil)
+    }
+
+    @Test func openSearch_commitsEditingFirst() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "ABC", side: .right, at: nil)
+        session.relayout()
+        session.startEditing(a)
+        session.draftText = "XYZ"
+        session.openSearch()
+        #expect(session.editingId == nil)                // 已提交
+        #expect(session.model.node(id: a)?.text == "XYZ")
+        #expect(session.search.isOpen)
+    }
+
+    @Test func centerCamera_movesToMatch() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        session.syncSelectionFromModel()
+        session.relayout()
+        let before = session.camera.scale
+        session.centerCamera(on: a, viewport: CGSize(width: 400, height: 300))
+        #expect(session.camera.scale == before)          // 保持缩放
+        let frame = session.snapshot.frames[a]!.rect
+        let c = session.camera.worldToScreen(CGPoint(x: frame.midX, y: frame.midY))
+        #expect(abs(c.x - 200) < 0.001)
+        #expect(abs(c.y - 150) < 0.001)
+    }
 }

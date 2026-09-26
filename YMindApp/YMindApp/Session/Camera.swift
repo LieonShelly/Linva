@@ -30,6 +30,14 @@ struct Camera: Equatable {
         )
     }
 
+    /// 保持当前 scale，平移使给定世界矩形的中心落入视口中心。
+    mutating func center(on rect: CGRect, viewport: CGSize) {
+        translation = CGPoint(
+            x: viewport.width / 2 - rect.midX * scale,
+            y: viewport.height / 2 - rect.midY * scale
+        )
+    }
+
     func worldToScreen(_ point: CGPoint) -> CGPoint {
         CGPoint(
             x: point.x * scale + translation.x,

@@ -251,6 +251,76 @@ final class DocumentSession: ObservableObject {
         cutSourceIds = []
     }
 
+    // MARK: - 搜索
+
+    struct SearchState: Equatable {
+        var isOpen = false
+        var query = ""
+        var matches: [UUID] = []
+        var index: Int = -1
+        var currentMatchId: UUID? {
+            index >= 0 && index < matches.count ? matches[index] : nil
+        }
+    }
+
+    @Published private(set) var search = SearchState()
+
+    func openSearch() {
+        commitEditingIfNeeded()
+        search.isOpen = true
+        // 已打开：壳层负责聚焦并全选；此处仅保证态
+    }
+
+    func closeSearch() {
+        search.isOpen = false
+    }
+
+    func runSearch(query: String, preferId: UUID? = nil) {
+        search.query = query
+        search.matches = model.searchMatches(query: query)
+        guard !search.matches.isEmpty else {
+            search.index = -1
+            return
+        }
+        var idx = 0
+        if let preferId, let at = search.matches.firstIndex(of: preferId) {
+            idx = at
+        }
+        revealSearchMatch(idx)
+    }
+
+    func revealSearchMatch(_ index: Int) {
+        guard !search.matches.isEmpty else { return }
+        let n = search.matches.count
+        search.index = ((index % n) + n) % n
+        let id = search.matches[search.index]
+
+        // 展开通往该节点的全部祖先（复用 setCollapsed：一步 Undo，全已展开 no-op）
+        var ancestors: [UUID] = []
+        var cur = model.parentId(of: id)
+        while let p = cur {
+            ancestors.append(p)
+            cur = model.parentId(of: p)
+        }
+        if !ancestors.isEmpty {
+            commandBus.execute(.setCollapsed(ids: ancestors, collapsed: false))
+        }
+        model.selectOnly(id)
+        syncSelectionFromModel()
+    }
+
+    /// 保持缩放，把命中节点世界矩形中心移到视口中心。
+    func centerCamera(on id: UUID, viewport: CGSize) {
+        guard let frame = snapshot.frames[id] else { return }
+        var cam = camera
+        cam.center(on: frame.rect, viewport: viewport)
+        camera = cam
+    }
+
+    var canSetSide: Bool {
+        model.selectedIds.contains { model.parentId(of: $0) == model.document.root.id }
+    }
+
     func pasteToPrimary() {
         guard let clipboard, let target = primarySelectedId else { return }
         switch clipboard.mode {
