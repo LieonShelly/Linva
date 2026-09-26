@@ -6,6 +6,13 @@ struct ReparentRecord: Equatable {
     let node: Node
 }
 
+enum BeforeAfter { case before, after }
+
+struct RootSideChange {
+    let sideChanges: [(id: UUID, oldSide: Side?)]
+    let promotions: [ReparentRecord]
+}
+
 final class MindMapModel {
     var document: MindMapDocument
     var selectedIds: Set<UUID> = []
@@ -231,6 +238,113 @@ final class MindMapModel {
         }
         _ = mutate(id: targetId) { $0.collapsed = false }
         return records
+    }
+
+    /// 可搬顶层卸下后按锚点前后插入为连续块（FR-R2）；跨父；新父为中心时 side 继承锚点（否则 nextSide）。
+    @discardableResult
+    func insertSiblings(ids: [UUID], anchorId: UUID, position: BeforeAfter) -> [ReparentRecord] {
+        let tops = movableTopLevel(ids: Set(ids))
+        guard !tops.isEmpty,
+              anchorId != document.root.id,
+              let anchorParentId = parentId(of: anchorId),
+              !tops.contains(anchorId),
+              !tops.contains(where: { isDescendant(anchorId, of: $0) }) else {
+            return []
+        }
+
+        // 严格全序 detach：先按父 id 排序，同父再按下标降序（与 removeMany 一致）。
+        let ordered = tops
+            .compactMap { id -> (UUID, Int, UUID)? in
+                guard let p = parentId(of: id), let i = indexInParent(of: id) else { return nil }
+                return (p, i, id)
+            }
+            .sorted { lhs, rhs in
+                if lhs.0 != rhs.0 { return lhs.0.uuidString < rhs.0.uuidString }
+                return lhs.1 > rhs.1
+            }
+
+        var records: [ReparentRecord] = []
+        for (parentId, index, id) in ordered {
+            guard let node = node(id: id) else { continue }
+            _ = removeWithoutChangingSelection(id: id)
+            records.append(ReparentRecord(parentId: parentId, index: index, node: node))
+        }
+        // 倒序 detach 后反转为原相对序
+        records.reverse()
+
+        // anchor 可能已因跨父被搬走（锚点在被搬集被守卫排除，故仍在原父）。
+        guard let anchorIndex = indexInParent(of: anchorId) else {
+            // 理论上不可达；保守回滚
+            for r in records { restoreChild(parentId: r.parentId, index: r.index, node: r.node) }
+            return []
+        }
+        var insertAt = position == .before ? anchorIndex : anchorIndex + 1
+        let anchorNode = node(id: anchorId)
+        for r in records {
+            var n = r.node
+            if anchorParentId == document.root.id {
+                n.side = anchorNode?.side ?? nextSide()
+            } else {
+                n.side = nil
+            }
+            _ = mutate(id: anchorParentId) { parent in
+                parent.children.insert(n, at: min(insertAt, parent.children.count))
+            }
+            insertAt += 1
+        }
+        return records
+    }
+
+    /// 仅作用中心直接子，设 side；返回被改节点快照供 Undo。
+    @discardableResult
+    func setSide(ids: [UUID], side: Side) -> [(id: UUID, oldSide: Side?)] {
+        var changes: [(id: UUID, oldSide: Side?)] = []
+        for id in ids where parentId(of: id) == document.root.id {
+            guard let node = node(id: id), node.side != side else { continue }
+            changes.append((id, node.side))
+            _ = mutate(id: id) { $0.side = side }
+        }
+        return changes
+    }
+
+    /// 中心直接子只改 side；更深提升为一级并设 side；返回撤销记录。
+    @discardableResult
+    func applyRootSide(ids: [UUID], side: Side) -> RootSideChange {
+        let tops = movableTopLevel(ids: Set(ids))
+        var sideChanges: [(id: UUID, oldSide: Side?)] = []
+        var promotions: [ReparentRecord] = []
+        for id in tops {
+            if parentId(of: id) == document.root.id {
+                guard let node = node(id: id), node.side != side else { continue }
+                sideChanges.append((id, node.side))
+                _ = mutate(id: id) { $0.side = side }
+            } else {
+                guard let p = parentId(of: id),
+                      let index = indexInParent(of: id),
+                      let node = node(id: id) else { continue }
+                _ = removeWithoutChangingSelection(id: id)
+                promotions.append(ReparentRecord(parentId: p, index: index, node: node))
+                _ = mutate(id: document.root.id) { root in
+                    var n = node
+                    n.side = side
+                    root.children.append(n)
+                }
+            }
+        }
+        return RootSideChange(sideChanges: sideChanges, promotions: promotions)
+    }
+
+    /// DFS 先序、大小写不敏感子串包含；含折叠子树；空查询返回空。
+    func searchMatches(query: String) -> [UUID] {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return [] }
+        var ids: [UUID] = []
+        func walk(_ node: Node) {
+            if node.text.lowercased().contains(q) { ids.append(node.id) }
+            for child in node.children { walk(child) }
+        }
+        walk(document.root)
+        return ids
     }
 
     /// 把既有节点追加为 parentId 的子；目标为中心主题时自动分侧。不改选中。

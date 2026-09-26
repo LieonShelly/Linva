@@ -222,4 +222,90 @@ struct ModelTests {
         #expect(!model.isValidDropTarget(g, movingIds: [a]))            // 后代
         #expect(model.isValidDropTarget(g, movingIds: [a, g]) == false) // 目标在被搬集内
     }
+
+    @Test func insertSiblings_crossParent_before_preservesOrder_andInheritsSide() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let g1 = model.insertChild(parentId: b, text: "G1", side: nil, at: nil)
+        let g2 = model.insertChild(parentId: b, text: "G2", side: nil, at: nil)
+
+        // 把 b 下的 G1、G2 插到 a 之前（跨父，同父 b 下标 G1=0,G2=1 → 保持相对序）
+        let records = model.insertSiblings(ids: [g1, g2], anchorId: a, position: .before)
+
+        #expect(records.count == 2)
+        #expect(model.parentId(of: g1) == root)
+        #expect(model.parentId(of: g2) == root)
+        // a 现在 root.children 中下标 1；g1,g2 在 a 前（下标 0,1）
+        let kids = model.node(id: root)!.children.map(\.id)
+        #expect(kids.firstIndex(of: g1)! < kids.firstIndex(of: a)!)
+        #expect(kids.firstIndex(of: g2)! < kids.firstIndex(of: a)!)
+        #expect(kids.firstIndex(of: g1)! < kids.firstIndex(of: g2)!)
+    }
+
+    @Test func insertSiblings_underRoot_inheritsAnchorSide() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let g = model.insertChild(parentId: b, text: "G", side: nil, at: nil)
+
+        _ = model.insertSiblings(ids: [g], anchorId: a, position: .before)
+
+        // g 提升为中心直接子，继承锚点 a 的 side=.right
+        #expect(model.node(id: g)?.side == .right)
+    }
+
+    @Test func setSide_onlyRootDirectChildren() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+
+        let changes = model.setSide(ids: [a, g], side: .left)
+
+        // 仅一级枝 a 被改；g 忽略
+        #expect(changes.count == 1)
+        #expect(changes[0].id == a)
+        #expect(changes[0].oldSide == .right)
+        #expect(model.node(id: a)?.side == .left)
+        #expect(model.node(id: g)?.side == nil)
+    }
+
+    @Test func applyRootSide_promotesDeeperAndChangesExisting() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+
+        let change = model.applyRootSide(ids: [g], side: .left)
+
+        // g 提升为一级 + left
+        #expect(model.parentId(of: g) == root)
+        #expect(model.node(id: g)?.side == .left)
+        #expect(change.promotions.count == 1)
+        #expect(change.promotions[0].parentId == a)
+
+        // a 已是中心直接子：只改侧
+        let change2 = model.applyRootSide(ids: [a], side: .left)
+        #expect(change2.sideChanges.count == 1)
+        #expect(model.node(id: a)?.side == .left)
+    }
+
+    @Test func searchMatches_dfsOrder_caseInsensitive_includesCollapsed() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "技术方案 tech", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "命中测试", side: nil, at: nil)
+        model.setCollapsed(id: a, to: true)
+
+        let ids = model.searchMatches(query: "命中")
+
+        #expect(ids == [g])           // 折叠子树内仍匹配
+        #expect(model.searchMatches(query: "技术").contains(a))
+        #expect(model.searchMatches(query: "TECH").contains(a))  // 大小写不敏感
+        #expect(model.searchMatches(query: "").isEmpty)
+        #expect(model.searchMatches(query: "不存在xyz").isEmpty)
+    }
 }
