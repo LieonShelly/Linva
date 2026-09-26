@@ -335,8 +335,6 @@ EOF
     let records = model.insertSiblings(ids: [g1, g2], anchorId: a, position: .before)
 
     #expect(records.count == 2)
-    let aKids = model.node(id: a).map { model.parentId(of: $0.id) } // 仅占位
-    _ = aKids
     #expect(model.parentId(of: g1) == root)
     #expect(model.parentId(of: g2) == root)
     // a 现在 root.children 中下标 1；g1,g2 在 a 前（下标 0,1）
@@ -1018,7 +1016,7 @@ EOF
                     top: 0,
                     bottom: camera.scale > 0 ? 4000 * camera.scale : 0,
                     thickness: 2,
-                    color: accent.withAlphaComponent(0.55)
+                    color: rgba(NSColor.controlAccentColor.withAlphaComponent(0.55))
                 )
             } else if case .sideLeft = intent {
                 let rect = screenRect(frame.rect, camera: camera)
