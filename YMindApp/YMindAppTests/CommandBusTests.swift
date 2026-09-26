@@ -288,4 +288,77 @@ struct CommandBusTests {
         bus.redo()
         #expect(model.parentId(of: g) == root)
     }
+
+    // 终审 M3-1：同父移位 [A,B,C] → insertSiblings(A, anchor: C, .after) → [B,C,A]；Undo 还原。
+    @Test func insertSiblings_sameParent_shiftAfter_orderAndUndo() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let c = model.insertChild(parentId: root, text: "C", side: nil, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.insertSiblings(ids: [a], anchorId: c, position: .after))
+        #expect(model.document.root.children.map(\.id) == [b, c, a])
+
+        bus.undo()
+        #expect(model.document.root.children.map(\.id) == [a, b, c])
+
+        bus.redo()
+        #expect(model.document.root.children.map(\.id) == [b, c, a])
+    }
+
+    // 终审 M3-2：跨父 .after —— 把 A 的子节点移到另一分支锚点后，验证顺序 + Undo。
+    @Test func insertSiblings_after_crossParent_restoresOrderAndUndo() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
+        let x = model.insertChild(parentId: root, text: "X", side: .left, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.insertSiblings(ids: [g], anchorId: x, position: .after))
+        #expect(model.parentId(of: g) == root)
+        #expect(model.document.root.children.map(\.id) == [a, x, g])
+        #expect(model.node(id: a)?.children.isEmpty == true)
+
+        bus.undo()
+        #expect(model.parentId(of: g) == a)
+        #expect(model.node(id: a)?.children.map(\.id) == [g])
+        #expect(model.document.root.children.map(\.id) == [a, x])
+
+        bus.redo()
+        #expect(model.parentId(of: g) == root)
+        #expect(model.document.root.children.map(\.id) == [a, x, g])
+    }
+
+    // 终审 M3-3 / I1：被清空的折叠源父，前向强置展开，Undo 还原子节点并重新折叠。
+    @Test func insertSiblings_undo_recollapsesEmptiedCollapsedSourceParent() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let c1 = model.insertChild(parentId: b, text: "C1", side: nil, at: nil)
+        let c2 = model.insertChild(parentId: b, text: "C2", side: nil, at: nil)
+        model.setCollapsed(id: b, to: true)
+        bus.clearHistory()
+
+        bus.execute(.insertSiblings(ids: [c1, c2], anchorId: a, position: .after))
+        // 前向清空 B → B 被 removeWithoutChangingSelection 强置展开。
+        #expect(model.node(id: b)?.children.isEmpty == true)
+        #expect(model.node(id: b)?.collapsed == false)
+        #expect(Set(model.document.root.children.map(\.id)) == [a, b, c1, c2])
+
+        bus.undo()
+        // Undo 还原子节点并重折叠 B。
+        #expect(model.node(id: b)?.children.map(\.id) == [c1, c2])
+        #expect(model.node(id: b)?.collapsed == true)
+
+        bus.redo()
+        #expect(model.node(id: b)?.children.isEmpty == true)
+        #expect(model.node(id: b)?.collapsed == false)
+    }
 }

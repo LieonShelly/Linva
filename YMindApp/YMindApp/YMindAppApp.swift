@@ -126,13 +126,14 @@ private struct DocumentCommands: Commands {
                 _ = setSide(session, .left)
             }
             .keyboardShortcut(.leftArrow, modifiers: .command)
-            .disabled(!session.canSetSide)
+            // 快捷键限非编辑态：编辑根直接子时 ⌘←/⌘→ 不得触发改侧（设计 §8.2）。
+            .disabled(!session.canSetSide || session.editingId != nil)
 
             Button("移到右侧") {
                 _ = setSide(session, .right)
             }
             .keyboardShortcut(.rightArrow, modifiers: .command)
-            .disabled(!session.canSetSide)
+            .disabled(!session.canSetSide || session.editingId != nil)
         }
     }
 

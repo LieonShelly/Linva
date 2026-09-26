@@ -141,7 +141,8 @@ final class CommandBus {
             )
 
         case let .moveToParent(ids, parentId):
-            let priorCollapsed = model.node(id: parentId)?.collapsed
+            let priorTargetCollapsed = model.node(id: parentId)?.collapsed
+            let priorSourceCollapsed = sourceParentCollapsed(for: ids)
             let records = model.reparent(ids: ids, to: parentId)
             guard !records.isEmpty else { return nil }
             let movedIds = Set(records.map(\.node.id))
@@ -154,8 +155,12 @@ final class CommandBus {
                         _ = self.model.removeWithoutSelection(id: r.node.id)
                         self.model.restoreChild(parentId: r.parentId, index: r.index, node: r.node)
                     }
-                    if let priorCollapsed {
-                        self.model.setCollapsed(id: parentId, to: priorCollapsed)
+                    if let priorTargetCollapsed {
+                        self.model.setCollapsed(id: parentId, to: priorTargetCollapsed)
+                    }
+                    // 源父可能因清空被 removeWithoutChangingSelection 强置展开，Undo 时还原折叠态。
+                    for (id, collapsed) in priorSourceCollapsed {
+                        self.model.setCollapsed(id: id, to: collapsed)
                     }
                     self.model.replaceSelection(movedIds, anchorId: anchor)
                 },
@@ -166,6 +171,8 @@ final class CommandBus {
             )
 
         case let .insertSiblings(ids, anchorId, position):
+            // 每个原始源父的折叠态须在执行前捕获；同父移动时锚点父即源父，一并覆盖。
+            let priorSourceCollapsed = sourceParentCollapsed(for: ids)
             let records = model.insertSiblings(ids: ids, anchorId: anchorId, position: position)
             guard !records.isEmpty else { return nil }
             let movedIds = Set(records.map(\.node.id))
@@ -176,6 +183,10 @@ final class CommandBus {
                     for r in records.sorted(by: { $0.index < $1.index }) {
                         _ = self.model.removeWithoutSelection(id: r.node.id)
                         self.model.restoreChild(parentId: r.parentId, index: r.index, node: r.node)
+                    }
+                    // 源父可能因清空被 removeWithoutChangingSelection 强置展开，Undo 时还原折叠态。
+                    for (id, collapsed) in priorSourceCollapsed {
+                        self.model.setCollapsed(id: id, to: collapsed)
                     }
                     self.model.replaceSelection(movedIds, anchorId: anchor)
                 },
@@ -200,6 +211,8 @@ final class CommandBus {
             )
 
         case let .applyRootSide(ids, side):
+            // 提升源父的折叠态须在执行前捕获；被提升清空的父会被 removeWithoutChangingSelection 强置展开。
+            let priorSourceCollapsed = sourceParentCollapsed(for: ids)
             let change = model.applyRootSide(ids: ids, side: side)
             guard !change.sideChanges.isEmpty || !change.promotions.isEmpty else { return nil }
             return Entry(
@@ -207,6 +220,9 @@ final class CommandBus {
                     for p in change.promotions.sorted(by: { $0.index < $1.index }) {
                         _ = self.model.removeWithoutSelection(id: p.node.id)
                         self.model.restoreChild(parentId: p.parentId, index: p.index, node: p.node)
+                    }
+                    for (id, collapsed) in priorSourceCollapsed {
+                        self.model.setCollapsed(id: id, to: collapsed)
                     }
                     for c in change.sideChanges {
                         _ = self.model.mutate(id: c.id) { $0.side = c.oldSide }
@@ -255,5 +271,17 @@ final class CommandBus {
                 }
             )
         }
+    }
+
+    /// 各被搬节点原始父的折叠态（须在搬移执行前捕获；被清空的源父会在移除时被强置展开）。
+    private func sourceParentCollapsed(for ids: [UUID]) -> [UUID: Bool] {
+        var result: [UUID: Bool] = [:]
+        for id in ids {
+            guard let parentId = model.parentId(of: id),
+                  let collapsed = model.node(id: parentId)?.collapsed,
+                  result[parentId] == nil else { continue }
+            result[parentId] = collapsed
+        }
+        return result
     }
 }

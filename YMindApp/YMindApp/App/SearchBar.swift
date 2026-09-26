@@ -10,7 +10,8 @@ struct SearchBar: View {
                 .foregroundStyle(.secondary)
             TextField("搜索主题…", text: Binding(
                 get: { session.search.query },
-                set: { session.runSearch(query: $0) }
+                // §5：查询变化优先留在仍匹配的当前节点，否则回落到第一个匹配。
+                set: { session.runSearch(query: $0, preferId: session.search.currentMatchId) }
             ))
             .textFieldStyle(.roundedBorder)
             .frame(width: 200)
