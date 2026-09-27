@@ -99,7 +99,9 @@ struct ContentView: View {
                     canSetFill: canSetFill,
                     activeFill: fillSelection.common,
                     fillActive: fillSelection.active,
-                    setFill: { fill in session.setFill(fill) }
+                    setFill: { fill in session.setFill(fill) },
+                    exportMarkdown: { DocumentWorkflow.exportMarkdown(session) },
+                    exportPNG: { DocumentWorkflow.exportPNG(session) }
                 )
             }
         }

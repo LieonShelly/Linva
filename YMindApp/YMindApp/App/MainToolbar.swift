@@ -27,6 +27,8 @@ struct MainToolbar: ToolbarContent {
     let activeFill: NodeFill?
     let fillActive: Bool
     let setFill: (NodeFill?) -> Void
+    let exportMarkdown: () -> Void
+    let exportPNG: () -> Void
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .automatic) {
@@ -122,6 +124,18 @@ struct MainToolbar: ToolbarContent {
                 Label("适应画布", systemImage: "arrow.up.left.and.arrow.down.right")
             }
             .help("适应全部内容")
+
+            Divider()
+
+            Button(action: exportMarkdown) {
+                Label("导出 Markdown", systemImage: "doc.plaintext")
+            }
+            .help("导出 Markdown 大纲")
+
+            Button(action: exportPNG) {
+                Label("导出 PNG", systemImage: "square.and.arrow.up")
+            }
+            .help("导出全展开 PNG 整图")
         }
     }
 }
