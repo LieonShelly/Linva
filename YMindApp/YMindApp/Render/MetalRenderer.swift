@@ -529,12 +529,33 @@ final class MetalRenderer {
 
     private func fillVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
         orderedFrames(snapshot).flatMap { frame in
-            let color = rgba(
-                frame.isRoot
-                    ? NSColor.controlAccentColor
-                    : NSColor.controlBackgroundColor
-            )
-            return rectangleQuad(rect: screenRect(frame.rect, camera: camera), color: color)
+            let rect = screenRect(frame.rect, camera: camera)
+            if let fill = frame.fill {
+                if frame.isRoot {
+                    return rectangleQuad(
+                        rect: rect,
+                        color: rgba(NodeFillStyle.rootBackground(fill))
+                    )
+                } else {
+                    var vertices = rectangleQuad(
+                        rect: rect,
+                        color: rgba(NodeFillStyle.background(fill))
+                    )
+                    vertices += strokeVertices(
+                        rect: rect,
+                        thickness: max(1, 1.5 * camera.scale),
+                        color: rgba(NodeFillStyle.border(fill))
+                    )
+                    return vertices
+                }
+            } else {
+                let color = rgba(
+                    frame.isRoot
+                        ? NSColor.controlAccentColor
+                        : NSColor.controlBackgroundColor
+                )
+                return rectangleQuad(rect: rect, color: color)
+            }
         }
     }
 
