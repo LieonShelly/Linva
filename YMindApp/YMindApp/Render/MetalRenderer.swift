@@ -804,8 +804,8 @@ final class MetalRenderer {
         var camera = Camera()
         camera.scale = scale
         camera.translation = CGPoint(
-            x: padding - contentBounds.minX * scale,
-            y: padding - contentBounds.minY * scale
+            x: padding * scale - contentBounds.minX * scale,
+            y: padding * scale - contentBounds.minY * scale
         )
 
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -837,13 +837,16 @@ final class MetalRenderer {
         }
         encoder.label = "YMind 导出"
 
+        // 导出不含分叉 ± 控件：LayoutSnapshot 缺省 branchToggles 为空。
+        let exportSnapshot = LayoutSnapshot(frames: snapshot.frames, edges: snapshot.edges)
+
         // 导出固定按浅色纸面解析动态语义色，结果与系统外观无关。
         let appearance = NSAppearance(named: .aqua)
         appearance?.performAsCurrentDrawingAppearance {
             encodeContent(
                 into: encoder,
                 viewportSize: CGSize(width: pixelW, height: pixelH),
-                snapshot: snapshot,
+                snapshot: exportSnapshot,
                 camera: camera,
                 displayScale: 1,
                 selectedIds: [],
@@ -853,8 +856,8 @@ final class MetalRenderer {
                 searchHitId: nil,
                 marquee: nil
             )
-            encoder.endEncoding()
         }
+        encoder.endEncoding()
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 

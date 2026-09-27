@@ -6,7 +6,7 @@ import AppKit
 @Suite("PNGExporter")
 struct PNGExporterTests {
     @Test func fullyExpanded_clearsAllCollapsed_andKeepsOriginal() {
-        let grand = Node(text: "孙")
+        let grand = Node(text: "孙", collapsed: true)
         let child = Node(text: "子", collapsed: true, children: [grand])
         var d = MindMapDocument.blank(rootText: "根")
         d.root.children = [child]

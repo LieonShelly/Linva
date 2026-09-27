@@ -4,8 +4,7 @@ import Foundation
 import MetalKit
 
 /// 全展开整图 PNG 导出（FR-E3）。
-/// 流程：记录折叠态 → 全部展开 → 布局 → 按包围盒离屏光栅化 → 恢复折叠态。
-/// 不改原文档、不入 Undo（FR-E4）。
+/// 流程：复制并展开副本 → 布局 → 按包围盒离屏光栅化；原文档不动、不入 Undo（FR-E4）。
 enum PNGExporter {
     /// 生成 PNG 数据；失败返回 nil。
     static func data(
