@@ -11,13 +11,13 @@ struct MarkdownExporterTests {
     }
 
     @Test func rootOnly_singleHash() {
-        #expect(MarkdownExporter.markdown(from: doc(rootText: "根")) == "# 根")
+        #expect(MarkdownExporter.markdown(from: doc(rootText: "根")) == "# 根\n")
     }
 
     @Test func nestedDepth_addsHash() {
         var d = doc(rootText: "根", children: [Node(text: "一层")])
         d.root.children[0].children = [Node(text: "二层")]
-        #expect(MarkdownExporter.markdown(from: d) == "# 根\n\n## 一层\n\n### 二层")
+        #expect(MarkdownExporter.markdown(from: d) == "# 根\n\n## 一层\n\n### 二层\n")
     }
 
     @Test func depthBeyondSix_cappedAtH6() {
@@ -38,16 +38,16 @@ struct MarkdownExporterTests {
 
     @Test func multilineText_collapsedToSingleLine() {
         let md = MarkdownExporter.markdown(from: doc(rootText: "第一行\r\n第二行\n\n  第三行  "))
-        #expect(md == "# 第一行 第二行 第三行")
+        #expect(md == "# 第一行 第二行 第三行\n")
     }
 
     @Test func emptyText_becomesUnnamed() {
-        #expect(MarkdownExporter.markdown(from: doc(rootText: "   \n  ")) == "# 未命名")
+        #expect(MarkdownExporter.markdown(from: doc(rootText: "   \n  ")) == "# 未命名\n")
     }
 
     @Test func fillAndSideMetadata_notEmitted() {
         let child = Node(text: "有填色", side: .left, fill: .sage)
-        #expect(MarkdownExporter.markdown(from: doc(children: [child])) == "# 中心\n\n## 有填色")
+        #expect(MarkdownExporter.markdown(from: doc(children: [child])) == "# 中心\n\n## 有填色\n")
     }
 }
 

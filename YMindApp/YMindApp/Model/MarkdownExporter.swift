@@ -9,7 +9,7 @@ enum MarkdownExporter {
     static func markdown(from document: MindMapDocument) -> String {
         var lines: [String] = []
         walk(document.root, depth: 1, into: &lines)
-        return lines.joined(separator: "\n\n")
+        return lines.joined(separator: "\n\n") + "\n"
     }
 
     private static func walk(_ node: Node, depth: Int, into lines: inout [String]) {

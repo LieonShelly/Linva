@@ -233,7 +233,7 @@ enum DocumentWorkflow {
         session.commitEditingIfNeeded()
         let text = MarkdownExporter.markdown(from: session.model.document)
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [.plainText]
+        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
         panel.nameFieldStringValue = ExportNaming.safeFilename(
             base: session.model.document.root.text,
             ext: "md"
