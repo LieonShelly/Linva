@@ -34,4 +34,16 @@ struct CodecTests {
         #expect(warnings?.count == 1)
         #expect(warnings?.first?.contains("side") == true)
     }
+
+    @Test func roundTrip_preservesFill() throws {
+        let model = MindMapModel.makeNew()
+        model.document.root.fill = .sage
+        let child = model.insertChild(parentId: model.document.root.id, text: "子", side: .left, at: nil)
+        _ = model.mutate(id: child) { $0.fill = .rose }
+        let data = try YMindCodec.encode(model.document)
+        let decoded = try YMindCodec.decode(data)
+        #expect(decoded == model.document)
+        #expect(decoded.root.fill == .sage)
+        #expect(decoded.root.children[0].fill == .rose)
+    }
 }
