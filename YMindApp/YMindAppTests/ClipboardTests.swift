@@ -54,4 +54,17 @@ struct ClipboardTests {
         #expect(session.model.parentId(of: a) == root)  // 未搬
         #expect(session.cutSourceIds == [a])                          // 剪切态未清
     }
+
+    @Test func copyPaste_preservesFill() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        _ = session.model.mutate(id: a) { $0.fill = .sage }
+        session.selectOnly(a)
+        session.copySelection()
+        let t = session.model.insertChild(parentId: root, text: "T", side: .left, at: nil)
+        session.selectOnly(t)
+        session.pasteToPrimary()
+        #expect(session.model.node(id: t)?.children[0].fill == .sage)
+    }
 }

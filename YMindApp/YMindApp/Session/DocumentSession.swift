@@ -336,6 +336,11 @@ final class DocumentSession: ObservableObject {
         }
     }
 
+    func setFill(_ fill: NodeFill?) {
+        commitEditingIfNeeded()
+        commandBus.execute(.setFill(ids: Array(model.selectedIds), fill: fill))
+    }
+
     func move(_ ids: [UUID], to targetId: UUID) {
         guard model.isValidDropTarget(targetId, movingIds: Set(ids)) else { return }
         commandBus.execute(.moveToParent(ids: ids, parentId: targetId))
