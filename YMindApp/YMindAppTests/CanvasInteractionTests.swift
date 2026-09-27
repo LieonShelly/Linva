@@ -45,7 +45,7 @@ struct CanvasInteractionTests {
             tracking: false
         )
         #expect(untracked.marqueeScreenRect == nil)
-        #expect(CanvasPointerGesture.pan(lastPoint: .zero).marqueeScreenRect == nil)
+        #expect(CanvasPointerGesture.pan(origin: .zero, lastPoint: .zero).marqueeScreenRect == nil)
         #expect(CanvasPointerGesture.none.marqueeScreenRect == nil)
     }
 
