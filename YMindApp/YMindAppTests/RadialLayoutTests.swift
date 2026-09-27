@@ -108,4 +108,14 @@ struct RadialLayoutTests {
         #expect(oneLine.height == LayoutConstants.nodeLineHeight + LayoutConstants.nodePadY * 2)
         #expect(twoLines.height == LayoutConstants.nodeLineHeight * 2 + LayoutConstants.nodePadY * 2)
     }
+
+    @Test func frameCarriesNodeFill() {
+        var doc = MindMapDocument.blank()
+        doc.root.fill = .sage
+        let child = Node(text: "子", side: .right, fill: .sky)
+        doc.root.children = [child]
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        #expect(snap.frames[doc.root.id]?.fill == .sage)
+        #expect(snap.frames[child.id]?.fill == .sky)
+    }
 }

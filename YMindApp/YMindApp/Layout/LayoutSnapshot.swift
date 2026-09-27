@@ -10,6 +10,29 @@ struct NodeFrame: Equatable {
     let side: Side?
     let collapsed: Bool
     let hiddenCount: Int
+    let fill: NodeFill?
+
+    init(
+        id: UUID,
+        text: String,
+        center: CGPoint,
+        size: NodeSize,
+        isRoot: Bool,
+        side: Side?,
+        collapsed: Bool,
+        hiddenCount: Int,
+        fill: NodeFill? = nil
+    ) {
+        self.id = id
+        self.text = text
+        self.center = center
+        self.size = size
+        self.isRoot = isRoot
+        self.side = side
+        self.collapsed = collapsed
+        self.hiddenCount = hiddenCount
+        self.fill = fill
+    }
 
     var rect: CGRect {
         CGRect(

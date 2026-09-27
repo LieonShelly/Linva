@@ -73,7 +73,8 @@ enum RadialLayout {
                 isRoot: false,
                 side: side,
                 collapsed: node.collapsed,
-                hiddenCount: node.collapsed ? countDescendants(node) : 0
+                hiddenCount: node.collapsed ? countDescendants(node) : 0,
+                fill: node.fill
             )
             frames[node.id] = frame
             edges.append(edge(from: parent, to: frame, side: side))
@@ -118,7 +119,8 @@ enum RadialLayout {
             collapsed: document.root.collapsed,
             hiddenCount: document.root.collapsed
                 ? countDescendants(document.root)
-                : 0
+                : 0,
+            fill: document.root.fill
         )
         frames[document.root.id] = rootFrame
 
