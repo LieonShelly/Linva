@@ -9,6 +9,11 @@
       "type": "stdio",
       "command": "xcrun",
       "args": ["mcpbridge"]
+    },
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": ["serve", "--mcp", "--path", "YMindApp"]
     }
   }
 }
