@@ -783,4 +783,104 @@ final class MetalRenderer {
             Float(converted.alphaComponent)
         )
     }
+
+    /// 导出：把 `contentBounds` 以 `scale = min(2, maxDimension / 长边)` 光栅化到离屏纹理，
+    /// 仅画边/节点块/文字/填色（不画分叉 ± 与交互 UI），返回 CGImage。
+    func renderImage(
+        snapshot: LayoutSnapshot,
+        contentBounds: CGRect,
+        maxDimension: CGFloat = 2400,
+        padding: CGFloat = 48,
+        paper: NSColor
+    ) -> CGImage? {
+        guard !contentBounds.isNull, !contentBounds.isEmpty else { return nil }
+
+        let contentW = max(contentBounds.width, 1)
+        let contentH = max(contentBounds.height, 1)
+        let scale = min(max(maxDimension / max(contentW, contentH), 0.35), 2)
+        let pixelW = max(Int(ceil((contentW + padding * 2) * scale)), 1)
+        let pixelH = max(Int(ceil((contentH + padding * 2) * scale)), 1)
+
+        var camera = Camera()
+        camera.scale = scale
+        camera.translation = CGPoint(
+            x: padding - contentBounds.minX * scale,
+            y: padding - contentBounds.minY * scale
+        )
+
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: pixelW,
+            height: pixelH,
+            mipmapped: false
+        )
+        textureDescriptor.usage = [.renderTarget, .shaderRead]
+        guard let texture = device.makeTexture(descriptor: textureDescriptor),
+              let commandBuffer = commandQueue.makeCommandBuffer() else {
+            return nil
+        }
+
+        let descriptor = MTLRenderPassDescriptor()
+        descriptor.colorAttachments[0].texture = texture
+        descriptor.colorAttachments[0].loadAction = .clear
+        descriptor.colorAttachments[0].storeAction = .store
+        let background = rgba(paper)
+        descriptor.colorAttachments[0].clearColor = MTLClearColor(
+            red: Double(background.x),
+            green: Double(background.y),
+            blue: Double(background.z),
+            alpha: Double(background.w)
+        )
+
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor) else {
+            return nil
+        }
+        encoder.label = "YMind 导出"
+
+        // 导出固定按浅色纸面解析动态语义色，结果与系统外观无关。
+        let appearance = NSAppearance(named: .aqua)
+        appearance?.performAsCurrentDrawingAppearance {
+            encodeContent(
+                into: encoder,
+                viewportSize: CGSize(width: pixelW, height: pixelH),
+                snapshot: snapshot,
+                camera: camera,
+                displayScale: 1,
+                selectedIds: [],
+                selectionAnchorId: nil,
+                cutSourceIds: [],
+                intent: nil,
+                searchHitId: nil,
+                marquee: nil
+            )
+            encoder.endEncoding()
+        }
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+
+        let region = MTLRegionMake2D(0, 0, pixelW, pixelH)
+        var bytes = [UInt8](repeating: 0, count: pixelW * pixelH * 4)
+        texture.getBytes(&bytes, bytesPerRow: pixelW * 4, from: region, mipmapLevel: 0)
+
+        guard let provider = CGDataProvider(data: Data(bytes) as CFData),
+              let image = CGImage(
+                width: pixelW,
+                height: pixelH,
+                bitsPerComponent: 8,
+                bitsPerPixel: 32,
+                bytesPerRow: pixelW * 4,
+                space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGBitmapInfo(
+                    rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue
+                        | CGBitmapInfo.byteOrder32Little.rawValue
+                ),
+                provider: provider,
+                decode: nil,
+                shouldInterpolate: false,
+                intent: .defaultIntent
+              ) else {
+            return nil
+        }
+        return image
+    }
 }
