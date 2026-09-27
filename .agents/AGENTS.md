@@ -1,99 +1,50 @@
 # YMind — Agent 说明
 
-macOS 思维导图应用。技术栈：**Swift + SwiftUI（壳）+ Metal（画布）**。
-第一版形态：**单窗口**、**中心辐射布局**。HTML 原型在 `prototype/`。
+macOS 思维导图应用：**Swift + SwiftUI（壳）+ Metal（画布）**，单窗口 + 中心辐射布局。HTML 原型在 `prototype/`。
 
-本仓库面向 Agent 的配置统一放在 **`.agents/`**（skills、MCP、rules），不绑定某一款 IDE。
+Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE。
 
-另请阅读：[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)
+## 文档语言（强制）
 
+**本仓库所有文档一律中文优先**（`AGENTS.md`、`.agents/`、`docs/`、PR、变更记录）。专有名词 / API / 代码标识符可保留英文。
+
+## MCP
+
+从 `.agents/mcp.json` 注册，启动时以**仓库根为 cwd**：
+
+1. **`XcodeBuildMCP`** — `xcodebuildmcp mcp`。构建 / 运行 / 测试 / 日志 / UI 优先走它。
+2. **`xcode`** — `xcrun mcpbridge`。Xcode IDE 桥接（预览 / IDE 状态），需已打开 Xcode 26.3+。
+
+名为 `xcodebuildmcp`、`xcodebuildmcp-cli`、`axiom-xcode-mcp` 的 skill 是使用说明，不是服务器本身。
+
+## Skills
+
+**YMind 专属技能（本仓库自建，不在 lockfile 管理）—— 改核心代码前优先读：**
+
+| Skill | 何时使用 |
+|-------|----------|
+| `ymind-command` | 新增/修改改变树结构的命令（CommandBus + Undo） |
+| `ymind-codec-version` | 改 `.ymind` schema、节点字段、序列化/版本升迁 |
+| `ymind-layout-snapshot` | 扩展布局算法 / NodeFrame / EdgeGeometry / Render-Layout 接缝 |
+| `ymind-render-text` | 文字纹理、TextAtlas、坐标系/Retina/缓存 |
+
+**第三方 skill**（`npx skills` 安装，各自 `SKILL.md` 的 `description` 自动路由）：
+- 完整路由表见 **[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)**（实现 Apple 平台代码前先查）。
+- 画布优先序：`metal-gpu` → `metal-shader-expert` → `axiom-graphics`（`resizable-rendering.md` / `display-performance.md`）。
 
 ## 基础约束
-- 优先使用 **codegraph mcp** 进行代码检索
-- 优先使用 **Mermaid** 进行图形绘制，如：流程图，类关系图，架构图等等需要诠释代码关系的相关操作
 
+- 优先用 **codegraph mcp** 检索代码。
+- 图形（流程图 / 类图 / 架构图）优先用 **Mermaid**。
 
-## 强制约束：文档语言
+## Claude 常犯的错误（犯两次就写进这里）
 
-**以后本仓库所有文档一律优先使用中文。**
-
-包括但不限于：`AGENTS.md`、`.agents/rules/`、`docs/`、设计说明、架构笔记、PR 说明、变更记录。  
-专有名词、API 名、命令、代码标识符可保留英文原文；正文叙述用中文。  
-第三方 skill 原文不必改写；**我们自己新写或维护的文档必须中文优先。**
-
-## MCP 与 Skill
-
-| 层级 | 含义 | 位置 |
-|------|------|------|
-| **MCP 服务器** | Agent 可直接调用的工具（构建 / 运行 / 调试） | `.agents/mcp.json` |
-| **Skills** | 使用工具前应阅读的指南 | `.agents/skills/` |
-| **Rules** | 项目架构与 skill 路由 | `.agents/rules/` |
-
-已配置的 MCP（请在各 Agent 客户端从 `.agents/mcp.json` 注册）：
-
-1. **`XcodeBuildMCP`** — `xcodebuildmcp mcp`。优先用于 macOS 的构建 / 运行 / 测试 / 日志 / UI。工作流配置：仓库根目录 `.xcodebuildmcp/config.yaml`（工具自身约定）。
-2. **`xcode`** — Apple IDE 桥接（`xcrun mcpbridge`）。需要已打开 Xcode（26.3+），并在 Intelligence 中允许外部 Agent。用于 IDE 状态、预览、Xcode 原生工具。
-
-启动 MCP 时请以**仓库根目录为 cwd**，以便发现 `.xcodebuildmcp/config.yaml`。
-
-名为 `xcodebuildmcp`、`xcodebuildmcp-cli`、`axiom-xcode-mcp` 的 skill 是**使用说明**，不是服务器本身。
-
-## 项目 Skills（`.agents/skills/`）
-
-通过 `npx skills` / 根目录 `skills-lock.json` 安装。需要时优先读 skill，不要仅靠通用记忆。
-
-### 核心（常用）
-
-| Skill | 何时使用 |
-|-------|----------|
-| `swiftui-expert-skill` | 编写 / 审阅 SwiftUI（avdlee） |
-| `swiftui-pro` | SwiftUI 最佳实践审阅（twostraws） |
-| `axiom-swiftui` | SwiftUI API 与模式（Axiom） |
-| `axiom-macos` | macOS 窗口、菜单、AppKit 桥接、沙盒 |
-| `macos-patterns` | 原生 macOS 模式（菜单、面板、快捷键） |
-| `macos-development` | 更广的 macOS SwiftUI / AppKit 实践 |
-| `macos-spm-app-packaging` | SwiftPM macOS 应用脚手架与打包 |
-
-### Metal / 渲染（画布）
-
-| Skill | 何时使用 |
-|-------|----------|
-| `metal-gpu` | Metal 管线、buffer/纹理、MetalKit；含 `references/metal-api-guide.md` |
-| `metal-shader-expert` | MSL shader、TBDR、GPU 调试 / 性能向写法 |
-| `axiom-graphics` | GPU 总路由：MTKView / CAMetalLayer、迁移、显示性能、可缩放渲染（子文档在 `axiom-graphics/skills/`） |
-| `core-animation` | Core Animation；含 `CAMetalLayer` 等层与合成 |
-| `axiom-games` | SpriteKit / SceneKit 等（YMind 2D 画布一般不用，仅对照） |
-
-做画布时优先：`metal-gpu` → 写 shader 再读 `metal-shader-expert` → 窗口缩放 / 显示刷新读 `axiom-graphics` 内 `resizable-rendering.md` / `display-performance.md`。
-
-### 构建 / 调试 / Xcode
-
-| Skill | 何时使用 |
-|-------|----------|
-| `macos-build` | 用 `xcodebuild` 编译 / 排查 macOS 构建 |
-| `xcodebuildmcp` / `xcodebuildmcp-cli` | 如何使用 XcodeBuildMCP 服务 / CLI |
-| `axiom-xcode-mcp` | 如何使用 Apple 的 `xcrun mcpbridge` |
-| `axiom-build` | 构建失败、崩溃日志、Xcode 环境 |
-| `ios-debugger-agent` | 通过 XcodeBuildMCP 运行 / 调试 |
-| `debugging-instruments` | Instruments 性能剖析 |
-| `xcode-build-orchestrator` | 端到端 Xcode 构建优化 |
-| `xcode-build-fixer` | 落实已批准的构建优化 |
-| `xcode-project-analyzer` | 工程 / scheme / 脚本阶段构建审计 |
-| `xcode-compilation-analyzer` | Swift 编译热点 / 类型检查耗时 |
-| `xcode-build-benchmark` | 测量 clean / 增量构建耗时 |
-| `spm-build-analysis` | SPM 依赖 / 模块化带来的构建成本 |
-
-### 辅助
-
-| Skill | 何时使用 |
-|-------|----------|
-| `swift-concurrency` / `axiom-concurrency` | async/await、actor、Swift 6 并发 |
-| `axiom-performance` | 内存、Instruments、循环引用、性能排查 |
-| `swift-testing-expert` | Swift Testing |
-| `swiftui-ui-patterns` | 导航、状态接线、UI 结构 |
-| `swiftui-performance-audit` | 卡顿、失效、List 身份 |
-| `macos-design-guidelines` | 面向 macOS HIG 的 UI 决策 |
-| `axiom-apple-docs` | 查阅 / 解释 Apple 文档与诊断信息 |
+- **改树绕过命令栈** → Undo 失真。改树必走 `commandBus.execute(...)`；相机/选中/搜索态不入栈。见 `ymind-command`。
+- **改 `.ymind` schema 不递增 `currentVersion`、不写迁移** → 老文件打不开。见 `ymind-codec-version`。
+- **深层节点带 `side`** → side 只存根下一层，`sanitize` 会强制清掉。见 `ymind-codec-version`。
+- **改文字渲染删掉行翻转** → 文字颠倒/错位。保留 `TextTextureRasterizer.flipVertically`。见 `ymind-render-text`。
+- **Render 层去读 Model** → Metal 只消费 `LayoutSnapshot`，不懂树。见 `ymind-layout-snapshot`。
+- **新增依赖没进 `scripts/check-boundaries.sh` 白名单** → 构建即红。新依赖同步更新白名单与 `docs/架构现状.md` §5。
 
 ## 更新 Skills
 
@@ -105,4 +56,4 @@ npx skills experimental_install
 
 ## 第一版明确不做
 
-多文档（`DocumentGroup`）、协同、App Store 上架打磨——等 Model → Layout → Metal 主链路跑通后再做。
+多文档（`DocumentGroup`）、协同、App Store 上架——等 Model → Layout → Metal 主链路跑通后再做。

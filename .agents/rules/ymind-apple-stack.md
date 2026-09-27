@@ -38,6 +38,18 @@ HTML 原型在 `prototype/`（仅作交互 / 布局参考；一旦开始原生�
 - 文字编辑：SwiftUI / AppKit 浮层，不做 Metal IME。
 - 先验证 Model + Layout，再加深 Metal。
 
+## 依赖边界（已强制）
+
+分层依赖由 `scripts/check-boundaries.sh` 在构建时强制（build phase「依赖边界校验」，违规即红）。白名单：
+
+- Model / Commands：仅 `Foundation`
+- Layout：`Foundation AppKit CoreGraphics CoreText`
+- Session：`Foundation Combine CoreGraphics`
+- Render：`Foundation AppKit CoreGraphics Metal MetalKit SwiftUI simd`
+- App：`Foundation AppKit SwiftUI`
+
+新增依赖必须同步更新脚本白名单与 `docs/架构现状.md` §5。
+
 ## 原型
 
 移植到原生时，以 `prototype/index.html` 与 `app.js` 作为已约定的交互与布局参考。
