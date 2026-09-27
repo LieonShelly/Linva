@@ -28,7 +28,7 @@
 | 总体方案 | 扩既有命令栈 + Snapshot + 单层 Metal 填充；不加新 shader、不加新子系统 |
 | 填色存储 | `Node.fill: NodeFill?`（typed enum，5 token）；未知/缺失 token 解码为 nil（PRD §7） |
 | 序列化 | `.ymind` `currentVersion` 1 → 2；v1 → v2 迁移（fill 缺省 nil，仅版本升迁） |
-| 调色板 | 单一来源 `NodeFillStyle`（纯 hex 数据，取自 prototype），Render 与工具条共用 |
+| 调色板 | **系统语义色派生**：每 token 保留色相身份（取自原型 swatch），由「token 色相 + 系统语义明度」派生出底/边框/根深色三态；做成**动态 `NSColor`**，随亮/暗外观自适应（超出 PRD「深色另案」，已拍板） |
 | 命令 | `.setFill(ids:fill:)` 为一步 Undo；全无变化不入栈；不改选中 |
 | 视觉 | 普通填色节点 = 浅底 + 协调边框；根 = 深色变体；无填色维持现状（**不新增边框**） |
 | 文字 | 填色不改文字色（节点 labelColor / 根 white），保证可读 |
@@ -38,7 +38,7 @@
 ### 1.3 明确不做（本增量）
 
 - 自定义取色器、渐变、字号档、粗体、主题包切换、按侧自动配色、从图片取色（PRD §4 FR-C5）
-- 深色模式专档（可随系统外观另案，PRD §0）
+- 整套深色模式主题系统（PRD §0）；填色**色值**本身随系统外观自适应（FR-C4、§3.2）
 - 导出时色差精调（PRD §0）
 - 未填色节点加边框 / 视觉重设计（超出「填色」增量范围，见 §1.2）
 
@@ -60,10 +60,10 @@ flowchart TB
     DS["setFill 门面 · clipboard · selectedIds"]
   end
   subgraph Canvas["画布"]
-    Metal["MetalRenderer<br/>fillVertices 按 token 取色"]
+    Metal["MetalRenderer<br/>NodeFillStyle 系统语义色"]
   end
   subgraph Shell["壳层"]
-    TB["工具条色点组（6 swatch）"]
+    TB["工具条色点组（6 swatch）<br/>取 NodeFillStyle 色相"]
   end
   Shell --> DS
   TB --> DS
@@ -78,16 +78,16 @@ flowchart TB
 
 | 层 | 本增量职责 | 禁止 |
 |----|------------|------|
-| Model | `NodeFill` token、`Node.fill`、`setFill`、`NodeFillStyle` 纯数据调色板 | 理解 Metal；引 UI 框架 |
+| Model | `NodeFill` token、`Node.fill`、`setFill` | 理解 Metal；引 UI 框架；持有颜色 |
 | Command | `setFill` 一步 Undo/Redo | 把选中/相机态入栈 |
 | Session | `setFill(_:)` 门面（先 commitEditing） | 在 View 内实现树变更 |
 | Layout | `NodeFrame.fill` 从 `node.fill` 带入，只传递不参与几何 | 理解渲染 |
-| Metal | 按 `frame.fill` 取底色/边框/根深色 | 读 Model / 改树 |
-| Shell | 工具条色点组 UI、激活态 | 在 View 内实现树变更 |
+| Metal | `NodeFillStyle`：token 色相 + 系统语义派生动态色；按 `frame.fill` 取底/边框/根深色 | 读 Model / 改树 |
+| Shell | 工具条色点组 UI、激活态；引用 `NodeFillStyle` 取色点色 | 在 View 内实现树变更 |
 
 ### 2.2 依赖规则
 
-沿用 v1：Model/Command 仅 Foundation；Metal 只消费 Snapshot；Layout 不依赖 Metal；Shell 经 Session。`NodeFillStyle` 放 Model 层（纯 hex 数据、仅 Foundation import），供 Render 与工具条共同取色——Model 不引 UI 框架，不违反边界；单一来源避免 Render/App 两处 hex 漂移。
+沿用 v1：Model/Command 仅 Foundation；Metal 只消费 Snapshot；Layout 不依赖 Metal；Shell 经 Session。动态 `NSColor` 需 AppKit，故 `NodeFillStyle` 放 **Render** 层（import AppKit 在白名单内），Shell（App 层）引用同一类型取色点色——同模块内部引用，不新增系统 import、不触发边界校验；单一来源避免 Render/App 两处调色漂移。
 
 ---
 
@@ -110,28 +110,39 @@ var fill: NodeFill?
 
 `Node` 需**自定义 `init(from:)`**：`fill` 用 `decodeIfPresent(String.self)` 再 `NodeFill(rawValue:)`，未知 token → nil（PRD §7「未知 token 读入时视为默认」）；`encode(to:)` 仍由编译器合成（`encodeIfPresent` → nil 时省略字段，对齐 PRD §7「可选字段 fill（string token | 省略）」）。其余字段解码与现状一致。
 
-### 3.2 调色板（单一来源）
+### 3.2 调色板（系统语义色派生，Render 层单一来源）
+
+固定 hex 作废。每个 token 保留**色相身份**（取自原型 swatch 的色相），由「token 色相 + 系统语义明度」派生三态，并做成**动态 `NSColor`** 随亮/暗外观自适应。`NodeFillStyle` 放 **Render**（import AppKit）。
 
 ```swift
-/// 纯数据（hex）调色板，取自 prototype；Model 层仅 Foundation。
+/// Render/NodeFillStyle.swift —— 系统语义色派生的单一来源。
 struct NodeFillStyle {
-    let swatch: UInt32      // 工具条色点
-    let background: UInt32  // 普通节点浅底
-    let border: UInt32      // 普通节点协调边框
-    let rootBackground: UInt32 // 中心主题深色变体
+    /// token 身份色相（0…1，取自原型 swatch 的 HSB hue）。
+    let hue: CGFloat
+    /// 色点色（工具条）：token 色相 + 系统表面明度。
+    var swatch: NSColor
+    /// 普通节点浅底：token 色相 + 系统语义明度（动态，亮=浅色 / 暗=深色）。
+    var background: NSColor
+    /// 普通节点协调边框：token 色相 + 系统分隔色明度。
+    var border: NSColor
+    /// 中心主题深色变体：token 色相压暗，白字可读。
+    var rootBackground: NSColor
     static let values: [NodeFill: NodeFillStyle]
 }
 ```
 
-| token | swatch | 普通 bg | 普通 border | 根 bg |
-|-------|--------|---------|-------------|-------|
-| sage  | `#C5D5C0` | `#DFEADF` | `#8FA88A` | `#3D5C48` |
-| sky   | `#BFD4E6` | `#D7E5F0` | `#7A9BB5` | `#355A78` |
-| sand  | `#E6D3A8` | `#F0E4C4` | `#C4A86A` | `#7A6230` |
-| rose  | `#E6C0BC` | `#F0D8D5` | `#C48984` | `#7A4040` |
-| lilac | `#D2C4E0` | `#E5DCED` | `#9E8BB3` | `#554868` |
+- 派生规则：三态由 `hue` 与系统语义色（如 `controlBackgroundColor` / `separatorColor` 的明度）混合，产出**动态 `NSColor`**（`NSColor(name:dynamicProvider:)`），亮/暗外观各解析一档；普通节点浅底与根深色保证对比度与字色可读（FR-C4）。
+- 色相身份来源（原型 swatch 的 hue，作为 token 视觉锚，避免色相漂移）：
 
-消费者各自把 hex 转成所用色空间：Render 经 `rgba(NSColor)`、工具条经 SwiftUI `Color`，转换逻辑不落 Model。
+| token | 身份色相 | 视觉锚（原型 swatch） |
+|-------|----------|----------------------|
+| sage  | 绿系 | `#C5D5C0` |
+| sky   | 蓝系 | `#BFD4E6` |
+| sand  | 暖金系 | `#E6D3A8` |
+| rose  | 粉红系 | `#E6C0BC` |
+| lilac | 紫系 | `#D2C4E0` |
+
+- 消费：Metal 经既有 `rgba(_:)` 把解析后的 `NSColor` 转 SIMD；工具条经 SwiftUI `Color(nsColor:)`。二者都随外观解析动态色，行为一致。
 
 ---
 
@@ -198,12 +209,12 @@ func setFill(_ fill: NodeFill?) {
 
 | frame | fill 为 nil（现状） | 有 fill |
 |-------|--------------------|---------|
-| 普通节点 | `controlBackgroundColor` 填充，无边框 | 浅底 `background` + 协调边框 `border`（描边走既有 `strokeVertices`，厚度 ~1.5·scale） |
-| 中心主题 | `controlAccentColor` 填充 | 深色变体 `rootBackground` 填充 |
+| 普通节点 | `controlBackgroundColor` 填充，无边框 | `NodeFillStyle.values[fill].background` 浅底 + `.border` 协调边框（描边走既有 `strokeVertices`，厚度 ~1.5·scale） |
+| 中心主题 | `controlAccentColor` 填充 | `NodeFillStyle.values[fill].rootBackground` 深色变体填充 |
 
 - 文字色不变：普通节点 `labelColor`、根 `white`（深浅变体均可读，FR-C4）。
 - 绘制顺序不变（边 → 填充 → 文字 → 分叉 → 多选描边 → 剪切弱化 → 放置反馈 → 搜索高亮 → 框选）→ 选中/搜索高亮天然叠在填色之上。
-- 无新 shader；hex → `NSColor` 经既有 `rgba(_:)`。
+- 无新 shader；动态 `NSColor` 经既有 `rgba(_:)` 在绘制时按当前外观解析为 SIMD。
 
 ---
 
@@ -227,7 +238,7 @@ let setFill: (NodeFill?) -> Void
 
 `MainToolbar` 新增一组 6 个圆形 swatch（放改侧按钮之后）：
 
-- 5 个填色点（`NodeFillStyle.values[token].swatch`）+ 1 个「默认」清除点（圆形底 + 对角斜线，对齐 prototype `.swatch-none`）。
+- 5 个填色点（`NodeFillStyle.values[token].swatch`，经 `Color(nsColor:)` 随外观解析）+ 1 个「默认」清除点（圆形底 + 对角斜线，对齐 prototype `.swatch-none`）。
 - **无选中（`!canSetFill`）全部禁用**（FR-C2）。
 - 激活态：色点外圈强调色环（对齐 prototype `.is-active`）。
 - 点击 → `setFill(token)` / `setFill(nil)`（默认）。
