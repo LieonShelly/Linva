@@ -18,7 +18,7 @@ license: proprietary
 
 1. **`currentVersion` 是硬校验**：`decode` 先做版本迁移（见规则 2），再 `guard doc.version == MindMapDocument.currentVersion else { throw .unsupportedVersion }`。**不在迁移链内的版本直接拒绝**。所以：
    - 每改一次序列化 schema，**必须递增 `currentVersion`**。
-   - 老版本文件会抛 `unsupportedVersion` —— 这是预期行为，需要你提供迁移。
+   - **已在迁移链内的旧版本**（如 v1）由内置迁移抬到当前版本，**不再抛** `unsupportedVersion`；**迁移链外的版本**（如未来未知版本）仍抛 `unsupportedVersion` —— 需要你为它写下一段迁移。
    - **现状：`currentVersion == 2`（v2 新增 `Node.fill` 节点填色）**。v1→v2 迁移**已内置**：旧文件无 `fill` 视为无填色，不再被拒绝。改 schema 仍须递增到 3，并按下面的流程写 v2→v3 迁移。
 2. **改 schema 的正确流程**：
    - 递增 `currentVersion`；
