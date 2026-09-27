@@ -19,10 +19,11 @@ license: proprietary
 1. **`currentVersion` 是硬校验**：`decode` 里 `guard doc.version == MindMapDocument.currentVersion else { throw .unsupportedVersion }`。**版本不符直接拒绝**，不会尝试自动迁移。所以：
    - 每改一次序列化 schema，**必须递增 `currentVersion`**。
    - 老版本文件会抛 `unsupportedVersion` —— 这是预期行为，需要你提供迁移。
+   - **现状：`currentVersion == 2`（v2 新增 `Node.fill` 节点填色）**。v1→v2 迁移**已内置**：旧文件无 `fill` 视为无填色，不再被拒绝。改 schema 仍须递增到 3，并按下面的流程写 v2→v3 迁移。
 2. **改 schema 的正确流程**：
    - 递增 `currentVersion`；
    - 新增字段在 `MindMapDocument`/`Node` 上加（`Codable` 合成，缺省要有合理默认值）；
-   - **必须写迁移**：旧版本 decode 后要能把老数据抬到新 schema。当前代码没有迁移层，需要你加（参考 `decode` 的 `switch doc.version` 分支，逐版本迁移到 `currentVersion`）。
+   - **必须写迁移**：旧版本 decode 后要能把老数据抬到新 schema。`decode` 的 `switch doc.version` 分支已逐版本迁移（v1→v2 已内置），新增时在末尾追加下一段迁移，逐版本抬到 `currentVersion`。
    - 迁移要在 `decode` 里、`sanitize` 前完成。
 3. **`sanitize` 的 `side` 消毒（重要不变量）**：`side` 字段**只允许出现在根节点下第一层**。`sanitize` 会：
    - 强制 `root.side = nil`；
