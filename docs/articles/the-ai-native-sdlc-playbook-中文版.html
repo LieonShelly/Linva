@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 原生软件开发生命周期行动手册 | Claude by Anthropic（中文版）</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#141413;
+    --muted:#5f5e5b;
+    --line:#e6e4df;
+    --accent:#c15f3c;
+    --accent-soft:#faf1ec;
+    --code-bg:#f7f6f3;
+    --card-bg:#f7f6f3;
+    --band:#faf9f7;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.75;
+    font-size:17px;
+    letter-spacing:.01em;
+  }
+  .page{max-width:760px;margin:0 auto;padding:40px 24px 96px}
+  header.site{max-width:760px;margin:0 auto;padding:28px 24px 0;display:flex;align-items:center;gap:10px}
+  header.site .logo{font-weight:700;font-size:20px;letter-spacing:-.02em}
+  header.site .logo span{color:var(--accent)}
+  .kicker{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 8px;font-size:13px;color:var(--muted)}
+  .kicker a{color:var(--accent);text-decoration:none}
+  h1{font-size:44px;line-height:1.15;letter-spacing:-.03em;margin:8px 0 12px;font-weight:650}
+  .dek{font-size:20px;color:var(--muted);margin:0 0 24px;line-height:1.5}
+  .meta{display:flex;flex-wrap:wrap;gap:14px;font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:40px}
+  .meta b{color:var(--ink);font-weight:600}
+  h2{font-size:30px;letter-spacing:-.02em;margin:56px 0 16px;font-weight:650;scroll-margin-top:20px}
+  h3{font-size:23px;margin:36px 0 12px;font-weight:640;letter-spacing:-.01em}
+  h4{font-size:18px;margin:26px 0 10px;font-weight:640}
+  p{margin:0 0 18px}
+  a{color:var(--accent)}
+  blockquote{margin:0 0 22px;padding:14px 20px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;color:#3a3a37}
+  blockquote p{margin:0}
+  ul,ol{margin:0 0 20px;padding-left:26px}
+  li{margin-bottom:8px}
+  .stage-num{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:2px 10px;font-size:15px;font-weight:700;letter-spacing:.04em;vertical-align:middle;margin-right:10px}
+  /* comparison cards */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 24px}
+  @media(max-width:640px){.duo{grid-template-columns:1fr}}
+  .card{background:var(--card-bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card .tag{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .card.trad .tag{color:var(--muted)}
+  .card.ai .tag{color:var(--accent)}
+  .card p{margin:0;font-size:15.5px}
+  /* labels */
+  .label{font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:30px 0 6px}
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:0 0 26px;font-size:15px;border:1px solid var(--line)}
+  th,td{text-align:left;padding:12px 14px;border:1px solid var(--line);vertical-align:top}
+  th{background:var(--card-bg);font-weight:650}
+  /* code */
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.6;margin:0 0 22px}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+  p code,li code{background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.86em}
+  pre code{background:none;border:none;padding:0}
+  .artifact{background:var(--band);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:20px 22px;margin:0 0 26px}
+  .artifact .cap{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+  .toc{background:var(--card-bg);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:0 0 36px}
+  .toc b{display:block;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .toc ol{margin:0;padding-left:20px;font-size:15px}
+  .toc a{color:var(--ink);text-decoration:none}
+  .toc a:hover{color:var(--accent)}
+  .fig{margin:0 0 24px}
+  .fig img{max-width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+  .fig figcaption{font-size:13.5px;color:var(--muted);margin-top:8px;font-style:italic}
+  .side{background:var(--accent-soft);border-radius:12px;padding:20px 22px;margin:0 0 26px;border:1px solid #f0dcd1}
+  .side .cap{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px}
+  .side p:last-child{margin-bottom:0}
+  hr{border:none;border-top:1px solid var(--line);margin:48px 0}
+  .section-divider{font-size:13px;color:var(--muted);text-align:center;letter-spacing:.3em;margin:48px 0}
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+  .resources a{display:block;margin-bottom:8px}
+  @media(max-width:640px){
+    h1{font-size:33px}
+    h2{font-size:25px}
+    h3{font-size:20px}
+    body{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<header class="site"><div class="logo">Claude <span>by Anthropic</span></div></header>
+
+<div class="page">
+
+  <div class="kicker">
+    <span>分类：<a href="#">企业 AI</a> · <a href="#">Claude Code</a></span>
+    <span>产品：<a href="#">Claude Enterprise</a> · <a href="#">Claude Code</a> · <a href="#">Claude Tag</a></span>
+  </div>
+
+  <h1>AI 原生软件开发生命周期行动手册</h1>
+  <p class="dek">如何用 AI 一步一步改造你的软件开发生命周期。</p>
+
+  <div class="meta">
+    <span>日期：<b>2026 年 8 月 21 日</b></span>
+    <span>阅读时间：<b>5 分钟</b></span>
+    <span>作者：<b>Louis Claxton</b></span>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <ol>
+      <li><a href="#s-intro">代码不再是瓶颈</a></li>
+      <li><a href="#s-ai-native">什么是 AI 原生的 SDLC？</a></li>
+      <li><a href="#s-plays">行动（Plays）</a></li>
+      <li><a href="#s1">阶段 1 —— 规划（Plan）</a></li>
+      <li><a href="#s2">阶段 2 —— 设计（Design）</a></li>
+      <li><a href="#s3">阶段 3 —— 构建（Build）</a></li>
+      <li><a href="#s4">阶段 4 —— 测试（Test）</a></li>
+      <li><a href="#s5">阶段 5 —— 部署（Deploy）</a></li>
+      <li><a href="#s6">阶段 6 —— 维护（Maintain）</a></li>
+      <li><a href="#s-close">结语</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ INTRO ============ -->
+  <h2 id="s-intro">代码不再是瓶颈</h2>
+  <p>组织已经开始以一年前难以想象的速度使用 AI 编写代码，但围绕代码的流程却没能以同样的速度改变。</p>
+  <p>许多工程团队仍然沿用同样的审批关卡、评审流程、交接环节和策略，从而拖慢了使用 <a href="#">Claude Code</a> 这类智能体编码方案所取得的效率提升。</p>
+  <p>软件开发生命周期（SDLC）是把软件从想法推进到生产的流程。大多数组织都在运行某种版本的同一套六个阶段，覆盖软件的规划、设计、构建、测试、部署和维护。传统上，每个阶段都是一个独立的阶段，由不同的角色负责。产品经理编写需求，技术架构师把需求转成设计，工程师落地设计，受监管企业中的 QA 团队负责验证，发布团队负责上线，运维团队监控正在运行的系统。工作通过文档、工单和审批签字在各个阶段之间流转。</p>
+  <p>传统的软件开发生命周期（SDLC）流程繁重，是为了在每个环节确保责任可追、受控可控。然而，传统 SDLC 的设计初衷是在一个"编写并实现代码"是最耗时、最昂贵的阶段的时代里实现效率最大化，而如今情况已不再如此。PRD（产品需求文档）、工期估算仪式、产品安全评审——所有这些之所以存在，都是为了在可能是数周、数月甚至数季度的开发工作期间强制各方保持一致。</p>
+  <p>传统 SDLC 还带有一些默认假设"每一步都由人类执行"的控制手段。而那些创造最大价值的组织，已经围绕智能体 AI 如今能够做到的事情重建了它们的流程，同时确保人类始终在环（human in the loop）。在本指南中，我们梳理了 Applied AI 团队在 SDLC 各个阶段内部集成 Claude 的若干最佳实践，以加速开发、让流程跑得更快——这些实践源自我们与客户合作的经验。</p>
+  <p>当代码不再是瓶颈、构建阶段比传统 SDLC 所允许的速度更快时，有三件事会变成现实：</p>
+  <ul>
+    <li>瓶颈转移到了构建阶段左右两侧的环节上。这主要是规划、评审/测试和部署，它们仍然以人类的速度运行。</li>
+    <li>控制手段不再与现实匹配，变得难以实施。当代码由某个人编写时，逐行人工评审是合理的；可一旦大部分 diff（变更）由智能体写出，人工评审就跟不上了。</li>
+    <li>治理成本上升，因为例外情况仍然要经过每周或每月召开一次的会议和委员会来流转。</li>
+  </ul>
+
+  <figure class="fig">
+    <img src="https://cdn.prod.website-files.com/68a44d4040f98a4adf2207b6/6a8739a1b934ffe55bfc9715_44592f18.png" alt="构建不再是约束">
+    <figcaption>构建不再是约束 —— 约束变成了它周围那些以人类速度运行的环节。人类速度的阶段保持原有时长，而构建则被压缩到以小时计。</figcaption>
+  </figure>
+
+  <p>让我们以安全瓶颈为例。安全团队的人力是按人类产出规模配置的，因此当智能体成倍地增加代码产出时，要么评审队列越积越长，要么代码在评审不足的情况下上线。受监管的组织无法接受这两种结果，所以它们的安全与策略检查必须跟上智能体的节奏。</p>
+  <p>为了更好地实现智能体 AI 的生产力提升并为其提供安全保障，传统 SDLC 生命周期需要经历与实现阶段所经历的那样的同等程度的转型。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ AI-NATIVE ============ -->
+  <h2 id="s-ai-native">什么是 AI 原生的 SDLC？</h2>
+  <p>AI 原生 SDLC 是一种重新构想的流程，它把旧有的控制目标与新的执行机制结合起来。它不再是线性的流程，而是变成了一个循环，并且 AI 被嵌入到每一个节点。AI 原生 SDLC 促进了自动化交接以及后续行动的自动触发，有助于解决传统 SDLC 各阶段之间交接那种手动、笨拙的特性。</p>
+  <p>你也会听到这种转变被称为智能体式 SDLC（agentic SDLC）、AI SDLC，或者干脆叫智能体式软件开发（agentic software development）——叫法不同，但描述的是同一件事。</p>
+
+  <figure class="fig">
+    <img src="https://cdn.prod.website-files.com/68a44d4040f98a4adf2207b6/6a8858c2eccce183e7553cf2_53b010df.png" alt="AI 原生 SDLC 六阶段转变">
+  </figure>
+
+  <h3>AI 原生 SDLC 六个阶段的转变</h3>
+  <p>下表突出显示了由 Claude 支撑的传统 SDLC 与 AI 原生 SDLC 之间的两个端点。大多数组织介于这两列之间。</p>
+
+  <table>
+    <thead>
+      <tr><th>阶段</th><th>传统 SDLC</th><th>AI 原生 SDLC</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>规划</td>
+        <td>需求由委员会收集，经工作坊与签字提炼，再手工整理成文</td>
+        <td>Claude 直接从源头综合痛点，并将其捕获到 <code>intent.md</code> 中——该文件既可供人阅读，又可被机器执行</td>
+      </tr>
+      <tr>
+        <td>设计</td>
+        <td>规格由分析师编写，再由设计师解析</td>
+        <td>需求与设计在同一个工作会话中由智能体压缩完成，并由以技能（skills）编码、在 git 中版本化的标准来指导</td>
+      </tr>
+      <tr>
+        <td>构建</td>
+        <td>测试与代码手工编写，文档在主开发之后才补写</td>
+        <td>测试与代码由 AI 生成，机构知识以版本化的、机器可读的 <code>CLAUDE.md</code> 文件与技能来维护</td>
+      </tr>
+      <tr>
+        <td>测试</td>
+        <td>QA 关卡设在阶段边界处</td>
+        <td>持续的评估（evals）编织在整个实现过程之中</td>
+      </tr>
+      <tr>
+        <td>部署</td>
+        <td>人类逐行评审所有代码，治理发生在评审周期中，且往往执行不一致</td>
+        <td>多层智能体评审，人类评审只保留给受监管的和关键性的代码。治理在 AI 行动时即时执行，钩子（hooks）作为审批关卡</td>
+      </tr>
+      <tr>
+        <td>维护</td>
+        <td>人类盯着生产环境找 bug</td>
+        <td>智能体监控线上部署。任何被突破的控制带（control band）都会被诊断，并作为新的 <code>intent.md</code> 写回循环中</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>贯穿右栏的一条主线是"已提交的产物"（committed artifact）。每个阶段结束时都会把一个产物写入版本控制（包括 <code>intent.md</code>、<code>spec.md</code>、<code>plan.md</code>、diff 及其测试、带有评审结论的 PR、以及事故记录），而下一阶段则以读取它作为开始。对于早期阶段，.md 文件是主要的产物，因为产品负责人和智能体都能阅读并操作同一个文件。从构建阶段往后，产物就是代码及其记录。提交链同时也是审计线索：谁要求了什么、智能体产出了什么、谁批准了它。</p>
+  <p>人类仍然对每一个需要判断力的决策负责。在智能体式 SDLC 的世界里，人类的注意力随着那些必须被评审的产物一起转移。</p>
+
+  <p><em>每个阶段都会提交一个可供下一阶段读取的产物。意图、规格、计划、diff 与评审结论合在一起，就是审计线索。</em></p>
+
+  <!-- ============ PLAYS ============ -->
+  <h2 id="s-plays">行动（Plays）</h2>
+  <p>这些行动是这本手册的核心，被归入六个非线性的阶段（规划、设计、构建、测试、部署、维护），它们共同覆盖了完整的生命周期。</p>
+  <p>每项行动都涵盖：</p>
+  <ul>
+    <li>改变了什么；</li>
+    <li>如何开始；</li>
+    <li>具体的实施步骤；</li>
+    <li>治理考量；以及</li>
+    <li>如何衡量它是否奏效。</li>
+  </ul>
+  <p>这些步骤是模块化的，组织可以根据自身的独特需求，在不同时间优先改造不同的阶段。每项行动都会在"前置条件"（Prerequisites）下列出它的依赖项，依赖关系图会进一步说明这些关系。</p>
+  <p>一个阶段以提交一个产物而结束，而该提交又会触发下一个阶段。一份被接受的 <code>intent.md</code> 会触发需求与设计环节，一份获批的 <code>spec.md</code> 会触发计划模式，一个被合并的 PR 会触发流水线，而生产环境中的一个被突破的控制带则会写出下一个 <code>intent.md</code>——于是循环就这样继续下去。</p>
+  <p>首先，你手工提示每一个步骤，其最终状态是一个循环：每个被接受的产物都会触发下一个关卡。人类的注意力集中在这些关卡上，评审智能体标记出来的内容，而不是从头开始每个阶段。</p>
+
+  <figure class="fig">
+    <img src="https://cdn.prod.website-files.com/68a44d4040f98a4adf2207b6/6a8855c75344623fc81efcb8_5d5a3c05.png" alt="行动（Plays）采纳顺序">
+    <figcaption>这些行动按阶段列出；箭头给出了采纳它们的顺序。这两者并不相同。从任何一个"泥土行动"（clay play）开始——没有任何箭头指向它，所以它不需要任何前置。对于任何其他行动，指向它的箭头所代表的就是在它之前需要采纳的行动。</figcaption>
+  </figure>
+
+  <!-- ============ STAGE 1 PLAN ============ -->
+  <h2 id="s1"><span class="stage-num">01</span>规划（Plan）</h2>
+  <p>想法不再需要等待某个人去把它写下来。意图只被捕获一次，用提出者自己的话，作为一个可版本化的产物，供下一阶段操作。</p>
+
+  <h3>以 intent.md 捕获</h3>
+  <p>启动软件开发流程的 <code>intent.md</code> 可以通过不同的途径进入。某个人有了想法，提交了一个工单，或者某个告警暴露了一起事故（见阶段 6：维护）。</p>
+  <p>当某个人有想法时，他会与 Claude 进行头脑风暴，并产出一份 markdown 原型规格（proto-spec）。在传统 SDLC 中，同一个人还必须说服产品团队的一名成员，和他一起或替他写下这个想法。</p>
+  <p>由 Claude 生成的原型规格可被人阅读、可版本化，并且能立即被下一阶段消费。原型规格被保存为 <code>intent.md</code>。</p>
+  <p>无论意图来自事件触发器还是智能体，所应用的步骤都是一样的：产品负责人在提交 <code>intent.md</code> 之前，先评审并纠正由智能体写出的这份文件。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>一个想法必须先经过积压条目、用户故事、故事点以及细化会议，才能有人对其采取行动。所有权在每次交接时转移，因此最终到达工程团队的内容，与提出者最初的意思已经隔了好几层。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>提出者与 Claude 头脑风暴，并把结果以 <code>intent.md</code> 的形式写下来——这是用提出者自己的语言写成的原型规格。该产物包含想要什么、为什么，以及在哪些约束之下。重复的流程通过技能（skills）来编码。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>无。</p>
+  <h4>基础设施</h4>
+  <p>为非工程师人员提供 Claude 访问权限（claude.ai 或 <a href="#">Cowork</a>）；一份双方认可的 <code>intent.md</code> 模板；一个共享的、可版本化的意图存放处，由产品负责人盯着。对单一产品而言，最简单的存放处是产品仓库里的一个 <code>intent/</code> 文件夹。这样的设置能让产物链紧邻由其派生的代码。只有当意图横跨多个仓库时，才值得为它单独建一个意图仓库；在单体仓库（monorepo）中，它就是一个目录。阶段 3：构建的侧栏会说明这个存放处与已经持有记录的 Jira 或需求工具之间的关系。</p>
+  <p>搭建这个环境对平台团队或工程团队来说是一次性任务。需要一名技术人员来搭起意图存放处，并决定谁能写入它，因为很多贡献者将来自组织的各个部门。</p>
+  <p>一旦仓库存在，没有 git 经验的贡献者就不必直接使用 git。取而代之的是，一个到版本控制系统（例如 GitHub）的连接器，让 Claude 能代表他们从 claude.ai 或 Cowork 提交 markdown 文件。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>提出者用自己的话向 Claude 描述问题。提出者可以描述今天他们做不到什么、这个想法影响谁、更好是什么样的、或者哪些属于范围之外。不需要任何正式语言。</li>
+    <li>头脑风暴，直到想法变得具体。Claude 会问分析师会问的那些问题：范围、用户、约束，以及成功是什么样子。</li>
+    <li>让 Claude 使用组织的模板把结果写成 <code>intent.md</code>。该模板可以被编码成一套由技术团队成员搭建、并经负责人签署的技能。它可以涵盖问题、拟议结果、受影响的用户与系统、约束以及未决问题。</li>
+    <li>提出者纠正任何 Claude 误解的地方。</li>
+    <li>把 <code>intent.md</code> 提交到共享存放处。作者和时间戳加入记录，产品负责人从那里接手这个想法。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">示例（intent.md）</div>
+    <pre><code># 意图：理赔状态自助服务
+作者：J. Ortiz（理赔运营）。状态：草稿。
+
+## 问题
+客户打电话到联络中心询问他们的理赔进行到哪一步了。
+坐席人员把约三分之一的通话时间花在了仅查询状态的请求上。
+
+## 拟议结果
+客户可以在门户中看到理赔状态、下一步操作和预计日期。
+
+## 受影响的用户与系统
+理赔坐席人员、门户团队、claims-core API。
+
+## 约束
+门户会话中不新增任何 PII。仅使用现有的身份验证。
+
+## 未决问题
+第三方损失理算人是否也需要访问权限？</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>证据就是已提交的 <code>intent.md</code>，它列明了作者、时间戳和完整的修订历史。它记录在意图存放处的 git 历史中。产品负责人负责批准，而把意图送入阶段 2：设计的接受或拒绝决定，则记录为合并操作或关闭评审。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>从第一次对话到提交 <code>intent.md</code> 的时间，从意图存放处的 git 历史读取，它记录了作者和时间戳。预期是从一个长达数周的引出与细化周期，缩短到数小时。</p>
+  <p><strong>滞后指标：</strong>存活率，即产品负责人接受进入阶段 2：设计、而非关闭的 <code>intent.md</code> 文件的占比。接受或拒绝的决定记录为产物的合并或关闭评审。此外，还有在同一变更的第一个 <code>spec.md</code> 提交之后，对 <code>intent.md</code> 所做的修改次数。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ STAGE 2 DESIGN ============ -->
+  <h2 id="s2"><span class="stage-num">02</span>设计（Design）</h2>
+  <p>需求与设计合并为一次会话。策略在编写规格时就已应用，而不是在数周后的评审中才发现。</p>
+
+  <h3>需求与设计</h3>
+  <p>一旦获得产品负责人批准，Claude 就会接手被接受的 <code>intent.md</code>，产出一份需求与设计规格。这由组织针对品牌、安全、合规和用户体验的<a href="#">技能（skills）</a>来指导。</p>
+  <p>产品负责人评审这份规格，但不编写它。这个过程的目标是创建一份工程团队可以据此规划的规格，并标记出值得关注的区域。</p>
+  <p>前端工作是最清晰的例子。一旦 <code>intent.md</code> 被接受，产品负责人就会基于 <code>intent.md</code> 在 <a href="#">Claude Design</a>（测试版）中制作设计稿，迭代打磨，然后将其导出到 Claude Code 去构建。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>需求与设计是由不同团队运行的两个独立阶段。分析师把想法正式化为需求，设计师再把需求解析回设计。这种分离是为了问责，但它既慢又会有信息损耗。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>两个阶段都发生在同一次提示会话中。Claude 接受 <code>intent.md</code>，产出一份需求与设计规格，受组织技能的约束，并标记出值得关注的区域。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>写一份 <code>intent.md</code> 文件，并把品牌、安全、合规与用户体验策略写成技能。</p>
+  <h4>基础设施</h4>
+  <p>一名有 Claude 访问权限的产品负责人。不需要任何工程技能。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>产品负责人打开一个带有组织技能可用、并附上 <code>intent.md</code> 的会话。</li>
+    <li>产品负责人的提示指向 <code>intent.md</code>，点名约束，并要求标记关注点。一开始手工运行，然后把它固化为组织级的斜杠命令。从这里开始，把意图存放处中 <code>intent.md</code> 的接受设为触发器，用一个在合并时触发的非交互式任务，加载组织的技能运行该环节，并把 <code>spec.md</code> 作为拉取请求（PR）提交（阶段 5：部署中的 CI/CD 行动涵盖相关管道）。从那一刻起，产品负责人的第一次介入就是评审。</li>
+    <li>同一位产品负责人对照这个想法评审这份规格。这份规格是否解决了所述的问题？<code>intent.md</code> 中的未决问题是得到了回答，还是被带入了后续？</li>
+    <li>首先处理被标记的关注点，因为它们正是分析师会升级处理的地方。产品负责人在工程团队看到规格之前，与每个关注点的策略负责人一起解决它们。</li>
+    <li>把 <code>spec.md</code> 与 <code>intent.md</code> 一起提交。这对文件记录了要求了什么、决定了什么。</li>
+    <li>产品负责人决定规格与意图是否进入构建，并针对组织归类为较高风险的事项咨询技术负责人。这个判断始终由一名人类队友做出，而接受规格正是启动阶段 3：构建中计划模式行动的东西。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（提示词）</div>
+    <pre><code>阅读所附的 intent.md，产出一份把它集成到我们现有代码库中的需求与设计规格。
+应用你可用到的技能，使计划符合我们的品牌指南、安全策略与用户体验标准。
+把规格完整地记录为 spec.md，准备交给工程团队。
+清晰描述任何值得关注的区域，尤其是你无法满足相互冲突的策略的地方。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>实时的策略不是数周后的评审中才被发现，而是在编写规格的同时就被读取和应用。组织的技能作为规格上的约束被应用。规格、生成它的提示词，以及生效中的技能版本，全部记录在版本控制中。产品负责人签署规格，并把被标记的关注点转给指定的策略负责人。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>同一变更的 <code>intent.md</code> 提交与 <code>spec.md</code> 提交之间的耗时（两个 git 时间戳），与旧的需求加设计周期相比。</p>
+  <p><strong>滞后指标：</strong>构建开始后的需求返工。统计同一变更的第一个 <code>plan.md</code> 提交之后、日期晚于它的 <code>spec.md</code> 提交数。git 日志会直接给出这一点。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ STAGE 3 BUILD ============ -->
+  <h2 id="s3"><span class="stage-num">03</span>构建（Build）</h2>
+  <p>没有一份被接受的计划，就不会实现任何东西。机构知识变成了智能体读取的文件，护栏以代码而非习惯的方式运行。</p>
+
+  <h3>将 Claude Code 的计划模式作为默认起点</h3>
+  <p>工程师以<a href="#">计划模式</a>启动 Claude Code 会话，把阶段 2：设计中获批的 <code>spec.md</code> 交给 Claude，让它采访他们，迭代计划，直到工程师满意为止。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>工程师阅读设计然后开始写代码。变更将如何进行——细化到改哪些文件、哪些测试——停留在工程师的脑子里，最好也不过是工单里的一条评论。没有其他人能评审它。评审者看到的第一样东西是完成的 diff，而到那时返工已经很慢了。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>工作始于 Claude 在计划模式中产出的书面计划——在这种模式下它可以读取代码库而不改动任何东西。工程师在写代码之前纠正计划，获批的版本作为 <code>plan.md</code> 提交，供后续阶段对照检查。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>如果存在意图产物（<code>intent.md</code> 或 <code>spec.md</code>），以及 <code>CLAUDE.md</code> 文件，会有帮助。</p>
+  <h4>基础设施</h4>
+  <p>能够访问仓库的 Claude Code。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>工程师以计划模式与 Claude 启动会话。</li>
+    <li>工程师把 <code>intent.md</code> 和 <code>spec.md</code> 交给 Claude，要求给出一个实施计划，点名要改的文件、工作的顺序，以及能证明其正确的测试。</li>
+    <li>通过追问来拷问这份计划：这个变更可能破坏什么？哪一步风险最高？Claude 选择不去做的其他选项是什么？</li>
+    <li>迭代，直到一个从未看过这段对话的工程师也能仅凭这份计划就实现该变更。</li>
+    <li>把获批的计划提交为 <code>plan.md</code>。计划加入审计线索，PR 评审行动（阶段 5：部署）会对照它检查最终的 diff。</li>
+    <li>接受计划，让 Claude 实现。有了扎实的计划，实现往往一次就完成。</li>
+    <li>当实现偏离计划时，在同一个提交中更新 <code>plan.md</code>。考虑用一个钩子来强制两者之间的同步。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（plan.md）</div>
+    <pre><code># 计划：理赔状态自助服务（源自 intent.md 2026-06-02）
+
+## 要改的文件
+portal/src/claims/StatusPanel.tsx（新增）、claims-api/routes/status.py、
+claims-api/tests/test_status.py
+
+## 工作顺序
+1. 在现有身份验证之后添加状态端点。
+2. 针对该端点构建面板。
+3. 接入门户导航。
+
+## 风险
+claims-core API 以 50 rps 限流；面板必须做缓存。
+
+## 证明
+test_status.py 覆盖四种理赔状态；截图与获批的设计稿一致。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>设计评审发生在任何代码生成之前——那时改变方向还只是编辑文档的问题。计划模式本身就强制执行这一点，因为在工程师接受计划之前，Claude 无法编辑文件。计划及其修订版本会被记录，连同谁接受了它。常规变更由工程师批准，而组织归类为较高风险的任何事项都会交给技术负责人或架构师。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>从第一次实现即成功合并的变更占比，以及从计划获批到合并 PR 的时间（所需数据在 PR 元数据中）。</p>
+  <p><strong>滞后指标：</strong>每次变更的返工轮数（同样来自 PR 元数据），以及合并后的 diff 与已提交的 <code>plan.md</code> 仍然一致的程度。</p>
+
+  <h3>Claude Code 的自动模式</h3>
+  <p>Claude Code 也可以运行在自动模式下：工程师批准计划，一旦满意并迭代完成，Claude 就在没有逐次编辑提示的情况下应用每一个变更。随着后面各行动中的护栏逐渐成熟（一份调优的 <code>CLAUDE.md</code>、编码策略的技能、阻止不安全动作的钩子，以及 Claude 可以运行的测试套件），自动接受会成为常规工作的默认：一份紧凑的 <code>spec.md</code>、很小的爆炸半径，以及已经被测试覆盖的代码。</p>
+  <p>现在的转变是：从用户盯着智能体做编辑、评审每一个动作，转向在更长的自主会话之后评审产物。自动接受模式在使用工作树（worktrees）时，还能进一步实现个人与团队层面的并行，并且是自主运行 SDLC、按阶段 6：维护中描述的方式闭环的基础。</p>
+
+  <div class="side">
+    <div class="cap">侧栏</div>
+    <h4 style="margin-top:0">遗留系统与真相之源</h4>
+    <p><em>适用于流程产出的每一个产物。</em></p>
+    <p>现有的 SDLC 流程可能已经在追踪产物了，只是用的不是 markdown 文件。工作项可能在 Jira 里，需求在某个内置了监管可追溯性的工具里，设计在 Figma 里，变更审批在变更委员会那里。这些系统很难被取代，因为审计人员和监管机构已经接受了它们，而且其他团队也依赖它们，所以 AI 原生 SDLC 必须适配既有的环境。</p>
+    <p>在向 AI 原生 SDLC 过渡时，对于流程产出的每一个产物，指定一个系统作为真相之源，其余一切只保留副本或指向原件的链接。可以按下面的配置设置单一真相之源，不同产物的选择不同：</p>
+    <ul>
+      <li><strong>以仓库为真相之源。</strong>markdown 产物是权威记录，遗留系统引用提交内的文件。对由工程主导的组织来说，这可能是一种最干净的配置，因为所有记录都在一个工具中、只有一个时间戳权威。</li>
+      <li><strong>以遗留系统为真相之源。</strong>Jira、ServiceNow 或需求工具持有权威记录，markdown 产物是工作副本。Claude 在会话开始时读取记录，并在同一个产生规格或计划的会话中，通过 <a href="#">MCP</a> 连接器把结果写回。</li>
+      <li><strong>以链接为最低标准。</strong>所有产物都标注记录 ID，所有遗留记录都包含 markdown 文件的提交 SHA。在向 AI 原生 SDLC 过渡时，链接是一个好的起点，但要接受会存在两个真相之源。</li>
+    </ul>
+    <p>只要两者之间有链接，或者其中一个被声明为真相之源，遗留系统和 markdown 优先系统就可以共存。</p>
+  </div>
+
+  <h3>CLAUDE.md</h3>
+  <p><a href="#"><code>CLAUDE.md</code></a> 给 Claude 提供了一名新入职成员所需要的上下文，涵盖约定、命令、架构，以及团队最常犯的错误。过去存在于人们头脑中和 wiki 上的知识，变成了一份智能体在每次会话开始时都会读取的文件，由整个团队维护，每当犯错时都会迭代更新。</p>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>无。</p>
+  <h4>基础设施</h4>
+  <p>一个仓库、已安装的 Claude Code，以及一名非常熟悉该代码库的工程师。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>在仓库中运行 <code>/init</code>。Claude 会基于它发现的内容生成一份初始的 <code>CLAUDE.md</code>。</li>
+    <li>把生成的文件精简到一名新成员第一天就需要的内容。保留构建、测试和 lint 命令、重要的约定，以及 Claude 反复出错的事项。</li>
+    <li>把 <code>CLAUDE.md</code> 提交到仓库根目录的 git 中，这样整个团队共享一个版本，对它的修改就像代码一样被评审。</li>
+    <li>这里有一条有用的规则：当 Claude 犯了两次同样的错误，纠正方法就写进 <code>CLAUDE.md</code>。</li>
+    <li>把它控制在一页以内，因为 Claude 会在会话开始时通读全部内容，任何过时的内容都在白白占用上下文。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（CLAUDE.md）</div>
+    <pre><code># 支付服务
+
+## 命令
+- 构建：make build
+- 测试：make test（单元测试）、make itest（集成测试，需要 docker）
+- Lint：make lint（在 CI 中运行；推送前修复）
+
+## 约定
+- Java 21、Spring Boot 3。不再新增 Lombok。
+- 金额一律用 BigDecimal，绝不用 double。
+- 每个端点都需要一个 src/itest 中的集成测试。
+
+## 架构
+- api/ 存放 REST 控制器，core/ 存放领域逻辑，
+  adapters/ 对接外部系统。
+- Kafka 事件在 schemas/ 中定义；绝不编辑生成的类。
+
+## Claude 常犯的错误
+- 不要升级依赖版本；平台团队负责它们。
+- 遗留的 v1/ 包已冻结；改动一律进 v2/。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p><code>CLAUDE.md</code> 是版本化的，因此智能体遵循的指令是可评审、可审计的。团队约定通过这份文件应用，对它的修改记录在 git 历史中，代码所有者在 PR 评审中批准这些修改。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>Claude 重复本应被 <code>CLAUDE.md</code> 拦住的错误的频率。对 <code>CLAUDE.md</code> 的纠正或修改应在 git 历史中追踪。</p>
+  <p><strong>滞后指标：</strong>新成员从加入团队到第一个合并 PR 的时间（来自 PR 历史）。</p>
+
+  <h3>技能作为机构知识</h3>
+  <p>技能是组织让机构知识变得可操作的方式。这些指令是显式的、可版本化的、被广泛应用的，并且在策略变化时集中更新。经验法则：为那些必须被一致应用的机构知识编写技能；不要为那些属于 <code>CLAUDE.md</code> 或提示词的内容编写技能。</p>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>无强制要求。拥有一个 <code>CLAUDE.md</code> 会有帮助，因为它把智能体的工作知识保持在仓库中，但技能并不依赖它。</p>
+  <h4>基础设施</h4>
+  <p>一条有指定负责人的策略，以及一个书面化的真相之源。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>挑选一条今天执行不一致的知识。它可以是安全标准、API 设计约定或品牌规则。</li>
+    <li>把它写成技能：一个包含 <code>SKILL.md</code> 的文件夹，其 frontmatter 说明何时触发，正文说明做什么。由一名工程师从策略负责人的真相之源出发编写，借助 Claude 的帮助。</li>
+    <li>把技能放到仓库的 <code>.claude/skills/&lt;name&gt;/</code> 中，让它随代码一起交付；或者通过一个<a href="#">插件</a>在组织范围内分发。</li>
+    <li>测试技能能否触发。用不同的方式让 Claude 执行相关任务，确认每次技能都被加载。</li>
+    <li>当策略变化时，修改技能并让策略负责人签署该修改。</li>
+    <li>工程师会在下一次会话中自动拿到新版本。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（.claude/skills/secure-api-review/SKILL.md）</div>
+    <pre><code>---
+name: secure-api-review
+description: 应用 API 安全标准。在创建或修改外部端点、
+  评审 API 代码或生成 OpenAPI 规格时使用。
+---
+# 安全的 API 评审
+
+当你创建或修改一个 API 端点时：
+1. 身份验证：每个端点都需要网关 JWT；/health 之外不允许匿名路由。
+2. 输入校验：对照 OpenAPI 模式校验请求体，并拒绝未知字段。
+3. 审计：每个改变状态的端点都会发出一个包含
+   操作者、动作、实体和时间戳的审计事件。
+4. 数据分类：模式中被标记为 pii 的字段绝不得出现在
+   日志或错误消息中。
+
+运行 scripts/check-endpoints.sh 并将其输出包含在你的总结中。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>技能是一种控制手段，尽管是建议性的。它让 Claude 在编写代码时更可能应用策略，但没有任何东西强制某个会话遵守它。一条必须始终成立的策略，需要技能背后有确定性的机制，例如阻止该动作的钩子，或是在 PR 处重新检查策略的评审环节。技能让违规变得罕见，而钩子让违规几乎不可能发生。技能调用记录在会话轨迹中，策略负责人像评审代码一样评审技能的修改。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>从策略负责人批准一项策略变更，到更新后的技能合并的时间（取自技能文件夹上的 PR）。</p>
+  <p><strong>滞后指标：</strong>引用该策略的 PR 评审结论，一旦技能在编写代码时应用了策略，这些结论就应趋近于零。如果结论没有趋近于零，那么要么技能没有触发，要么它的文本已经偏离了官方策略。</p>
+
+  <h3>钩子作为构建期护栏</h3>
+  <p>技能是建议性的控制手段，而<a href="#">钩子（hook）</a>是它背后确定性的那一层。Claude 在实现期间的大部分动作都是文件编辑和 shell 命令，所以构建阶段是钩子最可能频繁触发的地方。</p>
+  <p>构建期钩子可以：</p>
+  <ul>
+    <li>阻止对受保护路径的编辑，例如生成的类或冻结的包；</li>
+    <li>在文件编辑后运行格式化器和 linter，使偏离永不累积；</li>
+    <li>让凭据不进入 diff。</li>
+  </ul>
+  <p>为任何其策略必须无例外成立的技能提供支撑。钩子会对每个匹配它的动作运行，所以构建期钩子应该快速，并限定在发生变更的文件上。诸如完整测试套件这样的更重检查，属于提交或 PR 阶段。</p>
+  <p>一个向人类征求批准的钩子，属于阶段 5：部署中的关卡，因为构建期间的批准提示会把一个人重新放回到所有并行运行会话的关键路径上。</p>
+
+  <h3>并行会话与子智能体</h3>
+  <p>一名工程师可以同时驱动多条工作流。</p>
+  <p>并行会话是另一个完整的 Claude Code 实例，在自己的<a href="#">git 工作树</a>中处理一项独立任务。每个独立会话对彼此一无所知，指挥它们的工程师是它们之间唯一共享的东西。</p>
+  <p>一个<a href="#">子智能体（subagent）</a>在单个会话内作为一个受限的助手运行，拥有自己的上下文窗口和工具限制，适合那些在多个任务中反复出现的作业，例如验证应用是否按预期运行。</p>
+  <p>并行会话提高了工程师可以同时在飞的并发任务数，而子智能体让每个会话专注于自己的任务。工程师的工作是指挥并评审所有这些工作。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>一名工程师一次只做一个任务，并把一天或一周中的相当一部分时间花在构建、测试和评审上。等待期间在任务间切换是可能的，但上下文切换累人，以至于很少有人愿意这么做。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>一名工程师同时运行几个 Claude 会话，每个都在自己的工作树里、处理自己的任务。重复的作业变成拥有各自上下文和工具限制的子智能体。工程师的工作转向编排，并最终转向构建和监控循环。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p><code>CLAUDE.md</code>，因为所有会话都会读取这份文件。反馈回路（阶段 4：测试）在这里也有帮助，因为当一个会话能验证自己的工作时，所需的工程师监督就更少。</p>
+  <h4>基础设施</h4>
+  <p>一个 git 仓库，因为隔离来自工作树；权限设置经过调优，使会话不会因为组织认为安全的命令而等待批准提示。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>工程师使用计划模式行动（阶段 3：构建）中的计划，把工作拆成触及不同文件的任务，从而看清哪里是独立的。共享文件的任务在同一个会话中一个接一个地运行。</li>
+    <li>每个并行任务都有自己的工作树，例如在一个终端里运行 <code>claude --worktree feature-auth</code>，在另一个终端里运行 <code>claude --worktree fix-rate-limit</code>。工作树是在自己分支上的独立检出，能防止会话在文件上相互冲突。</li>
+    <li>两到三个会话是一个合理的起点。实际的上限是一个人能好好评审多少条流，所以只有在评审跟得上的情况下才增加会话。</li>
+    <li>把重复的作业变成子智能体，按 <code>.claude/agents/</code> 中的 markdown 文件定义，每个都有名称、何时使用的描述，以及它可以接触的工具。示例包括：一个在主智能体完成后剔除不必要复杂度的代码简化器、一个运行应用并检查行为的验证器、一个探索代码库而不淹没主上下文的调研者。把这些定义检入 git，让整个团队共享它们。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（.claude/agents/verifier.md）</div>
+    <pre><code>---
+name: verifier
+description: 在会话报告完成之前运行应用并检查变更是否生效
+tools: Bash, Read
+---
+用 make run 启动应用。演练被改变的这段行为以及
+最相邻的两个周边流程。报告你运行了什么、看到了什么，
+以及任何与 plan.md 不符的行为。不要修复任何东西；只报告。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>更多的会话意味着更多的产出，所以控制手段必须来自仓库中的配置。那里的钩子和权限设置适用于所有会话，而某个会话做了什么会被记录并归属于运行它的工程师。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>在评审质量保持不变的情况下，每名工程师的并发会话数（从 OpenTelemetry 导出统计），以及一天中用于指挥而非等待的时间占比。</p>
+  <p><strong>滞后指标：</strong>每周每名工程师合并的变更数，与按 PR 历史确定的返工率并读。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ STAGE 4 TEST ============ -->
+  <h2 id="s4"><span class="stage-num">04</span>测试（Test）</h2>
+  <p>每个会话都会在人类看到结果之前检查自己的工作，而指挥智能体的配置会像它写出的代码一样得到回归测试。</p>
+
+  <h3>给 Claude 一个反馈回路</h3>
+  <p>始终给 Claude 一种验证自己工作的方法，无论是测试、构建还是截图对比。一个会话会在工程师看到问题之前检查自己的工作并修复自己的错误。</p>
+  <p>不要把反馈回路与验证器子智能体（阶段 3：构建）混淆。反馈回路会在整个任务中与工作本身一样多次地运行。而验证器子智能体，则是把最终检查打包的一种方式——一旦会话认为工作完成了，就用一个全新的上下文窗口来运行它。这样，结论就不会被产生那段代码的假设所左右。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>表明代码能工作的信号来得很晚。CI 要几分钟，测试者要几天，生产环境要几周。当智能体产出代码时，一个迟到的信号意味着一个人必须检查它的全部产出，而这个人就成了瓶颈。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>会话在一个人看到结果之前就获得检查自己工作的方式。运行测试、运行构建、截图。Claude 一直迭代到检查通过为止，所以到达工程师手里的东西已经通过了检查。搭建这个回路是运行会话的工程师的责任，下面的步骤就是为他们写的。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>无。</p>
+  <h4>基础设施</h4>
+  <p>一套测试套件和一个构建，各自用一条命令就能在本地运行。对于 UI 工作，让 Claude 能看到结果的方式至关重要——要么是一个浏览器工具，要么是一个通过 MCP 接入的截图工具。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>如果今天检查工作需要一串命令和一些环境知识，就把它包装进一个单一目标，例如 <code>make test</code> 或 <code>npm test</code>，失败时以非零退出。</li>
+    <li>在 <code>CLAUDE.md</code> 的命令部分，为每条命令列出健康输出的示例。</li>
+    <li>陈述一个目标并让它可量化，这样 Claude 就能在不用问你的情况下检查工作，例如："test_status.py 中的所有测试都通过"、"截图与附上的设计稿一致"或"端点在新字段存在时返回 200"。</li>
+    <li>对于 bug 修复，先写失败测试。让 Claude 把 bug 复现成一个测试，运行它，并确认它因你预期的原因而失败。提交那个测试。只有到那时，才让 Claude 在不去编辑测试的情况下让它通过，由最后一步中的测试文件钩子来强制这一限制。一个在修复之前就存在、且智能体无法重写的测试，就是 bug 已消除的证据。</li>
+    <li>对于 UI 工作，用视觉检查来闭环。给 Claude 一个浏览器或截图工具，给它设计稿，让它迭代。实现、截图、比较、调整。两到三轮是正常的，结果应该每轮都变好。</li>
+    <li>把验证变成"完成"的一部分。指令存在于 <code>CLAUDE.md</code> 中。在报告任务完成前运行测试，并展示输出。</li>
+    <li>最后，回路本身也需要保护，因为一个修复代码的智能体绝不能削弱对那段代码的检查。一个在修复任务期间阻止编辑测试文件的钩子就能做到这一点。另一种做法是在评审中检查 diff，并拒绝任何触及测试的变更。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（CLAUDE.md 验证块）</div>
+    <pre><code>## 验证你的工作
+
+- 构建：make build（必须以 "Build succeeded" 结束）
+- 测试：make test（全部绿；绝不跳过或删除一个失败的测试）
+- Lint：make lint（零警告）
+
+在报告任何任务完成之前运行全部三项，并粘贴输出。
+如果某个测试失败，修复代码，而不是测试。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p><strong>强制了什么：</strong>在任务被报告完成前的验证，以及在修复期间阻止智能体编辑测试文件的限制——在组织希望它们得到保证的地方，两者都以钩子实现。</p>
+  <p><strong>证据是什么：</strong>"make test"的字面输出、构建日志，或 Claude 运行并粘贴的截图对比，因此证据来自工具链。</p>
+  <p><strong>记录在哪里：</strong>在会话记录中（OpenTelemetry 导出会把它转发到组织的可观测性栈），以及在 PR 的检查运行中，评审者和之后的任何审计者都能在那里看到它。</p>
+  <p><strong>谁批准：</strong>评审 PR 的代码所有者，因为机械性的证据已经附上了，他可以专注于意图与风险。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>智能体写出的变更的一次通过 CI 成功率，CI 系统已支持。</p>
+  <p><strong>滞后指标：</strong>每个 PR 的评审时间（来自 PR 元数据），一旦测试捕获了评审者过去要捕获的东西，它就应该下降；以及来自事故追踪器的变更失败率。</p>
+
+  <h3>CI 中的持续评估（evals）</h3>
+  <p>评估是阶段关卡式 QA 的 AI 原生对应物。在实践中，这意味着一套在智能体配置发生任何变化时都会运行的测试套件。当接入一个新模型或重写一个提示词时，评估套件会说明智能体是否仍然以同样的标准完成工作。</p>
+  <p>这些评估应被视为一套活套件。随着模型改进，曾经有判别力的用例不再有判别力，必须添加来自持续监控中浮现的新用例。</p>
+  <p>根据用例不同，有些团队可能更愿意按固定节奏离线运行这些评估，而不是每次变更都运行。下面的步骤针对的是持续评估。</p>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p><code>CLAUDE.md</code> 和反馈回路（阶段 4：测试）。</p>
+  <h4>基础设施</h4>
+  <p>能非交互式运行 Claude Code 的 CI，以及一个带预算、用于评估运行的 API 密钥。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>平台工程师从近期工作中收集 20 到 50 个真实任务及其预期/被接受的结果。</li>
+    <li>把每个任务写成一个评估，即提示词加上定义"可接受"的检查（测试通过、lint 干净、行为不变、策略得到遵循）。</li>
+    <li>该套件在 CI 中按计划、并在 <code>CLAUDE.md</code>、技能或钩子的任何变更上非交互式运行，因为那份配置在指挥智能体，值得获得代码所得到的回归测试。</li>
+    <li>用结果作为配置变更的关卡。一个让通过率下降的技能变更，在合并之前要被评审。</li>
+    <li>每个生产事故都会获得一个评估，由拥有该事故的团队编写，并作为回归测试留在套件中。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（.github/workflows/agent-evals.yml）</div>
+    <pre><code>name: Agent evals
+on:
+  pull_request:
+    paths: ['CLAUDE.md', '.claude/**']
+  schedule:
+    - cron: '0 2 * * *'
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g @anthropic-ai/claude-code
+      - name: Run eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          for eval in evals/*.json; do
+            claude -p "$(jq -r '.prompt' $eval)" \
+              --allowedTools "Read,Edit,Bash(make test)" \
+              --output-format json > result.json
+            ./evals/check.sh "$eval" result.json
+          done</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>评估给 QA 一个能跟上智能体产出的关卡。通过率阈值作为合并检查被强制执行，运行会被记录以便随时间比较结果，而拥有该配置变更的团队批准它。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>随时间变化的评估通过率（套件每次运行都会报告），以及一个生产事故要多久才能变成一个永久的评估。</p>
+  <p><strong>滞后指标：</strong>在 CI 中捕获的回归，与在生产环境中发现的回归对比（从事故追踪器得出）。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ STAGE 5 DEPLOY ============ -->
+  <h2 id="s5"><span class="stage-num">05</span>部署（Deploy）</h2>
+  <p>评审在两个方向上都运行，治理在智能体行动时被强制执行。智能体做到生产关卡之前的所有事情，而不做之后任何事。</p>
+
+  <h3>PR 评审回路中的 AI</h3>
+  <p>Claude 既给出评审也接收评审。它对照组织的策略评审收到的 PR，并处理它自己 PR 上的评审意见。这让工程师能够在他们的 PR 评审中专注于行为，这归结为判断意图与风险。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>评审能力是按人类产出来规划的。一个 PR 等待一个评审者通读全部内容，评审质量随评审者的负荷而波动，作者在后面追赶，而积压越积越大。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>所有 PR 都获得一组相同的评审环节，结论按严重程度排序。人类的注意力上移一层，转到这个变更是否做了计划打算做的事、风险是否可接受。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>一份来自阶段 3：构建的更新后的 <code>CLAUDE.md</code> 文件；如果评审环节强制执行书面策略，则还需要技能和已定义的子智能体。</p>
+  <h4>基础设施</h4>
+  <p>一个安装了 Claude 集成的仓库，要么是管理员启用的托管式<a href="#">代码评审（Code Review）</a>（研究预览）服务，要么是在你自己 CI 中运行的 <a href="#">claude-code-action</a>，在需要时通过 AWS Bedrock、Google Vertex 或 Microsoft Foundry 进行模型调用（CI/CD 行动涵盖部署选项）。要求代码所有者批准的分支保护策略也值得设置。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>托管式代码评审服务是最快的起点。管理员启用它并选择仓库。当你需要控制流水线、或想让 API 调用通过你自己的云协议路由时，就在你自己的 CI 中用 claude-code-action 运行评审（CI/CD 行动涵盖那块管道）。</li>
+    <li>技术负责人把评审策略写成仓库根目录的 <code>REVIEW.md</code>，分成组织关心的几个环节：bug 与逻辑错误；安全与漏洞；对照规格（来自需求行动的 <code>spec.md</code>）、实施计划（来自计划模式行动的 <code>plan.md</code>）和设计原则的合规性。<code>REVIEW.md</code> 还定义了什么算"重要"（Important）、什么只是"小事"（Nit），以及什么应该跳过。</li>
+    <li>技术负责人设定人类阈值。结论本身不会批准或阻止一个 PR，分支保护仍然要求代码所有者批准。想要依据结论把关合并的平台工程师，可以读取检查运行以机器可读计数发布的严重程度统计。</li>
+    <li>当评审者或作者在评审意见上标记 <code>@claude</code> 时，Claude 处理该意见并推送修复。PR 线程同时记录请求与变更。这个修复回路通过 claude-code-action 运行。在托管式服务中，评论 <code>@claude review</code> 会请求一次全新的评审。对于 Claude 自己开的 PR，更进一步，让 Claude 照看 PR 直到合并。团队把回路包装进一个自定义斜杠命令，它清扫 PR 上未解决的评审意见和失败的检查，处理它们并推送修复，直到 PR 变绿、只等代码所有者批准。</li>
+    <li>评审结论反馈回 <code>CLAUDE.md</code>。当一次评审第二次标记某个错误时，纠正方法作为那次评审的一部分写进 <code>CLAUDE.md</code>，而且因为评审会读取 <code>CLAUDE.md</code>，该错误从下一个 PR 起就会被捕获。评审还会在某个变更让 <code>CLAUDE.md</code> 过时时加以标记。</li>
+    <li>每月一次，技术负责人通过给结论打分来调优这套设置，让评审者改进，并在 <code>REVIEW.md</code> 中限制小事（Nit）的数量。生成的路径和任何 CI 已强制执行的内容被排除在外。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（REVIEW.md）</div>
+    <pre><code># 评审指令
+
+## 环节
+运行三个环节，并给每个结论标记它的环节：
+- Bug：逻辑错误、坏掉的边界情况、微妙的回归
+- 安全：注入风险、身份验证缺口、日志中的 PII
+- 合规：变更与 spec.md、plan.md 及我们的设计原则一致
+
+## 这里的"重要"指什么
+把 Important 留给那些会破坏行为、泄露数据或违反策略的结论。
+风格和命名是小问题。
+
+## 限制小事
+每次评审最多报告五条小问题；其余只给出一个计数总结。
+
+## 不要报告
+src/gen/ 下生成的文件，以及任何 CI 已强制执行的内容。</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>职责分离被保留下来，因为写代码的智能体无法批准它。在 <code>REVIEW.md</code> 中的评审策略被应用到所有 PR，结论、修复、评分和批准都记录在 PR 历史中，所以 PR 就是审计记录。批准来自通过分支保护的人类，并以结论为依据。</p>
+  <p>关于这些控制在生产规模下如何组合，参见<a href="#">在 Anthropic 保护其 AI 原生 SDLC</a>。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>首次评审的时间，应降到几分钟；以及无需人类触碰分支就解决的评审意见占比（数据直接存储在 git 上）。</p>
+  <p><strong>滞后指标：</strong>合并前捕获的缺陷与漏洞，对比那些逃逸到生产环境的，来自 PR 历史和事故追踪器。</p>
+
+  <h3>钩子作为审批关卡</h3>
+  <p>构建阶段把钩子用作护栏，在没有人介入的情况下允许或阻止动作（阶段 3：构建）。钩子也可以询问，暂停动作直到某个特定的人批准——这正是发布把关（release gating）所需要的。</p>
+  <p>这项行动放在阶段 5：部署，因为发布关卡是最清晰的情形，但钩子并不限于部署：它们会在 Claude 行动的任何地方运行。例如，钩子可以在阶段 3：构建期间阻止在没有变更工单的情况下编辑迁移和基础设施，并在阶段 4：测试期间阻止智能体在修复任务中编辑测试文件。</p>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>无。</p>
+  <h4>基础设施</h4>
+  <p>一份变更流程所需的批准清单（书面化）。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>工程领导层与变更管理和合规团队一起，列出必须保留的人类审批关卡，例如变更管理签字、发布授权，以及对受保护路径的编辑。</li>
+    <li>平台工程师把每个关卡表达成一个钩子：一个在 Claude 行动前运行的脚本，可以允许、询问或阻止。</li>
+    <li>团队钩子放在 git 中的 <code>.claude/settings.json</code>，而不可协商的钩子放在由平台或 IT 管理员拥有的托管设置中，单个工程师无法关掉它们。</li>
+    <li>一次阻止应该自我解释，所以当一个钩子阻止某个动作时，原因和获得批准的途径会出现在 Claude 的输出中。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（.claude/settings.json）</div>
+    <pre><code>{
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            { "type": "command",
+              "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/production-gate.sh" }
+          ]
+        }
+      ]
+    }
+}</code></pre>
+  </div>
+
+  <div class="artifact">
+    <div class="cap">以及关卡本身（.claude/hooks/production-gate.sh）</div>
+    <pre><code>#!/bin/bash
+# 生产环境部署需要一个具名的发布授权
+cmd=$(jq -r '.tool_input.command' < /dev/stdin)
+if [[ "$cmd" == *"deploy"* && "$cmd" == *"production"* ]]; then
+   if [ -z "$RELEASE_APPROVAL" ]; then
+     echo "生产环境部署需要发布授权。" >&2
+     exit 2 # 退出码 2 会阻止该动作；消息传给 Claude
+   fi
+fi
+exit 0</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>钩子就是审批关卡。关卡条件每次、对每个人都强制执行。允许和阻止的决定带着时间戳被记录。关卡还定义了什么算批准，无论是一张获批的变更工单，还是发布经理的签字。</p>
+
+  <div class="side">
+    <div class="cap">实战示例</div>
+    <h4 style="margin-top:0">受监管企业的托管设置</h4>
+    <p><em>由平台团队通过 MDM 或管理控制台部署；工程师无法编辑或覆盖其中任何一项。</em></p>
+    <pre><code>{
+"permissions": {
+"deny": [
+"Read(.env*)", "Read(./secrets/**)",
+"WebFetch", "Bash(curl *)", "Bash(wget *)"
+],
+"allow": [
+"Bash(git *)", "Bash(make build)",
+"Bash(make test)", "Bash(make lint)"
+],
+"disableBypassPermissionsMode": "disable"
+},
+"allowManagedPermissionRulesOnly": true,
+"sandbox": {
+"enabled": true,
+"failIfUnavailable": true,
+"allowUnsandboxedCommands": false,
+"network": { "allowedDomains": ["git.internal.example.com",
+"registry.npmjs.org"] },
+"credentials": {
+"files": [
+{ "path": "~/.ssh", "mode": "deny" },
+{ "path": "~/.aws/credentials", "mode": "deny" }
+],
+"envVars": [ { "name": "GITHUB_TOKEN", "mode": "deny" } ]
+}
+},
+"allowManagedHooksOnly": true,
+"disableSideloadFlags": true,
+"allowManagedMcpServersOnly": true,
+"strictKnownMarketplaces": [
+{ "source": "github", "repo": "example-corp/approved-plugins" }
+],
+"requiredMinimumVersion": "2.1.193"
+}</code></pre>
+    <p><strong>从控制的角度，每一行换来了什么：</strong></p>
+    <ul>
+      <li><code>permissions.deny</code> 让密钥不进入智能体的上下文，并阻止通过工具进行的任意网络出口；<code>permissions.allow</code> 预先批准安全的内环，这样拒绝清单不会变成提示疲劳。</li>
+      <li><code>disableBypassPermissionsMode</code> 加上 <code>allowManagedPermissionRulesOnly</code> 意味着没有任何工程师、项目文件或命令行标志能够放宽规则。</li>
+      <li><code>sandbox</code> 弥合了权限无法覆盖的缺口。对 WebFetch 的工具级拒绝无法阻止 shell 命令触达网络；OS 级的域名允许清单则直接封死出口。</li>
+      <li><code>failIfUnavailable</code> 和 <code>allowUnsandboxedCommands</code> 让沙箱成为一道关卡：当沙箱无法初始化时 Claude Code 拒绝启动，而在沙箱内失败的命令也无法在沙箱外重试。</li>
+      <li><code>credentials</code> 弥合了拒绝规则留下的缺口。<code>permissions.deny</code> 约束 Claude 的文件工具，但一个沙箱化 shell 命令默认仍可能读取 <code>~/.ssh</code> 或 <code>~/.aws/credentials</code>；这个块拒绝这些读取，并把命名的密钥从每个沙箱命令的环境中剥离。</li>
+      <li><code>allowManagedHooksOnly</code> 意味着这项行动中的审批关卡是唯一运行的钩子；本地任何东西都无法添加或替换它们。</li>
+      <li><code>disableSideloadFlags</code> 和 <code>strictKnownMarketplaces</code> 意味着工程师机器上的每个技能、智能体、钩子和 MCP 服务器都来自组织批准的插件市场，绝不来自家目录。</li>
+      <li><code>allowManagedMcpServersOnly</code> 让智能体的工具面成为一个由平台团队拥有的允许清单。</li>
+      <li><code>requiredMinimumVersion</code> 拒绝在低于获批最低版本的版本上启动，因此控制手段由一个组织实际评估过的构建来强制执行。</li>
+    </ul>
+    <p>把上述内容视为一个可以定制的起点，而不是一份照抄的推荐。每一项拒绝都在与能力做权衡，正确的平衡取决于仓库的数据分类。设置参考文档记录了每个键，包括仅托管可用的那些：<a href="#">code.claude.com/docs/en/settings</a>。</p>
+  </div>
+
+  <div class="label">如何衡量（针对钩子本身）</div>
+  <p><strong>先行指标：</strong>在每一个审批关卡上等待的时间。每个钩子决定都带时间戳和允许或阻止的结论写入 OpenTelemetry 导出，因此等待在每个关卡上都可见。</p>
+  <p><strong>滞后指标：</strong>在钩子之前和之后，到达生产环境的关卡违规（来自事故追踪器）。</p>
+
+  <h3>CI/CD 集成与部署</h3>
+  <p>在 CI/CD 流水线内部非交互式地运行 Claude Code，对执行进行沙箱化以便长时间运行的智能体安全运行，通过 MCP 集成暴露部署，并在智能体真正需要之前排练回滚路径。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>流水线运行确定性的脚本，任何需要判断力的事情都要等一个人类。例如，分流那个偶发失败的测试、写变更日志，或弄清构建为什么坏了。部署和回滚是由人类在压力下照着操作手册执行。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>Claude 在流水线内部为判断类步骤非交互式运行，处在一个带作用域凭据的沙箱中。部署工具通过 MCP 暴露给智能体，因此那个编写并测试了变更的工作流也能交付它、回滚它，并且是在组织为每个环境定义的关卡之内。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>PR 评审回路中的 Claude 和作为审批关卡的钩子，因为关卡必须存在，自动化才能加速任何东西通过它们。</p>
+  <h4>基础设施</h4>
+  <p>一个安装了 claude-code-action 的 CI 平台，或任何能调用 <code>claude -p</code> 的运行器；通过 API、或当流量必须留在组织云协议上时通过 Bedrock、Foundry 或 Vertex 的模型访问；针对部署目标的 MCP 服务器；一个用于智能体作业的、无常驻生产凭据的沙箱配置文件。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>平台工程师从只读判断步骤开始。在流水线作业中使用 <code>claude -p</code> 分流一次失败的构建、总结一个偶发失败的测试，或起草变更日志。</li>
+    <li>把写步骤加在现有关卡之后，用于诸如修复 lint、更新生成的文档，或通过 <code>@claude</code> 提及处理评审意见之类的作业。智能体写出的任何东西都通过分支保护作为 PR 到达，而智能体没有通往 main 的路。</li>
+    <li>执行是沙箱化的。智能体作业运行在容器中，受网络策略约束，使用短期作用域令牌，默认不持有生产凭据。</li>
+    <li>通过 MCP 暴露部署。部署、状态和回滚成为工具，按环境限定作用域，因此智能体的部署能力是一个允许清单，而不是一个带凭据的 shell 脚本。</li>
+    <li>按环境划分自主层级。在开发环境，智能体自由部署。在生产环境，智能体准备发布，发布经理授权它，一个钩子强制执行生产关卡。暂存环境位于两者之间。</li>
+    <li>回滚应该是流水线中排练最多的路径：一条智能体可以运行、并在暂存环境定期演练的单命令。闭环行动（阶段 6：维护）在控制带被突破时会调用这次回滚，所以它必须预先被证明可用。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（流水线步骤）</div>
+    <pre><code>- name: Triage failed build
+  if: failure()
+  run: >
+    claude -p "读取 out/build.log 中的构建日志。找出最可能的原因，
+    说明失败看起来是偶发还是真实，并为 PR 线程写一段三行的总结。" >> triage.md</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>治理原则是：智能体可以做到生产关卡之前的一切，并且无法越过它。下面的控制手段强制执行这一原则。</p>
+  <ul>
+    <li>分支保护把智能体写出的任何东西都变成 PR，没有通往 main 的直接路径。</li>
+    <li>生产部署钩子阻止发布，直到一个具名的发布经理授权它。每次非交互式运行都以智能体自己的身份行动，因此流水线日志把智能体做了什么与触发它的工程师做了什么区分开来。</li>
+    <li>按环境的权限层级决定智能体在通往关卡的路上可以做多少。</li>
+  </ul>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>无需呼叫人类就完成分流的流水线失败占比（取自 CI/CD 流水线日志）。</p>
+  <p><strong>滞后指标：</strong>DevOps 研究与评估（DORA）指标，CI 系统和部署工具已经在发出这些指标。</p>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ STAGE 6 MAINTAIN ============ -->
+  <h2 id="s6"><span class="stage-num">06</span>维护（Maintain）</h2>
+  <p>循环闭环了。一个触发器在调用路径上没有人的情况下唤起 Claude，而它所发现的东西以 <code>intent.md</code> 的形式重新进入流水线。</p>
+
+  <h3>维护与闭环</h3>
+  <p>到目前为止，我们讨论了如何把 Claude 加入 SDLC 流程的每个阶段，每个阶段都需要一个人来启动初始步骤。而这个阶段把焦点转向让 Claude 自主运行，以闭合循环。</p>
+  <p>例如，一个持续运行的监控智能体，可以在一个 bug 工单被提出之后，创建一个 <code>intent.md</code>，并流经需求、计划、构建、测试和评审各阶段。阶段 6：维护是无人值守（headless）运行的，各阶段之间有一个独立的置信关卡——一个确定性检查或一个对抗性评审智能体——决定上一阶段的产出是继续，还是升级给人类。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>维护是一个反应性阶段。所有工单或事故都要等一个人去处理并重启流程。一个凌晨 3 点的告警可能被漏掉，一个工单可能在积压里躺到有人接手为止，而如果先发生了另一场火灾，事后总结的行动可能根本到不了代码库。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>一个触发器——例如控制带被突破、一个工单、一条频道消息或一个计划——在路径上没有人的情况下唤起 Claude。Claude 进行诊断，只通过受把关的路径行动，并把它的发现写成 <code>intent.md</code>，然后它流经上面描述的那些阶段。人们对这些工作进行分流和评审，而不再需要启动它。</p>
+    </div>
+  </div>
+
+  <h3>闭环</h3>
+  <p>一个确定性脚本盯着生产环境，当控制带被突破时唤起 Claude。对一次突破的监控，是理解循环自主运行模式的一个有帮助的例子，而本阶段末尾的 <a href="#">Claude Tag</a>（公开测试版）部分则涵盖通过不同渠道到达的工作。</p>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p><code>Intent.md</code>，它给循环一个结构化的输出用来重启。加速的 Claude PR 评审、作为行动边界的钩子，以及一个 CI/CD 的回滚路径（最高自主层级会调用它）。</p>
+  <h4>基础设施</h4>
+  <p>一个检测脚本可以查询的指标存储（Prometheus、CI 系统的 API 或等价物）、对仓库的读取权限、一种在 CI 中非交互式运行 Claude Code 的方式，或用于一个接收 webhook 的服务的 <a href="#">Agent SDK</a>。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>服务所有者或平台工程师挑选一个具有稳定滚动基线的指标，例如 CI 测试失败率、部署后的 5xx 率，或 PR 周期时间。</li>
+    <li>他们编写检测脚本，通常是滚动窗口上的均值与标准差，并配合规则（Western Electric 或类似规则），这样控制带既能捕获缓慢漂移也能捕获尖峰。脚本是版本化的、经单元测试的，检测完全保持确定性，不涉及任何模型。</li>
+    <li>响应层级定义在版本化的配置中（下面的 <code>bands.yaml</code>）。在 1σ 时脚本只记录；在 2σ 时它只读地唤起 Claude 进行诊断；在 3σ 时 Claude 可以行动，但只能通过开一个进入评审关卡的 PR，或触发一个预先批准的运行手册。</li>
+    <li>触发层可以是一个 GitHub 或 GitLab 中的计划工作流、一个来自现有监控栈的 webhook，或网络内的一个 Cron Job。Claude 无状态运行，要么作为 CI 运行器上的非交互步骤，要么作为沙箱容器中的 Agent SDK 服务，而 CI/CD 行动涵盖部署和模型访问选项。因为运行是无状态且非交互的，一个循环可以在没有任何人启动它的情况下开始和结束。</li>
+    <li>智能体把它的诊断以阶段 1：规划中的格式写成 <code>intent.md</code>，涵盖异常及其证据、一个拟议结果、受影响的系统，以及任何未决问题。从那里，这条发现像其他任何东西一样流经流水线。</li>
+    <li>服务所有者或值班工程师对队列进行分流，把面向产品的发现路由给产品负责人。立即修复、排期，或驳回。驳回会调优控制带并帮助降低噪音。</li>
+    <li>当一个修复上线时，为该事故添加一个评估（持续评估行动），以确保这类问题在未来得到保护。</li>
+  </ol>
+
+  <div class="artifact">
+    <div class="cap">它长什么样（例如，一个监控 CI 测试失败率的 bands.yaml）</div>
+    <pre><code>metric: ci_test_failure_rate
+baseline: rolling_30d
+rules: western_electric
+tiers:
+  1sigma: { action: log }
+  2sigma: { action: diagnose,
+            tools: "Read,Grep,Bash(gh run view *)" }
+  3sigma: { action: propose,
+            routes: [pull_request, runbook:rollback-deploy] }</code></pre>
+  </div>
+
+  <h4>治理考量</h4>
+  <p>层级边界从版本化的配置强制执行，权限和托管设置拒绝生产访问。调用、发现和分流决定都带时间戳记录。一个服务所有者对发现进行分流和批准，产生的变更走正常的 PR 评审关卡，而智能体可以触发的运行手册是预先批准的。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>从控制带被突破到分流队列中出现 <code>intent.md</code> 的时间，对比旧的事故到事后总结行动的时间。检测脚本的日志带有突破时间戳和事故层级。</p>
+  <p><strong>滞后指标：</strong>成为已合并修复的发现占比（分流队列对比实际 PR 历史），以及同类事故的重复次数——随着修复给评估套件增加用例，这个数字应该下降。</p>
+
+  <h4>示例</h4>
+  <ul>
+    <li>当 CI 测试失败率突破 3σ 时，智能体隔离那个偶发失败的测试或开一个回滚 PR，由评审关卡决定。</li>
+    <li>当部署后的 5xx 率在窗口内有一个部署的情况下突破 3σ 时，智能体触发现有的回滚流水线。</li>
+    <li>当 PR 周期时间触发一条漂移规则时，智能体为工程领导层写一份报告，这表明该框架既适用于过程指标，也适用于生产指标。</li>
+  </ul>
+
+  <p><em>检测保持确定性。一旦某个控制带被突破，Claude 就会被唤起，而层级决定它可以做什么。</em></p>
+
+  <h3>周期性代码库扫描</h3>
+  <p>一次安全扫描是关于一个代码库在特定模型下的、针对某一时刻的陈述，而这两半都会过时：代码每周都在变，而每一代模型都会发现上一代遗漏的漏洞。AI 原生的答案是按计划运行扫描，在调用路径上没有人类，并把发现的东西与对代码库的任何其他变更一样，送过同样的关卡。</p>
+  <p><a href="#">Claude Security</a> 是计划扫描的托管形式。连接一个 GitHub 仓库，扫描就在 Anthropic 基础设施上以 Claude Mythos 5 运行，每条发现都在被报告之前得到验证并附上置信评级。建议的补丁在网页版 Claude Code 中评审和应用。组织无需访问模型本身就能获得发现。</p>
+
+  <div class="duo">
+    <div class="card trad">
+      <div class="tag">传统</div>
+      <p>安全扫描是一个事件，在发布或审计前发起一次扫描。报告送到一个追踪器，积压靠手工消化，直到下一个事件。其间的代码由 PR 评审捕获到的任何东西来覆盖。</p>
+    </div>
+    <div class="card ai">
+      <div class="tag">AI 原生</div>
+      <p>扫描按计划针对每个已连接的仓库运行，使用可用的最强模型，发现内容在任何人读到之前就已验证。每条发现都像一个被突破的控制带那样处理：一个能放进一个 PR 的修复走评审关卡，任何更大的内容变成 <code>intent.md</code>。覆盖率从最后一次运行开始计算，而不是从第一次。</p>
+    </div>
+  </div>
+
+  <div class="label">如何开始</div>
+  <h4>前置条件</h4>
+  <p>PR 评审关卡和作为审批关卡的钩子（<a href="#s5">阶段 5：部署</a>），这样发现内容像任何其他变更一样经过评审。对于单个 PR 装不下的发现，使用<a href="#s1">阶段 1：规划</a>中的 <code>intent.md</code> 格式。</p>
+  <h4>基础设施</h4>
+  <p>Claude Security 向 Claude Enterprise 组织以公开测试版提供。它需要：在目标仓库上安装 Anthropic GitHub App（云托管的 github.com）、启用网页版 Claude Code、开启超额用量（Extra Usage）并设置消费上限、为运行扫描的人提供高级席位，并由管理员在 <code>claude.ai/admin-settings/claude-code</code> 开启该功能。扫描按 Mythos 5 费率按用量计费，因此消费上限应与仓库的规模和数量相匹配。</p>
+
+  <h4>如何执行</h4>
+  <ol>
+    <li>安全负责人连接仓库，并按仓库、服务或团队把它们组织成项目，这样发现的归属从一开始就清晰。</li>
+    <li>对最关键仓库运行第一次全量扫描，包括那些已被其他工具或早期模型扫描过的仓库。把第一次扫描当作基线。第一次扫描很可能在被认为是干净的代码中浮现发现。</li>
+    <li>为每个项目设置计划。对积极开发的服务，每周是一个合理的默认值；在仓库很大或混合的情况下，把扫描限定到某个目录或分支。</li>
+    <li>手持置信评级对发现进行分流。带理由地驳回，这样驳回会被记录，同一条发现也不会在下一次运行中作为新的返回。</li>
+    <li>对于有边界的发现，在网页版 Claude Code 中打开建议补丁、评审它，并像任何其他变更一样送过 PR 评审关卡。提出修复的智能体没有批准它的路。</li>
+    <li>对于任何比单个补丁更广的东西——例如一个架构弱点或一个跨服务重复的模式——用阶段 1 的格式把它写成 <code>intent.md</code>，并从规划阶段开始。</li>
+    <li>当一个修复发布到生产时，把该漏洞类别的一个评估加到持续评估行动的套件中，这样指挥智能体的配置从那时起就针对那一类进行测试。</li>
+    <li>把发现导出为 CSV 或 Markdown，或使用 webhook，让组织现有的追踪器和审计系统保持为审计者已经期待的系统记录。</li>
+  </ol>
+
+  <h4>治理考量</h4>
+  <p>扫描在组织的管理控制下运行，意味着连接哪些仓库、谁持有扫描席位、消费上限是多少，都由中央设置。每条发现都有一个验证结果和一个置信评级，每次驳回都有理由，因此扫描历史就是一份关于发现了什么、修复了什么、有意识地接受了什么的审计记录。</p>
+  <p>修复通过 PR 评审关卡和分支保护到达生产，而不是来自扫描本身。Claude Security 是对现有静态分析和依赖扫描的补充。确定性检查留在 CI，而模型驱动的扫描覆盖那些检查并非为找出而构建的、依赖上下文的漏洞。</p>
+
+  <div class="label">如何衡量</div>
+  <p><strong>先行指标：</strong>处于计划中的已连接仓库占比，以及从一条发现被报告到其补丁进入 PR 评审关卡的时间（从扫描历史和 PR 元数据读取）。</p>
+  <p><strong>滞后指标：</strong>计划扫描发现的漏洞，对比在生产中发现或由外部报告发现的，来自事故追踪器；以及在经历了多轮运行的仓库上，每次扫描发现数的趋势——随着修复和评估的累积，它应该下降。</p>
+
+  <h3>用 Claude Tag 做 on-call</h3>
+  <p>事故也可以通过其他方式到达，例如 Slack 或 Teams 这类工作场所通讯应用。事故可能看起来像 10 点在一个事故频道里要求紧急修复的一条 Slack 消息，而现在可以立即采取行动。<a href="#">Claude Tag</a>（目前在 Slack 中提供公开测试版）让 Claude 以自己的身份成为这些频道的成员，因此每条新事故都有一个第一响应者，而响应本身成为未来事故的循环与记忆的一部分。</p>
+  <p>对话和机构知识留在频道里，频道中的任何人都可以引导并执行响应。任何团队成员都可以实时测试假设、探索新选项和进行调查，频道历史增加了可审计性。通过访问 MCP，Claude 验证指标回到基线并在线程中确认它，把事后总结写进一个版本化的经验教训文件，供未来的调查阅读。</p>
+  <p>事故并不是 Claude Tag 接手的唯一工作。在工单上通过 MCP 标记它，或在频道里提问它，Claude 都以同样的方式分流工作。一个小的、边界清晰的小修复作为 PR 通过评审关卡到达，任何更大的内容被写成 <code>intent.md</code> 交给阶段 1：规划，此时循环开始自我供给。参见：<a href="#">Claude Tag 如何在 Anthropic 为 CI/CD 做 on-call</a>。</p>
+
+  <figure class="fig">
+    <img src="https://cdn.prod.website-files.com/68a44d4040f98a4adf2207b6/6a8760aded54a2a8319cd5b9_fe6d780d.png" alt="频道作为审计线索">
+    <figcaption>频道就是审计线索：请求、诊断、人类授权和修复都留在处理该事故的地方。</figcaption>
+  </figure>
+
+  <div class="section-divider">✦ ✦ ✦</div>
+
+  <!-- ============ CLOSING ============ -->
+  <h2 id="s-close">结语</h2>
+  <p>模型和框架（harness）已经变得更加先进，让组织不仅能改造它们生产代码的方式，还能改造整个软件开发生命周期。</p>
+  <p>这场转型让人类判断保持在流程的中心，并考虑大型企业组织的治理与监管要求。</p>
+  <p>本指南汇集了我们 Applied AI 团队每天为客户执行的许多真实最佳实践，我们希望你会觉得它是一个实用且可行动的资源。</p>
+  <p><strong>循环持续运转。人类判断居于其上。</strong></p>
+
+  <h3>资源与致谢</h3>
+  <p>下面的文档是平台团队设置这些控制所需的东西，大致按你落地它们的顺序排列。</p>
+  <div class="resources">
+    <a href="#">为你的组织设置 Claude Code——管理决策地图；从这里开始 · code.claude.com/docs/en/admin-setup</a>
+    <a href="#">设置参考与优先级，包括每个仅托管可用的键 · code.claude.com/docs/en/settings</a>
+    <a href="#">来自 Claude 管理控制台的服务器托管设置 · code.claude.com/docs/en/server-managed-settings</a>
+    <a href="#">权限 · code.claude.com/docs/en/permissions</a>
+    <a href="#">沙箱化——OS 级文件系统与网络隔离 · code.claude.com/docs/en/sandboxing</a>
+    <a href="#">钩子——指南 · code.claude.com/docs/en/hooks-guide</a>
+    <a href="#">钩子——参考 · code.claude.com/docs/en/hooks</a>
+    <a href="#">技能 · code.claude.com/docs/en/skills</a>
+    <a href="#">插件与私有市场——技能和钩子如何在组织内分发 · code.claude.com/docs/en/plugin-marketplaces</a>
+    <a href="#">托管 MCP——对智能体工具面的集中控制 · code.claude.com/docs/en/managed-mcp</a>
+    <a href="#">企业部署概览——Bedrock、Vertex、Foundry · code.claude.com/docs/en/third-party-integrations</a>
+    <a href="#">企业网络配置 · code.claude.com/docs/en/network-config</a>
+    <a href="#">监控（OpenTelemetry）· code.claude.com/docs/en/monitoring-usage</a>
+    <a href="#">分析仪表板 · code.claude.com/docs/en/analytics</a>
+    <a href="#">合规 API——企业活动源、聊天检索与删除 · platform.claude.com/docs/en/manage-claude/compliance-api</a>
+    <a href="#">安全模型 · code.claude.com/docs/en/security</a>
+  </div>
+  <p>感谢 Jim Blackhurst、Will Steuk 和 Jamal Arif 对本指南的贡献，本指南的灵感来自并建立在他们此前的大量工作之上。</p>
+
+  <footer>
+    本页为原网页 <em>The AI-Native SDLC playbook</em>（<a href="https://claude.com/blog/the-ai-native-sdlc-playbook">claude.com/blog/the-ai-native-sdlc-playbook</a>）的中文翻译版。原网页为 Anthropic（Claude）官方博客文章，版权归原作者所有；本译文仅供个人学习阅读之用。代码块、命令与文件内容保留原文（机器可读内容不作翻译）。
+  </footer>
+
+</div>
+</body>
+</html>
