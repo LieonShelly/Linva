@@ -93,7 +93,11 @@ struct ContentView: View {
                     setSideRight: { setSide(.right) },
                     zoomOut: { zoom(by: 1 / 1.12, viewport: geometry.size) },
                     zoomIn: { zoom(by: 1.12, viewport: geometry.size) },
-                    fit: { fit(viewport: geometry.size) }
+                    fit: { fit(viewport: geometry.size) },
+                    canSetFill: canSetFill,
+                    activeFill: fillSelection.common,
+                    fillActive: fillSelection.active,
+                    setFill: { fill in session.setFill(fill) }
                 )
             }
         }
@@ -101,6 +105,17 @@ struct ContentView: View {
     }
 
     private var isMulti: Bool { session.selectedIds.count > 1 }
+
+    private var canSetFill: Bool { !session.selectedIds.isEmpty }
+
+    /// 单选/全一致 → active=true，common 为公共 fill（含全 nil）；多选不一致或选中空 → active=false。
+    private var fillSelection: (common: NodeFill?, active: Bool) {
+        let ids = Array(session.selectedIds)
+        guard !ids.isEmpty else { return (nil, false) }
+        let first = session.model.node(id: ids[0])?.fill
+        let allSame = ids.allSatisfy { session.model.node(id: $0)?.fill == first }
+        return (first, allSame)
+    }
 
     private var canAddChild: Bool { !isMulti && session.primarySelectedId != nil }
 

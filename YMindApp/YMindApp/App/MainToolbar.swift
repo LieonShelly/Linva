@@ -21,6 +21,10 @@ struct MainToolbar: ToolbarContent {
     let zoomOut: () -> Void
     let zoomIn: () -> Void
     let fit: () -> Void
+    let canSetFill: Bool
+    let activeFill: NodeFill?
+    let fillActive: Bool
+    let setFill: (NodeFill?) -> Void
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .automatic) {
@@ -76,6 +80,14 @@ struct MainToolbar: ToolbarContent {
             }
             .disabled(!canSetSide)
             .help("放到右侧（⌘→）")
+
+            Divider()
+            FillSwatchesView(
+                canSetFill: canSetFill,
+                activeFill: activeFill,
+                fillActive: fillActive,
+                setFill: setFill
+            )
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {
