@@ -10,6 +10,8 @@ struct MainToolbar: ToolbarContent {
     let canPaste: Bool
     let canSetSide: Bool
     let zoomPercent: Int
+    let canvasTool: CanvasTool
+    let setCanvasTool: (CanvasTool) -> Void
     let addChild: () -> Void
     let addSibling: () -> Void
     let delete: () -> Void
@@ -91,6 +93,16 @@ struct MainToolbar: ToolbarContent {
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {
+            Picker("画布工具", selection: Binding(
+                get: { canvasTool },
+                set: { setCanvasTool($0) }
+            )) {
+                Image(systemName: "cursorarrow").tag(CanvasTool.select)
+                Image(systemName: "hand.draw").tag(CanvasTool.pan)
+            }
+            .pickerStyle(.segmented)
+            .help("选择/框选 ↔ 手型平移（空白拖拽语义）")
+
             Button(action: zoomOut) {
                 Label("缩小", systemImage: "minus.magnifyingglass")
             }

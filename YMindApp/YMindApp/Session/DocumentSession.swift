@@ -78,6 +78,7 @@ final class DocumentSession: ObservableObject {
     @Published var isDirty = false
     @Published private(set) var undoRevision = 0
     @Published var camera = Camera()
+    @Published var canvasTool: CanvasTool = .select
     @Published var snapshot: LayoutSnapshot
     @Published private(set) var selectedIds: Set<UUID> = []
     @Published private(set) var selectionAnchorId: UUID?

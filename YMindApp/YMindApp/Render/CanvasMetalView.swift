@@ -9,11 +9,19 @@ enum CanvasSelectIntent: Equatable {
     case range
 }
 
+/// 画布工具模式：决定空白处左键拖拽的语义（平移模式找回画布中心用）。
+enum CanvasTool: Equatable {
+    /// 选择/框选：空白左拖 = 框选，单击空白 = 取消选中。
+    case select
+    /// 手型平移：空白左拖 = 平移画布。
+    case pan
+}
+
 /// 画布指针手势状态。纯值类型，便于推演与测试。
 enum CanvasPointerGesture: Equatable {
     case none
     /// 平移相机：`lastPoint` 为上一次的视图坐标。
-    case pan(lastPoint: CGPoint)
+    case pan(origin: CGPoint, lastPoint: CGPoint)
     /// 框选：`tracking == false` 表示忽略拖动（编辑态下不框选）。
     case marquee(origin: CGPoint, current: CGPoint, additive: Bool, tracking: Bool)
     /// 节点按下未拖：`movingIds` 为待搬集；松手未拖则收成单选。
@@ -96,7 +104,8 @@ struct CanvasMetalView: NSViewRepresentable {
     func updateNSView(_ view: CanvasMTKView, context: Context) {
         view.session = session
         view.actions = actions
-        // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates。
+        view.refreshCursorForTool()
+        // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates.
         if session.camera == Camera() {
             view.markNeedsFitContent()
         }
@@ -113,10 +122,25 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
 
+    /// 手型平移模式显示手掌光标，模式切换时刷新。
+    func refreshCursorForTool() {
+        guard appliedCanvasTool != session.canvasTool else { return }
+        appliedCanvasTool = session.canvasTool
+        window?.invalidateCursorRects(for: self)
+    }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        if session.canvasTool == .pan {
+            addCursorRect(bounds, cursor: .openHand)
+        }
+    }
+
     private let renderer: MetalRenderer?
     private var gesture: CanvasPointerGesture = .none
     private var isSpaceHeld = false
     private var appliedFocusRequest = 0
+    private var appliedCanvasTool: CanvasTool?
     private var didFitContent = false
     private var fitContentScheduled = false
 
@@ -222,7 +246,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
     /// 中键（及其他鼠标键）拖拽始终平移相机。
     override func otherMouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
-        gesture = .pan(lastPoint: convert(event.locationInWindow, from: nil))
+        let point = convert(event.locationInWindow, from: nil)
+        gesture = .pan(origin: point, lastPoint: point)
     }
 
     override func otherMouseDragged(with event: NSEvent) {
@@ -280,9 +305,11 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
                 gesture = .pendingDrag(origin: point, nodeId: id, movingIds: [id])
             }
         case .empty:
-            if isSpaceHeld {
-                gesture = .pan(lastPoint: point)
+            if isSpaceHeld || session.canvasTool == .pan {
+                // 手型平移：空格临时平移，或处于平移模式。
+                gesture = .pan(origin: point, lastPoint: point)
             } else {
+                // 选择/框选模式：空白左拖 = 框选。
                 gesture = .marquee(
                     origin: point,
                     current: point,
@@ -297,10 +324,10 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         switch gesture {
         case .none:
             break
-        case let .pan(lastPoint):
+        case let .pan(origin, lastPoint):
             session.camera.translation.x += point.x - lastPoint.x
             session.camera.translation.y += point.y - lastPoint.y
-            gesture = .pan(lastPoint: point)
+            gesture = .pan(origin: origin, lastPoint: point)
             setNeedsDisplay(bounds)
         case let .marquee(origin, _, additive, tracking):
             guard tracking else { return }

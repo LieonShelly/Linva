@@ -83,6 +83,8 @@ struct ContentView: View {
                     canPaste: session.canPaste,
                     canSetSide: session.canSetSide,
                     zoomPercent: Int((session.camera.scale * 100).rounded()),
+                    canvasTool: session.canvasTool,
+                    setCanvasTool: { session.canvasTool = $0 },
                     addChild: addChild,
                     addSibling: addSibling,
                     delete: deleteSelected,

@@ -216,6 +216,8 @@ final class MetalRenderer {
         viewport: inout ViewportUniforms
     ) {
         let displayScale = view.window?.backingScaleFactor ?? 1
+        // 与分叉控件一致：按相机缩放向上量化栅格倍率，放大时不糊（缩放靠 bucket 重栅格）。
+        let rasterScale = displayScale * Self.rasterBucket(camera.scale)
         encoder.setRenderPipelineState(texturedPipeline)
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -223,7 +225,7 @@ final class MetalRenderer {
             guard let texture = textAtlas.texture(
                 for: frame,
                 text: frame.text,
-                scale: displayScale,
+                scale: rasterScale,
                 device: device
             ) else {
                 continue
