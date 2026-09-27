@@ -82,6 +82,15 @@ private struct DocumentCommands: Commands {
             .keyboardShortcut("s", modifiers: [.command, .shift])
         }
 
+        CommandGroup(after: .saveItem) {
+            Button("导出 Markdown…") {
+                DocumentWorkflow.exportMarkdown(session)
+            }
+            Button("导出 PNG…") {
+                DocumentWorkflow.exportPNG(session)
+            }
+        }
+
         CommandGroup(replacing: .undoRedo) {
             Button("撤销") {
                 if session.editingId != nil {
@@ -216,6 +225,45 @@ enum DocumentWorkflow {
         } catch {
             session.errorMessage = error.localizedDescription
             return false
+        }
+    }
+
+    /// 导出 Markdown（FR-E2）：生成纯结构标题大纲，SavePanel 落地。
+    static func exportMarkdown(_ session: DocumentSession) {
+        session.commitEditingIfNeeded()
+        let text = MarkdownExporter.markdown(from: session.model.document)
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = ExportNaming.safeFilename(
+            base: session.model.document.root.text,
+            ext: "md"
+        )
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try Data(text.utf8).write(to: url, options: .atomic)
+        } catch {
+            session.errorMessage = error.localizedDescription
+        }
+    }
+
+    /// 导出 PNG（FR-E3）：全展开整图，SavePanel 落地。
+    static func exportPNG(_ session: DocumentSession) {
+        session.commitEditingIfNeeded()
+        guard let data = PNGExporter.data(document: session.model.document) else {
+            session.errorMessage = "导出 PNG 失败：无法生成图像"
+            return
+        }
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.png]
+        panel.nameFieldStringValue = ExportNaming.safeFilename(
+            base: session.model.document.root.text,
+            ext: "png"
+        )
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            session.errorMessage = error.localizedDescription
         }
     }
 
