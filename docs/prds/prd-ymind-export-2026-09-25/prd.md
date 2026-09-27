@@ -1,8 +1,8 @@
 ---
 title: YMind — 导出（PNG / Markdown）
-status: draft
+status: 已实现（spec 2026-09-27 为准）
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-09-27
 skill: bmad-prd (Fast path)
 inputs:
   - docs/prds/prd-ymind-2026-09-24/prd.md
