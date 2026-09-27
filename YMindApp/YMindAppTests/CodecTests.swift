@@ -24,7 +24,7 @@ struct CodecTests {
 
     @Test func stripsDeepSide() throws {
         let json = """
-        {"version":1,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000002","text":"一","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000003","text":"二","collapsed":false,"side":"right","children":[]}]}]}}
+        {"version":2,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000002","text":"一","collapsed":false,"side":"left","children":[{"id":"00000000-0000-0000-0000-000000000003","text":"二","collapsed":false,"side":"right","children":[]}]}]}}
         """.data(using: .utf8)!
         var warnings: [String]? = []
         let doc = try YMindCodec.decode(json, warnings: &warnings)
@@ -45,5 +45,24 @@ struct CodecTests {
         #expect(decoded == model.document)
         #expect(decoded.root.fill == .sage)
         #expect(decoded.root.children[0].fill == .rose)
+    }
+
+    @Test func migratesV1ToV2() throws {
+        let json = """
+        {"version":1,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[{"id":"00000000-0000-0000-0000-000000000002","text":"子","collapsed":false,"children":[]}]}}
+        """.data(using: .utf8)!
+        let doc = try YMindCodec.decode(json)
+        #expect(doc.version == 2)
+        #expect(doc.root.fill == nil)
+        #expect(doc.root.children[0].fill == nil)
+    }
+
+    @Test func unknownFillToken_decodesAsNil() throws {
+        let json = """
+        {"version":2,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"fill":"neon","children":[]}}
+        """.data(using: .utf8)!
+        let doc = try YMindCodec.decode(json)
+        #expect(doc.version == 2)
+        #expect(doc.root.fill == nil)
     }
 }

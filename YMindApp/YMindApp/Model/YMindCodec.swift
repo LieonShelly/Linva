@@ -24,11 +24,15 @@ enum YMindCodec {
     }
 
     static func decode(_ data: Data, warnings: inout [String]?) throws -> MindMapDocument {
-        let doc: MindMapDocument
+        var doc: MindMapDocument
         do {
             doc = try decoder.decode(MindMapDocument.self, from: data)
         } catch {
             throw YMindCodecError.decodingFailed
+        }
+        // 迁移：v1 → v2（fill 缺省 nil，仅版本号升迁；Node 解码器对缺失 fill 天然容错）。
+        if doc.version == 1 {
+            doc.version = 2
         }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
