@@ -104,8 +104,41 @@ final class MetalRenderer {
         }
         encoder.label = "YMind 画布"
 
+        encodeContent(
+            into: encoder,
+            viewportSize: view.bounds.size,
+            snapshot: snapshot,
+            camera: camera,
+            displayScale: view.window?.backingScaleFactor ?? 1,
+            selectedIds: selectedIds,
+            selectionAnchorId: selectionAnchorId,
+            cutSourceIds: cutSourceIds,
+            intent: intent,
+            searchHitId: searchHitId,
+            marquee: marquee
+        )
+
+        encoder.endEncoding()
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+    }
+
+    /// 编码一帧的全部绘制内容；在线 draw(in:) 与离屏 renderImage 共用。
+    private func encodeContent(
+        into encoder: MTLRenderCommandEncoder,
+        viewportSize: CGSize,
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        displayScale: CGFloat,
+        selectedIds: Set<UUID>,
+        selectionAnchorId: UUID?,
+        cutSourceIds: Set<UUID>,
+        intent: DropIntent?,
+        searchHitId: UUID?,
+        marquee: CGRect?
+    ) {
         var viewport = ViewportUniforms(
-            size: SIMD2(Float(view.bounds.width), Float(view.bounds.height))
+            size: SIMD2(Float(viewportSize.width), Float(viewportSize.height))
         )
 
         // 绘制顺序：边 → 节点底色 → 文字 → 分叉控件 → 多选描边。
@@ -122,14 +155,14 @@ final class MetalRenderer {
         drawText(
             snapshot: snapshot,
             camera: camera,
-            view: view,
+            displayScale: displayScale,
             encoder: encoder,
             viewport: &viewport
         )
         drawBranchToggles(
             snapshot: snapshot,
             camera: camera,
-            view: view,
+            displayScale: displayScale,
             encoder: encoder,
             viewport: &viewport
         )
@@ -159,10 +192,6 @@ final class MetalRenderer {
         if let marquee {
             drawMarquee(marquee, encoder: encoder, viewport: &viewport)
         }
-
-        encoder.endEncoding()
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
     }
 
     private static func makePipeline(
@@ -211,11 +240,10 @@ final class MetalRenderer {
     private func drawText(
         snapshot: LayoutSnapshot,
         camera: Camera,
-        view: MTKView,
+        displayScale: CGFloat,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        let displayScale = view.window?.backingScaleFactor ?? 1
         // 与分叉控件一致：按相机缩放向上量化栅格倍率，放大时不糊（缩放靠 bucket 重栅格）。
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
         encoder.setRenderPipelineState(texturedPipeline)
@@ -253,7 +281,7 @@ final class MetalRenderer {
     private func drawBranchToggles(
         snapshot: LayoutSnapshot,
         camera: Camera,
-        view: MTKView,
+        displayScale: CGFloat,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
@@ -284,7 +312,6 @@ final class MetalRenderer {
         }
         drawSolid(solidVertices, encoder: encoder, viewport: &viewport)
 
-        let displayScale = view.window?.backingScaleFactor ?? 1
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
         encoder.setRenderPipelineState(texturedPipeline)
         encoder.setFragmentSamplerState(sampler, index: 0)
