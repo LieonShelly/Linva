@@ -233,6 +233,20 @@ final class CommandBus {
                 }
             )
 
+        case let .setFill(ids, fill):
+            let changes = model.setFill(ids: ids, fill: fill)
+            guard !changes.isEmpty else { return nil }
+            return Entry(
+                undo: {
+                    for c in changes {
+                        _ = self.model.mutate(id: c.id) { $0.fill = c.oldFill }
+                    }
+                },
+                redo: {
+                    _ = self.model.setFill(ids: ids, fill: fill)
+                }
+            )
+
         case let .pasteAsChild(payload, parentId):
             let priorSelection = model.selectedIds
             let priorAnchor = model.selectionAnchorId

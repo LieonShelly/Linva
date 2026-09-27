@@ -209,6 +209,19 @@ final class MindMapModel {
         _ = mutate(id: id) { $0.collapsed = collapsed }
     }
 
+    /// 对选中集每个节点写同一 fill（含根）；返回被改节点旧值供 Undo。不改选中。
+    @discardableResult
+    func setFill(ids: [UUID], fill: NodeFill?) -> [(id: UUID, oldFill: NodeFill?)] {
+        var changes: [(id: UUID, oldFill: NodeFill?)] = []
+        var seen = Set<UUID>()
+        for id in ids where seen.insert(id).inserted {
+            guard let node = node(id: id), node.fill != fill else { continue }
+            changes.append((id, node.fill))
+            _ = mutate(id: id) { $0.fill = fill }
+        }
+        return changes
+    }
+
     func restoreChild(parentId: UUID, index: Int, node: Node) {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))

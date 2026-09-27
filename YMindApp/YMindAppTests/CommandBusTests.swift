@@ -361,4 +361,38 @@ struct CommandBusTests {
         #expect(model.node(id: b)?.children.isEmpty == true)
         #expect(model.node(id: b)?.collapsed == false)
     }
+
+    @Test func setFill_undoRedo_restoresEachOldValue() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "A", side: .left, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        model.document.root.fill = .sage
+        _ = model.mutate(id: a) { $0.fill = .sky }
+        bus.clearHistory()
+        bus.execute(.setFill(ids: [root, a, b], fill: .lilac))
+        #expect(model.node(id: root)?.fill == .lilac)
+        #expect(model.node(id: a)?.fill == .lilac)
+        #expect(model.node(id: b)?.fill == .lilac)
+        bus.undo()
+        #expect(model.node(id: root)?.fill == .sage)
+        #expect(model.node(id: a)?.fill == .sky)
+        #expect(model.node(id: b)?.fill == nil)
+        bus.redo()
+        #expect(model.node(id: root)?.fill == .lilac)
+        #expect(model.node(id: a)?.fill == .lilac)
+        #expect(model.node(id: b)?.fill == .lilac)
+    }
+
+    @Test func setFill_noChange_isNoOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        bus.execute(.setFill(ids: [root], fill: nil))
+        #expect(!bus.canUndo)
+        model.document.root.fill = .sage
+        bus.execute(.setFill(ids: [root], fill: .sage))
+        #expect(!bus.canUndo)
+    }
 }
