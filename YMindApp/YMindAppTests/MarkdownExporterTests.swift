@@ -50,3 +50,20 @@ struct MarkdownExporterTests {
         #expect(MarkdownExporter.markdown(from: doc(children: [child])) == "# 中心\n\n## 有填色")
     }
 }
+
+@Suite("ExportNaming")
+struct ExportNamingTests {
+    @Test func illegalCharacters_replaced() {
+        #expect(ExportNaming.safeFilename(base: "a/b\\c:d", ext: "png") == "a_b_c_d.png")
+    }
+    @Test func whitespaceRuns_collapsedToSingleSpace() {
+        #expect(ExportNaming.safeFilename(base: "  我的  图\n表 ", ext: "md") == "我的 图 表.md")
+    }
+    @Test func emptyBase_fallsBackToYmind() {
+        #expect(ExportNaming.safeFilename(base: "   ", ext: "png") == "ymind.png")
+    }
+    @Test func longBase_truncated() {
+        let long = String(repeating: "a", count: 100)
+        #expect(ExportNaming.safeFilename(base: long, ext: "md").hasPrefix(String(repeating: "a", count: 48)))
+    }
+}
