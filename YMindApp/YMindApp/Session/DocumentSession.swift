@@ -6,6 +6,11 @@ enum DocumentSessionError: Error, Equatable {
     case noFileURL
 }
 
+/// 待恢复会话提示（Task 3 启动扫描生成；本阶段仅声明态）。
+struct RecoveryOffer: Equatable {
+    let meta: AutosaveMeta
+}
+
 final class SecurityScopedAccess {
     typealias StartAccess = (URL) -> Bool
     typealias StopAccess = (URL) -> Void
@@ -88,10 +93,15 @@ final class DocumentSession: ObservableObject {
     @Published private(set) var clipboard: ClipboardPayload?
     @Published private(set) var cutSourceIds: Set<UUID> = []
     @Published var importPreview: ImportPreviewState?
-    var documentID = UUID()   // 自动保存/恢复配对用（未命名文档亦然）
+    /// 自动保存/恢复配对用（未命名文档亦然）。导入 plan 已引入，勿重复声明。
+    var documentID = UUID()
+    /// 启动扫描待恢复会话提示（Task 3 填充；newDocument/load 时清空）。
+    @Published var recovery: RecoveryOffer?
 
     private let measure: TextMeasure
     private let securityScopedAccess: SecurityScopedAccess
+    private let autosaveStore: AutosaveStore
+    private var autoSaveDebounce: AnyCancellable?
     private var lastSavedDocument: MindMapDocument
     private var originalEditingText = ""
 
@@ -104,13 +114,15 @@ final class DocumentSession: ObservableObject {
     init(
         model: MindMapModel? = nil,
         measure: TextMeasure = TextMeasure(),
-        securityScopedAccess: SecurityScopedAccess = SecurityScopedAccess()
+        securityScopedAccess: SecurityScopedAccess = SecurityScopedAccess(),
+        autosaveStore: AutosaveStore = AutosaveStore()
     ) {
         let model = model ?? MindMapModel.makeNew()
         self.model = model
         self.commandBus = CommandBus(model: model)
         self.measure = measure
         self.securityScopedAccess = securityScopedAccess
+        self.autosaveStore = autosaveStore
         self.lastSavedDocument = model.document
         self.snapshot = LayoutSnapshot(frames: [:], edges: [])
         self.selectedIds = model.selectedIds
@@ -131,6 +143,8 @@ final class DocumentSession: ObservableObject {
         fileURL = nil
         lastSavedDocument = doc
         isDirty = false
+        documentID = UUID()
+        recovery = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""
@@ -180,6 +194,8 @@ final class DocumentSession: ObservableObject {
         fileURL = url
         lastSavedDocument = doc
         isDirty = false
+        documentID = UUID()
+        recovery = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""
@@ -199,6 +215,7 @@ final class DocumentSession: ObservableObject {
         }
         lastSavedDocument = model.document
         isDirty = false
+        try? autosaveStore.delete(documentID: documentID)
     }
 
     func saveAs(to url: URL) throws {
@@ -210,6 +227,7 @@ final class DocumentSession: ObservableObject {
         fileURL = url
         lastSavedDocument = model.document
         isDirty = false
+        try? autosaveStore.delete(documentID: documentID)
     }
 
     func markDirtyAndRelayout() {
@@ -438,7 +456,39 @@ final class DocumentSession: ObservableObject {
             syncSelectionFromModel()
             undoRevision += 1
             markDirtyAndRelayout()
+            scheduleAutoSave()
         }
+    }
+
+    /// 脏后 2s 防抖写副本（FR-S1）。重订阅每次 cancel 旧的延时。
+    private func scheduleAutoSave() {
+        autoSaveDebounce = Just(())
+            .delay(for: .seconds(2), scheduler: RunLoop.main)
+            .sink { [weak self] _ in self?.flushAutoSave() }
+    }
+
+    /// 立即把当前文档写临时副本；失败静默（FR-S1）。internal 供单测直接调用。
+    func flushAutoSave() {
+        guard hasLoadedEditableContent else { return }
+        let meta = AutosaveMeta(
+            documentID: documentID,
+            originalURL: fileURL?.absoluteString,
+            savedAt: Date(),
+            changeCount: pendingChangeCount(),
+            rootText: model.document.root.text
+        )
+        try? autosaveStore.write(document: model.document, meta: meta)
+    }
+
+    /// 只对已加载且有内容的文档写副本（不建空树副本）。
+    private var hasLoadedEditableContent: Bool {
+        // fileURL != nil（已保存）或 isDirty（有改动）
+        fileURL != nil || isDirty
+    }
+
+    /// 距上次保存的变化计数：复用 undoRevision（每次命令/撤销/重做 +1）。
+    private func pendingChangeCount() -> Int {
+        undoRevision
     }
 }
 

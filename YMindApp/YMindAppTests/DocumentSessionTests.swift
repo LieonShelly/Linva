@@ -334,3 +334,55 @@ struct DocumentSessionImportTests {
         #expect(session.documentID != oldID)  // 每次载入新文档换新 docID（供自动保存配对）
     }
 }
+
+@Suite("DocumentSessionAutosave")
+struct DocumentSessionAutosaveTests {
+    private func tempDir() throws -> URL {
+        try FileManager.default.url(
+            for: .itemReplacementDirectory,
+            in: .userDomainMask,
+            appropriateFor: FileManager.default.temporaryDirectory,
+            create: true
+        )
+    }
+
+    @Test func save_clearsPendingCopy() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // 注入同一 store：session 与断言侧指向同一目录
+        let session = DocumentSession(autosaveStore: AutosaveStore(directory: dir))
+        let autosave = AutosaveStore(directory: dir)
+
+        // 模拟写了一份当前 documentID 的副本
+        var doc = MindMapDocument.blank(rootText: "根")
+        doc.root.children = [Node(text: "x")]
+        try autosave.write(document: doc, meta: AutosaveMeta(
+            documentID: session.documentID, originalURL: nil,
+            savedAt: Date(), changeCount: 1, rootText: "根"))
+
+        // 触发保存（无 fileURL → saveAs）
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ymind-as-\(UUID().uuidString).ymind")
+        try session.saveAs(to: url)
+
+        // 保存后副本清除：latestPending 为 nil
+        #expect(autosave.latestPending() == nil)
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    @Test func newDocument_resetsDocumentID_andClearsRecovery() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let session = DocumentSession(autosaveStore: AutosaveStore(directory: dir))
+        let oldID = session.documentID
+        session.recovery = RecoveryOffer(meta: AutosaveMeta(
+            documentID: oldID, originalURL: nil,
+            savedAt: Date(), changeCount: 1, rootText: "根"))
+        #expect(session.recovery != nil)
+
+        session.newDocument()
+
+        #expect(session.documentID != oldID)  // 新文档换新 docID（供自动保存配对）
+        #expect(session.recovery == nil)      // 清 recovery 态
+    }
+}
