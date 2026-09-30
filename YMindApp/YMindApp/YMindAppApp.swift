@@ -304,6 +304,7 @@ enum DocumentWorkflow {
             session.errorMessage = error.localizedDescription
         }
     }
+    /// 导入入口（FR-I1/I2）：选文件 → 解析 → 暂存 importPreview（不载入），等预览确认。
     static func importMarkdown(_ session: DocumentSession) { presentImportPanel(session, extensions: ["md", "markdown"]) }
     static func importOPML(_ session: DocumentSession)     { presentImportPanel(session, extensions: ["opml"]) }
     static func importFreeMind(_ session: DocumentSession) { presentImportPanel(session, extensions: ["mm"]) }
