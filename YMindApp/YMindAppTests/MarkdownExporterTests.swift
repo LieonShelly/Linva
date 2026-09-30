@@ -36,17 +36,30 @@ struct MarkdownExporterTests {
     }
 
     @Test func mixedDepthTree_branchHeading_leafList() {
-        // 模拟用户混合深度树：root → 分支 → (分支→叶子, 叶子)
+        // 同层兄弟对齐：root → (二级分支→深叶子, 浅叶子a, 浅叶子b)
+        // 深度2 存在分支（二级分支）→ 深度2 全为标题（浅叶子a/b 也是 ##）
         var leaf2 = Node(text: "深叶子")        // depth3 叶子 → `* `
         var branch2 = Node(text: "二级分支", children: [leaf2])  // depth2 分支 → ##
-        var leaf1a = Node(text: "浅叶子a")       // depth2 叶子 → `- `
+        var leaf1a = Node(text: "浅叶子a")       // depth2 叶子，但同层有分支 → 标题
         var leaf1b = Node(text: "浅叶子b")
         var d = doc(rootText: "根", children: [branch2, leaf1a, leaf1b])
         let md = MarkdownExporter.markdown(from: d)
         #expect(md.contains("\n## 二级分支\n"))
+        #expect(md.contains("\n## 浅叶子a\n"))
+        #expect(md.contains("\n## 浅叶子b\n"))
         #expect(md.contains("\n* 深叶子\n"))
-        #expect(md.contains("\n- 浅叶子a\n"))
-        #expect(md.contains("\n- 浅叶子b\n"))
+        #expect(!md.contains("\n- 浅叶子a"))
+    }
+
+    @Test func siblingAlignment_leafBecomesHeading_ifSiblingBranches() {
+        // 用户场景：root → (A有三级, B无子)。A 是分支 → 深度2 全标题，B 也变标题
+        let a = Node(text: "A", children: [Node(text: "a三级")])
+        let b = Node(text: "B")
+        let d = doc(rootText: "root", children: [a, b])
+        let md = MarkdownExporter.markdown(from: d)
+        #expect(md.contains("\n## A\n"))
+        #expect(md.contains("\n## B\n"))
+        #expect(md.contains("\n* a三级\n"))
     }
 
     @Test func leafSymbol_cyclesByDepth() {
