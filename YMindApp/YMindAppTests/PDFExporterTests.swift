@@ -141,6 +141,26 @@ struct PDFExporterRenderingTests {
         let mode = PDFPageMode(fit: .fitSinglePage)
         #expect(PDFExporter.data(document: d, mode: mode) != nil)
     }
+
+    @Test func centeredTextRect_centersTextInNodeRect() {
+        let rect = CGRect(x: 0, y: 0, width: 120, height: 40)
+        // 包围盒小于节点框：文本 rect 中心应与节点框中心重合（不贴左上角）。
+        let bound = CGRect(x: 0, y: 0, width: 60, height: 20)
+        let out = PDFExporter.centeredTextRect(bound: bound, in: rect)
+        #expect(abs(out.midX - rect.midX) < 0.001)
+        #expect(abs(out.midY - rect.midY) < 0.001)
+        // 尺寸保持包围盒原大小（不缩放文本）。
+        #expect(out.size == bound.size)
+    }
+
+    @Test func centeredTextRect_preservesSizeRegardlessOfNode() {
+        let rect = CGRect(x: 10, y: 20, width: 90, height: 32)
+        let bound = CGRect(x: 0, y: 0, width: 44, height: 17)
+        let out = PDFExporter.centeredTextRect(bound: bound, in: rect)
+        #expect(out.size == bound.size)
+        #expect(out.midX == rect.midX)
+        #expect(out.midY == rect.midY)
+    }
 }
 
 /// 从 Data 建 CGPDFDocument（供页数断言）。

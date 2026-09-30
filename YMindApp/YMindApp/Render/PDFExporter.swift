@@ -211,11 +211,27 @@ extension PDFExporter {
         let graphicsContext = NSGraphicsContext(cgContext: ctx, flipped: false)
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = graphicsContext
-        // 多行：按节点宽高 wrap；用 boundingRect 从 rect 左上绘制
+        // 多行：按节点宽 wrap；先量实际包围盒，再居中到节点 rect 中央（否则文字贴左上角）。
         let rect = frame.rect
         let options: NSString.DrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
-        attr.draw(with: rect, options: options)
+        let bound = attr.boundingRect(
+            with: CGSize(width: rect.width, height: .greatestFiniteMagnitude),
+            options: options
+        )
+        let textRect = centeredTextRect(bound: bound, in: rect)
+        attr.draw(with: textRect, options: options)
         NSGraphicsContext.restoreGraphicsState()
+    }
+
+    /// 把文本包围盒 bound 居中到节点 rect 中央（水平 + 垂直）。
+    /// 独立成内部函数以便单测钉住「文本不贴左上角」的回归（final review M-3）。
+    static func centeredTextRect(bound: CGRect, in rect: CGRect) -> CGRect {
+        CGRect(
+            x: rect.midX - bound.width / 2,
+            y: rect.midY - bound.height / 2,
+            width: bound.width,
+            height: bound.height
+        )
     }
 
     private static func cgColor(_ color: NSColor) -> CGColor {
