@@ -39,7 +39,7 @@
 
 ### 1.3 明确不做（本增量）
 
-- 导出 PDF / SVG / PPT / XMind / OPML
+- 导出 PDF（已移除：产品拍板 PDF 导出不做）/ SVG / PPT / XMind / OPML
 - 仅视口截图、水印、按枝拆图
 - Markdown 双向导入、自定义模板
 - 打印对话框精调（PRD §0）

@@ -85,7 +85,7 @@ inputs:
 
 ## 5. 非目标
 
-- 导出 PDF / SVG / PPT  
+- 导出 PDF（已移除：产品拍板 PDF 导出不做）/ SVG / PPT  
 - 仅视口截图、水印、按枝拆图  
 - Markdown 双向导入  
 - 自定义导出模板  

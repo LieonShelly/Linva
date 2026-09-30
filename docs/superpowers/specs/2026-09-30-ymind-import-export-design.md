@@ -1,10 +1,10 @@
-# YMind — 迁移闭环（导入 + PDF 导出 + 自动保存 / 崩溃恢复）（设计）
+# YMind — 迁移闭环（导入 + 自动保存 / 崩溃恢复）（设计）
 
 **状态：** 已批准（Brainstorming 四节逐节确认）
 **日期：** 2026-09-30
 **需求真源：** `docs/prds/prd-ymind-import-export-2026-09-30/prd.md` + `addendum.md`
 **上游架构：** `docs/superpowers/specs/2026-09-24-ymind-v1-architecture-design.md`、`docs/架构现状.md`、`2026-09-27-ymind-export-design.md`（复用其导出语义）
-**体验真源：** `prototype/import-export.html`（导入 / 导出 PDF / 崩溃恢复 三标签，浏览器已实测）
+**体验真源：** `prototype/import-export.html`（导入 / 崩溃恢复 交互，浏览器已实测）
 **依据：** Brainstorming 决议（本对话）；实施计划见后续 `writing-plans`。
 
 **绘图约定：** 架构图使用 Mermaid。
@@ -18,7 +18,7 @@
 把 YMind 从「能画图」打磨到「能正经用」的三条链路：
 
 - **导入（进得来）：** Markdown 大纲为第一路径，OPML / FreeMind 顺带；文件 → 导入 →（格式）→ 预览确认 → 新文档。
-- **导出 PDF（出得去）：** 矢量、打印友好、整棵逻辑树（含折叠枝）分页交付；与既有 PNG / Markdown 并列统一入口。
+- **导出（出得去）：** 保持既有 Markdown / PNG 两入口并列（PDF 导出已移除，不再做）。
 - **防丢（不白费）：** 脏后 2s 防抖写临时副本；崩溃后下次启动提示恢复。
 
 ### 1.2 Brainstorming 已拍板
@@ -27,16 +27,13 @@
 |----|------|
 | 导入交互 | **预览 + 确认导入**（对齐原型两步流程与 UJ-I1）：选文件 → 纯函数解析出树 → `importPreview` 展示 → 点「确认导入」才载入；确认载入时 **Undo 栈重置**（PRD §9.1 假设不变） |
 | 导入撤销 | 不做文档级快照撤销；导入 = 载入新文档，Undo 栈重置（§9.1 假设，v1.1 再评估） |
-| PDF 绘制 | **CG 矢量绘制**（新 `PDFExporter`，复用「清折叠→布局」流但不复用 GPU 管线），满足 FR-E1「文字为矢量」硬验收 |
-| PDF 范围 | 单选 → `subtree(id)` 该节点子树；无选中 → `full` 整树；**多选时「当前选中枝」禁用**（addendum §3 默认） |
-| PDF 分页 | 默认横向 A4 按宽度分页（页网格）；可选「缩放单页」；纸色背景 `#e7e4dc`（与 PNG 一致，[ASSUMPTION]） |
 | 导入器结构 | **`DocumentImporter` 注册表**（`MarkdownImporter` / `OPMLImporter` / `FreeMindImporter`），XMind 后续注册进同一张表 |
 | 自动保存防抖 | **Combine `debounce` 2s**（Session 已 `import Combine`；`commandBus.onChange` 为脏信号，不接触模型/命令栈） |
 | 副本保留 | **只留最新，忽略清全部**：启动只对最新副本弹横幅；「恢复」载入并删该副本；「忽略」清空 `Unsaved/` 全部（无 7 天过期） |
-| 导出快捷键 | PDF 给不给快捷键（如 ⌘⇧E）本版不定，菜单先行（§9.2，随反馈补） |
 
 ### 1.3 明确不做（本增量）
 
+- **PDF 导出已移除**（产品拍板：大树 PDF 画面效果差，仅保留 PNG / Markdown / .ymind）
 - XMind 格式导入（.xmind，v1.1）、SVG 导出、打印排版引擎（纸张/边距/页眉页脚精调）
 - 有序列表、代码块/引用/图片、列表多级缩进（v1.1）
 - iCloud / 多文档 / 文件库 / 版本历史；AI 集成；大纲视图
@@ -46,7 +43,7 @@
 
 ## 2. 架构与边界
 
-沿用「分层内核 + 薄壳」；新增 7 个文件，全部落在既有层白名单内，**无新 import、`currentVersion` 保持 2**。
+沿用「分层内核 + 薄壳」；新增 6 个文件，全部落在既有层白名单内，**无新 import、`currentVersion` 保持 2**。
 
 ```mermaid
 flowchart TB
@@ -55,12 +52,6 @@ flowchart TB
     MD["MarkdownImporter"]
     XML["XMLImporters（OPML/FreeMind）"]
   end
-  subgraph Layout["Layout"]
-    L["RadialLayout → LayoutSnapshot"]
-  end
-  subgraph Render["Render（AppKit/CoreGraphics）"]
-    PDF["PDFExporter<br/>scope→fullyExpanded→layout→CG PDF"]
-  end
   subgraph Session["Session（Foundation/Combine）"]
     AS["AutosaveStore<br/>Unsaved/ 副本读写"]
     DS["DocumentSession<br/>loadImported · 防抖 · recovery"]
@@ -68,13 +59,12 @@ flowchart TB
   subgraph Shell["Shell"]
     IP["ImportPreviewView"]
     RB["RecoveryBannerView"]
-    WF["DocumentWorkflow<br/>import* / exportPDF / scanForRecovery"]
-    Menu["File 菜单 导入… · 导出 PDF…"]
+    WF["DocumentWorkflow<br/>import* / scanForRecovery"]
+    Menu["File 菜单 导入…"]
   end
   Menu --> WF
   WF --> Reg ; Reg --> MD ; Reg --> XML
   WF --> IP ; IP --> DS
-  WF --> PDF ; PDF --> L
   DS --> AS
   AS --> RB
 ```
@@ -84,15 +74,12 @@ flowchart TB
 | 层 | 本增量职责 | 禁止 |
 |----|------------|------|
 | Model | 三类导入器纯函数（`parse(data)->MindMapDocument`）+ 注册表 | 理解渲染/UI；引 Metal/AppKit |
-| Layout | `RadialLayout` 复用（无改动） | — |
-| Render | `PDFExporter`（子图/全展开→布局→CG 矢量分页绘制） | 读 Model 会话态；改树 |
 | Session | `AutosaveStore` + `DocumentSession` 导入载入/防抖/恢复态 | 在 Store 内造命令 |
-| Shell | 预览浮层、恢复横幅、File 菜单两入口、`DocumentWorkflow` 工作流 | 在 View 内改树 |
+| Shell | 预览浮层、恢复横幅、File 菜单「导入…」、`DocumentWorkflow` 工作流 | 在 View 内改树 |
 
 ### 2.2 依赖与白名单
 
 - `DocumentImporter` / `MarkdownImporter` / `XMLImporters` → Model，仅 `Foundation`（`XMLParser` 属 Foundation，安全）。
-- `PDFExporter` → Render，`Foundation AppKit CoreGraphics`（全在白名单）。
 - `AutosaveStore` → Session，`Foundation Combine`。
 - `ImportPreviewView` / `RecoveryBannerView` → App/Shell，`SwiftUI AppKit`。
 - `scripts/check-boundaries.sh` **无需新增 import 白名单**；若实现时发现需要（如 Model 碰 XML 需别的模块），先改脚本白名单再动代码。
@@ -174,63 +161,6 @@ struct ImportPreviewState: Equatable {
 
 ---
 
-## 5. Render：PDF 导出（FR-E1 / FR-E2）
-
-### 5.1 `PDFExporter`（`Render/PDFExporter.swift`）
-
-```swift
-enum PDFScope { case full, subtree(UUID) }
-
-struct PDFPageMode: Equatable {
-    enum PageFit { case paginateByWidth, fitSinglePage }
-    var fit: PageFit = .paginateByWidth
-    var pageSize: CGSize = CGSize(width: 842, height: 595)   // 横向 A4
-    var margin: CGFloat = 24
-}
-
-enum PDFExporter {
-    static func data(
-        document: MindMapDocument,
-        scope: PDFScope = .full,
-        mode: PDFPageMode = .init()
-    ) -> Data?
-}
-```
-
-流程（对齐 addendum §3，复用 PNG 的「清折叠→布局」流但不复用 GPU 绘制）：
-
-1. `scope == .subtree(id)` → 抽取「以该节点为根的子图」为独立 document（根=该节点，isRoot=true）；`.full` → 原文档。
-2. 复制并清空全部 `collapsed=false`（复用 `PNGExporter.fullyExpanded` 同款逻辑，或抽公共函数）。
-3. `RadialLayout.layout` → `LayoutSnapshot`。
-4. 求全部 `frame.rect` 包围盒 `bounds`。
-5. `CGContext(consumer:mediaBox:)` 起 PDF；按 `mode` 分页；逐页绘制。
-
-**分页：**
-- `paginateByWidth`（默认）：横向 A4 `842×595`，margin 24；`scale = min(1, (pageW-2m)/bounds.width)`；从 `bounds.minX/minY` 起按 `usableW/usableH` 步进生成页网格，每页渲染一个（列,行）世界窗口 → 平移进页坐标。
-- `fitSinglePage`：`scale = min((pageW-2m)/bounds.width, (pageH-2m)/bounds.height)`，整树居中缩至一页。
-
-**绘制语义**（与画布一致，矢量）：
-
-| 元素 | 方式 |
-|---|---|
-| 边 | `NSBezierPath` 沿 `EdgeGeometry.points`（quad 曲线）双段连线，`separatorColor`，线宽 `max(1.25, 2*scale)` |
-| 节点块 | 圆角矩形：有 fill → 根 `rootBackground`、非根 `background`+`border` 描边；无 fill → 根 `controlAccentColor`、非根 `controlBackgroundColor` |
-| 文字 | 根 `white` 18.4 bold / 非根 `labelColor` 14.7 medium；`NSAttributedString` 画节点 rect 内（矢量、可打印/选中/复制） |
-| 外观 | `.aqua` 解析动态语义色（与系统外观无关），纸色背景 `#e7e4dc` |
-| 交互 UI | 不画分叉 ± / 选中 / 搜索 / 框选 / 放置（对齐 PNG 导出 FR-E3） |
-
-**文件名**：`ExportNaming.safeFilename(base: root.text, ext: "pdf")`；SavePanel `allowedContentTypes = [.pdf]`。
-
-### 5.2 入口与菜单（FR-E2）
-
-`DocumentWorkflow.exportPDF(_ session:)`：读 `selectedIds` + `selectionAnchorId` → scope（单选 `subtree` / 无选中 `full` / 多选禁用「选中枝」）→ `PDFExporter.data` → SavePanel 落地。失败 → `errorMessage`。
-
-File 菜单：既有 `CommandGroup(after: .saveItem)` 增「导出 PDF…」，与 Markdown… / PNG… 并列三入口。
-
-PDF 导出**不经过命令栈、不入 Undo、不写 `.ymind`、不改折叠态**（FR-E4）。
-
----
-
 ## 6. Session + Shell：自动保存 + 崩溃恢复（FR-S1 / FR-S2）
 
 ### 6.1 `AutosaveStore`（`Session/AutosaveStore.swift`）
@@ -306,7 +236,6 @@ func flushAutoSave()   // 只对已加载文档写副本；失败静默（FR-S1�
 
 - **MarkdownImporterTests**：标题层级 / 列表挂最近标题 / 层级跳变直连 / 空文案未命名 / 无标题报错 / 侧交替 / 折叠不引入。
 - **XMLImporterTests**：OPML/FreeMind 嵌套→树、空文案、非法 XML、空根报错。
-- **PDFExporterTests**：`fullyExpanded` 清折叠保原档（复用语义）；`data` 产出 `.pdf` 魔数、含折叠枝、折叠态不变、矢量（可选：`CGPDFDocument` 页数 = 预期分页数）。
 - **AutosaveStoreTests**：写副本 + `.meta.json` 落盘 / 删 / latestPending 取最新 / clearAll / load 读回 round-trip。
 - **DocumentSessionTests**：`loadImported` 载入即 isDirty=true 且命令栈清空；save 删副本；new/load 重置 documentID。
 
@@ -314,8 +243,6 @@ func flushAutoSave()   // 只对已加载文档写副本；失败静默（FR-S1�
 
 - 导入含标题+列表的 MD → 树正确；含空行/空文案/非法输入 → 不崩溃、未命名、无标题报错。
 - 导入 OPML/FreeMind → 层级正确；非法 XML 报错；当前文档不受影响。
-- 有折叠枝导出 PDF → 含隐藏子树、画布折叠态不变、可打印、文字矢量。
-- 导出范围=选中枝 → 仅含该子树；多选禁用。
 - 自动保存 → 变脏后 ≤3s 落盘；正常保存后副本清除。
 - 崩溃恢复 → 启动横幅 → 恢复后=草稿且未保存；忽略后草稿删除。
 - `scripts/check-boundaries.sh` 绿；`currentVersion` 仍为 2。
@@ -328,15 +255,13 @@ func flushAutoSave()   // 只对已加载文档写副本；失败静默（FR-S1�
 |-----|--------|
 | FR-I1 Markdown 导入（首标题=根 / 深度→层级 / 列表挂最近标题 / 未命名 / 无标题报错） | §3.2 |
 | FR-I2 OPML / FreeMind（嵌套→树 / text→文案 / 非法 XML 报错） | §3.3 |
-| FR-E1 PDF（全展开含折叠枝 / 分页 / 范围选中枝 / 矢量文字 / 文件名） | §5.1 |
-| FR-E2 导出三入口并列（MD/PNG/PDF，不入 Undo） | §5.2 |
+| FR-E2 导出入口并列（MD/PNG，不入 Undo） | 既有导出语义（2026-09-27 导出设计） |
 | FR-S1 自动保存（2s 防抖 ≤3s 落盘 / 保存清副本 / 写入失败静默 / 不入命令栈） | §6.1–6.2 |
 | FR-S2 崩溃恢复（启动横幅 / 恢复 isDirty / 忽略删副本 / 未命名支持 / 多副本只留最新） | §6.3–6.4 |
 | FR-C1 层边界不变 / FR-C2 currentVersion 不变 | §2 |
 | §9.1 导入 Undo 栈重置 | §3/§4 |
-| §9.2 导出快捷键暂缓 | §1.2 |
 | §9.3 副本只留最新，忽略清全部 | §1.2 |
-| prototype 导入预览 / 导出 PDF 选项 / 恢复横幅 | §3–§6 |
+| prototype 导入预览 / 恢复横幅 | §3–§6 |
 
 ---
 
@@ -345,3 +270,4 @@ func flushAutoSave()   // 只对已加载文档写副本；失败静默（FR-S1�
 | 日期 | 说明 |
 |------|------|
 | 2026-09-30 | 初稿：Brainstorming 四节（架构/导入/PDF/自动保存）逐节确认后落盘 |
+| 2026-09-30 | 修订：PDF 导出移除（产品拍板：大树 PDF 画面效果差），删除 §5 与相关条目 |
