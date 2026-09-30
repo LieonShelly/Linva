@@ -304,10 +304,13 @@ enum DocumentWorkflow {
             )
         } catch ImportError.unrecognizedOutline {
             session.errorMessage = "未识别为导图大纲（缺少标题）"
+            session.importPreview = nil  // 导入失败时清掉旧预览，避免「旧预览 + 错误横幅」并存
         } catch ImportError.invalidXML {
             session.errorMessage = "文件不是有效的 XML 导图"
+            session.importPreview = nil
         } catch {
             session.errorMessage = "导入失败：\(error.localizedDescription)"
+            session.importPreview = nil
         }
     }
 
