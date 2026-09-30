@@ -148,7 +148,8 @@ final class DocumentSession: ObservableObject {
         commandBus.clearHistory()
         undoRevision += 1
         fileURL = nil
-        lastSavedDocument = document
+        // 注意：不要在此把 lastSavedDocument 设为新文档 —— 导入文档没有磁盘文件，
+        // lastSavedDocument 保持导入前的旧值，撤销回载入态时 isDirty 仍需保持 true。
         isDirty = true
         documentID = UUID()
         editingId = nil

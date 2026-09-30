@@ -310,6 +310,22 @@ struct DocumentSessionImportTests {
         #expect(session.commandBus.canUndo == false)
     }
 
+    @Test func loadImported_undoAll_keepsDirtyWithoutFile() {
+        let session = DocumentSession()
+        var doc = MindMapDocument.blank(rootText: "导入根")
+        doc.root.children = [Node(text: "子")]
+        session.loadImported(doc)
+
+        session.commandBus.execute(.addChild(parentId: session.model.document.root.id, text: "新子"))
+        while session.commandBus.canUndo {
+            session.commandBus.undo()
+        }
+
+        // 导入文档无磁盘文件：撤销回载入态仍必须视为未保存，否则新建/打开/退出会静默丢弃。
+        #expect(session.isDirty)
+        #expect(session.fileURL == nil)
+    }
+
     @Test func loadImported_resetsDocumentID() {
         let session = DocumentSession()
         let oldID = session.documentID
