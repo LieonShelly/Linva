@@ -6,11 +6,12 @@
 
 | 状态 | 课题 | 机会卡片 | 决策（ICE） | 备注 / 下一步 |
 |------|------|----------|------------|--------------|
-| **就绪** | 迁移闭环：导入（Markdown/OPML/FreeMind）+ 导出 PDF + 自动保存/崩溃恢复 | [opportunities/2026-09-30-迁移闭环导入导出.md](opportunities/2026-09-30-迁移闭环导入导出.md) | 做（I9 C8 E6 → 12.0） | 打磨 v1 到「能正经用」：编辑→导入→导出→防丢闭环；含 FR-I1/I2/E1/E2/S1/S2。**本版不考虑付费/商业化**。PRD 已交付：[prd-ymind-import-export-2026-09-30](../../prds/prd-ymind-import-export-2026-09-30/prd.md)。下一步：开发 Agent 开工（specs → plans） |
+| **就绪** | 迁移闭环：导入（Markdown/OPML/FreeMind）+ 导出（Markdown/PNG/.ymind；已移除：PDF 导出不做）+ 自动保存/崩溃恢复 | [opportunities/2026-09-30-迁移闭环导入导出.md](opportunities/2026-09-30-迁移闭环导入导出.md) | 做（I9 C8 E6 → 12.0） | 打磨 v1 到「能正经用」：编辑→导入→导出→防丢闭环；含 FR-I1/I2/E1/E2/S1/S2。**本版不考虑付费/商业化**。PRD 已交付：[prd-ymind-import-export-2026-09-30](../../prds/prd-ymind-import-export-2026-09-30/prd.md)。下一步：开发 Agent 开工（specs → plans） |
 | 搁置 | iCloud + 多文档文件库 | 同上（O3） | 5.3 | PRD 后置；单文档阶段价值有限，沙盒改造成本高 |
 | 搁置 | AI 集成（MCP / BYOK） | 同上（O4） | 7.1 | 上架后 v1.1；`.ymind` JSON 对 MCP 友好，依赖外部生态与成本模型先想清 |
 | 搁置 | 大纲视图 | 同上（O5） | 5.0 | 与导出/打印联动，可后置 |
-| 搁置 | 图标 / 节点备注 / 富文本 | 同上（O6） | 4.0 | 上架后按用户反馈排 |
+| 搁置 | 图标 / 节点备注 / 富文本 | 同上（O6） | 4.0 | 上架后按用户反馈排（注：AppIcon 图标的「图标」≠ 节点图标，勿混） |
+| **就绪** | 上架就绪（App Store 提交） | [launch-checklist-2026-09-30.md](launch-checklist-2026-09-30.md) | —（工程合规，非需求课题） | P0：AppIcon 填充 + 隐私清单 + 元数据；P1：崩溃实测 / 部署目标 / entitlements 确认。开发终端逐项销项 |
 
 ## 变更记录
 

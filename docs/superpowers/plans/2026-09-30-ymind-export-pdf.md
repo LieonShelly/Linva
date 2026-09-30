@@ -1,3 +1,5 @@
+> ⛔ 本 plan 已废弃（2026-09-30）：PDF 导出功能被产品移除（大树 PDF 画面效果差，仅保留 PNG/Markdown/.ymind）。代码已删除（PDFExporter/PDFCompactLayout 及入口、测试）。保留本文件作为历史记录，不执行。
+
 # YMind PDF 导出子系统（FR-E1 / FR-E2）Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
