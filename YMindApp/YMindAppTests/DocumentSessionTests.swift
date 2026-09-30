@@ -272,3 +272,49 @@ struct DocumentSessionTests {
         #expect(abs(c.y - 150) < 0.001)
     }
 }
+
+@Suite("DocumentSessionImport")
+struct DocumentSessionImportTests {
+    @Test func loadImported_adoptsDocument_asDirtyNewDoc_resetsUndo() {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+        session.commandBus.execute(.addChild(parentId: rootId, text: "已有内容"))
+        let oldRevision = session.undoRevision
+
+        var doc = MindMapDocument.blank(rootText: "导入根")
+        doc.root.children = [Node(text: "子")]
+
+        session.loadImported(doc)
+
+        #expect(session.model.document.root.text == "导入根")
+        #expect(session.model.document.root.children.count == 1)
+        #expect(session.isDirty)                      // 新文档未保存 → dirty
+        #expect(session.fileURL == nil)               // 非磁盘文件
+        #expect(session.commandBus.canUndo == false)  // Undo 栈重置
+        #expect(session.undoRevision == oldRevision + 1)
+        #expect(session.importPreview == nil)         // 载入后清预览
+    }
+
+    @Test func cancelImport_discardsPreview_withoutLoading() {
+        let session = DocumentSession()
+        var doc = MindMapDocument.blank(rootText: "预览稿")
+        doc.root.children = [Node(text: "x")]
+        session.importPreview = ImportPreviewState(
+            sourceName: "a.md", document: doc, nodeCount: 2, depth: 2
+        )
+
+        session.cancelImport()
+
+        #expect(session.importPreview == nil)
+        #expect(session.model.document.root.text == "中心主题")  // 未载入，保持原文档
+        #expect(session.commandBus.canUndo == false)
+    }
+
+    @Test func loadImported_resetsDocumentID() {
+        let session = DocumentSession()
+        let oldID = session.documentID
+        var doc = MindMapDocument.blank(rootText: "新根")
+        session.loadImported(doc)
+        #expect(session.documentID != oldID)  // 每次载入新文档换新 docID（供自动保存配对）
+    }
+}

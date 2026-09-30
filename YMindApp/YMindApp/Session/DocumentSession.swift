@@ -87,6 +87,8 @@ final class DocumentSession: ObservableObject {
     @Published var errorMessage: String?
     @Published private(set) var clipboard: ClipboardPayload?
     @Published private(set) var cutSourceIds: Set<UUID> = []
+    @Published var importPreview: ImportPreviewState?
+    var documentID = UUID()   // 自动保存/恢复配对用（未命名文档亦然）
 
     private let measure: TextMeasure
     private let securityScopedAccess: SecurityScopedAccess
@@ -135,6 +137,31 @@ final class DocumentSession: ObservableObject {
         camera = Camera()
         relayout()
         errorMessage = nil
+    }
+
+    /// 载入一次导入解析出的新树为当前文档：等同「打开」语义但 fileURL=nil、isDirty=true。
+    func loadImported(_ document: MindMapDocument) {
+        commitEditingIfNeeded()
+        model.document = document
+        model.selectOnly(document.root.id)
+        syncSelectionFromModel()
+        commandBus.clearHistory()
+        undoRevision += 1
+        fileURL = nil
+        lastSavedDocument = document
+        isDirty = true
+        documentID = UUID()
+        editingId = nil
+        draftText = ""
+        originalEditingText = ""
+        camera = Camera()
+        importPreview = nil
+        relayout()
+        errorMessage = nil
+    }
+
+    func cancelImport() {
+        importPreview = nil
     }
 
     func load(from url: URL) throws {
@@ -411,4 +438,11 @@ final class DocumentSession: ObservableObject {
             markDirtyAndRelayout()
         }
     }
+}
+
+struct ImportPreviewState: Equatable {
+    let sourceName: String
+    let document: MindMapDocument
+    var nodeCount: Int
+    var depth: Int
 }
