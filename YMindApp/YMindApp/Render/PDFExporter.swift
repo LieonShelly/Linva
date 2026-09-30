@@ -45,3 +45,26 @@ struct PDFPagination: Equatable {
         }
     }
 }
+
+/// 导出范围（spec §5.1 拍板）。
+enum PDFScope: Equatable {
+    case full
+    case subtree(UUID)
+}
+
+enum PDFExporter {
+    /// 抽「以 rootID 为根的新 MindMapDocument」；找不到返回 nil。
+    /// 保留子树结构（含 fill/side/collapsed 原值；布局时新根 isRoot=true，side 被布局忽略）。
+    static func subtreeDocument(_ document: MindMapDocument, rootID: UUID) -> MindMapDocument? {
+        guard let node = find(rootID, in: document.root) else { return nil }
+        return MindMapDocument(version: document.version, root: node)
+    }
+
+    private static func find(_ id: UUID, in node: Node) -> Node? {
+        if node.id == id { return node }
+        for child in node.children {
+            if let found = find(id, in: child) { return found }
+        }
+        return nil
+    }
+}

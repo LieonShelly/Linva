@@ -53,3 +53,47 @@ struct PDFPaginationTests {
         #expect(p.pageWindows[0] == CGRect(x: -500, y: -200, width: 300, height: 200))
     }
 }
+
+@Suite("PDFScope")
+struct PDFScopeTests {
+    private func doc() -> MindMapDocument {
+        var d = MindMapDocument.blank(rootText: "根")
+        // 根 → A(a1,a2) , B(b1)
+        let a1 = Node(text: "a1")
+        let a2 = Node(text: "a2")
+        let a = Node(text: "A", children: [a1, a2])
+        let b1 = Node(text: "b1")
+        let b = Node(text: "B", children: [b1])
+        d.root.children = [a, b]
+        return d
+    }
+
+    @Test func subtreeDocument_returnsNodeAndDescendants_asNewRoot() {
+        let d = doc()
+        let aID = d.root.children[0].id
+        let sub = PDFExporter.subtreeDocument(d, rootID: aID)
+        #expect(sub != nil)
+        #expect(sub?.root.text == "A")
+        #expect(sub?.root.children.map(\.text) == ["a1", "a2"])
+    }
+
+    @Test func subtreeDocument_leafNode_returnsSingleNodeDoc() {
+        let d = doc()
+        let b1ID = d.root.children[1].children[0].id
+        let sub = PDFExporter.subtreeDocument(d, rootID: b1ID)
+        #expect(sub?.root.text == "b1")
+        #expect(sub?.root.children.isEmpty == true)
+    }
+
+    @Test func subtreeDocument_unknownID_returnsNil() {
+        let d = doc()
+        #expect(PDFExporter.subtreeDocument(d, rootID: UUID()) == nil)
+    }
+
+    @Test func subtreeDocument_fullScope_returnsOriginal() {
+        let d = doc()
+        let sub = PDFExporter.subtreeDocument(d, rootID: d.root.id)
+        #expect(sub?.root.text == "根")
+        #expect(sub?.root.children.map(\.text) == ["A", "B"])
+    }
+}
