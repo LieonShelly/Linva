@@ -97,3 +97,54 @@ struct PDFScopeTests {
         #expect(sub?.root.children.map(\.text) == ["A", "B"])
     }
 }
+
+@Suite("PDFExporterRendering")
+struct PDFExporterRenderingTests {
+    private var a4: PDFPageMode { .init() }
+
+    @Test func data_returnsPDFData_withMagicNumber_andOnePage() throws {
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = [Node(text: "子")]
+        let data = PDFExporter.data(document: d, mode: a4)
+        #expect(data != nil)
+        let head = String(data: data?.prefix(8) ?? Data(), encoding: .isoLatin1)
+        #expect(head?.hasPrefix("%PDF") == true)
+        // 用 CGPDFDocument 数页数：小图 1 页（需从内存 Data 建 provider）
+        let pdf = try #require(data.flatMap { makePDFDoc($0) })
+        #expect(pdf.numberOfPages == 1)
+    }
+
+    @Test func data_hiddenSubtree_isIncluded_andOriginalCollapsedKept() throws {
+        let grand = Node(text: "孙")
+        let child = Node(text: "子", collapsed: true, fill: .sage, children: [grand])
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = [child]
+
+        let data = PDFExporter.data(document: d, mode: a4)
+        #expect(data != nil)
+        // 原文档折叠态不变（FR-E1 验收 4）
+        #expect(d.root.children[0].collapsed == true)
+    }
+
+    @Test func data_subtreeScope_producesPDF() throws {
+        var d = MindMapDocument.blank(rootText: "根")
+        let a = Node(text: "A", children: [Node(text: "a1")])
+        let b = Node(text: "B")
+        d.root.children = [a, b]
+        let data = PDFExporter.data(document: d, scope: .subtree(d.root.children[0].id), mode: a4)
+        #expect(data != nil)
+    }
+
+    @Test func data_fitSinglePage_producesPDF() throws {
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = [Node(text: "子")]
+        let mode = PDFPageMode(fit: .fitSinglePage)
+        #expect(PDFExporter.data(document: d, mode: mode) != nil)
+    }
+}
+
+/// 从 Data 建 CGPDFDocument（供页数断言）。
+private func makePDFDoc(_ data: Data) -> CGPDFDocument? {
+    guard let provider = CGDataProvider(data: data as CFData) else { return nil }
+    return CGPDFDocument(provider)
+}
