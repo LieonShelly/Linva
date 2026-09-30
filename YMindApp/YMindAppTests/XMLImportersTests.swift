@@ -45,6 +45,12 @@ struct OPMLImporterTests {
         }
     }
 
+    @Test func emptyBody_noOutline_throwsInvalidXML() {
+        #expect(throws: ImportError.invalidXML) {
+            _ = try parse("<opml><body/></opml>")
+        }
+    }
+
     @Test func rootChildren_getAlternatingSide() throws {
         let xml = """
         <opml><body><outline text="root"><outline text="a"/><outline text="b"/><outline text="c"/></outline></body></opml>
@@ -92,5 +98,11 @@ struct FreeMindImporterTests {
         """
         let doc = try parse(xml)
         #expect(doc.root.children.map(\.side) == [.left, .right, .left])
+    }
+
+    @Test func emptyMap_noNode_throwsInvalidXML() {
+        #expect(throws: ImportError.invalidXML) {
+            _ = try parse("<map/>")
+        }
     }
 }
