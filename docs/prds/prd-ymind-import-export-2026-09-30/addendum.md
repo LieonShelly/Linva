@@ -29,20 +29,7 @@
 
 两者共用同一个「解析 → `MindMapDocument` → 载入新文档」管线；仅解析器不同（可注册为 `DocumentImporter` 协议，XMind 后续注册进同一张表）。
 
-## 3. PDF 导出管线（FR-E1 细则）
-
-复用 `PNGExporter` 已验证的「复制文档 → 清空折叠 → 布局 → 离屏」流：
-
-1. 复制当前文档，全部 `collapsed = false`（不改原文档、不入 Undo）。
-2. `RadialLayout` + `TextMeasure` 出 `LayoutSnapshot`（含 `NodeFrame.fill`）。
-3. 按包围盒（+padding）分页：横向 A4 物理宽度 → 每页一段宽度；高度超出则纵向续页。**默认：横向 A4，按宽度分页；「缩放单页」模式整树缩至一页。**
-4. 绘制：CG PDF Context（`CGContext(consumer:mediaBox:)`）+ CoreText 画矢量文字 + 复用节点/连线绘制语义；纸色背景（`#e7e4dc`，与 PNG 一致）。
-5. 范围=选中枝：先取子树子图再布局，语义同「以该节点为根的子图」。
-6. 文件名：`ExportNaming.safeFilename(主题)` + `.pdf`；Save Panel。
-
-**导出范围语义**：「全部」= 整棵逻辑树；「当前选中枝」= 选中节点的子树（多选时禁用该选项或取锚点子树——实现时定，默认：多选禁用）。
-
-## 4. 自动保存 / 恢复约定（FR-S1/S2 细则）
+## 3. 自动保存 / 恢复约定（FR-S1/S2 细则）
 
 - **目录**：`FileManager.default.urls(for: .applicationSupportDirectory)`/`Unsaved/<docID>.ymind` + 同名 `.meta.json`（原 URL、docID、最后保存时间、修改计数）。
 - **触发**：`commandBus` 变更 → Session 记 `dirtyRevision` → 2s 防抖 → 写副本；正常保存（save/saveAs）成功后删副本。
@@ -51,14 +38,13 @@
 - **未命名文档**：无正式 URL 也可产生副本（docID = 内存 UUID），恢复时作为新文档打开。
 - **多副本**：只提示最新一份；其余按保留策略清理（默认：仅本次会话产生的副本参与提示，历史残留由「忽略后清理全部」兜底）。
 
-## 5. 层边界清单（FR-C1 落地）
+## 4. 层边界清单（FR-C1 落地）
 
 | 新增件 | 层 | import 白名单 |
 |--------|-----|---------------|
 | Markdown 导入解析器 | Model | `Foundation`（现有白名单） |
 | OPML/FreeMind 解析器 | Model | `Foundation` |
 | `DocumentImporter` 注册表 | Model | `Foundation` |
-| PDF 导出 | Render（离屏） | AppKit / CoreGraphics / MetalKit（已在白名单） |
 | 自动保存 + 恢复横幅 | Session + Shell | Combine / SwiftUI / AppKit |
 
 `scripts/check-boundaries.sh` **无需新增 import 白名单**；若实现时发现需要（如 Model 里碰 XML → XMLParser 属 Foundation，安全），先改脚本白名单再动代码（构建期校验会红，勿绕过）。
