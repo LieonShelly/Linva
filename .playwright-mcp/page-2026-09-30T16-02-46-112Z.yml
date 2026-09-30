@@ -1,0 +1,20 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: YMind 节点图片 · 交互线框 v0
+    - navigation [ref=e4]:
+      - generic [ref=e5] [cursor=pointer]: 粘贴插图
+      - generic [ref=e6] [cursor=pointer]: 图文同框
+      - generic [ref=e7] [cursor=pointer]: 导出含图
+  - main [ref=e8]:
+    - img [ref=e10]:
+      - generic [ref=e70]: 2026-Q4 路线图
+      - generic [ref=e73]: 上架就绪
+      - generic [ref=e76]: 迁移闭环
+      - generic [ref=e79]: 图片 + 文字同框
+    - generic [ref=e84]:
+      - heading "导出含图" [level=2] [ref=e85]
+      - paragraph [ref=e86]: 图片跟着导出走：PNG / PDF 含图，MD 降级
+      - generic [ref=e87]:
+        - button "导出 PNG（含图）" [ref=e88] [cursor=pointer]
+        - button "导出 PDF（含图，迁移闭环 FR-E1）" [ref=e89] [cursor=pointer]
+      - generic [ref=e90]: 依据 FR-G5 · 机会卡片 §4

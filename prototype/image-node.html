@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YMind — 节点图片线框（图文共存）</title>
+  <style>
+    :root {
+      --paper: #e7e4dc; --ink: #26221b; --accent: #b85c3a; --line: #c9c4b8;
+      --panel: #f6f3ec; --ok: #2f6f4f; --warn: #9a5b1f;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--paper); color: var(--ink); font-size: 14px; }
+    header { display: flex; align-items: center; gap: 18px; padding: 10px 18px;
+      background: #26221b; color: #f6f3ec; }
+    header .brand { font-weight: 700; letter-spacing: .5px; }
+    header .brand small { opacity: .6; font-weight: 400; margin-left: 8px; }
+    .tabs { display: flex; gap: 4px; }
+    .tab { padding: 6px 14px; border-radius: 8px; cursor: pointer; color: #cfc9bc; }
+    .tab.active { background: #3a342a; color: #fff; }
+    main { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 52px); }
+    .stage { position: relative; overflow: hidden; }
+    .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .node rect { fill: #fff; stroke: var(--ink); stroke-width: 1.2; rx: 8; }
+    .node.root rect { fill: var(--ink); }
+    .node.root text { fill: #fff; }
+    .node text { fill: var(--ink); font-size: 13px; }
+    .edge { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+    .panel { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; }
+    .panel h2 { margin: 0 0 4px; font-size: 16px; }
+    .panel .sub { color: #6e685c; margin: 0 0 14px; font-size: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+      background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+    .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .btn.danger { color: #a03a2a; }
+    .demo-paste { border: 2px dashed var(--accent); border-radius: 10px; padding: 18px; text-align: center;
+      background: #fdf6ef; margin: 10px 0; }
+    .demo-paste .hint { font-size: 12px; color: #8a6a4f; margin-top: 6px; }
+    .preview { display: flex; gap: 14px; align-items: center; margin: 12px 0; }
+    .preview img { width: 96px; height: 96px; object-fit: cover; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .preview .meta { font-size: 12px; color: #6e685c; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .toast { margin-top: 12px; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    .toast.ok { background: #e2efe6; border: 1px solid #b8d6c2; color: var(--ok); }
+    .field { margin: 10px 0; }
+    .field label { display: block; font-size: 12px; color: #6e685c; margin-bottom: 5px; }
+    .kbd { background: #efece3; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+    .xref { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 10px; font-size: 12px; color: #6e685c; }
+    .note { font-size: 12px; color: #6e685c; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">YMind <small>节点图片 · 交互线框 v0</small></div>
+    <nav class="tabs">
+      <div class="tab active" data-tab="paste">粘贴插图</div>
+      <div class="tab" data-tab="layout">图文同框</div>
+      <div class="tab" data-tab="export">导出含图</div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="stage">
+      <svg id="map" viewBox="0 0 700 400"></svg>
+    </div>
+
+    <div class="panel">
+      <!-- 场景 A：粘贴插图 -->
+      <section id="pane-paste">
+        <h2>粘贴插图</h2>
+        <p class="sub">选中节点 → <span class="kbd">⌘V</span> 粘贴剪贴板图片，或直接拖入图片文件</p>
+
+        <div class="demo-paste" id="paste-zone">
+          <div style="font-size:32px">🖼️</div>
+          <div style="font-weight:600">模拟剪贴板中的图片</div>
+          <div class="hint">点「粘贴」或拖拽图片到画布节点</div>
+        </div>
+
+        <div class="preview" id="paste-preview" hidden>
+          <img id="thumb" alt="粘贴的图片预览" />
+          <div class="meta" id="paste-meta"></div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="btn-paste">粘贴到选中节点（⌘V）</button>
+          <button class="btn danger" id="btn-clear" disabled>清除图片（⌫）</button>
+        </div>
+        <p class="note">支持 png / jpeg / gif / tiff / heic（heic 自动转 png）；失败给可读提示。</p>
+
+        <div class="toast ok" id="paste-done" hidden>
+          ✅ 图片已贴入节点，图文同框显示；随文档保存（Codec v3），⌘Z 可撤销。
+        </div>
+
+        <div class="xref">依据 FR-G1 / FR-G2 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 B：图文同框 -->
+      <section id="pane-layout" hidden>
+        <h2>图文同框</h2>
+        <p class="sub">节点尺寸 = 文字与图片合成：宽取 max，高叠加</p>
+
+        <div class="field">
+          <label>显示宽度上限（参照 MindNode clamp）</label>
+          <div class="row">
+            <button class="btn" id="btn-width-200">200pt</button>
+            <button class="btn" id="btn-width-300">300pt</button>
+            <button class="btn" id="btn-width-400">400pt</button>
+          </div>
+        </div>
+
+        <div class="toast ok" id="layout-hint" hidden>
+          ✅ 已切换显示宽度——画布节点框按上限重排，图片等比缩放、不裁切。
+        </div>
+        <p class="note">命中 / 选中 / 折叠不受影响；图片随节点缩放等比显示。</p>
+
+        <div class="xref">依据 FR-G3 / FR-G4 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 C：导出含图 -->
+      <section id="pane-export" hidden>
+        <h2>导出含图</h2>
+        <p class="sub">图片跟着导出走：PNG / PDF 含图，MD 降级</p>
+
+        <div class="row">
+          <button class="btn primary" id="btn-export-png">导出 PNG（含图）</button>
+          <button class="btn" id="btn-export-pdf">导出 PDF（含图，迁移闭环 FR-E1）</button>
+        </div>
+
+        <div id="export-done" hidden>
+          <div class="toast ok">✅ PNG 离屏渲染自动含图；PDF 复用同管线画图。</div>
+          <div class="toast" style="background:#f6ead6;border:1px solid #e3cda4;color:var(--warn)">
+            ⓘ Markdown 无法表达图片——默认忽略图片只导出文字结构（实现时定，可输出引用）。
+          </div>
+        </div>
+
+        <div class="xref">依据 FR-G5 · 机会卡片 §4</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // —— 画布：一个带图的根 + 三个文字分支 ——
+    let imgWidth = 120; // 图片显示宽度
+    let hasImage = false;
+    const tree = [
+      { x: 350, y: 200, t: "2026-Q4 路线图", root: true },
+      { x: 130, y: 90,  t: "上架就绪" },
+      { x: 130, y: 310, t: "迁移闭环" },
+      { x: 480, y: 200, t: "自动保存", img: true },
+    ];
+    const edges = [[0,1],[0,2],[0,3]];
+    function renderMap() {
+      const svg = document.getElementById("map");
+      let out = edges.map(([a,b]) =>
+        `<path class="edge" d="M${tree[a].x} ${tree[a].y} C ${(tree[a].x+tree[b].x)/2} ${tree[a].y}, ${(tree[a].x+tree[b].x)/2} ${tree[b].y}, ${tree[b].y} ${tree[b].y}"/>`).join("");
+      tree.forEach(n => {
+        const hasImg = n.img && hasImage;
+        const w = Math.max(n.t.length * 13 + 28, hasImg ? imgWidth + 20 : 0);
+        const h = 30 + (hasImg ? imgWidth * 0.75 + 12 : 0);
+        const x = n.x - w/2, y = n.y - h/2;
+        out += `<g class="node ${n.root?'root':''}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+        if (hasImg) {
+          out += `<image href="data:image/svg+xml;utf8,${encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' width='${imgWidth}' height='${imgWidth*0.75}'><rect width='100%' height='100%' fill='#e8d9c4'/><circle cx='50%' cy='45%' r='22' fill='#b85c3a'/><path d='M30% 70% L45% 50% L55% 58% L70% 30% L75% 70% Z' fill='#2f6f4f'/></svg>`)}" x="${n.x-imgWidth/2}" y="${y+8}" width="${imgWidth}" height="${imgWidth*0.75}"/>`;
+          out += `<text x="${n.x}" y="${y+h-10}" text-anchor="middle" font-size="12">图片 + 文字同框</text>`;
+        } else {
+          out += `<text x="${n.x}" y="${n.y+5}" text-anchor="middle">${n.t}</text>`;
+        }
+        out += `</g>`;
+      });
+      svg.innerHTML = out;
+    }
+
+    // 标签切换
+    document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      ["paste","layout","export"].forEach(k =>
+        document.getElementById("pane-" + k).hidden = (k !== t.dataset.tab));
+    }));
+
+    // 场景 A：粘贴
+    document.getElementById("btn-paste").addEventListener("click", () => {
+      hasImage = true;
+      renderMap();
+      document.getElementById("paste-done").hidden = false;
+      document.getElementById("paste-preview").hidden = false;
+      document.getElementById("paste-meta").textContent = "clipboard.png · 96×96 · 24 KB · 内嵌 base64";
+      document.getElementById("thumb").src =
+        "data:image/svg+xml;utf8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect width='96' height='96' fill='#e8d9c4'/><circle cx='48' cy='43' r='22' fill='#b85c3a'/><path d='M28 68 L44 48 L52 56 L68 30 L72 68 Z' fill='#2f6f4f'/></svg>");
+      document.getElementById("btn-clear").disabled = false;
+    });
+    document.getElementById("btn-clear").addEventListener("click", () => {
+      hasImage = false;
+      renderMap();
+      document.getElementById("paste-done").hidden = true;
+      document.getElementById("paste-preview").hidden = true;
+      document.getElementById("btn-clear").disabled = true;
+    });
+
+    // 场景 B：显示宽度
+    [[200,200],[300,300],[400,400]].forEach(([id, w]) => {
+      document.getElementById("btn-width-" + id).addEventListener("click", () => {
+        imgWidth = w;
+        renderMap();
+        document.getElementById("layout-hint").hidden = false;
+      });
+    });
+
+    // 场景 C：导出
+    document.getElementById("btn-export-png").addEventListener("click", () => {
+      hasImage = true; renderMap();
+      document.getElementById("export-done").hidden = false;
+    });
+    document.getElementById("btn-export-pdf").addEventListener("click", () => {
+      hasImage = true; renderMap();
+      document.getElementById("export-done").hidden = false;
+    });
+
+    renderMap();
+  </script>
+</body>
+</html>

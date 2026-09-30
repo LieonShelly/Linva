@@ -35,7 +35,8 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 
 ## 基础约束
 
-- 优先用 **codegraph mcp** 检索代码。
+- 优先用 **codegraph mcp** 检索代码；具体约束与 path 见 **[`.agents/rules/ymind-code-retrieval.md`](rules/ymind-code-retrieval.md)**。
+- 需要分析**图片内容**且父会话看不了 / 图多需精读时，委派视觉子代理（模型 `ark/glm-5.3-flash`）；触发条件、启动方式与提示模板见 **[`.agents/rules/ymind-vision-delegate.md`](rules/ymind-vision-delegate.md)**。
 - 图形（流程图 / 类图 / 架构图）优先用 **Mermaid**。
 
 ## Claude 常犯的错误（犯两次就写进这里）

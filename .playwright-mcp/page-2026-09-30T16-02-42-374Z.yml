@@ -1,0 +1,25 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: YMind 节点图片 · 交互线框 v0
+    - navigation [ref=e4]:
+      - generic [ref=e5] [cursor=pointer]: 粘贴插图
+      - generic [ref=e6] [cursor=pointer]: 图文同框
+      - generic [ref=e7] [cursor=pointer]: 导出含图
+  - main [ref=e8]:
+    - img [ref=e10]:
+      - generic [ref=e70]: 2026-Q4 路线图
+      - generic [ref=e73]: 上架就绪
+      - generic [ref=e76]: 迁移闭环
+      - generic [ref=e79]: 图片 + 文字同框
+    - generic [ref=e57]:
+      - heading "图文同框" [level=2] [ref=e58]
+      - paragraph [ref=e59]: 节点尺寸 = 文字与图片合成：宽取 max，高叠加
+      - generic [ref=e60]:
+        - generic [ref=e61]: 显示宽度上限（参照 MindNode clamp）
+        - generic [ref=e62]:
+          - button "200pt" [ref=e63] [cursor=pointer]
+          - button "300pt" [active] [ref=e64] [cursor=pointer]
+          - button "400pt" [ref=e65] [cursor=pointer]
+      - generic [ref=e83]: ✅ 已切换显示宽度——画布节点框按上限重排，图片等比缩放、不裁切。
+      - paragraph [ref=e66]: 命中 / 选中 / 折叠不受影响；图片随节点缩放等比显示。
+      - generic [ref=e67]: 依据 FR-G3 / FR-G4 · 机会卡片 §4
