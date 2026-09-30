@@ -112,7 +112,7 @@ extension PDFExporter {
                 ctx.setFillColor(cgColor(PNGExporter.paperColor))
                 ctx.fill(mediaBox)
                 ctx.restoreGState()
-                drawPage(ctx: ctx, snapshot: snapshot, window: window, scale: pagination.scale, margin: mode.margin, paper: PNGExporter.paperColor)
+                drawPage(ctx: ctx, snapshot: snapshot, window: window, scale: pagination.scale, margin: mode.margin, pageSize: mode.pageSize, paper: PNGExporter.paperColor)
                 ctx.endPDFPage()
             }
         }
@@ -127,16 +127,23 @@ extension PDFExporter {
         window: CGRect,
         scale: CGFloat,
         margin: CGFloat,
+        pageSize: CGSize,
         paper: NSColor
     ) {
-        // 背景
+        // 背景（整页纸色）
         ctx.setFillColor(cgColor(paper))
-        ctx.fill(CGRect(x: 0, y: 0, width: 842, height: 595))  // 用窗口尺寸；此处页=842×595
+        ctx.fill(CGRect(x: 0, y: 0, width: pageSize.width, height: pageSize.height))
 
         // 世界 → 页变换：页 (margin, margin) = 世界 window 原点；随后按 scale 缩放。
+        // 缩放后的内容 centered 在 margin 内可用区（spec §5.1 整树居中）；
+        // paginateByWidth 时 scale=1 且 window == usable → 偏移为 0，行为不变。
+        let usableW = pageSize.width - margin * 2
+        let usableH = pageSize.height - margin * 2
+        let xc = (usableW - scale * window.width) / 2
+        let yc = (usableH - scale * window.height) / 2
         // CG PDF 默认无变换；这里用显式变换矩阵让世界 y 轴向上。
         ctx.saveGState()
-        ctx.translateBy(x: margin, y: margin)
+        ctx.translateBy(x: margin + xc, y: margin + yc)
         ctx.scaleBy(x: scale, y: scale)
         ctx.translateBy(x: -window.minX, y: -window.minY)
         // 世界 y 向上：CG 默认 y 轴向上，Node center 也是向上；无需翻转。
