@@ -295,6 +295,7 @@ enum DocumentWorkflow {
         do {
             let data = try Data(contentsOf: url)
             let document = try importer.parse(data)
+            session.errorMessage = nil
             session.importPreview = ImportPreviewState(
                 sourceName: url.lastPathComponent,
                 document: document,

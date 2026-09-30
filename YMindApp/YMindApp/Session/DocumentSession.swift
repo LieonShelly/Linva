@@ -162,6 +162,7 @@ final class DocumentSession: ObservableObject {
 
     func cancelImport() {
         importPreview = nil
+        errorMessage = nil
     }
 
     func load(from url: URL) throws {
