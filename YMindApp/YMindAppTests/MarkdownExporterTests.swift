@@ -77,6 +77,25 @@ struct MarkdownExporterTests {
         #expect(MarkdownExporter.markdown(from: dd).contains("\n- d5\n"))
     }
 
+    @Test func deepBranch_doesNotRaiseSiblingGroupHeadings() {
+        // 用户不满足场景：深分支 B 不应拉高 A 分支下的浅叶子 a1
+        // root → (A→a1无子, B→b1→b1x无子)
+        var b1x = Node(text: "b1x")
+        var b1 = Node(text: "b1", children: [b1x])
+        var a1 = Node(text: "a1")
+        var d = doc(rootText: "root", children: [Node(text: "A", children: [a1]), Node(text: "B", children: [b1])])
+        let md = MarkdownExporter.markdown(from: d)
+        // A、B 组（root 直接子）有分支 → 全 Title
+        #expect(md.contains("\n## A\n"))
+        #expect(md.contains("\n## B\n"))
+        // a1 组无分支 → Content
+        #expect(md.contains("\n* a1\n"))
+        #expect(!md.contains("### a1"))
+        // b1 有子 → Title；b1x 组无分支 → Content
+        #expect(md.contains("\n### b1\n"))
+        #expect(md.contains("\n+ b1x\n"))
+    }
+
     @Test func rootAlwaysHeading_evenIfLeaf() {
         // 根节点即使无子节点也是标题
         #expect(MarkdownExporter.markdown(from: doc(rootText: "孤根")) == "# 孤根\n")
