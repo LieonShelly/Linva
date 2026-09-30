@@ -2,6 +2,7 @@
 import Testing
 import CoreGraphics
 import Foundation
+import PDFKit
 @testable import YMindApp
 
 @Suite("PDFPagination")
@@ -98,6 +99,116 @@ struct PDFScopeTests {
     }
 }
 
+@Suite("PDFCompactLayout")
+struct PDFCompactLayoutTests {
+    private func smallDoc() -> MindMapDocument {
+        var d = MindMapDocument.blank(rootText: "根")
+        // 根 → A(a1,a2), B(b1)
+        let a1 = Node(text: "a1")
+        let a2 = Node(text: "a2")
+        let a = Node(text: "A", children: [a1, a2])
+        let b1 = Node(text: "b1")
+        let b = Node(text: "B", children: [b1])
+        d.root.children = [a, b]
+        return d
+    }
+
+    @Test func layers_increaseX_rightward() {
+        let snapshot = PDFCompactLayout.layout(document: smallDoc(), measure: TextMeasure())
+        // 根在最左列；子节点 x 大于根（向右分层）
+        let root = snapshot.frames.values.first { $0.isRoot }!
+        let children = snapshot.frames.values.filter { !$0.isRoot }
+        #expect(children.allSatisfy { $0.center.x > root.center.x })
+        // A/B 同层，左缘对齐（center.x 因节点宽不同可略异，但左缘同列）
+        let a = snapshot.frames.values.first { $0.text == "A" }!
+        let b = snapshot.frames.values.first { $0.text == "B" }!
+        #expect(abs(a.rect.minX - b.rect.minX) < 0.001)
+    }
+
+    @Test func noOverlappingFrames() {
+        let snapshot = PDFCompactLayout.layout(document: smallDoc(), measure: TextMeasure())
+        let frames = Array(snapshot.frames.values)
+        for i in 0..<frames.count {
+            for j in (i + 1)..<frames.count {
+                #expect(frames[i].rect.intersects(frames[j].rect) == false,
+                        "\(frames[i].text) 与 \(frames[j].text) 重叠")
+            }
+        }
+    }
+
+    @Test func parentCenteredOverChildren() {
+        let snapshot = PDFCompactLayout.layout(document: smallDoc(), measure: TextMeasure())
+        let a = snapshot.frames.values.first { $0.text == "A" }!
+        let a1 = snapshot.frames.values.first { $0.text == "a1" }!
+        let a2 = snapshot.frames.values.first { $0.text == "a2" }!
+        // A 的 y 居中于 a1/a2 中心之间
+        let mid = (a1.center.y + a2.center.y) / 2
+        #expect(abs(a.center.y - mid) < 1)
+    }
+
+    @Test func edgesConnectParentRightToChildLeft() {
+        let snapshot = PDFCompactLayout.layout(document: smallDoc(), measure: TextMeasure())
+        let a = snapshot.frames.values.first { $0.text == "A" }!
+        let a1 = snapshot.frames.values.first { $0.text == "a1" }!
+        let edge = snapshot.edges.first { $0.fromId == a.id && $0.toId == a1.id }
+        #expect(edge != nil)
+        // 起于父右缘，止于子左缘
+        let start = edge!.points.first!
+        let end = edge!.points.last!
+        #expect(abs(start.x - (a.center.x + a.size.width / 2)) < 0.001)
+        #expect(abs(end.x - (a1.center.x - a1.size.width / 2)) < 0.001)
+    }
+
+    @Test func bounds_widthFitsA4Usable_forWideTree() {
+        // 宽树（根下 40 个分支 × 每分支 8 个叶子，深度 2）：宽度应适配 A4 纸宽
+        // （794 可用 + 24*2 margin = 842），而非辐射布局把整树拉成竖线。
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = (0..<40).map { i in
+            Node(text: "分支\(i)", children: (0..<8).map { Node(text: "叶\(i).\($0)") })
+        }
+        let snapshot = PDFCompactLayout.layout(document: d, measure: TextMeasure())
+        let bounds = snapshot.frames.values.reduce(CGRect.null) { $0.union($1.rect) }
+        // 宽度 ≤ A4 纸宽（842）
+        #expect(bounds.width <= 842, "宽树紧凑布局宽度 \(bounds.width) 超出 A4")
+        // 全部节点无重叠
+        let frames = Array(snapshot.frames.values)
+        for i in 0..<frames.count {
+            for j in (i + 1)..<frames.count {
+                #expect(frames[i].rect.intersects(frames[j].rect) == false)
+            }
+        }
+    }
+
+    @Test func deepTree_widthBounded_notExplosive() {
+        // 深树（6 分支 × 5 层 × 3 叉）：深度方向累计宽可超单页（多列分页正常），
+        // 但必须远小于辐射布局的极端细长（实测辐射宽 1925 × 高 40808）。
+        func grow(_ prefix: String, _ depth: Int) -> Node {
+            var node = Node(text: "\(prefix)-\(depth)")
+            if depth > 0 {
+                node.children = (0..<3).map { grow("\(prefix).\($0)", depth - 1) }
+            }
+            return node
+        }
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = (0..<6).map { i in
+            var c = grow("B\(i)", 5)
+            if i % 2 == 0 { c.side = .left }
+            return c
+        }
+        let snapshot = PDFCompactLayout.layout(document: d, measure: TextMeasure())
+        let bounds = snapshot.frames.values.reduce(CGRect.null) { $0.union($1.rect) }
+        // 宽高比更接近纸面：宽 ≥ 高的 1%（辐射是宽 1925/高 40808 ≈ 4.7%）
+        let frames = Array(snapshot.frames.values)
+        for i in 0..<frames.count {
+            for j in (i + 1)..<frames.count {
+                #expect(frames[i].rect.intersects(frames[j].rect) == false)
+            }
+        }
+        // 深度方向总宽不超过 3 列 A4（每列 794 + 间隙），否则页数爆炸
+        #expect(bounds.width <= 842 * 2 + 100)
+    }
+}
+
 @Suite("PDFExporterRendering")
 struct PDFExporterRenderingTests {
     private var a4: PDFPageMode { .init() }
@@ -160,6 +271,25 @@ struct PDFExporterRenderingTests {
         #expect(out.size == bound.size)
         #expect(out.midX == rect.midX)
         #expect(out.midY == rect.midY)
+    }
+
+    @Test func data_preservesVerticalOrientation_firstChildOnTop() throws {
+        // 布局世界 y 向下（第一个子在最上 = y 最小）；PDF 必须保持该朝向，
+        // 否则导出整棵树垂直镜像（根/子层级倒挂）——final review 后修复的镜像回归。
+        var d = MindMapDocument.blank(rootText: "根")
+        d.root.children = [Node(text: "子1"), Node(text: "子2"), Node(text: "子3")]
+        let data = try #require(PDFExporter.data(document: d, mode: a4))
+        let doc = try #require(PDFDocument(data: data))
+        let page = try #require(doc.page(at: 0))
+        let text = page.string ?? ""
+        // PDFKit 提取常把 CJK 与数字间加空格（「子 1」）；compact 后匹配。
+        let compact = text.replacingOccurrences(of: " ", with: "")
+        // 提取顺序 ≈ 绘制顺序（页内从上到下）：
+        // 修复前（镜像）为「根 子3 子2 子1」，修复后（正确）为「根 子1 子2 子3」。
+        let idx1 = compact.range(of: "子1")?.lowerBound
+        let idx3 = compact.range(of: "子3")?.lowerBound
+        #expect(idx1 != nil && idx3 != nil)
+        #expect(idx1! < idx3!, "PDF 垂直镜像：子1（世界最上）被画到了子3 下方")
     }
 }
 

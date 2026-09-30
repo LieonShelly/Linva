@@ -85,8 +85,11 @@ extension PDFExporter {
         }
         // 2. 全展开（复用 PNGExporter：复制并清 collapsed，不改原文档）
         let expanded = PNGExporter.fullyExpanded(source)
-        // 3. 布局
-        let snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
+        // 3. 布局：PDF 专用紧凑布局（左→右分层 tidy 树）。
+        //    画布用中心辐射；纸面导出用本布局避免大树包围盒极窄极高
+        //    → A4 网格切分大量空白/结构被切碎。输出与 RadialLayout 同构，
+        //    绘制层（drawPage/drawEdge/drawNodeBlock/drawText）无需改动。
+        let snapshot = PDFCompactLayout.layout(document: expanded, measure: TextMeasure())
         let bounds = snapshot.frames.values.reduce(CGRect.null) { $0.union($1.rect) }
         guard !bounds.isNull else { return nil }
         // 4. 分页
@@ -134,19 +137,18 @@ extension PDFExporter {
         ctx.setFillColor(cgColor(paper))
         ctx.fill(CGRect(x: 0, y: 0, width: pageSize.width, height: pageSize.height))
 
-        // 世界 → 页变换：页 (margin, margin) = 世界 window 原点；随后按 scale 缩放。
-        // 缩放后的内容 centered 在 margin 内可用区（spec §5.1 整树居中）；
-        // paginateByWidth 时 scale=1 且 window == usable → 偏移为 0，行为不变。
+        // 世界 → 页变换：布局世界 y 向下增长（根在 0，第一个子在最上 = y 最小），
+        // CG PDF 默认 y-up —— 这里显式翻转 y，否则导出整棵树垂直镜像（结构倒挂）。
         let usableW = pageSize.width - margin * 2
         let usableH = pageSize.height - margin * 2
         let xc = (usableW - scale * window.width) / 2
         let yc = (usableH - scale * window.height) / 2
-        // CG PDF 默认无变换；这里用显式变换矩阵让世界 y 轴向上。
+        // 世界 (wx,wy) → 页: x = margin+xc + scale*(wx-window.minX)
+        //                    y = pageH-margin-yc - scale*(wy-window.minY)   （y 翻转，窗口顶 → 页顶）
         ctx.saveGState()
-        ctx.translateBy(x: margin + xc, y: margin + yc)
-        ctx.scaleBy(x: scale, y: scale)
+        ctx.translateBy(x: margin + xc, y: pageSize.height - margin - yc)
+        ctx.scaleBy(x: scale, y: -scale)
         ctx.translateBy(x: -window.minX, y: -window.minY)
-        // 世界 y 向上：CG 默认 y 轴向上，Node center 也是向上；无需翻转。
 
         // 绘制顺序：边 → 节点块 → 文字（对齐 Metal encodeContent）
         for edge in snapshot.edges {
@@ -201,14 +203,14 @@ extension PDFExporter {
     }
 
     private static func drawText(_ ctx: CGContext, _ frame: NodeFrame, scale: CGFloat) {
-        // 用 AppKit NSAttributedString 矢量绘制：先包 NSGraphicsContext，flipped=false（世界 y 向上）。
+        // 用 AppKit NSAttributedString 矢量绘制：CTM 已翻转 y（世界 y 向下），flipped=true 与之对齐。
         let font = NSFont.systemFont(ofSize: frame.isRoot ? 18.4 : 14.7, weight: frame.isRoot ? .bold : .medium)
         let color: NSColor = frame.isRoot ? .white : .labelColor
         let attr = NSAttributedString(string: frame.text, attributes: [
             .font: font,
             .foregroundColor: color,
         ])
-        let graphicsContext = NSGraphicsContext(cgContext: ctx, flipped: false)
+        let graphicsContext = NSGraphicsContext(cgContext: ctx, flipped: true)
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = graphicsContext
         // 多行：按节点宽 wrap；先量实际包围盒，再居中到节点 rect 中央（否则文字贴左上角）。
