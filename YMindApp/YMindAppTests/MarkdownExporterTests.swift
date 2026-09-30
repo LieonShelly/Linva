@@ -14,62 +14,66 @@ struct MarkdownExporterTests {
         #expect(MarkdownExporter.markdown(from: doc(rootText: "根")) == "# 根\n")
     }
 
-    @Test func nestedDepth_withinTitleDepth_addsHash() {
-        // maxDepth=3 → titleDepth=2：深度1、2 为标题，深度3 为列表项
-        var d = doc(rootText: "根", children: [Node(text: "一层")])
-        d.root.children[0].children = [Node(text: "二层")]
-        #expect(MarkdownExporter.markdown(from: d) == "# 根\n\n## 一层\n\n- 二层\n")
-    }
-
-    @Test func depthBeyondTitleDepth_becomesListItems() {
-        // maxDepth=7 → titleDepth=3：深度4+ 全为列表项，缩进递增，永不出现 #### 标题
-        var node = Node(text: "最深层")
-        for _ in 0..<6 { node = Node(text: "层", children: [node]) }
-        var d = doc(rootText: "根")
-        d.root.children = [node]
-        let lines = MarkdownExporter.markdown(from: d).split(separator: "\n")
-        #expect(!lines.contains { $0.hasPrefix("####") })
-        // 深度4（titleDepth+1）→ 无缩进列表；最深层深度8 → 8 空格缩进列表
-        #expect(lines.contains { $0 == "- 层" })
-        #expect(lines.contains { $0.hasPrefix("        - 最深层") })
-    }
-
-    @Test func titleDepth_adaptsToShallowTree() {
-        // maxDepth=2 → titleDepth=1：深度1 标题、深度2 列表项
+    @Test func branchNode_isHeading_leaf_isList() {
+        // 根(分支)→子(叶子)：根标题，子列表项（深度2 → `- `）
         let d = doc(rootText: "根", children: [Node(text: "子")])
         #expect(MarkdownExporter.markdown(from: d) == "# 根\n\n- 子\n")
     }
 
-    @Test func titleDepth_capsAtThree_forDeepTree() {
-        // maxDepth=5 → titleDepth=3：深度1-3 标题、深度4-5 列表项
-        var node = Node(text: "d4")
-        node.children = [Node(text: "d5")]
+    @Test func deepBranch_staysHeading_deepLeaf_isList() {
+        // 深层分支节点仍是标题，只有叶子变列表
+        var node = Node(text: "最深层")
+        for _ in 0..<5 { node = Node(text: "层", children: [node]) }
         var d = doc(rootText: "根")
-        d.root.children = [Node(text: "d2", children: [Node(text: "d3", children: [node])])]
-        let md = MarkdownExporter.markdown(from: d)
-        #expect(md.contains("### d3"))
-        #expect(md.contains("- d4"))
-        #expect(md.contains("  - d5"))
+        d.root.children = [node]
+        let lines = MarkdownExporter.markdown(from: d).split(separator: "\n")
+        // 5 个 "层" 都是分支 → 标题（深度2-6）；最深层是叶子（深度7）→ 列表（符号 +）
+        #expect(lines.contains("## 层"))
+        #expect(lines.contains("### 层"))
+        #expect(lines.contains("###### 层"))
+        #expect(lines.contains("+ 最深层"))
+        #expect(!lines.contains { $0.hasPrefix("#######") })
     }
 
-    @Test func contentList_nestedIndentation() {
-        // 深度4 → 无缩进；深度5 → 2 空格；深度6 → 4 空格
-        var d6 = Node(text: "d6")
-        var d5 = Node(text: "d5", children: [d6])
-        var d4 = Node(text: "d4", children: [d5])
-        var d = doc(rootText: "根")
-        d.root.children = [Node(text: "d2", children: [Node(text: "d3", children: [d4])])]
+    @Test func mixedDepthTree_branchHeading_leafList() {
+        // 模拟用户混合深度树：root → 分支 → (分支→叶子, 叶子)
+        var leaf2 = Node(text: "深叶子")        // depth3 叶子 → `* `
+        var branch2 = Node(text: "二级分支", children: [leaf2])  // depth2 分支 → ##
+        var leaf1a = Node(text: "浅叶子a")       // depth2 叶子 → `- `
+        var leaf1b = Node(text: "浅叶子b")
+        var d = doc(rootText: "根", children: [branch2, leaf1a, leaf1b])
         let md = MarkdownExporter.markdown(from: d)
-        #expect(md.contains("\n- d4\n"))
-        #expect(md.contains("\n  - d5\n"))
-        #expect(md.contains("\n    - d6\n"))
+        #expect(md.contains("\n## 二级分支\n"))
+        #expect(md.contains("\n* 深叶子\n"))
+        #expect(md.contains("\n- 浅叶子a\n"))
+        #expect(md.contains("\n- 浅叶子b\n"))
+    }
+
+    @Test func leafSymbol_cyclesByDepth() {
+        // root(d1)→d3分支(d2)→d4分支(d3)→d5叶(d4)
+        // 叶子深度2→`-`、3→`*`、4→`+`、5→`-`（循环）
+        var d5 = Node(text: "d5")
+        var d4 = Node(text: "d4", children: [d5])
+        var d3 = Node(text: "d3", children: [d4])
+        var d = doc(rootText: "根", children: [d3])
+        let md = MarkdownExporter.markdown(from: d)
+        #expect(md.contains("\n+ d5\n"))          // depth4 → `+`
+        #expect(!md.contains("- d5"))
+        // 单独验证 depth5 → `-`（回环）：
+        var dd = doc(rootText: "根", children: [Node(text: "d2", children: [Node(text: "d3", children: [Node(text: "d4", children: [Node(text: "d5")])])])])
+        #expect(MarkdownExporter.markdown(from: dd).contains("\n- d5\n"))
+    }
+
+    @Test func rootAlwaysHeading_evenIfLeaf() {
+        // 根节点即使无子节点也是标题
+        #expect(MarkdownExporter.markdown(from: doc(rootText: "孤根")) == "# 孤根\n")
     }
 
     @Test func collapsedBranch_stillFullyExported() {
         let grand = Node(text: "孙")
         let child = Node(text: "子", collapsed: true, side: .right, children: [grand])
-        // maxDepth=3 → titleDepth=2：孙（深度3）为列表项
-        #expect(MarkdownExporter.markdown(from: doc(children: [child])).contains("\n- 孙"))
+        // 子有子节点=分支标题；孙为叶子（深度3）→ `* 孙`
+        #expect(MarkdownExporter.markdown(from: doc(children: [child])).contains("\n* 孙"))
     }
 
     @Test func multilineText_collapsedToSingleLine() {
@@ -83,7 +87,7 @@ struct MarkdownExporterTests {
 
     @Test func fillAndSideMetadata_notEmitted() {
         let child = Node(text: "有填色", side: .left, fill: .sage)
-        // maxDepth=2 → titleDepth=1：子节点（深度2）为列表项
+        // 子为叶子 → 列表项（深度2 → `- `）
         #expect(MarkdownExporter.markdown(from: doc(children: [child])) == "# 中心\n\n- 有填色\n")
     }
 }

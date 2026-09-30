@@ -62,8 +62,8 @@ struct MarkdownImporter: DocumentImporter {
                 continue
             }
 
-            // —— 列表项 - / * / •
-            if trimmed.hasPrefix("-") || trimmed.hasPrefix("*") || trimmed.hasPrefix("•") {
+            // —— 列表项 - / * / + / •
+            if trimmed.hasPrefix("-") || trimmed.hasPrefix("*") || trimmed.hasPrefix("+") || trimmed.hasPrefix("•") {
                 let content = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
                 let item = Node(text: content.isEmpty ? "未命名" : content)
                 if let path = lastHeadingPath {

@@ -31,6 +31,12 @@ struct MarkdownImporterTests {
         #expect(sub.children.map(\.text) == ["subitem"])
     }
 
+    @Test func allListSymbols_imported() throws {
+        // 导出器用 - / * / + 区分层级，导入需全部识别
+        let doc = try parse("# root\n- dash\n* star\n+ plus\n• bullet")
+        #expect(doc.root.children.map(\.text) == ["dash", "star", "plus", "bullet"])
+    }
+
     @Test func emptyText_becomesUnnamed() throws {
         let doc = try parse("# root\n##   \n-  ")
         #expect(doc.root.children[0].text == "未命名")
