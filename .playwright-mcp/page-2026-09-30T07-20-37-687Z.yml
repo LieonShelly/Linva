@@ -1,0 +1,223 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - button "跳至内容" [ref=f2e3] [cursor=pointer]
+    - button "辅助功能反馈" [ref=f2e6] [cursor=pointer]
+    - generic [ref=f2e9]:
+      - link [ref=f2e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "返回到必应搜索" [level=1] [ref=f2e11]
+      - search [ref=f2e12]:
+        - button "搜索" [ref=f2e15] [cursor=pointer]
+        - searchbox "在此处输入你的搜索 — 输入时会显示搜索建议" [ref=f2e16]: Apple Freeform mind map reddit "wish" OR "missing" OR "frustrating"
+        - generic [ref=f2e17] [cursor=pointer]
+        - button "使用图像搜索" [ref=f2e22] [cursor=pointer]
+    - complementary "帐户奖励和偏好设置" [ref=f2e24]:
+      - button "Microsoft Rewards" [ref=f2e25] [cursor=pointer]:
+        - generic [ref=f2e26]: Rewards
+      - link "登录" [ref=f2e42] [cursor=pointer]:
+        - /url: javascript:void(0)
+    - navigation "主菜单" [ref=f2e44]:
+      - list [ref=f2e45]:
+        - listitem [ref=f2e46]:
+          - link "全部" [ref=f2e47] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=f2e48]:
+          - link "搜索" [ref=f2e49] [cursor=pointer]:
+            - /url: /copilotsearch?q=Apple+Freeform+mind+map+reddit+%22wish%22+OR+%22missing%22+OR+%22frustrating%22&FORM=CSSCOP
+        - listitem [ref=f2e52]:
+          - link "图片" [ref=f2e53] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=0b2c94d044e13430224158b543f23126a197d532e2e4364cf56157a505c6f161JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L2ltYWdlcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSttaW5kK21hcCtyZWRkaXQrJTIyd2lzaCUyMitPUislMjJtaXNzaW5nJTIyK09SKyUyMmZydXN0cmF0aW5nJTIyJkZPUk09SERSU0Mz&ntb=1
+        - listitem [ref=f2e54]:
+          - link "视频" [ref=f2e55] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=3407c9d77fb39b7a27dc30a31d854e0f421a112cc39dd7269949779aa9916a02JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSttaW5kK21hcCtyZWRkaXQrJTIyd2lzaCUyMitPUislMjJtaXNzaW5nJTIyK09SKyUyMmZydXN0cmF0aW5nJTIyJkZPUk09SERSU0M0&ntb=1
+        - listitem [ref=f2e56]:
+          - link "地图" [ref=f2e57] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=ba0a898fda60bafdb513b2f02e6f297e47275e6df26c3169ba4fa43d101fda81JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L21hcHM_cT1BcHBsZStGcmVlZm9ybSttaW5kK21hcCtyZWRkaXQrJTIyd2lzaCUyMitPUislMjJtaXNzaW5nJTIyK09SKyUyMmZydXN0cmF0aW5nJTIyJkZPUk09SERSU0M2&ntb=1
+        - listitem [ref=f2e58]:
+          - link "资讯" [ref=f2e59] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=8a16659ed173936bfeb69133747b8ad9ecc9ec1b49baf5598db08e7ed4ced7b8JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L25ld3Mvc2VhcmNoP3E9QXBwbGUrRnJlZWZvcm0rbWluZCttYXArcmVkZGl0KyUyMndpc2glMjIrT1IrJTIybWlzc2luZyUyMitPUislMjJmcnVzdHJhdGluZyUyMiZGT1JNPUhEUlNDNw&ntb=1
+        - listitem [ref=f2e60]:
+          - button [ref=f2e61] [cursor=pointer]
+  - generic [ref=f2e65]:
+    - main "搜索结果" [ref=f2e66]:
+      - generic [ref=f2e68]:
+        - generic [aria-hidden] [ref=f2e69]:
+          - generic [ref=f2e70] [cursor=pointer]
+          - generic [ref=f2e73] [cursor=pointer]
+          - generic [ref=f2e76] [cursor=pointer]
+        - text: 约 185,000 个结果
+      - list [ref=f2e79]:
+        - listitem [ref=f2e80]:
+          - link "YouTube" [ref=f2e82] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=02219740fe7395a70e27498cd6a64728894b4dde7a1800c6de647fc7e908a4daJmltdHM9MTc5MDc1MjgzOA&ptn=3&fclid=6f2c3c14-bc9f-11f1-ad56-9b1eb0bb4b3c&ntb=1&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9QXBwbGUrRnJlZWZvcm0rbWluZCttYXArcmVkZGl0KyUyMndpc2glMjIrT1IrJTIybWlzc2luZyUyMitPUislMjJmcnVzdHJhdGluZyUyMiZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJm1pZD1DMkJFNEY1RTY3RTFGQzJEM0M2MkMyQkU0RjVFNjdFMUZDMkQzQzYyJkZPUk09V1JWT1JDJm50Yj0xJm1zb2NraWQ9NmYyYzNjMTRiYzlmMTFmMWFkNTY5YjFlYjBiYjRiM2M
+            - generic [ref=f2e87]:
+              - generic [ref=f2e88]: YouTube
+              - generic [ref=f2e90]:
+                - generic [ref=f2e91]: https://www.youtube.com › watch
+                - generic [ref=f2e92]: 翻译此结果
+          - heading [level=2] [ref=f2e93]:
+            - link "Missing - YouTube" [ref=f2e94] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=f9f4fca11b226b60bb2f7fab065c68b5ffd8e92a817c73d1a3c08ae6f25a1a30JmltdHM9MTc5MDc1MjgzOA&ptn=3&fclid=6f2c4e49-bc9f-11f1-9827-2cd0cf8e9b36&ntb=1&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9QXBwbGUrRnJlZWZvcm0rbWluZCttYXArcmVkZGl0KyUyMndpc2glMjIrT1IrJTIybWlzc2luZyUyMitPUislMjJmcnVzdHJhdGluZyUyMiZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJm1pZD1DMkJFNEY1RTY3RTFGQzJEM0M2MkMyQkU0RjVFNjdFMUZDMkQzQzYyJkZPUk09V1JWT1JDJm50Yj0xJm1zb2NraWQ9NmYyYzRlNDliYzlmMTFmMTk4MjcyY2QwY2Y4ZTliMzY
+          - generic [ref=f2e96]:
+            - 'link "Missing - YouTube · 时长: 2 分钟53 秒 · 单击以播放。" [ref=f2e103] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=4e9e339a1e483c81f45c1f23a14d9feb21a69218f5fd5be251b7d5de42f47698JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSttaW5kK21hcCtyZWRkaXQrJTIyd2lzaCUyMitPUislMjJtaXNzaW5nJTIyK09SKyUyMmZydXN0cmF0aW5nJTIyJnZpZXc9ZGV0YWlsJm1pZD1DMkJFNEY1RTY3RTFGQzJEM0M2MkMyQkU0RjVFNjdFMUZDMkQzQzYyJmNodXJsPSZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJkZPUk09V1JWT1JD&ntb=1
+              - generic [ref=f2e104]: 2:53
+            - paragraph [ref=f2e114]:
+              - text: 2026年6月28日 · Provided to YouTube by B-ME Missing · BE:FIRST Missing ℗ AVEX MUSIC …
+              - link "阅读更多" [ref=f2e115] [cursor=pointer]:
+                - /url: https://www.bing.com/ck/a?!&&p=9bd6678a64f8d897ff19feed0da5da52f69266c98e1d8ecd148acd0c41b678ebJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1CWll4OVFzRzZzMA&ntb=1
+            - generic [ref=f2e117]:
+              - list [ref=f2e118]:
+                - listitem [ref=f2e119]:
+                  - generic [ref=f2e120]: "作者: BE:FIRST - Topic"
+              - list [ref=f2e121]:
+                - listitem [ref=f2e122]:
+                  - generic [ref=f2e123]: "查看次数: 244.4万"
+        - listitem [ref=f2e124]:
+          - link "Cambridge Dictionary" [ref=f2e126] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d971fbb8678f1e80dfe774187ee982ee645b1cd9fb6252ca2ceaab4b578b3d30JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaWN0aW9uYXJ5LmNhbWJyaWRnZS5vcmcvemh0LyVFOCVBOSU5RSVFNSU4NSVCOC8lRTglOEIlQjElRTglQUElOUUtJUU2JUJDJUEyJUU4JUFBJTlFLSVFNyVCOSU4MSVFOSVBQiU5NC9mcnVzdHJhdGluZw&ntb=1
+            - generic [ref=f2e131]:
+              - generic [ref=f2e132]: Cambridge Dictionary
+              - generic [ref=f2e133]: https://dictionary.cambridge.org › zht › 詞典 › 英語-漢語-繁體 › frustrating
+          - heading [level=2] [ref=f2e136]:
+            - link "FRUSTRATING中文 (繁體)翻譯：劍橋詞典 - Cambridge Dictionary" [ref=f2e137] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=d971fbb8678f1e80dfe774187ee982ee645b1cd9fb6252ca2ceaab4b578b3d30JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaWN0aW9uYXJ5LmNhbWJyaWRnZS5vcmcvemh0LyVFOCVBOSU5RSVFNSU4NSVCOC8lRTglOEIlQjElRTglQUElOUUtJUU2JUJDJUEyJUU4JUFBJTlFLSVFNyVCOSU4MSVFOSVBQiU5NC9mcnVzdHJhdGluZw&ntb=1
+          - paragraph [ref=f2e139]: FRUSTRATING翻譯：令人灰心的;使人氣餒的。了解更多。
+        - listitem [ref=f2e140]:
+          - link "百度百科" [ref=f2e142] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=0bbe609ff776ac5c04526dad05034efd367376909d2a6a4ceb20041cb20d6212JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9iYWlrZS5iYWlkdS5jb20vaXRlbS9mcnVzdHJhdGluZy8yMjkwNTExNw&ntb=1
+            - generic [ref=f2e147]:
+              - generic [ref=f2e148]: 百度百科
+              - generic [ref=f2e149]: https://baike.baidu.com › item › frustrating
+          - heading [level=2] [ref=f2e152]:
+            - link "frustrating_百度百科" [ref=f2e153] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=0bbe609ff776ac5c04526dad05034efd367376909d2a6a4ceb20041cb20d6212JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9iYWlrZS5iYWlkdS5jb20vaXRlbS9mcnVzdHJhdGluZy8yMjkwNTExNw&ntb=1
+          - generic [ref=f2e157]:
+            - tablist [ref=f2e160]:
+              - tab "释义" [selected] [ref=f2e161]
+              - tab "举例" [ref=f2e162] [cursor=pointer]
+            - tabpanel "释义" [ref=f2e164]:
+              - list [ref=f2e165]:
+                - listitem [ref=f2e166]:
+                  - generic [ref=f2e167]: 英 [frʌˈstreɪtɪŋ] 美 [ˈfrʌstreɪtɪŋ]adj.产生挫折的，使人沮丧的，令人泄气的
+              - link "在baike.baidu.com上查看更多信息" [ref=f2e168] [cursor=pointer]:
+                - /url: https://www.bing.com/ck/a?!&&p=0bbe609ff776ac5c04526dad05034efd367376909d2a6a4ceb20041cb20d6212JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9iYWlrZS5iYWlkdS5jb20vaXRlbS9mcnVzdHJhdGluZy8yMjkwNTExNw&ntb=1
+        - listitem [ref=f2e169]:
+          - link "金山词霸" [ref=f2e171] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=7937c27aa228043e03d0a78e04a2e51b03bca3f33f6618c45f906bbe1254c453JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuaWNpYmEuY29tL3dvcmQ_dz1mcnVzdHJhdGluZw&ntb=1
+            - generic [ref=f2e176]:
+              - generic [ref=f2e177]: 金山词霸
+              - generic [ref=f2e178]: https://www.iciba.com › word
+          - heading [level=2] [ref=f2e181]:
+            - link "frustrating是什么意思_frustrating的翻译_音标_读音_用法_例句_爱词 …" [ref=f2e182] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=7937c27aa228043e03d0a78e04a2e51b03bca3f33f6618c45f906bbe1254c453JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuaWNpYmEuY29tL3dvcmQ_dz1mcnVzdHJhdGluZw&ntb=1
+          - paragraph [ref=f2e184]: 爱词霸权威在线词典,为您提供frustrating的中文意思,frustrating的用法讲解,frustrating的读音,frustrating的同义词,frustrating的反义 …
+        - listitem [ref=f2e185]:
+          - link "ウィキペディア" [ref=f2e187] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=b6f8cf459dc08c13d751c7e525d0eaf5eff54dbb7a10999cb3cd8d14bced7ee3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qYS53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ18oJUU0JUI5JTg1JUU0JUJGJTlEJUU3JTk0JUIwJUU1JTg4JUE5JUU0JUJDJUI4JUUzJTgxJUFFJUU2JTlCJUIyKQ&ntb=1
+            - generic [ref=f2e192]:
+              - generic [ref=f2e193]: ウィキペディア
+              - generic [ref=f2e195]:
+                - generic [ref=f2e196]: https://ja.wikipedia.org › wiki › Missing_(久保田利伸の曲)
+                - generic [ref=f2e197]: 翻译此结果
+          - heading [level=2] [ref=f2e198]:
+            - link "Missing (久保田利伸の曲) - Wikipedia" [ref=f2e199] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=b6f8cf459dc08c13d751c7e525d0eaf5eff54dbb7a10999cb3cd8d14bced7ee3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qYS53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ18oJUU0JUI5JTg1JUU0JUJGJTlEJUU3JTk0JUIwJUU1JTg4JUE5JUU0JUJDJUI4JUUzJTgxJUFFJUU2JTlCJUIyKQ&ntb=1
+          - paragraph [ref=f2e201]: 1986年 9月10日 にリリースされた1stアルバム『SHAKE IT PARADISE』に初収録。シングル曲ではないものの自身の代表曲の1つで …
+        - listitem [ref=f2e202]:
+          - link "ウィキペディア" [ref=f2e204] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=a5d6c0a8f203e33e8dea32fba38011b0217034fe4b50ecde5d566db019312be3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qYS53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ18oJUU1JUIwJThGJUU4JUFBJUFDKQ&ntb=1
+            - generic [ref=f2e209]:
+              - generic [ref=f2e210]: ウィキペディア
+              - generic [ref=f2e212]:
+                - generic [ref=f2e213]: https://ja.wikipedia.org › wiki › Missing_(小説)
+                - generic [ref=f2e214]: 翻译此结果
+          - heading [level=2] [ref=f2e215]:
+            - link "Missing (小説) - Wikipedia" [ref=f2e216] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=a5d6c0a8f203e33e8dea32fba38011b0217034fe4b50ecde5d566db019312be3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qYS53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ18oJUU1JUIwJThGJUU4JUFBJUFDKQ&ntb=1
+          - paragraph [ref=f2e218]: 『Missing』（ミッシング）は、 甲田学人 による 日本 の ライトノベル。 イラスト は 翠川しん が担当している。 電撃文庫 （メ …
+        - listitem [ref=f2e219]:
+          - link "YouTube" [ref=f2e221] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=43c103bbf1bb61a1b681767b0813bafcf10a6b6871382f44ad695db425a42b16JmltdHM9MTc5MDc1MjgzOA&ptn=3&fclid=6f2db0be-bc9f-11f1-8cda-78e650c27fae&ntb=1&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9QXBwbGUrRnJlZWZvcm0rbWluZCttYXArcmVkZGl0KyUyMndpc2glMjIrT1IrJTIybWlzc2luZyUyMitPUislMjJmcnVzdHJhdGluZyUyMiZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJm1pZD1GMTIyNzJGNTFENEU2RERGQjg5MkYxMjI3MkY1MUQ0RTZEREZCODkyJkZPUk09V1JWT1JDJm50Yj0xJm1zb2NraWQ9NmYyZGIwYmViYzlmMTFmMThjZGE3OGU2NTBjMjdmYWU
+            - generic [ref=f2e226]:
+              - generic [ref=f2e227]: YouTube
+              - generic [ref=f2e229]:
+                - generic [ref=f2e230]: https://www.youtube.com › watch
+                - generic [ref=f2e231]: 翻译此结果
+          - heading [level=2] [ref=f2e232]:
+            - link "ELLEGARDEN「Missing」Music Video - YouTube" [ref=f2e233] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=88dac34e0a46a0695162b8528c3b33cbd297eb1e5f04e1f7a43996d36a7f54f2JmltdHM9MTc5MDc1MjgzOA&ptn=3&fclid=6f2db90c-bc9f-11f1-86e6-733e378f61e8&ntb=1&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9QXBwbGUrRnJlZWZvcm0rbWluZCttYXArcmVkZGl0KyUyMndpc2glMjIrT1IrJTIybWlzc2luZyUyMitPUislMjJmcnVzdHJhdGluZyUyMiZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJm1pZD1GMTIyNzJGNTFENEU2RERGQjg5MkYxMjI3MkY1MUQ0RTZEREZCODkyJkZPUk09V1JWT1JDJm50Yj0xJm1zb2NraWQ9NmYyZGI5MGNiYzlmMTFmMTg2ZTY3MzNlMzc4ZjYxZTg
+          - generic [ref=f2e235]:
+            - 'link "ELLEGARDEN「Missing」Music Video - YouTube · 时长: 3 分钟57 秒 · 单击以播放。" [ref=f2e242] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=de75b2eff56f86302c89a8bdfe9f66ba8eb26fcddaf12a030570454054cd4252JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSttaW5kK21hcCtyZWRkaXQrJTIyd2lzaCUyMitPUislMjJtaXNzaW5nJTIyK09SKyUyMmZydXN0cmF0aW5nJTIyJnZpZXc9ZGV0YWlsJm1pZD1GMTIyNzJGNTFENEU2RERGQjg5MkYxMjI3MkY1MUQ0RTZEREZCODkyJmNodXJsPSZydT0lMmZzZWFyY2glM2ZxJTNkQXBwbGUlMmJGcmVlZm9ybSUyYm1pbmQlMmJtYXAlMmJyZWRkaXQlMmIlMjUyMndpc2glMjUyMiUyYk9SJTJiJTI1MjJtaXNzaW5nJTI1MjIlMmJPUiUyYiUyNTIyZnJ1c3RyYXRpbmclMjUyMiZtbXNjbj12d3JjJkZPUk09V1JWT1JD&ntb=1
+              - generic [ref=f2e243]: 3:57
+            - paragraph [ref=f2e253]: 2017年4月23日 · ELLEGARDEN「Missing」Music Video GROWING UP Official Channel 21.4K …
+            - generic [ref=f2e255]:
+              - list [ref=f2e256]:
+                - listitem [ref=f2e257]:
+                  - generic [ref=f2e258]: "作者: GROWING UP Official Channel"
+              - list [ref=f2e259]:
+                - listitem [ref=f2e260]:
+                  - generic [ref=f2e261]: "查看次数: 334万"
+        - listitem [ref=f2e262]:
+          - link "Cambridge Dictionary" [ref=f2e264] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=dbeb77d0bd27a9044358e141bcc2bad86d3bcafd561b97c87d65054c6837ea06JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaWN0aW9uYXJ5LmNhbWJyaWRnZS5vcmcvemhzLyVFOCVBRiU4RCVFNSU4NSVCOC8lRTglOEIlQjElRTglQUYlQUQtJUU2JUIxJTg5JUU4JUFGJUFELSVFNyVBRSU4MCVFNCVCRCU5My9mcnVzdHJhdGU&ntb=1
+            - generic [ref=f2e269]:
+              - generic [ref=f2e270]: Cambridge Dictionary
+              - generic [ref=f2e271]: https://dictionary.cambridge.org › zhs › 词典 › 英语-汉语-简体 › frustrate
+          - heading [level=2] [ref=f2e274]:
+            - link "FRUSTRATE中文 (简体)翻译：剑桥词典" [ref=f2e275] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=dbeb77d0bd27a9044358e141bcc2bad86d3bcafd561b97c87d65054c6837ea06JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaWN0aW9uYXJ5LmNhbWJyaWRnZS5vcmcvemhzLyVFOCVBRiU4RCVFNSU4NSVCOC8lRTglOEIlQjElRTglQUYlQUQtJUU2JUIxJTg5JUU4JUFGJUFELSVFNyVBRSU4MCVFNCVCRCU5My9mcnVzdHJhdGU&ntb=1
+          - paragraph [ref=f2e277]: FRUSTRATE翻译：使气馁, 使灰心，使气馁, 阻止, 阻挠，阻止；挫败。了解更多。
+        - listitem [ref=f2e278]:
+          - link "Wikipedia" [ref=f2e280] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=f75db10481f16a6ae58cc8a15251bdce954a3b3b4a9bbce1440ab20aa04c81f1JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ19wZXJzb24&ntb=1
+            - generic [ref=f2e285]:
+              - generic [ref=f2e286]: Wikipedia
+              - generic [ref=f2e288]:
+                - generic [ref=f2e289]: https://en.wikipedia.org › wiki › Missing_person
+                - generic [ref=f2e290]: 翻译此结果
+          - heading [level=2] [ref=f2e291]:
+            - link "Missing person - Wikipedia" [ref=f2e292] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=f75db10481f16a6ae58cc8a15251bdce954a3b3b4a9bbce1440ab20aa04c81f1JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvTWlzc2luZ19wZXJzb24&ntb=1
+          - paragraph [ref=f2e294]: A missing person is a person who has disappeared and whose status as alive or dead cannot be confirmed as their location and …
+        - listitem [ref=f2e295]:
+          - link "and.nic.in" [ref=f2e297] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=9becd4439864fe0b20b22b529bd7177af94fe92139887676f192fe95ca4c53dbJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2RiLmFuZC5uaWMuaW4vbWlzc2luZy9saXN0LmFzcHg&ntb=1
+            - img "全球 Web 图标" [ref=f2e301]
+            - generic [ref=f2e302]:
+              - generic [ref=f2e303]: and.nic.in
+              - generic [ref=f2e305]:
+                - generic [ref=f2e306]: http://db.and.nic.in › missing › list.aspx
+                - generic [ref=f2e307]: 翻译此结果
+          - heading [level=2] [ref=f2e308]:
+            - link "List - And" [ref=f2e309] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=9becd4439864fe0b20b22b529bd7177af94fe92139887676f192fe95ca4c53dbJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2RiLmFuZC5uaWMuaW4vbWlzc2luZy9saXN0LmFzcHg&ntb=1
+          - paragraph [ref=f2e311]: 1 天前 · List LIST OF MISSING PERSONS AS ON 29/09/2026
+        - listitem [ref=f2e312]:
+          - navigation "Apple Freeform mind map reddit \"wish\" OR \"missing\" OR \"frustrating\" 的更多搜索结果":
+            - list:
+              - listitem [ref=f2e313]:
+                - generic "第 1 页" [ref=f2e314]: "1"
+              - listitem [ref=f2e315]:
+                - link "第 2 页" [ref=f2e316] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+mind+map+reddit+%22wish%22+OR+%22missing%22+OR+%22frustrating%22&FPIG=2DC58C7B9D81430BB89705652EEA2460&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=f2e317]:
+                - link "第 3 页" [ref=f2e318] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+mind+map+reddit+%22wish%22+OR+%22missing%22+OR+%22frustrating%22&FPIG=2DC58C7B9D81430BB89705652EEA2460&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=f2e319]:
+                - link "下一页" [ref=f2e320] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+mind+map+reddit+%22wish%22+OR+%22missing%22+OR+%22frustrating%22&FPIG=2DC58C7B9D81430BB89705652EEA2460&first=11&FORM=PORE
+    - complementary "更多结果" [ref=f2e321]:
+      - list
+  - contentinfo [ref=f2e322]:
+    - generic [ref=f2e323]:
+      - list:
+        - listitem [ref=f2e324]:
+          - link "隐私" [ref=f2e325] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d660dfeed4c7740b4c04ebab64e8cff0d315208bd6440962533707a517911c01JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=f2e326]:
+          - link "条款" [ref=f2e327] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=962d8e0a64d73880b363a406cb28d0387916f70e99e4f804c717e77523f62567JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1

@@ -23,6 +23,7 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 
 | Skill | 何时使用 |
 |-------|----------|
+| `ymind-pm` | 需求探索 / 痛点分析 / 外部调研（Google·X·竞品）/ 找下一个 idea / 写 PRD 之前的思考。产出需求文档 + HTML 原型图，正式 PRD 交 bmad-prd |
 | `ymind-command` | 新增/修改改变树结构的命令（CommandBus + Undo） |
 | `ymind-codec-version` | 改 `.ymind` schema、节点字段、序列化/版本升迁 |
 | `ymind-layout-snapshot` | 扩展布局算法 / NodeFrame / EdgeGeometry / Render-Layout 接缝 |

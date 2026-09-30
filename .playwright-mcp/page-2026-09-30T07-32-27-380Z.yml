@@ -1,0 +1,251 @@
+- generic [active] [ref=f15e1]:
+  - banner [ref=f15e2]:
+    - button "跳至内容" [ref=f15e3] [cursor=pointer]
+    - button "辅助功能反馈" [ref=f15e6] [cursor=pointer]
+    - generic [ref=f15e9]:
+      - link [ref=f15e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "返回到必应搜索" [level=1] [ref=f15e11]
+      - search [ref=f15e12]:
+        - button "搜索" [ref=f15e15] [cursor=pointer]
+        - searchbox "在此处输入你的搜索 — 输入时会显示搜索建议" [ref=f15e16]: SimpleMind Mac separate purchase reddit
+        - generic [ref=f15e17] [cursor=pointer]
+        - button "使用图像搜索" [ref=f15e22] [cursor=pointer]
+    - complementary "帐户奖励和偏好设置" [ref=f15e24]:
+      - button "Microsoft Rewards" [ref=f15e25] [cursor=pointer]:
+        - generic [ref=f15e26]: Rewards
+      - link "登录" [ref=f15e42] [cursor=pointer]:
+        - /url: javascript:void(0)
+    - navigation "主菜单" [ref=f15e44]:
+      - list [ref=f15e45]:
+        - listitem [ref=f15e46]:
+          - link "全部" [ref=f15e47] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=f15e48]:
+          - link "搜索" [ref=f15e49] [cursor=pointer]:
+            - /url: /copilotsearch?q=SimpleMind+Mac+separate+purchase+reddit&FORM=CSSCOP
+        - listitem [ref=f15e52]:
+          - link "图片" [ref=f15e53] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=cefef99bcce90012f1c36674bda0830e72756226ec4083c6fbc6be306c0b4e5dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L2ltYWdlcy9zZWFyY2g_cT1TaW1wbGVNaW5kK01hYytzZXBhcmF0ZStwdXJjaGFzZStyZWRkaXQmRk9STT1IRFJTQzM&ntb=1
+        - listitem [ref=f15e54]:
+          - link "视频" [ref=f15e55] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=2a3ed6c1fdcdf5052de376ce027eb18ba763910415af204c3bcd57262f6a136bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1TaW1wbGVNaW5kK01hYytzZXBhcmF0ZStwdXJjaGFzZStyZWRkaXQmRk9STT1IRFJTQzQ&ntb=1
+        - listitem [ref=f15e56]:
+          - link "地图" [ref=f15e57] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=568d9cd647cba33e095895fc0f47ff71c0dd919a3452f4953ab4c8a7d08000cdJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L21hcHM_cT1TaW1wbGVNaW5kK01hYytzZXBhcmF0ZStwdXJjaGFzZStyZWRkaXQmRk9STT1IRFJTQzY&ntb=1
+        - listitem [ref=f15e58]:
+          - link "资讯" [ref=f15e59] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=a9a4f5a917155c97bd3549853e96503295199be6ae77bb1e420c0d965787e18fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L25ld3Mvc2VhcmNoP3E9U2ltcGxlTWluZCtNYWMrc2VwYXJhdGUrcHVyY2hhc2UrcmVkZGl0JkZPUk09SERSU0M3&ntb=1
+        - listitem [ref=f15e60]:
+          - button [ref=f15e61] [cursor=pointer]
+  - generic [ref=f15e65]:
+    - main "搜索结果" [ref=f15e66]:
+      - generic [ref=f15e68]:
+        - generic [aria-hidden] [ref=f15e69]:
+          - generic [ref=f15e70] [cursor=pointer]
+          - generic [ref=f15e72] [cursor=pointer]
+          - generic [ref=f15e75] [cursor=pointer]
+        - text: 约 809 个结果
+      - list [ref=f15e78]:
+        - listitem [ref=f15e79]:
+          - link "Reddit" [ref=f15e81] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=666f4e35d8adcdcf22fa7bfa4a22d2792e5c17d9a9c5e220ddcb0c1c4ac2fd29JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL3ZvOTFyci9xdWlja19xdWVzdGlvbi8&ntb=1
+            - generic [ref=f15e86]:
+              - generic [ref=f15e87]: Reddit
+              - generic [ref=f15e89]:
+                - generic [ref=f15e90]: https://www.reddit.com › mindmapping › comments › quick_question
+                - generic [ref=f15e91]: 翻译此结果
+          - heading [level=2] [ref=f15e92]:
+            - 'link "Quick Question : r/mindmapping - Reddit" [ref=f15e93] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=666f4e35d8adcdcf22fa7bfa4a22d2792e5c17d9a9c5e220ddcb0c1c4ac2fd29JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL3ZvOTFyci9xdWlja19xdWVzdGlvbi8&ntb=1
+          - paragraph [ref=f15e95]:
+            - text: "I'm a fan of SimpleMind: https://simplemind.eu/ It's quite usable on iPhone, and I run the Android version on my Chromebook. I didn't …"
+            - link "阅读更多" [ref=f15e96] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=666f4e35d8adcdcf22fa7bfa4a22d2792e5c17d9a9c5e220ddcb0c1c4ac2fd29JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL3ZvOTFyci9xdWlja19xdWVzdGlvbi8&ntb=1
+        - listitem [ref=f15e97]:
+          - link "SimpleMind" [ref=f15e99] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=f94f71b093f0762ca674e61fef521555512d62c3e4a946d541ceb60d0f02ee7cJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2Rvd25sb2FkL2Z1bGwtZWRpdGlvbi8&ntb=1
+            - generic [ref=f15e104]:
+              - generic [ref=f15e105]: SimpleMind
+              - generic [ref=f15e107]:
+                - generic [ref=f15e108]: https://simplemind.eu › download › full-edition
+                - generic [ref=f15e109]: 翻译此结果
+          - heading [level=2] [ref=f15e110]:
+            - link "Get SimpleMind Full edition" [ref=f15e111] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=f94f71b093f0762ca674e61fef521555512d62c3e4a946d541ceb60d0f02ee7cJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2Rvd25sb2FkL2Z1bGwtZWRpdGlvbi8&ntb=1
+          - paragraph [ref=f15e113]: Choose a Platform SimpleMind Pro for Mac requires MacOS 12.0 or later. SimpleMind Pro for Windows requires Windows 7 or later. …
+        - listitem [ref=f15e114]:
+          - link "SimpleMind" [ref=f15e116] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=65de9d6f078d0c7a7391501de4af75f9118330deec37a7609cd67dff8c296cd3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2ZhcV9ncm91cC9wdXJjaGFzZS1pbnN0YWxsLw&ntb=1
+            - generic [ref=f15e121]:
+              - generic [ref=f15e122]: SimpleMind
+              - generic [ref=f15e124]:
+                - generic [ref=f15e125]: https://simplemind.eu › faq_group › purchase-install
+                - generic [ref=f15e126]: 翻译此结果
+          - heading [level=2] [ref=f15e127]:
+            - link "Purchase & Reinstall - SimpleMind" [ref=f15e128] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=65de9d6f078d0c7a7391501de4af75f9118330deec37a7609cd67dff8c296cd3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2ZhcV9ncm91cC9wdXJjaGFzZS1pbnN0YWxsLw&ntb=1
+          - paragraph [ref=f15e130]: "SimpleMind Pro for Mac is available in two editions: the Direct Edition, sold via our website the AppStore Edition, sold by Apple’s App …"
+        - listitem [ref=f15e131]:
+          - link "稀土掘金" [ref=f15e133] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=38c0e4e56e6fd3048e85dcbe8a35d555448a9fc0d4486b139472f1886c9e959fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qdWVqaW4uY24vcG9zdC83MjIxMzIwNjg3NDMyNDgyODc3&ntb=1
+            - generic [ref=f15e138]:
+              - generic [ref=f15e139]: 稀土掘金
+              - generic [ref=f15e140]: https://juejin.cn › post
+          - heading [level=2] [ref=f15e143]:
+            - link "mac思维导图软件-Simplemind pro for Mac - 掘金" [ref=f15e144] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=38c0e4e56e6fd3048e85dcbe8a35d555448a9fc0d4486b139472f1886c9e959fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9qdWVqaW4uY24vcG9zdC83MjIxMzIwNjg3NDMyNDgyODc3&ntb=1
+          - paragraph [ref=f15e146]: 2023年4月13日 · mac思维导图软件Simplemind mac版可以单独移动某个节点,点击随便一个连线就能移动所有节点。 这款mac上的思 …
+        - listitem [ref=f15e147]:
+          - link "Reddit" [ref=f15e149] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=b166ada6561e98f35eefef37e6c5824a2bfba03e29eefd3ca6f8f900ecdb486cJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL3IzOW9hdS9zaW1wbGVtaW5kLw&ntb=1
+            - img "全球 Web 图标" [ref=f15e153]
+            - generic [ref=f15e154]:
+              - generic [ref=f15e155]: Reddit
+              - generic [ref=f15e157]:
+                - generic [ref=f15e158]: https://www.reddit.com › mindmapping › comments › simplemind
+                - generic [ref=f15e159]: 翻译此结果
+          - heading [level=2] [ref=f15e160]:
+            - 'link "Simplemind : r/mindmapping - Reddit" [ref=f15e161] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=b166ada6561e98f35eefef37e6c5824a2bfba03e29eefd3ca6f8f900ecdb486cJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL3IzOW9hdS9zaW1wbGVtaW5kLw&ntb=1
+          - paragraph [ref=f15e163]: Hi is anyone here using simplemind app for mind mapping? Am looking for any solutions to place the keyword in the centre of the …
+        - listitem [ref=f15e164]:
+          - link "Reddit" [ref=f15e166] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=195376177ae7c8ebb00971f6144dbdd42c051dff80e009ca8637d9a0cfba0d28JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL256anhlMi9jb25mdXNlZF9vdmVyX3NvZnR3YXJlLw&ntb=1
+            - generic [ref=f15e171]:
+              - generic [ref=f15e172]: Reddit
+              - generic [ref=f15e174]:
+                - generic [ref=f15e175]: https://www.reddit.com › mindmapping › comments › ...
+                - generic [ref=f15e176]: 翻译此结果
+          - heading [level=2] [ref=f15e177]:
+            - 'link "Confused over software : r/mindmapping - Reddit" [ref=f15e178] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=195376177ae7c8ebb00971f6144dbdd42c051dff80e009ca8637d9a0cfba0d28JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzL256anhlMi9jb25mdXNlZF9vdmVyX3NvZnR3YXJlLw&ntb=1
+          - paragraph [ref=f15e180]: Unfortunately, the only non-subscription mind map software I have found is free, open source software. And there are a lot of those …
+        - listitem [ref=f15e181]:
+          - link "CSDN博客" [ref=f15e183] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d5be0b301fe19d49a3fe331ebb7681b34affb14525f95bb86f962b11b53ac4c4JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2tlZXBpbmd1cHVwL2FydGljbGUvZGV0YWlscy8xNTQxNzU2NTU&ntb=1
+            - generic [ref=f15e188]:
+              - generic [ref=f15e189]: CSDN博客
+              - generic [ref=f15e190]: https://blog.csdn.net › keepingupup › article › details
+          - heading [level=2] [ref=f15e193]:
+            - link "【思维导图SimpleMind】轻量级思维导图软件推荐之SimpleMind Pro …" [ref=f15e194] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=d5be0b301fe19d49a3fe331ebb7681b34affb14525f95bb86f962b11b53ac4c4JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2tlZXBpbmd1cHVwL2FydGljbGUvZGV0YWlscy8xNTQxNzU2NTU&ntb=1
+          - paragraph [ref=f15e196]: 【思维导图SimpleMind】轻量级思维导图软件推荐之SimpleMind Pro保姆级图文安装指南！ 摘要： SimpleMind Pro 是一款轻量高效 …
+        - listitem [ref=f15e197]:
+          - link "Reddit" [ref=f15e199] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=21b2daa9fafaec82a6d69c4b34907696876b47b706e0733a550a69ad5329c12eJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lwYWQvY29tbWVudHMvbXI1a3JsL2xvb2tpbmdfZm9yX2Ffbm9uc3Vic2NyaXB0aW9uX21pbmRfbWFwX2FwcC8&ntb=1
+            - img "全球 Web 图标" [ref=f15e203]
+            - generic [ref=f15e204]:
+              - generic [ref=f15e205]: Reddit
+              - generic [ref=f15e207]:
+                - generic [ref=f15e208]: https://www.reddit.com › ipad › comments › ...
+                - generic [ref=f15e209]: 翻译此结果
+          - heading [level=2] [ref=f15e210]:
+            - 'link "Looking for: A Non-Subscription Mind Map app! : r/ipad - Reddit" [ref=f15e211] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=21b2daa9fafaec82a6d69c4b34907696876b47b706e0733a550a69ad5329c12eJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lwYWQvY29tbWVudHMvbXI1a3JsL2xvb2tpbmdfZm9yX2Ffbm9uc3Vic2NyaXB0aW9uX21pbmRfbWFwX2FwcC8&ntb=1
+          - paragraph [ref=f15e213]: SimpleMind Pro is US$9.99 on the iOS App Store. One time purchase that you can upgrade through the app. But SimpleMind Pro is …
+        - listitem [ref=f15e214]:
+          - link "SimpleMind" [ref=f15e216] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=b437a07a04a038380cd4b6b450ede200674595508762091ee724365d357232c9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2ZhcV9ncm91cC9wdXJjaGFzZS8&ntb=1
+            - generic [ref=f15e221]:
+              - generic [ref=f15e222]: SimpleMind
+              - generic [ref=f15e224]:
+                - generic [ref=f15e225]: https://simplemind.eu › faq_group › purchase
+                - generic [ref=f15e226]: 翻译此结果
+          - heading [level=2] [ref=f15e227]:
+            - link "Purchase - SimpleMind" [ref=f15e228] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=b437a07a04a038380cd4b6b450ede200674595508762091ee724365d357232c9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zaW1wbGVtaW5kLmV1L2ZhcV9ncm91cC9wdXJjaGFzZS8&ntb=1
+          - paragraph [ref=f15e230]: "SimpleMind Pro for Mac is available in two editions: the Direct Edition, sold via our website the AppStore Edition, sold by Apple’s App …"
+        - listitem [ref=f15e231]:
+          - link "Reddit" [ref=f15e233] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=a54fbc5782fefb746b9b5986c248dd51fd3bf909d7a096cbedeafec12c7da066JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21hY2FwcHMvY29tbWVudHMvdnZ5azVtL21pbmRtYXBfYXBwX2Zvcl9tYWNvc19hbmRfaW9zLw&ntb=1
+            - generic [ref=f15e238]:
+              - generic [ref=f15e239]: Reddit
+              - generic [ref=f15e241]:
+                - generic [ref=f15e242]: https://www.reddit.com › macapps › comments › ...
+                - generic [ref=f15e243]: 翻译此结果
+          - heading [level=2] [ref=f15e244]:
+            - 'link "Mindmap app for macOS and iOS : r/macapps - Reddit" [ref=f15e245] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=a54fbc5782fefb746b9b5986c248dd51fd3bf909d7a096cbedeafec12c7da066JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21hY2FwcHMvY29tbWVudHMvdnZ5azVtL21pbmRtYXBfYXBwX2Zvcl9tYWNvc19hbmRfaW9zLw&ntb=1
+          - paragraph [ref=f15e247]: SimpleMind (https://simplemind.eu) is a great mind mapping option without having to pay for an app for the rest of your life.
+        - listitem [ref=f15e248]:
+          - generic [ref=f15e250]:
+            - heading "其他用户还问了以下问题" [level=2] [ref=f15e251]
+            - list [ref=f15e255]:
+              - listitem [ref=f15e256]:
+                - heading [level=3] [ref=f15e257]:
+                  - button "Where can I download simplemind Pro for Mac?" [ref=f15e258] [cursor=pointer]
+              - listitem [ref=f15e260]:
+                - heading [level=3] [ref=f15e261]:
+                  - button "What OS do I need to use simplemind pro?" [ref=f15e262] [cursor=pointer]
+              - listitem [ref=f15e264]:
+                - heading [level=3] [ref=f15e265]:
+                  - button "How many versions of simplemind Pro are there?" [ref=f15e266] [cursor=pointer]
+              - listitem [ref=f15e268]:
+                - heading [level=3] [ref=f15e269]:
+                  - button "Where can I buy simplemind?" [ref=f15e270] [cursor=pointer]
+        - listitem [ref=f15e273]:
+          - generic [ref=f15e274]:
+            - heading [level=2] [ref=f15e275]:
+              - strong [ref=f15e276]: SimpleMind Mac separate purchase reddit
+              - text: 的相关搜索
+            - list [ref=f15e277]:
+              - listitem [ref=f15e278]:
+                - link [ref=f15e279] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=08dfd10605f1218c363f753385ad2684a58eaf9283257c63509ac84ce241a311JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPXNpbXBsZW1pbmQrcHJvK3BybytlZGl0aW9uJkZPUk09UVNSRTE&ntb=1
+                  - generic [ref=f15e281]:
+                    - text: simplemind
+                    - strong [ref=f15e282]: pro pro edition
+              - listitem [ref=f15e283]:
+                - link [ref=f15e284] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=5de4538e2800cf59e84a4c5f17cd3288264040404fd8c133944fdb971e16ce80JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPXNpbXBsZW1pbmQrcHJvK1dpbmRvd3MrMTAmRk9STT1RU1JFMg&ntb=1
+                  - generic [ref=f15e286]:
+                    - text: simplemind
+                    - strong [ref=f15e287]: pro Windows 10
+        - listitem [ref=f15e288]:
+          - link "某些结果已被删除" [ref=f15e290] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=11b3cc2cde7b3b694e3909433b43156c82527f0a9b8199a396679e06a1293121JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9NjE3MzUw&ntb=1
+        - listitem [ref=f15e291]:
+          - navigation "SimpleMind Mac separate purchase reddit 的更多搜索结果":
+            - list:
+              - listitem [ref=f15e292]:
+                - generic "第 1 页" [ref=f15e293]: "1"
+              - listitem [ref=f15e294]:
+                - link "第 2 页" [ref=f15e295] [cursor=pointer]:
+                  - /url: /search?q=SimpleMind+Mac+separate+purchase+reddit&FPIG=F33B998168F842E984D92210585AC2C2&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=f15e296]:
+                - link "第 3 页" [ref=f15e297] [cursor=pointer]:
+                  - /url: /search?q=SimpleMind+Mac+separate+purchase+reddit&FPIG=F33B998168F842E984D92210585AC2C2&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=f15e298]:
+                - link "下一页" [ref=f15e299] [cursor=pointer]:
+                  - /url: /search?q=SimpleMind+Mac+separate+purchase+reddit&FPIG=F33B998168F842E984D92210585AC2C2&first=11&FORM=PORE
+    - complementary "更多结果" [ref=f15e300]:
+      - list [ref=f15e301]:
+        - listitem [ref=f15e302]:
+          - generic "相关搜索" [ref=f15e303]:
+            - generic [ref=f15e305]:
+              - heading [level=2] [ref=f15e307]:
+                - strong [ref=f15e308]: SimpleMind Mac separate purchase reddit
+                - text: 的相关搜索
+              - generic [ref=f15e309]:
+                - link [ref=f15e311] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=afc1effae7bdb41b42a4db460e6203d17093af87fd5c96724b95faa0a6f5f749JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPXNpbXBsZW1pbmQrcHJvK3BybytlZGl0aW9uJkZPUk09UjVGRA&ntb=1
+                  - generic [ref=f15e313]:
+                    - text: simplemind
+                    - strong [ref=f15e314]: pro pro edition
+                - link [ref=f15e316] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=e2fa1461667ab83dcdf8a572dad7594903457a8a29b462d4fede764fa60eab30JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPXNpbXBsZW1pbmQrcHJvK1dpbmRvd3MrMTAmRk9STT1SNUZEMQ&ntb=1
+                  - generic [ref=f15e318]:
+                    - text: simplemind
+                    - strong [ref=f15e319]: pro Windows 10
+  - contentinfo [ref=f15e320]:
+    - generic [ref=f15e321]:
+      - list:
+        - listitem [ref=f15e322]:
+          - link "隐私" [ref=f15e323] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d660dfeed4c7740b4c04ebab64e8cff0d315208bd6440962533707a517911c01JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=f15e324]:
+          - link "条款" [ref=f15e325] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=962d8e0a64d73880b363a406cb28d0387916f70e99e4f804c717e77523f62567JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1

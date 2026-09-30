@@ -1,0 +1,64 @@
+- generic [ref=f18e1]:
+  - banner [ref=f18e2]:
+    - generic [ref=f18e3]: YMind 迁移闭环 · 交互线框 v0
+    - navigation [ref=f18e4]:
+      - generic [ref=f18e5] [cursor=pointer]: 导入
+      - generic [ref=f18e6] [cursor=pointer]: 导出 PDF
+      - generic [ref=f18e7] [cursor=pointer]: 崩溃恢复
+  - main [ref=f18e8]:
+    - img [ref=f18e10]:
+      - generic [ref=f18e188]: 2026-Q4 路线图
+      - generic [ref=f18e191]: 上架就绪
+      - generic [ref=f18e194]: 迁移闭环
+      - generic [ref=f18e197]: 沙盒/公证
+      - generic [ref=f18e200]: 产品页
+      - generic [ref=f18e203]: 导入 Markdown
+      - generic [ref=f18e206]: 导出 PDF
+      - generic [ref=f18e209]: 自动保存
+    - generic [ref=f18e129]:
+      - heading "导出 PDF" [level=2] [ref=f18e130]
+      - paragraph [ref=f18e131]: 交付即付费理由：PDF 是无水印的，含打印友好分页
+      - generic [ref=f18e132]:
+        - generic [ref=f18e133]: 范围
+        - generic [ref=f18e134]:
+          - generic [ref=f18e135]:
+            - radio "全部内容" [checked] [ref=f18e136]
+            - text: 全部内容
+          - generic [ref=f18e137]:
+            - radio "当前选中枝" [ref=f18e138]
+            - text: 当前选中枝
+      - generic [ref=f18e139]:
+        - generic [ref=f18e140]: 页面
+        - generic [ref=f18e141]:
+          - generic [ref=f18e142]:
+            - radio "横向 A4 · 按宽度分页" [checked] [ref=f18e143]
+            - text: 横向 A4 · 按宽度分页
+          - generic [ref=f18e144]:
+            - radio "缩放至单页" [ref=f18e145]
+            - text: 缩放至单页
+      - generic [ref=f18e146]:
+        - generic [ref=f18e147]: 文件名
+        - textbox [ref=f18e148]: 2026-Q4-路线图
+      - button "导出 PDF…" [active] [ref=f18e150] [cursor=pointer]
+      - paragraph [ref=f18e151]: 沿用 LayoutSnapshot 管线（与 PNG 导出同源），矢量文字、可打印。
+      - generic [ref=f18e152]:
+        - generic [ref=f18e153]: ✅ 已导出 3 页 · 无水印（XMind 免费版此处是付费墙+水印）
+        - generic [ref=f18e154]:
+          - generic [ref=f18e213]:
+            - img [ref=f18e214]:
+              - generic [ref=f18e216]: 路线图
+              - generic [ref=f18e218]: 上架
+              - generic [ref=f18e220]: 迁移
+              - generic [ref=f18e222]: 自动保存
+            - generic [ref=f18e223]: 第 1 页
+          - generic [ref=f18e224]:
+            - img [ref=f18e225]:
+              - generic [ref=f18e227]: 沙盒
+              - generic [ref=f18e229]: 产品页
+            - generic [ref=f18e230]: 第 2 页
+          - generic [ref=f18e231]:
+            - img [ref=f18e232]:
+              - generic [ref=f18e234]: 导入
+              - generic [ref=f18e236]: 导出 PDF
+            - generic [ref=f18e237]: 第 3 页
+      - generic [ref=f18e180]: 依据 FR-E1 / FR-E2 · 机会卡片 §4

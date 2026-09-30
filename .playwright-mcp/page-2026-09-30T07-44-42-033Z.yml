@@ -1,0 +1,30 @@
+- generic [active] [ref=f17e1]:
+  - banner [ref=f17e2]:
+    - generic [ref=f17e3]: YMind 迁移闭环 · 交互线框 v0
+    - navigation [ref=f17e4]:
+      - generic [ref=f17e5] [cursor=pointer]: 导入
+      - generic [ref=f17e6] [cursor=pointer]: 导出 PDF
+      - generic [ref=f17e7] [cursor=pointer]: 崩溃恢复
+  - main [ref=f17e8]:
+    - img [ref=f17e10]:
+      - generic [ref=f17e94]: 2026-Q4 路线图
+      - generic [ref=f17e97]: 上架就绪
+      - generic [ref=f17e100]: 迁移闭环
+      - generic [ref=f17e103]: 沙盒/公证
+      - generic [ref=f17e106]: 产品页
+      - generic [ref=f17e109]: 导入 Markdown
+      - generic [ref=f17e112]: 导出 PDF
+      - generic [ref=f17e115]: 自动保存
+    - generic [ref=f17e147]:
+      - heading "崩溃恢复" [level=2] [ref=f17e148]
+      - paragraph [ref=f17e149]: 自动保存兜底：崩溃不丢进度（竞品最痛投诉点）
+      - generic [ref=f17e150]:
+        - generic [ref=f17e151]: ⚠️
+        - generic [ref=f17e152]:
+          - generic [ref=f17e153]: 检测到上次未保存的更改
+          - generic [ref=f17e154]: 「2026-Q4-路线图.ymind」 · 最近自动保存 14:32 · 3 处修改未写盘（含「导出策略」节点）
+      - generic [ref=f17e155]:
+        - button "恢复更改" [ref=f17e156] [cursor=pointer]
+        - button "忽略（丢弃草稿）" [ref=f17e157] [cursor=pointer]
+      - paragraph [ref=f17e158]: 自动保存：脏后 2 秒防抖写临时副本（~/Library/.../Unsaved/）；正常保存后自动清除。
+      - generic [ref=f17e159]: 依据 FR-S1 / FR-S2 · 机会卡片 §4

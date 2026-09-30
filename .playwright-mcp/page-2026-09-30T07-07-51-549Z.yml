@@ -1,0 +1,220 @@
+- generic [ref=f1e3]:
+  - navigation [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - generic [ref=f1e8]:
+        - img "App Store" [ref=f1e9]
+        - button "App Store" [ref=f1e12] [cursor=pointer]: iPhone 专区
+      - generic [ref=f1e17]:
+        - generic: 搜索
+        - searchbox "搜索" [ref=f1e18]
+    - generic [ref=f1e20]:
+      - list [ref=f1e22]:
+        - listitem [ref=f1e23]:
+          - button "Today" [ref=f1e24] [cursor=pointer]
+        - listitem [ref=f1e28]:
+          - button "游戏" [ref=f1e29] [cursor=pointer]
+        - listitem [ref=f1e33]:
+          - button "App" [ref=f1e34] [cursor=pointer]
+      - generic:
+        - list
+  - generic [ref=f1e38]:
+    - main [ref=f1e39]:
+      - generic [ref=f1e40]:
+        - heading [level=1] [ref=f1e41]:
+          - 'link "Xmind: AI 思维导图、头脑风暴" [ref=f1e42] [cursor=pointer]':
+            - /url: https://apps.apple.com/cn/app/xmind-ai-%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE-%E5%A4%B4%E8%84%91%E9%A3%8E%E6%9A%B4/id1286983622
+        - region "评分及评论" [ref=f1e43]:
+          - heading "评分及评论" [level=2] [ref=f1e46]
+          - list [ref=f1e47]:
+            - listitem [ref=f1e48]:
+              - generic [ref=f1e50]:
+                - generic [ref=f1e51]:
+                  - generic [ref=f1e52]: "4.8"
+                  - generic [ref=f1e53]: 满分 5 分
+                - generic [ref=f1e54]:
+                  - generic [ref=f1e55]: 21万 个评分
+                  - generic [ref=f1e56]:
+                    - generic "**ASE.Shared.Ratings.Review.StarsAria.one.other**" [ref=f1e57]
+                    - generic "**ASE.Shared.Ratings.Review.StarsAria.one.other**" [ref=f1e66]
+                    - generic "**ASE.Shared.Ratings.Review.StarsAria.one.other**" [ref=f1e74]
+                    - generic "**ASE.Shared.Ratings.Review.StarsAria.one.other**" [ref=f1e81]
+                    - generic "**ASE.Shared.Ratings.Review.StarsAria.other.other**" [ref=f1e87]
+        - list [ref=f1e93]:
+          - listitem [ref=f1e94]:
+            - generic [ref=f1e95]:
+              - generic [ref=f1e96]:
+                - generic [ref=f1e97]:
+                  - heading "我重新回来了，必须五星好评" [level=3] [ref=f1e100]
+                  - list "5 星" [ref=f1e102]:
+                    - listitem [ref=f1e103]
+                    - listitem [ref=f1e104]
+                    - listitem [ref=f1e105]
+                    - listitem [ref=f1e106]
+                    - listitem [ref=f1e107]
+                - generic [ref=f1e108]:
+                  - time [ref=f1e109]: 2020/03/09
+                  - generic [ref=f1e110]: 厉害大哥大啊66
+              - generic [ref=f1e113]:
+                - paragraph [ref=f1e114]: 在半年前我开始使用这个软件，但由于网络问题导致同步过程中出现了问题在尝试了多种方法都失败后，就没再管他，直到前几天我重新想消灭这个问题。于是向开发者发了一封求助邮件，借助回复解决了问题。没出问题之前就很喜欢这个软件吗，现在更是支持，我算是个新手，这个软件的好多功能多很棒在等着我去开发。另外考研加油
+                - button "更多" [ref=f1e115] [cursor=pointer]
+          - listitem [ref=f1e116]:
+            - generic [ref=f1e117]:
+              - generic [ref=f1e118]:
+                - generic [ref=f1e119]:
+                  - heading "挺好用" [level=3] [ref=f1e122]
+                  - list "5 星" [ref=f1e124]:
+                    - listitem [ref=f1e125]
+                    - listitem [ref=f1e126]
+                    - listitem [ref=f1e127]
+                    - listitem [ref=f1e128]
+                    - listitem [ref=f1e129]
+                - generic [ref=f1e130]:
+                  - time [ref=f1e131]: 2019/06/23
+                  - generic [ref=f1e132]: 小小不言27
+              - paragraph [ref=f1e136]: 这款思维导图应该是市面上最好用的之一，但是还是有几个缺点：一建议可以在界面里面设置文件夹，做的导图比较多的话查找编辑比较麻烦；二是主标题副标题之类的的调整可以更加灵活，字体大小背景颜色可以设置成和次级标题一样的，要不然太占地方了
+          - listitem [ref=f1e137]:
+            - generic [ref=f1e138]:
+              - generic [ref=f1e139]:
+                - generic [ref=f1e140]:
+                  - heading "好用，推荐，仍可继续完善～" [level=3] [ref=f1e143]
+                  - list "5 星" [ref=f1e145]:
+                    - listitem [ref=f1e146]
+                    - listitem [ref=f1e147]
+                    - listitem [ref=f1e148]
+                    - listitem [ref=f1e149]
+                    - listitem [ref=f1e150]
+                - generic [ref=f1e151]:
+                  - time [ref=f1e152]: 2020/04/01
+                  - generic [ref=f1e153]: Mrs.Monking
+              - generic [ref=f1e156]:
+                - paragraph [ref=f1e157]: 很好用，之前考研复习的时候就喜欢用这种形式来概括内容，但是经常受纸张篇幅限制。现在用手机也可以弄这个，比纸张更加方便。但是功能上我觉得还可以再加一些功能项目，比如说一个框框里面部分文字可以突出或设置颜色，一个导图里面的某个哐哐，可以增加一个超链接，链接到另外一个思维导图。过了一段时间没用以后，发现以前做的导图全都不见了！
+                - button "更多" [ref=f1e158] [cursor=pointer]
+          - listitem [ref=f1e159]:
+            - generic [ref=f1e160]:
+              - generic [ref=f1e161]:
+                - generic [ref=f1e162]:
+                  - heading "整体很满意免费的功能就够用了" [level=3] [ref=f1e165]
+                  - list "5 星" [ref=f1e167]:
+                    - listitem [ref=f1e168]
+                    - listitem [ref=f1e169]
+                    - listitem [ref=f1e170]
+                    - listitem [ref=f1e171]
+                    - listitem [ref=f1e172]
+                - generic [ref=f1e173]:
+                  - time [ref=f1e174]: 2019/09/05
+                  - generic [ref=f1e175]: 霜霜子酱
+              - paragraph [ref=f1e179]: 但是有一个问题呀，不知道是不是我设备的问题。每次导出分享的时候，刚打开微信还没划两下分享就取消了，又到重新来。有些人他不在列表的上面我就是要翻一下才能找到呀，每次都得拼手速，分享时除非他在最上面，不然肯定要分享个三四次才能顺利分享过去。很麻烦呐！求改进！
+          - listitem [ref=f1e180]:
+            - generic [ref=f1e181]:
+              - generic [ref=f1e182]:
+                - generic [ref=f1e183]:
+                  - heading "很好用，得心应手，如果再有一点改进就更好了" [level=3] [ref=f1e186]
+                  - list "5 星" [ref=f1e188]:
+                    - listitem [ref=f1e189]
+                    - listitem [ref=f1e190]
+                    - listitem [ref=f1e191]
+                    - listitem [ref=f1e192]
+                    - listitem [ref=f1e193]
+                - generic [ref=f1e194]:
+                  - time [ref=f1e195]: 2021/02/01
+                  - generic [ref=f1e196]: O哦哦LMML来了W我
+              - generic [ref=f1e199]:
+                - paragraph [ref=f1e200]: ①迫切希望增加在同一段文字里可以选择编缉任一部分文字的颜色等，比如为人民服务是我们党的根本宗旨，这句话中我想把为＂人民服务＂这几个字标为红色把＂根本宗旨＂这几个字标为绿色而现在这个版本没有这个功能用起来就会不太方便；这是我复制的另一位朋友的评论，我有同样的困扰，希望程序员师傅可以看到！！谢谢你们！！
+                - button "更多" [ref=f1e201] [cursor=pointer]
+          - listitem [ref=f1e202]:
+            - generic [ref=f1e203]:
+              - generic [ref=f1e204]:
+                - generic [ref=f1e205]:
+                  - heading "老用户了" [level=3] [ref=f1e208]
+                  - list "5 星" [ref=f1e210]:
+                    - listitem [ref=f1e211]
+                    - listitem [ref=f1e212]
+                    - listitem [ref=f1e213]
+                    - listitem [ref=f1e214]
+                    - listitem [ref=f1e215]
+                - generic [ref=f1e216]:
+                  - time [ref=f1e217]: 2020/06/22
+                  - generic [ref=f1e218]: maoerke
+              - generic [ref=f1e221]:
+                - paragraph [ref=f1e222]: 以前用过pc版就很喜欢，全解锁的功能很强大，需要做统筹工作的大家完全可以试试。目前用移动端的免费模式，目前还够用，不过觉得随着需求增加会需要买付费版，不过软件说明里并看不到付费版的其他功能，不知和pc版一不一样，所以之后需要的话在网上自己了解下吧。这个软件用来做笔记，写会议记录都很方便，学习工作都能兼顾，笔芯。
+                - button "更多" [ref=f1e223] [cursor=pointer]
+          - listitem [ref=f1e224]:
+            - generic [ref=f1e225]:
+              - generic [ref=f1e226]:
+                - generic [ref=f1e227]:
+                  - heading "如果有这个功能就好了" [level=3] [ref=f1e230]
+                  - list "5 星" [ref=f1e232]:
+                    - listitem [ref=f1e233]
+                    - listitem [ref=f1e234]
+                    - listitem [ref=f1e235]
+                    - listitem [ref=f1e236]
+                    - listitem [ref=f1e237]
+                - generic [ref=f1e238]:
+                  - time [ref=f1e239]: 2020/05/23
+                  - generic [ref=f1e240]: 布丁奶茶多加糖
+              - paragraph [ref=f1e244]: 准备考试的时候想背诵导图，突然想到如果可以有个--一次性空白化某个标签下所有的分支主题就好了。就像单词书上附带的红膜自测一样，一盖上红膜，所有红色的单词就都隐藏了最后就说一下我一直没有付费的原因吧，到目前为止免费的功能基本够用，而且付费与免费使用感觉没什么差别
+          - listitem [ref=f1e245]:
+            - generic [ref=f1e246]:
+              - generic [ref=f1e247]:
+                - generic [ref=f1e248]:
+                  - heading "建议" [level=3] [ref=f1e251]
+                  - list "5 星" [ref=f1e253]:
+                    - listitem [ref=f1e254]
+                    - listitem [ref=f1e255]
+                    - listitem [ref=f1e256]
+                    - listitem [ref=f1e257]
+                    - listitem [ref=f1e258]
+                - generic [ref=f1e259]:
+                  - time [ref=f1e260]: 2019/10/24
+                  - generic [ref=f1e261]: 飞天小女警娜娜
+              - paragraph [ref=f1e265]: 之前嫌这个软件功能太繁杂没有用，后来发现这就是优势啊！！！目前已经成为最爱的导图软件了。但是用下来还有一些小缺点：1不能给分支上单独的字词加重点，希望可以增加选中关键词更改大小颜色或加底色的功能。2希望可以像插入自由主题一样插入表格，有时候一些需要横向比较的东西有表格会更清晰。以上。
+          - listitem [ref=f1e266]:
+            - generic [ref=f1e267]:
+              - generic [ref=f1e268]:
+                - generic [ref=f1e269]:
+                  - heading "有待改进" [level=3] [ref=f1e272]
+                  - list "5 星" [ref=f1e274]:
+                    - listitem [ref=f1e275]
+                    - listitem [ref=f1e276]
+                    - listitem [ref=f1e277]
+                    - listitem [ref=f1e278]
+                    - listitem [ref=f1e279]
+                - generic [ref=f1e280]:
+                  - time [ref=f1e281]: 2020/02/01
+                  - generic [ref=f1e282]: 猪猪是傻瓜
+              - paragraph [ref=f1e286]: 有的导图画着画着就觉得需要更高级的功能才能表达清楚。另外如果桌面端和移动端可以共享文件或者提供云服务就会方便很多了
+          - listitem [ref=f1e287]:
+            - generic [ref=f1e288]:
+              - generic [ref=f1e289]:
+                - generic [ref=f1e290]:
+                  - heading "很棒！" [level=3] [ref=f1e293]
+                  - list "5 星" [ref=f1e295]:
+                    - listitem [ref=f1e296]
+                    - listitem [ref=f1e297]
+                    - listitem [ref=f1e298]
+                    - listitem [ref=f1e299]
+                    - listitem [ref=f1e300]
+                - generic [ref=f1e301]:
+                  - time [ref=f1e302]: 2019/11/03
+                  - generic [ref=f1e303]: 㲈之㷊
+              - paragraph [ref=f1e307]: 只是需要付费，对于学生来说有点肉疼。整体功能，界面都非常有效优秀。值得使用，推荐！容易上手，你看到了基本就明白它是怎么用的啦。对于制作一些复习规划，思维导图是很有用的，就是对电子产品的依赖程度高，不太好作为框架打印下来自己填写，需要全程使用电子产品编辑，调整。
+    - generic [ref=f1e310]:
+      - paragraph [ref=f1e311]:
+        - generic [ref=f1e312]:
+          - text: Copyright © 2026
+          - link "Apple Inc." [ref=f1e313] [cursor=pointer]:
+            - /url: https://www.apple.com.cn
+        - text: 保留所有权利。
+      - list [ref=f1e314]:
+        - listitem [ref=f1e315]:
+          - link "互联网服务条款" [ref=f1e316] [cursor=pointer]:
+            - /url: https://www.apple.com.cn/legal/internet-services/
+        - listitem [ref=f1e317]:
+          - link "App Store 与隐私" [ref=f1e318] [cursor=pointer]:
+            - /url: https://www.apple.com/legal/privacy/data/zh-cn/app-store/
+        - listitem [ref=f1e319]:
+          - link "Cookie 警告" [ref=f1e320] [cursor=pointer]:
+            - /url: https://www.apple.com/legal/privacy/szh/cookies/
+        - listitem [ref=f1e321]:
+          - link "支持" [ref=f1e322] [cursor=pointer]:
+            - /url: https://support.apple.com/zh-cn/billing

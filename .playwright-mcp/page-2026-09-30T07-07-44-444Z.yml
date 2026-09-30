@@ -1,0 +1,1018 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img "App Store" [ref=e9]
+        - button "App Store" [ref=e12] [cursor=pointer]: iPhone 专区
+      - generic [ref=e17]:
+        - generic: 搜索
+        - searchbox "搜索" [ref=e18]
+    - generic [ref=e20]:
+      - list [ref=e22]:
+        - listitem [ref=e23]:
+          - button "Today" [pressed] [ref=e24] [cursor=pointer]
+        - listitem [ref=e28]:
+          - button "游戏" [ref=e29] [cursor=pointer]
+        - listitem [ref=e33]:
+          - button "App" [ref=e34] [cursor=pointer]
+      - generic [ref=e38]:
+        - generic [ref=e40]: 类别
+        - list "类别" [ref=e41]:
+          - listitem [ref=e42]:
+            - button "类别" [ref=e43] [cursor=pointer]
+          - listitem [ref=e48]:
+            - button "摄影与录像" [ref=e49] [cursor=pointer]
+          - listitem [ref=e54]:
+            - button "健康健美" [ref=e55] [cursor=pointer]
+          - listitem [ref=e60]:
+            - button "效率" [ref=e61] [cursor=pointer]
+          - listitem [ref=e66]:
+            - button "娱乐" [ref=e67] [cursor=pointer]
+          - listitem [ref=e72]:
+            - button "动作" [ref=e73] [cursor=pointer]
+          - listitem [ref=e78]:
+            - button "冒险" [ref=e79] [cursor=pointer]
+          - listitem [ref=e84]:
+            - button "益智解谜" [ref=e85] [cursor=pointer]
+          - listitem [ref=e90]:
+            - button "独立" [ref=e91] [cursor=pointer]
+      - generic:
+        - list
+  - generic [ref=e96]:
+    - main [ref=e97]:
+      - generic [ref=e98]:
+        - heading "Today" [level=1] [ref=e99]
+        - generic [ref=e102]:
+          - generic "一起玩双人成局，暗影成双《新世界：暗影成双》：双人互动，联机成局新世界：暗影成双两个人一起玩的电影，多玩法、多结局，8小时沉浸式扮演，超新奇" [ref=e104]:
+            - generic [ref=e110]:
+              - link "双人成局，暗影成双" [ref=e111] [cursor=pointer]:
+                - /url: https://apps.apple.com/cn/iphone/story/id6808101130
+                - generic [ref=e114]:
+                  - paragraph [ref=e115]:
+                    - generic [ref=e116]: 一起玩
+                  - generic [ref=e117]: 双人成局，暗影成双
+                  - paragraph [ref=e120]: 《新世界：暗影成双》：双人互动，联机成局
+              - link "查看 新世界：暗影成双 两个人一起玩的电影，多玩法、多结局，8小时沉浸式扮演，超新奇" [ref=e125] [cursor=pointer]:
+                - /url: https://apps.apple.com/cn/app/%E6%96%B0%E4%B8%96%E7%95%8C-%E6%9A%97%E5%BD%B1%E6%88%90%E5%8F%8C/id6775828757
+                - generic [ref=e126]: 查看
+                - generic [ref=e132]:
+                  - generic [ref=e133]: 新世界：暗影成双
+                  - generic [ref=e135]: 两个人一起玩的电影，多玩法、多结局，8小时沉浸式扮演，超新奇
+          - generic "重磅更新往冥府的安魂歌全新版本开启，周年庆即将到来原神-6周年米哈游开放世界冒险RPG" [ref=e138]:
+            - time [ref=e140]: 现已推出
+            - generic [ref=e147]:
+              - link "往冥府的安魂歌" [ref=e148] [cursor=pointer]:
+                - /url: https://apps.apple.com/cn/iphone/story/id6805781947
+                - generic [ref=e150]:
+                  - paragraph [ref=e151]:
+                    - generic [ref=e152]: 重磅更新
+                  - generic [ref=e153]: 往冥府的安魂歌
+                  - paragraph [ref=e156]: 全新版本开启，周年庆即将到来
+              - link "查看 原神-6周年 米哈游开放世界冒险RPG" [ref=e161] [cursor=pointer]:
+                - /url: https://apps.apple.com/cn/app/%E5%8E%9F%E7%A5%9E-6%E5%91%A8%E5%B9%B4/id1467190251
+                - generic [ref=e162]: 查看
+                - generic [ref=e168]:
+                  - generic [ref=e169]: 原神-6周年
+                  - generic [ref=e171]: 米哈游开放世界冒险RPG
+        - region "瞩目 App 与游戏" [ref=e173]:
+          - heading "瞩目 App 与游戏" [level=2] [ref=e176]
+          - generic [ref=e178]:
+            - generic "编辑呈现佳节热门游戏" [ref=e180]:
+              - generic [ref=e184]:
+                - paragraph [ref=e185]:
+                  - generic [ref=e186]: 编辑呈现
+                - link "佳节热门游戏" [ref=e188] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1536067926
+              - list [ref=e190]:
+                - listitem [ref=e191]:
+                  - link "查看 王者荣耀 S45赛季 月照长安" [ref=e193] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80/id989673964
+                    - generic [ref=e194]: 查看
+                    - generic [ref=e200]:
+                      - generic [ref=e201]: 王者荣耀
+                      - generic [ref=e203]: S45赛季 月照长安
+                - listitem [ref=e205]:
+                  - link "查看 无畏契约：源能行动 全新潮流英雄射击手游力作" [ref=e207] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%97%A0%E7%95%8F%E5%A5%91%E7%BA%A6-%E6%BA%90%E8%83%BD%E8%A1%8C%E5%8A%A8/id6535673811
+                    - generic [ref=e208]: 查看
+                    - generic [ref=e214]:
+                      - generic [ref=e215]: 无畏契约：源能行动
+                      - generic [ref=e217]: 全新潮流英雄射击手游力作
+                - listitem [ref=e219]:
+                  - link "查看 和平精英 金秋激战，吃鸡结伴！" [ref=e221] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%92%8C%E5%B9%B3%E7%B2%BE%E8%8B%B1/id1321803705
+                    - generic [ref=e222]: 查看
+                    - generic [ref=e228]:
+                      - generic [ref=e229]: 和平精英
+                      - generic [ref=e231]: 金秋激战，吃鸡结伴！
+                - listitem [ref=e233]:
+                  - link "查看 英雄联盟手游 聚光时刻 S23赛季" [ref=e235] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%8B%B1%E9%9B%84%E8%81%94%E7%9B%9F%E6%89%8B%E6%B8%B8/id1455054000
+                    - generic [ref=e236]: 查看
+                    - generic [ref=e242]:
+                      - generic [ref=e243]: 英雄联盟手游
+                      - generic [ref=e245]: 聚光时刻 S23赛季
+                - listitem [ref=e247]:
+                  - link "查看 王者万象棋 《王者荣耀》英雄策略对战新游" [ref=e249] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%8E%8B%E8%80%85%E4%B8%87%E8%B1%A1%E6%A3%8B/id1614798032
+                    - generic [ref=e250]: 查看
+                    - generic [ref=e256]:
+                      - generic [ref=e257]: 王者万象棋
+                      - generic [ref=e259]: 《王者荣耀》英雄策略对战新游
+                - listitem [ref=e261]:
+                  - link "查看 三角洲行动 新一代战术射击品质标杆" [ref=e263] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E4%B8%89%E8%A7%92%E6%B4%B2%E8%A1%8C%E5%8A%A8/id1642894547
+                    - generic [ref=e264]: 查看
+                    - generic [ref=e270]:
+                      - generic [ref=e271]: 三角洲行动
+                      - generic [ref=e273]: 新一代战术射击品质标杆
+                - listitem [ref=e275]:
+                  - link "查看 蛋仔派对-小猪佩奇联动 十一上线即暴富，登录送你一栋楼！" [ref=e277] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%9B%8B%E4%BB%94%E6%B4%BE%E5%AF%B9-%E5%B0%8F%E7%8C%AA%E4%BD%A9%E5%A5%87%E8%81%94%E5%8A%A8/id1544884479
+                    - generic [ref=e278]: 查看
+                    - generic [ref=e284]:
+                      - generic [ref=e285]: 蛋仔派对-小猪佩奇联动
+                      - generic [ref=e287]: 十一上线即暴富，登录送你一栋楼！
+                - listitem [ref=e289]:
+                  - link "查看 原神-6周年 米哈游开放世界冒险RPG" [ref=e291] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%8E%9F%E7%A5%9E-6%E5%91%A8%E5%B9%B4/id1467190251
+                    - generic [ref=e292]: 查看
+                    - generic [ref=e298]:
+                      - generic [ref=e299]: 原神-6周年
+                      - generic [ref=e301]: 米哈游开放世界冒险RPG
+                - listitem [ref=e303]:
+                  - link "查看 光·遇 光遇，光是遇见就很美好" [ref=e305] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%85%89-%E9%81%87/id1344733855
+                    - generic [ref=e306]: 查看
+                    - generic [ref=e312]:
+                      - generic [ref=e313]: 光·遇
+                      - generic [ref=e315]: 光遇，光是遇见就很美好
+                - listitem [ref=e317]:
+                  - link "查看 金铲铲之战 英雄联盟云顶之弈正版授权手游" [ref=e319] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E9%87%91%E9%93%B2%E9%93%B2%E4%B9%8B%E6%88%98/id1478101301
+                    - generic [ref=e320]: 查看
+                    - generic [ref=e326]:
+                      - generic [ref=e327]: 金铲铲之战
+                      - generic [ref=e329]: 英雄联盟云顶之弈正版授权手游
+                - listitem [ref=e331]:
+                  - link "查看 开心消消乐 长盛不衰，8亿人都在玩" [ref=e333] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BC%80%E5%BF%83%E6%B6%88%E6%B6%88%E4%B9%90/id791532221
+                    - generic [ref=e334]: 查看
+                    - generic [ref=e340]:
+                      - generic [ref=e341]: 开心消消乐
+                      - generic [ref=e343]: 长盛不衰，8亿人都在玩
+                - listitem [ref=e345]:
+                  - link "查看 我的世界：移动版 铜器时代，玩个铜块" [ref=e347] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C-%E7%A7%BB%E5%8A%A8%E7%89%88/id1243986797
+                    - generic [ref=e348]: 查看
+                    - generic [ref=e354]:
+                      - generic [ref=e355]: 我的世界：移动版
+                      - generic [ref=e357]: 铜器时代，玩个铜块
+                - listitem [ref=e359]:
+                  - link "查看 实况足球 真·公平竞技拟真足球手游" [ref=e361] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%AE%9E%E5%86%B5%E8%B6%B3%E7%90%83/id1347776121
+                    - generic [ref=e362]: 查看
+                    - generic [ref=e368]:
+                      - generic [ref=e369]: 实况足球
+                      - generic [ref=e371]: 真·公平竞技拟真足球手游
+                - listitem [ref=e373]:
+                  - link "查看 火影忍者 人气竞技动作手游" [ref=e375] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%81%AB%E5%BD%B1%E5%BF%8D%E8%80%85/id955396648
+                    - generic [ref=e376]: 查看
+                    - generic [ref=e382]:
+                      - generic [ref=e383]: 火影忍者
+                      - generic [ref=e385]: 人气竞技动作手游
+                - listitem [ref=e387]:
+                  - link "查看 伊莫 多人在线大世界捉宠RPG" [ref=e389] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E4%BC%8A%E8%8E%AB/id6768584375
+                    - generic [ref=e390]: 查看
+                    - generic [ref=e396]:
+                      - generic [ref=e397]: 伊莫
+                      - generic [ref=e399]: 多人在线大世界捉宠RPG
+                - listitem [ref=e401]:
+                  - link "查看 迷你世界 国风建筑方块全新亮相" [ref=e403] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%BF%B7%E4%BD%A0%E4%B8%96%E7%95%8C/id1170455562
+                    - generic [ref=e404]: 查看
+                    - generic [ref=e410]:
+                      - generic [ref=e411]: 迷你世界
+                      - generic [ref=e413]: 国风建筑方块全新亮相
+                - listitem [ref=e415]:
+                  - link "查看 弹壳战机！ 单手起飞，爽快割草！" [ref=e417] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BC%B9%E5%A3%B3%E6%88%98%E6%9C%BA/id6789496517
+                    - generic [ref=e418]: 查看
+                    - generic [ref=e424]:
+                      - generic [ref=e425]: 弹壳战机！
+                      - generic [ref=e427]: 单手起飞，爽快割草！
+                - listitem [ref=e429]:
+                  - link "查看 重返未来：1999-巡游庆典 20世纪复古神秘学策略RPG" [ref=e431] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E9%87%8D%E8%BF%94%E6%9C%AA%E6%9D%A5-1999-%E5%B7%A1%E6%B8%B8%E5%BA%86%E5%85%B8/id1611712418
+                    - generic [ref=e432]: 查看
+                    - generic [ref=e438]:
+                      - generic [ref=e439]: 重返未来：1999-巡游庆典
+                      - generic [ref=e441]: 20世纪复古神秘学策略RPG
+                - listitem [ref=e443]:
+                  - link "查看 超自然行动组-登录送高泰明 史上最欢乐的组队恐怖游戏" [ref=e445] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%B6%85%E8%87%AA%E7%84%B6%E8%A1%8C%E5%8A%A8%E7%BB%84-%E7%99%BB%E5%BD%95%E9%80%81%E9%AB%98%E6%B3%B0%E6%98%8E/id6544797261
+                    - generic [ref=e446]: 查看
+                    - generic [ref=e452]:
+                      - generic [ref=e453]: 超自然行动组-登录送高泰明
+                      - generic [ref=e455]: 史上最欢乐的组队恐怖游戏
+                - listitem [ref=e457]:
+                  - link "查看 穿越火线-枪战王者 鬼吹灯联动龙岭寻宝版本上线" [ref=e459] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%A9%BF%E8%B6%8A%E7%81%AB%E7%BA%BF-%E6%9E%AA%E6%88%98%E7%8E%8B%E8%80%85/id1042545880
+                    - generic [ref=e460]: 查看
+                    - generic [ref=e466]:
+                      - generic [ref=e467]: 穿越火线-枪战王者
+                      - generic [ref=e469]: 鬼吹灯联动龙岭寻宝版本上线
+            - generic "编辑呈现国庆黄金周热门 App" [ref=e472]:
+              - generic [ref=e476]:
+                - paragraph [ref=e477]:
+                  - generic [ref=e478]: 编辑呈现
+                - link "国庆黄金周热门 App" [ref=e480] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1556592468
+              - list [ref=e482]:
+                - listitem [ref=e483]:
+                  - link "查看 抖音 记录美好生活" [ref=e485] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3/id1142110895
+                    - generic [ref=e486]: 查看
+                    - generic [ref=e492]:
+                      - generic [ref=e493]: 抖音
+                      - generic [ref=e495]: 记录美好生活
+                - listitem [ref=e497]:
+                  - link "查看 豆包 - 生活工作 AI 助手 生活问答、工作任务、创意设计" [ref=e499] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%B1%86%E5%8C%85-%E7%94%9F%E6%B4%BB%E5%B7%A5%E4%BD%9C-ai-%E5%8A%A9%E6%89%8B/id6459478672
+                    - generic [ref=e500]: 查看
+                    - generic [ref=e506]:
+                      - generic [ref=e507]: 豆包 - 生活工作 AI 助手
+                      - generic [ref=e509]: 生活问答、工作任务、创意设计
+                - listitem [ref=e511]:
+                  - link "查看 QQ 社交" [ref=e513] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/qq/id444934666
+                    - generic [ref=e514]: 查看
+                    - generic [ref=e520]:
+                      - generic [ref=e521]: QQ
+                      - generic [ref=e523]: 社交
+                - listitem [ref=e525]:
+                  - link "查看 微信 社交" [ref=e527] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BE%AE%E4%BF%A1/id414478124
+                    - generic [ref=e528]: 查看
+                    - generic [ref=e534]:
+                      - generic [ref=e535]: 微信
+                      - generic [ref=e537]: 社交
+                - listitem [ref=e539]:
+                  - link "查看 小红书 - 你的生活兴趣社区 3亿人的生活兴趣爱好聚集地" [ref=e541] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%B0%8F%E7%BA%A2%E4%B9%A6-%E4%BD%A0%E7%9A%84%E7%94%9F%E6%B4%BB%E5%85%B4%E8%B6%A3%E7%A4%BE%E5%8C%BA/id741292507
+                    - generic [ref=e542]: 查看
+                    - generic [ref=e548]:
+                      - generic [ref=e549]: 小红书 - 你的生活兴趣社区
+                      - generic [ref=e551]: 3亿人的生活兴趣爱好聚集地
+                - listitem [ref=e553]:
+                  - link "查看 Soul-年轻人的社交元宇宙 灵魂有趣 自在相遇" [ref=e555] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/soul-%E5%B9%B4%E8%BD%BB%E4%BA%BA%E7%9A%84%E7%A4%BE%E4%BA%A4%E5%85%83%E5%AE%87%E5%AE%99/id1032287195
+                    - generic [ref=e556]: 查看
+                    - generic [ref=e562]:
+                      - generic [ref=e563]: Soul-年轻人的社交元宇宙
+                      - generic [ref=e565]: 灵魂有趣 自在相遇
+                - listitem [ref=e567]:
+                  - link "查看 高德地图-高德打车,导航公交地铁出行 低价预订酒店门票,吃住游用高德" [ref=e569] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BE-%E9%AB%98%E5%BE%B7%E6%89%93%E8%BD%A6-%E5%AF%BC%E8%88%AA%E5%85%AC%E4%BA%A4%E5%9C%B0%E9%93%81%E5%87%BA%E8%A1%8C/id461703208
+                    - generic [ref=e570]: 查看
+                    - generic [ref=e576]:
+                      - generic [ref=e577]: 高德地图-高德打车,导航公交地铁出行
+                      - generic [ref=e579]: 低价预订酒店门票,吃住游用高德
+                - listitem [ref=e581]:
+                  - link "查看 快手 拥抱每一种生活" [ref=e583] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BF%AB%E6%89%8B/id440948110
+                    - generic [ref=e584]: 查看
+                    - generic [ref=e590]:
+                      - generic [ref=e591]: 快手
+                      - generic [ref=e593]: 拥抱每一种生活
+                - listitem [ref=e595]:
+                  - link "查看 支付宝-你的AI生活伙伴 生活" [ref=e597] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%94%AF%E4%BB%98%E5%AE%9D-%E4%BD%A0%E7%9A%84ai%E7%94%9F%E6%B4%BB%E4%BC%99%E4%BC%B4/id333206289
+                    - generic [ref=e598]: 查看
+                    - generic [ref=e604]:
+                      - generic [ref=e605]: 支付宝-你的AI生活伙伴
+                      - generic [ref=e607]: 生活
+                - listitem [ref=e609]:
+                  - link "查看 夸克-AI旗舰应用 千问AI助手搜索拍题小说网盘浏览器扫描" [ref=e611] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%A4%B8%E5%85%8B-ai%E6%97%97%E8%88%B0%E5%BA%94%E7%94%A8/id1160172628
+                    - generic [ref=e612]: 查看
+                    - generic [ref=e618]:
+                      - generic [ref=e619]: 夸克-AI旗舰应用
+                      - generic [ref=e621]: 千问AI助手搜索拍题小说网盘浏览器扫描
+                - listitem [ref=e623]:
+                  - link "查看 剪映 - 抖音官方AI创作神器 视频图片全能王 「马」上出片" [ref=e625] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%89%AA%E6%98%A0-%E6%8A%96%E9%9F%B3%E5%AE%98%E6%96%B9ai%E5%88%9B%E4%BD%9C%E7%A5%9E%E5%99%A8/id1458072671
+                    - generic [ref=e626]: 查看
+                    - generic [ref=e632]:
+                      - generic [ref=e633]: 剪映 - 抖音官方AI创作神器
+                      - generic [ref=e635]: 视频图片全能王 「马」上出片
+                - listitem [ref=e637]:
+                  - link "查看 哔哩哔哩-弹幕番剧直播高清视频 你感兴趣的视频都在B站" [ref=e639] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9-%E5%BC%B9%E5%B9%95%E7%95%AA%E5%89%A7%E7%9B%B4%E6%92%AD%E9%AB%98%E6%B8%85%E8%A7%86%E9%A2%91/id736536022
+                    - generic [ref=e640]: 查看
+                    - generic [ref=e646]:
+                      - generic [ref=e647]: 哔哩哔哩-弹幕番剧直播高清视频
+                      - generic [ref=e649]: 你感兴趣的视频都在B站
+                - listitem [ref=e651]:
+                  - link "查看 微博 随时随地，发现新鲜事" [ref=e653] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BE%AE%E5%8D%9A/id350962117
+                    - generic [ref=e654]: 查看
+                    - generic [ref=e660]:
+                      - generic [ref=e661]: 微博
+                      - generic [ref=e663]: 随时随地，发现新鲜事
+                - listitem [ref=e665]:
+                  - link "查看 腾讯视频-沈腾携《现在就出发4》爆笑回归 沈腾携出发家族抽象野游4.0" [ref=e667] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%85%BE%E8%AE%AF%E8%A7%86%E9%A2%91-%E6%B2%88%E8%85%BE%E6%90%BA-%E7%8E%B0%E5%9C%A8%E5%B0%B1%E5%87%BA%E5%8F%914-%E7%88%86%E7%AC%91%E5%9B%9E%E5%BD%92/id458318329
+                    - generic [ref=e668]: 查看
+                    - generic [ref=e674]:
+                      - generic [ref=e675]: 腾讯视频-沈腾携《现在就出发4》爆笑回归
+                      - generic [ref=e677]: 沈腾携出发家族抽象野游4.0
+                - listitem [ref=e679]:
+                  - link "查看 百度网盘 美好由我 全盘掌握" [ref=e681] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/id547166701
+                    - generic [ref=e682]: 查看
+                    - generic [ref=e688]:
+                      - generic [ref=e689]: 百度网盘
+                      - generic [ref=e691]: 美好由我 全盘掌握
+                - listitem [ref=e693]:
+                  - link "查看 QQ音乐 - 听我想听 亿级正版音乐，真无损音质体验" [ref=e695] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/qq%E9%9F%B3%E4%B9%90-%E5%90%AC%E6%88%91%E6%83%B3%E5%90%AC/id414603431
+                    - generic [ref=e696]: 查看
+                    - generic [ref=e702]:
+                      - generic [ref=e703]: QQ音乐 - 听我想听
+                      - generic [ref=e705]: 亿级正版音乐，真无损音质体验
+                - listitem [ref=e707]:
+                  - link "查看 汽水音乐 - 随时听好歌 随时随地，懂你想听" [ref=e709] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%B1%BD%E6%B0%B4%E9%9F%B3%E4%B9%90-%E9%9A%8F%E6%97%B6%E5%90%AC%E5%A5%BD%E6%AD%8C/id1605585211
+                    - generic [ref=e710]: 查看
+                    - generic [ref=e716]:
+                      - generic [ref=e717]: 汽水音乐 - 随时听好歌
+                      - generic [ref=e719]: 随时随地，懂你想听
+                - listitem [ref=e721]:
+                  - link "查看 网易云音乐-数亿音乐畅听 数亿音乐有声内容畅听" [ref=e723] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90-%E6%95%B0%E4%BA%BF%E9%9F%B3%E4%B9%90%E7%95%85%E5%90%AC/id590338362
+                    - generic [ref=e724]: 查看
+                    - generic [ref=e730]:
+                      - generic [ref=e731]: 网易云音乐-数亿音乐畅听
+                      - generic [ref=e733]: 数亿音乐有声内容畅听
+                - listitem [ref=e735]:
+                  - link "查看 BOSS直聘-招聘求职找工作招人 找工作，BOSS直聘直接谈！" [ref=e737] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/boss%E7%9B%B4%E8%81%98-%E6%8B%9B%E8%81%98%E6%B1%82%E8%81%8C%E6%89%BE%E5%B7%A5%E4%BD%9C%E6%8B%9B%E4%BA%BA/id887314963
+                    - generic [ref=e738]: 查看
+                    - generic [ref=e744]:
+                      - generic [ref=e745]: BOSS直聘-招聘求职找工作招人
+                      - generic [ref=e747]: 找工作，BOSS直聘直接谈！
+                - listitem [ref=e749]:
+                  - link "查看 WPS Office - 智能AI办公助手 AI写作、扫描文件、PDF编辑、表格处理、在线文档" [ref=e751] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/wps-office-%E6%99%BA%E8%83%BDai%E5%8A%9E%E5%85%AC%E5%8A%A9%E6%89%8B/id599852710
+                    - generic [ref=e752]: 查看
+                    - generic [ref=e758]:
+                      - generic [ref=e759]: WPS Office - 智能AI办公助手
+                      - generic [ref=e761]: AI写作、扫描文件、PDF编辑、表格处理、在线文档
+        - region "今日活动进行时新鲜节目、电影、游戏和更多精彩" [ref=e763]:
+          - heading "今日活动进行时" [level=2] [ref=e766]
+          - paragraph [ref=e767]: 新鲜节目、电影、游戏和更多精彩
+          - generic [ref=e769]:
+            - generic "特别活动假期节拍，随心播放听歌开启悠长假期，测人设赢限定奖励汽水音乐 - 随时听好歌随时随地，懂你想听" [ref=e771]:
+              - time [ref=e773]: 进行中
+              - generic [ref=e780]:
+                - link "假期节拍，随心播放" [ref=e781] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id6806907299
+                  - generic [ref=e783]:
+                    - paragraph [ref=e784]:
+                      - generic [ref=e785]: 特别活动
+                    - generic [ref=e786]: 假期节拍，随心播放
+                    - paragraph [ref=e789]: 听歌开启悠长假期，测人设赢限定奖励
+                - link "查看 汽水音乐 - 随时听好歌 随时随地，懂你想听" [ref=e794] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%B1%BD%E6%B0%B4%E9%9F%B3%E4%B9%90-%E9%9A%8F%E6%97%B6%E5%90%AC%E5%A5%BD%E6%AD%8C/id1605585211
+                  - generic [ref=e795]: 查看
+                  - generic [ref=e801]:
+                    - generic [ref=e802]: 汽水音乐 - 随时听好歌
+                    - generic [ref=e804]: 随时随地，懂你想听
+            - generic "限时活动追寻全世界的月亮《小红书》：“天涯 live 共此时”直播活动小红书 - 你的生活兴趣社区3亿人的生活兴趣爱好聚集地" [ref=e807]:
+              - time [ref=e809]: 进行中
+              - generic [ref=e816]:
+                - link "追寻全世界的月亮" [ref=e817] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id6808136256
+                  - generic [ref=e819]:
+                    - paragraph [ref=e820]:
+                      - generic [ref=e821]: 限时活动
+                    - generic [ref=e822]: 追寻全世界的月亮
+                    - paragraph [ref=e825]: 《小红书》：“天涯 live 共此时”直播活动
+                - link "查看 小红书 - 你的生活兴趣社区 3亿人的生活兴趣爱好聚集地" [ref=e830] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%B0%8F%E7%BA%A2%E4%B9%A6-%E4%BD%A0%E7%9A%84%E7%94%9F%E6%B4%BB%E5%85%B4%E8%B6%A3%E7%A4%BE%E5%8C%BA/id741292507
+                  - generic [ref=e831]: 查看
+                  - generic [ref=e837]:
+                    - generic [ref=e838]: 小红书 - 你的生活兴趣社区
+                    - generic [ref=e840]: 3亿人的生活兴趣爱好聚集地
+        - region "如果能穿越时空在游戏世界中改写历史" [ref=e842]:
+          - heading "如果能穿越时空" [level=2] [ref=e845]
+          - paragraph [ref=e846]: 在游戏世界中改写历史
+          - generic [ref=e848]:
+            - generic "必备精选大唐，一场绵延的梦在《梦幻西游》中重温三界爱恨情仇梦幻西游网易出品，招牌回合制手游" [ref=e850]:
+              - generic [ref=e856]:
+                - link "大唐，一场绵延的梦" [ref=e857] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1841573294
+                  - generic [ref=e860]:
+                    - paragraph [ref=e861]:
+                      - generic [ref=e862]: 必备精选
+                    - generic [ref=e863]: 大唐，一场绵延的梦
+                    - paragraph [ref=e866]: 在《梦幻西游》中重温三界爱恨情仇
+                - link "查看 梦幻西游 网易出品，招牌回合制手游" [ref=e871] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%A2%A6%E5%B9%BB%E8%A5%BF%E6%B8%B8/id940547441
+                  - generic [ref=e872]: 查看
+                  - generic [ref=e878]:
+                    - generic [ref=e879]: 梦幻西游
+                    - generic [ref=e881]: 网易出品，招牌回合制手游
+            - generic "主打推荐谁能与关羽单挑一百回合？战棋佳作重现汉末酣战三国望神州烈星孤鸣！猛将「吕布」登场！" [ref=e884]:
+              - generic [ref=e895]:
+                - link "谁能与关羽单挑一百回合？" [ref=e896] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1840101457
+                  - generic [ref=e899]:
+                    - paragraph [ref=e900]:
+                      - generic [ref=e901]: 主打推荐
+                    - generic [ref=e902]: 谁能与关羽单挑一百回合？
+                    - paragraph [ref=e905]: 战棋佳作重现汉末酣战
+                - link "查看 三国望神州 烈星孤鸣！猛将「吕布」登场！" [ref=e910] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E4%B8%89%E5%9B%BD%E6%9C%9B%E7%A5%9E%E5%B7%9E/id6744015881
+                  - generic [ref=e911]: 查看
+                  - generic [ref=e917]:
+                    - generic [ref=e918]: 三国望神州
+                    - generic [ref=e920]: 烈星孤鸣！猛将「吕布」登场！
+            - generic "主打推荐你在海边有一座自己的房子奥比岛：梦想国度快乐蔬果" [ref=e923]:
+              - generic [ref=e929]:
+                - link "你在海边有一座自己的房子" [ref=e930] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1626797190
+                  - generic [ref=e933]:
+                    - paragraph [ref=e934]:
+                      - generic [ref=e935]: 主打推荐
+                    - generic [ref=e936]: 你在海边有一座自己的房子
+                - link "查看 奥比岛：梦想国度 快乐蔬果" [ref=e941] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%A5%A5%E6%AF%94%E5%B2%9B-%E6%A2%A6%E6%83%B3%E5%9B%BD%E5%BA%A6/id1599425438
+                  - generic [ref=e942]: 查看
+                  - generic [ref=e948]:
+                    - generic [ref=e949]: 奥比岛：梦想国度
+                    - generic [ref=e951]: 快乐蔬果
+            - generic "主打推荐《冒险岛》新生月圆枫红，登岛夺冠冒险岛：枫之传说月圆枫红，登岛夺冠" [ref=e954]:
+              - generic [ref=e960]:
+                - link "《冒险岛》新生" [ref=e961] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1692468072
+                  - generic [ref=e964]:
+                    - paragraph [ref=e965]:
+                      - generic [ref=e966]: 主打推荐
+                    - generic [ref=e967]: 《冒险岛》新生
+                    - paragraph [ref=e970]: 月圆枫红，登岛夺冠
+                - link "查看 冒险岛：枫之传说 月圆枫红，登岛夺冠" [ref=e975] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%86%92%E9%99%A9%E5%B2%9B-%E6%9E%AB%E4%B9%8B%E4%BC%A0%E8%AF%B4/id6447610302
+                  - generic [ref=e976]: 查看
+                  - generic [ref=e982]:
+                    - generic [ref=e983]: 冒险岛：枫之传说
+                    - generic [ref=e985]: 月圆枫红，登岛夺冠
+        - region "我们喜爱的独立游戏小团队，带来大乐趣" [ref=e987]:
+          - heading "我们喜爱的独立游戏" [level=2] [ref=e990]
+          - paragraph [ref=e991]: 小团队，带来大乐趣
+          - generic [ref=e993]:
+            - generic "独立佳作我始终未曾离开这座岛胖布丁的解谜宇宙迷失岛4小屋实验益智解谜" [ref=e995]:
+              - generic [ref=e1006]:
+                - link "我始终未曾离开这座岛" [ref=e1007] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1780499939
+                  - generic [ref=e1010]:
+                    - paragraph [ref=e1011]:
+                      - generic [ref=e1012]: 独立佳作
+                    - generic [ref=e1013]: 我始终未曾离开这座岛
+                    - paragraph [ref=e1016]: 胖布丁的解谜宇宙
+                - link "查看 迷失岛4小屋实验 益智解谜" [ref=e1021] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E8%BF%B7%E5%A4%B1%E5%B2%9B4%E5%B0%8F%E5%B1%8B%E5%AE%9E%E9%AA%8C/id1512107893
+                  - generic [ref=e1022]: 查看
+                  - generic [ref=e1028]:
+                    - generic [ref=e1029]: 迷失岛4小屋实验
+                    - generic [ref=e1031]: 益智解谜
+            - generic "独立佳作卡牌奏响剑与魔法勇闯奇幻世界高殿战记-经典肉鸽RPG卡牌手游冒险RPG和卡牌的碰撞，展开史诗般的冒险之旅！" [ref=e1034]:
+              - generic [ref=e1045]:
+                - link "卡牌奏响剑与魔法" [ref=e1046] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1780499508
+                  - generic [ref=e1049]:
+                    - paragraph [ref=e1050]:
+                      - generic [ref=e1051]: 独立佳作
+                    - generic [ref=e1052]: 卡牌奏响剑与魔法
+                    - paragraph [ref=e1055]: 勇闯奇幻世界
+                - link "查看 高殿战记-经典肉鸽RPG卡牌手游 冒险RPG和卡牌的碰撞，展开史诗般的冒险之旅！" [ref=e1060] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E9%AB%98%E6%AE%BF%E6%88%98%E8%AE%B0-%E7%BB%8F%E5%85%B8%E8%82%89%E9%B8%BDrpg%E5%8D%A1%E7%89%8C%E6%89%8B%E6%B8%B8/id6702017485
+                  - generic [ref=e1061]: 查看
+                  - generic [ref=e1067]:
+                    - generic [ref=e1068]: 高殿战记-经典肉鸽RPG卡牌手游
+                    - generic [ref=e1070]: 冒险RPG和卡牌的碰撞，展开史诗般的冒险之旅！
+            - generic "编辑挚爱游戏致另一个自己双相关注双相情感障碍" [ref=e1073]:
+              - generic [ref=e1079]:
+                - link "致另一个自己" [ref=e1080] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1642289915
+                  - generic [ref=e1083]:
+                    - paragraph [ref=e1084]:
+                      - generic [ref=e1085]: 编辑挚爱游戏
+                    - generic [ref=e1086]: 致另一个自己
+                - link "查看 双相 关注双相情感障碍" [ref=e1091] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%8F%8C%E7%9B%B8/id1634743663
+                  - generic [ref=e1092]: 查看
+                  - generic [ref=e1098]:
+                    - generic [ref=e1099]: 双相
+                    - generic [ref=e1101]: 关注双相情感障碍
+            - generic "编辑挚爱游戏世界毁灭了？幸好还能种田在《波西亚时光》建设小镇，经营家族工坊波西亚时光悠然田园生活，自由打造你的专属家园" [ref=e1104]:
+              - generic [ref=e1110]:
+                - link "世界毁灭了？幸好还能种田" [ref=e1111] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1773912622
+                  - generic [ref=e1114]:
+                    - paragraph [ref=e1115]:
+                      - generic [ref=e1116]: 编辑挚爱游戏
+                    - generic [ref=e1117]: 世界毁灭了？幸好还能种田
+                    - paragraph [ref=e1120]: 在《波西亚时光》建设小镇，经营家族工坊
+                - link "查看 波西亚时光 悠然田园生活，自由打造你的专属家园" [ref=e1125] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%B3%A2%E8%A5%BF%E4%BA%9A%E6%97%B6%E5%85%89/id1542017327
+                  - generic [ref=e1126]: 查看
+                  - generic [ref=e1132]:
+                    - generic [ref=e1133]: 波西亚时光
+                    - generic [ref=e1135]: 悠然田园生活，自由打造你的专属家园
+        - region "App Store 编辑推荐我们逐一体验，为你精选以下 App 和游戏" [ref=e1137]:
+          - heading "App Store 编辑推荐" [level=2] [ref=e1140]
+          - paragraph [ref=e1141]: 我们逐一体验，为你精选以下 App 和游戏
+          - generic [ref=e1143]:
+            - generic "今日游戏在《塔塔冒险队》收集萌宠伙伴，共同守护家园塔塔冒险队上班暂停，萌宠霸屏！" [ref=e1145]:
+              - generic [ref=e1151]:
+                - link "守护家园，塔塔出击！" [ref=e1152] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id6807273507
+                  - generic [ref=e1155]:
+                    - generic [ref=e1156]: 今日游戏
+                    - paragraph [ref=e1159]: 在《塔塔冒险队》收集萌宠伙伴，共同守护家园
+                - link "查看 塔塔冒险队 上班暂停，萌宠霸屏！" [ref=e1164] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%A1%94%E5%A1%94%E5%86%92%E9%99%A9%E9%98%9F/id6759896881
+                  - generic [ref=e1165]: 查看
+                  - generic [ref=e1171]:
+                    - generic [ref=e1172]: 塔塔冒险队
+                    - generic [ref=e1174]: 上班暂停，萌宠霸屏！
+            - generic "今日 App让《Skoove》带你用钢琴弹奏喜爱歌曲Skoove-你的钢琴私敎来自德国, 全球百万用户第一选择" [ref=e1177]:
+              - generic [ref=e1183]:
+                - link "成为钢琴家，从第一个琴键开始" [ref=e1184] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1896913814
+                  - generic [ref=e1187]:
+                    - generic [ref=e1188]: 今日 App
+                    - paragraph [ref=e1191]: 让《Skoove》带你用钢琴弹奏喜爱歌曲
+                - link "查看 Skoove-你的钢琴私敎 来自德国, 全球百万用户第一选择" [ref=e1196] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/skoove-%E4%BD%A0%E7%9A%84%E9%92%A2%E7%90%B4%E7%A7%81%E6%95%8E/id1160668178
+                  - generic [ref=e1197]: 查看
+                  - generic [ref=e1203]:
+                    - generic [ref=e1204]: Skoove-你的钢琴私敎
+                    - generic [ref=e1206]: 来自德国, 全球百万用户第一选择
+        - region "重温热门好游戏经典游戏，带来下一个惊喜" [ref=e1208]:
+          - heading "重温热门好游戏" [level=2] [ref=e1211]
+          - paragraph [ref=e1212]: 经典游戏，带来下一个惊喜
+          - generic [ref=e1214]:
+            - generic "常玩常新探索世界，创造奇迹我的世界：移动版铜器时代，玩个铜块" [ref=e1216]:
+              - generic [ref=e1222]:
+                - link "探索世界，创造奇迹" [ref=e1223] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1559693344
+                  - generic [ref=e1226]:
+                    - paragraph [ref=e1227]:
+                      - generic [ref=e1228]: 常玩常新
+                    - generic [ref=e1229]: 探索世界，创造奇迹
+                - link "查看 我的世界：移动版 铜器时代，玩个铜块" [ref=e1234] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C-%E7%A7%BB%E5%8A%A8%E7%89%88/id1243986797
+                  - generic [ref=e1235]: 查看
+                  - generic [ref=e1241]:
+                    - generic [ref=e1242]: 我的世界：移动版
+                    - generic [ref=e1244]: 铜器时代，玩个铜块
+            - link "地表之下，才是勇者的天堂" [ref=e1247] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1603581316
+              - generic "常玩常新地表之下，才是勇者的天堂《泰拉瑞亚》中无尽宝藏等你挖掘" [ref=e1248]:
+                - link "地表之下，才是勇者的天堂" [ref=e1255]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1603581316
+                  - generic [ref=e1258]:
+                    - paragraph [ref=e1259]:
+                      - generic [ref=e1260]: 常玩常新
+                    - generic [ref=e1261]: 地表之下，才是勇者的天堂
+                    - paragraph [ref=e1264]: 《泰拉瑞亚》中无尽宝藏等你挖掘
+            - generic "必备精选村长还在藤蔓上面吗？在《开心消消乐》享受三消乐趣，成为全村希望开心消消乐长盛不衰，8亿人都在玩" [ref=e1266]:
+              - generic [ref=e1272]:
+                - link "村长还在藤蔓上面吗？" [ref=e1273] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1842306352
+                  - generic [ref=e1276]:
+                    - paragraph [ref=e1277]:
+                      - generic [ref=e1278]: 必备精选
+                    - generic [ref=e1279]: 村长还在藤蔓上面吗？
+                    - paragraph [ref=e1282]: 在《开心消消乐》享受三消乐趣，成为全村希望
+                - link "查看 开心消消乐 长盛不衰，8亿人都在玩" [ref=e1287] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%BC%80%E5%BF%83%E6%B6%88%E6%B6%88%E4%B9%90/id791532221
+                  - generic [ref=e1288]: 查看
+                  - generic [ref=e1294]:
+                    - generic [ref=e1295]: 开心消消乐
+                    - generic [ref=e1297]: 长盛不衰，8亿人都在玩
+            - generic "常玩常新敌“僵”来袭， 请求“植”援！植物大战僵尸2国民塔防策略休闲手游，单机闯关益智对战" [ref=e1300]:
+              - generic [ref=e1306]:
+                - link "敌“僵”来袭，<br />请求“植”援！" [ref=e1307] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1559693227
+                  - generic [ref=e1310]:
+                    - paragraph [ref=e1311]:
+                      - generic [ref=e1312]: 常玩常新
+                    - generic [ref=e1313]: 敌“僵”来袭，请求“植”援！
+                - link "查看 植物大战僵尸2 国民塔防策略休闲手游，单机闯关益智对战" [ref=e1318] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%A4%8D%E7%89%A9%E5%A4%A7%E6%88%98%E5%83%B5%E5%B0%B82/id639516529
+                  - generic [ref=e1319]: 查看
+                  - generic [ref=e1325]:
+                    - generic [ref=e1326]: 植物大战僵尸2
+                    - generic [ref=e1328]: 国民塔防策略休闲手游，单机闯关益智对战
+        - region "越奇怪，越好玩发现不同寻常的游戏体验" [ref=e1330]:
+          - heading "越奇怪，越好玩" [level=2] [ref=e1333]
+          - paragraph [ref=e1334]: 发现不同寻常的游戏体验
+          - generic [ref=e1336]:
+            - generic "主打推荐马桶穿越魔法世界！构筑强力法术 击败邪恶古神魔法工艺买断制法术构筑动作Rogue手游" [ref=e1338]:
+              - generic [ref=e1344]:
+                - link "马桶穿越魔法世界！" [ref=e1345] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1841794533
+                  - generic [ref=e1348]:
+                    - paragraph [ref=e1349]:
+                      - generic [ref=e1350]: 主打推荐
+                    - generic [ref=e1351]: 马桶穿越魔法世界！
+                    - paragraph [ref=e1354]: 构筑强力法术 击败邪恶古神
+                - link "查看 魔法工艺 买断制法术构筑动作Rogue手游" [ref=e1359] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E9%AD%94%E6%B3%95%E5%B7%A5%E8%89%BA/id6746777407
+                  - generic [ref=e1360]: 查看
+                  - generic [ref=e1366]:
+                    - generic [ref=e1367]: 魔法工艺
+                    - generic [ref=e1369]: 买断制法术构筑动作Rogue手游
+            - generic "编辑挚爱游戏藏在拼图里的冒险之旅颜值能打、玩法出色的独立佳作《无尽旅图》无尽旅图翻转地图 踏上奇遇" [ref=e1372]:
+              - generic [ref=e1378]:
+                - link "藏在拼图里的冒险之旅" [ref=e1379] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1674983946
+                  - generic [ref=e1382]:
+                    - paragraph [ref=e1383]:
+                      - generic [ref=e1384]: 编辑挚爱游戏
+                    - generic [ref=e1385]: 藏在拼图里的冒险之旅
+                    - paragraph [ref=e1388]: 颜值能打、玩法出色的独立佳作《无尽旅图》
+                - link "查看 无尽旅图 翻转地图 踏上奇遇" [ref=e1393] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%97%A0%E5%B0%BD%E6%97%85%E5%9B%BE/id1670078436
+                  - generic [ref=e1394]: 查看
+                  - generic [ref=e1400]:
+                    - generic [ref=e1401]: 无尽旅图
+                    - generic [ref=e1403]: 翻转地图 踏上奇遇
+        - region "办公必备 App这些实用工具，助你提升效率" [ref=e1405]:
+          - heading "办公必备 App" [level=2] [ref=e1408]
+          - paragraph [ref=e1409]: 这些实用工具，助你提升效率
+          - generic [ref=e1411]:
+            - generic "编辑挚爱 APP今日的任务进度是……《Joi》帮你轻松追踪任务、活动和习惯Daily Habits & Tasks | PlannerSmart Management | Sync To-Do" [ref=e1413]:
+              - generic [ref=e1419]:
+                - link "今日的任务进度是……" [ref=e1420] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1814327529
+                  - generic [ref=e1423]:
+                    - paragraph [ref=e1424]:
+                      - generic [ref=e1425]: 编辑挚爱 APP
+                    - generic [ref=e1426]: 今日的任务进度是……
+                    - paragraph [ref=e1429]: 《Joi》帮你轻松追踪任务、活动和习惯
+                - link "查看 Daily Habits & Tasks | Planner Smart Management | Sync To-Do" [ref=e1434] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/daily-habits-tasks-planner/id6736852235
+                  - generic [ref=e1435]: 查看
+                  - generic [ref=e1441]:
+                    - generic [ref=e1442]: Daily Habits & Tasks | Planner
+                    - generic [ref=e1444]: Smart Management | Sync To-Do
+            - generic "编辑挚爱 APP交给我吧，这就处理！《WPS Office》：你的移动办公智能伙伴WPS Office - 智能AI办公助手AI写作、扫描文件、PDF编辑、表格处理、在线文档" [ref=e1447]:
+              - generic [ref=e1453]:
+                - link "交给我吧，这就处理！" [ref=e1454] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1871114763
+                  - generic [ref=e1457]:
+                    - paragraph [ref=e1458]:
+                      - generic [ref=e1459]: 编辑挚爱 APP
+                    - generic [ref=e1460]: 交给我吧，这就处理！
+                    - paragraph [ref=e1463]: 《WPS Office》：你的移动办公智能伙伴
+                - link "查看 WPS Office - 智能AI办公助手 AI写作、扫描文件、PDF编辑、表格处理、在线文档" [ref=e1468] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/wps-office-%E6%99%BA%E8%83%BDai%E5%8A%9E%E5%85%AC%E5%8A%A9%E6%89%8B/id599852710
+                  - generic [ref=e1469]: 查看
+                  - generic [ref=e1475]:
+                    - generic [ref=e1476]: WPS Office - 智能AI办公助手
+                    - generic [ref=e1478]: AI写作、扫描文件、PDF编辑、表格处理、在线文档
+        - region "你的世界你做主在这些虚拟世界中成为主宰" [ref=e1480]:
+          - heading "你的世界你做主" [level=2] [ref=e1483]
+          - paragraph [ref=e1484]: 在这些虚拟世界中成为主宰
+          - generic [ref=e1486]:
+            - generic "时下热门属于“三国”的一千八百年三国志·战略版1亿玩家的立体战争策略手游" [ref=e1488]:
+              - generic [ref=e1494]:
+                - link "属于“三国”的一千八百年" [ref=e1495] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1478256141
+                  - generic [ref=e1498]:
+                    - paragraph [ref=e1499]:
+                      - generic [ref=e1500]: 时下热门
+                    - generic [ref=e1501]: 属于“三国”的一千八百年
+                - link "查看 三国志·战略版 1亿玩家的立体战争策略手游" [ref=e1506] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E4%B8%89%E5%9B%BD%E5%BF%97-%E6%88%98%E7%95%A5%E7%89%88/id1474572440
+                  - generic [ref=e1507]: 查看
+                  - generic [ref=e1513]:
+                    - generic [ref=e1514]: 三国志·战略版
+                    - generic [ref=e1516]: 1亿玩家的立体战争策略手游
+            - generic "游戏文化意难平的江南梦，尽入此画中江南百景图模拟大明，经营江南" [ref=e1519]:
+              - generic [ref=e1525]:
+                - link "意难平的江南梦，尽入此画中" [ref=e1526] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1518705909
+                  - generic [ref=e1529]:
+                    - paragraph [ref=e1530]:
+                      - generic [ref=e1531]: 游戏文化
+                    - generic [ref=e1532]: 意难平的江南梦，尽入此画中
+                - link "查看 江南百景图 模拟大明，经营江南" [ref=e1537] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E6%B1%9F%E5%8D%97%E7%99%BE%E6%99%AF%E5%9B%BE/id1498402704
+                  - generic [ref=e1538]: 查看
+                  - generic [ref=e1544]:
+                    - generic [ref=e1545]: 江南百景图
+                    - generic [ref=e1547]: 模拟大明，经营江南
+        - region "数字生活大扫除用这些 App 优化空间，整理一切" [ref=e1549]:
+          - heading "数字生活大扫除" [level=2] [ref=e1552]
+          - paragraph [ref=e1553]: 用这些 App 优化空间，整理一切
+          - generic [ref=e1555]:
+            - 'generic "编辑挚爱 APP一扫一划，相册轻松整理用《Slidebox》轻松分类整理照片Slidebox: 照片清理助手快速整理照片，释放空间" [ref=e1557]':
+              - generic [ref=e1563]:
+                - link "一扫一划，相册轻松整理" [ref=e1564] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1675957794
+                  - generic [ref=e1567]:
+                    - paragraph [ref=e1568]:
+                      - generic [ref=e1569]: 编辑挚爱 APP
+                    - generic [ref=e1570]: 一扫一划，相册轻松整理
+                    - paragraph [ref=e1573]: 用《Slidebox》轻松分类整理照片
+                - 'link "查看 Slidebox: 照片清理助手 快速整理照片，释放空间" [ref=e1578] [cursor=pointer]':
+                  - /url: https://apps.apple.com/cn/app/slidebox-%E7%85%A7%E7%89%87%E6%B8%85%E7%90%86%E5%8A%A9%E6%89%8B/id984305203
+                  - generic [ref=e1579]: 查看
+                  - generic [ref=e1585]:
+                    - generic [ref=e1586]: "Slidebox: 照片清理助手"
+                    - generic [ref=e1588]: 快速整理照片，释放空间
+            - link "轻轻一点，相册不乱" [ref=e1591] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1440553973
+              - generic "生活解决方案轻轻一点，相册不乱" [ref=e1592]:
+                - generic [ref=e1593]:
+                  - list [ref=e1594]:
+                    - listitem [ref=e1595]
+                    - listitem [ref=e1599]
+                    - listitem [ref=e1603]
+                    - listitem [ref=e1607]
+                    - listitem [ref=e1611]
+                    - listitem [ref=e1615]
+                    - listitem [ref=e1619]
+                    - listitem [ref=e1623]
+                    - listitem [ref=e1627]
+                    - listitem [ref=e1631]
+                    - listitem [ref=e1635]
+                    - listitem [ref=e1639]
+                    - listitem [ref=e1643]
+                    - listitem [ref=e1647]
+                    - listitem [ref=e1651]
+                    - listitem [ref=e1655]
+                    - listitem [ref=e1659]
+                    - listitem [ref=e1663]
+                    - listitem [ref=e1667]
+                    - listitem [ref=e1671]
+                    - listitem [ref=e1675]
+                    - listitem [ref=e1679]
+                    - listitem [ref=e1683]
+                    - listitem [ref=e1687]
+                  - list [ref=e1691]:
+                    - listitem [ref=e1692]
+                    - listitem [ref=e1696]
+                    - listitem [ref=e1700]
+                    - listitem [ref=e1704]
+                    - listitem [ref=e1708]
+                    - listitem [ref=e1712]
+                    - listitem [ref=e1716]
+                    - listitem [ref=e1720]
+                    - listitem [ref=e1724]
+                    - listitem [ref=e1728]
+                    - listitem [ref=e1732]
+                    - listitem [ref=e1736]
+                    - listitem [ref=e1740]
+                    - listitem [ref=e1744]
+                    - listitem [ref=e1748]
+                    - listitem [ref=e1752]
+                    - listitem [ref=e1756]
+                    - listitem [ref=e1760]
+                    - listitem [ref=e1764]
+                    - listitem [ref=e1768]
+                    - listitem [ref=e1772]
+                    - listitem [ref=e1776]
+                    - listitem [ref=e1780]
+                    - listitem [ref=e1784]
+                - link "轻轻一点，相册不乱" [ref=e1790]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1440553973
+                  - generic [ref=e1793]:
+                    - paragraph [ref=e1794]:
+                      - generic [ref=e1795]: 生活解决方案
+                    - generic [ref=e1796]: 轻轻一点，相册不乱
+        - region "App Store 佳作精选" [ref=e1797]:
+          - heading "App Store 佳作精选" [level=2] [ref=e1800]
+          - generic [ref=e1802]:
+            - link "精选十佳：录像与剪辑" [ref=e1804] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1587674438
+              - generic "必备精选精选十佳：录像与剪辑" [ref=e1805]:
+                - link "精选十佳：录像与剪辑" [ref=e1812]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1587674438
+                  - generic [ref=e1815]:
+                    - paragraph [ref=e1816]:
+                      - generic [ref=e1817]: 必备精选
+                    - generic [ref=e1818]: 精选十佳：录像与剪辑
+            - link "精选十佳：健康" [ref=e1820] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1587675975
+              - generic "必备精选精选十佳：健康" [ref=e1821]:
+                - link "精选十佳：健康" [ref=e1828]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1587675975
+                  - generic [ref=e1831]:
+                    - paragraph [ref=e1832]:
+                      - generic [ref=e1833]: 必备精选
+                    - generic [ref=e1834]: 精选十佳：健康
+        - region "《原神》畅游指南" [ref=e1835]:
+          - heading "《原神》畅游指南" [level=2] [ref=e1838]
+          - generic [ref=e1840]:
+            - link "你不可不知的<br />《原神》隐藏谜题" [ref=e1842] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1528297488
+              - generic "入门你不可不知的 《原神》隐藏谜题提瓦特大陆的 9 种奇妙事物" [ref=e1843]:
+                - link "你不可不知的<br />《原神》隐藏谜题" [ref=e1850]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1528297488
+                  - generic [ref=e1853]:
+                    - paragraph [ref=e1854]:
+                      - generic [ref=e1855]: 入门
+                    - generic [ref=e1856]: 你不可不知的《原神》隐藏谜题
+                    - paragraph [ref=e1859]: 提瓦特大陆的 9 种奇妙事物
+            - link "技术宅拯救世界！" [ref=e1861] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1529395859
+              - generic "深度故事技术宅拯救世界！米哈游总裁“大伟哥”讲述《原神》背后的故事" [ref=e1862]:
+                - link "技术宅拯救世界！" [ref=e1869]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1529395859
+                  - generic [ref=e1872]:
+                    - paragraph [ref=e1873]:
+                      - generic [ref=e1874]: 深度故事
+                    - generic [ref=e1875]: 技术宅拯救世界！
+                    - paragraph [ref=e1878]: 米哈游总裁“大伟哥”讲述《原神》背后的故事
+        - region "宝贝开心，家长安心边探索、边玩乐，让这些 App 相伴亲子时光" [ref=e1879]:
+          - heading "宝贝开心，家长安心" [level=2] [ref=e1882]
+          - paragraph [ref=e1883]: 边探索、边玩乐，让这些 App 相伴亲子时光
+          - generic [ref=e1885]:
+            - link "哆来咪，真有趣！" [ref=e1887] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1547622270
+              - generic "释放创意哆来咪，真有趣！这些 App 为孩子打开音乐世界大门" [ref=e1888]:
+                - link "哆来咪，真有趣！" [ref=e1895]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1547622270
+                  - generic [ref=e1898]:
+                    - paragraph [ref=e1899]:
+                      - generic [ref=e1900]: 释放创意
+                    - generic [ref=e1901]: 哆来咪，真有趣！
+                    - paragraph [ref=e1904]: 这些 App 为孩子打开音乐世界大门
+            - generic "给小朋友小朋友的好伙伴" [ref=e1906]:
+              - generic [ref=e1910]:
+                - paragraph [ref=e1911]:
+                  - generic [ref=e1912]: 给小朋友
+                - link "小朋友的好伙伴" [ref=e1914] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1335505713
+              - list [ref=e1916]:
+                - listitem [ref=e1917]:
+                  - link "查看 宝宝巴士科学-儿童百科全书早教启蒙科普学习 儿童科学实验，解密十万个为什么" [ref=e1919] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%AE%9D%E5%AE%9D%E5%B7%B4%E5%A3%AB%E7%A7%91%E5%AD%A6-%E5%84%BF%E7%AB%A5%E7%99%BE%E7%A7%91%E5%85%A8%E4%B9%A6%E6%97%A9%E6%95%99%E5%90%AF%E8%92%99%E7%A7%91%E6%99%AE%E5%AD%A6%E4%B9%A0/id1552666569
+                    - generic [ref=e1920]: 查看
+                    - generic [ref=e1926]:
+                      - generic [ref=e1927]: 宝宝巴士科学-儿童百科全书早教启蒙科普学习
+                      - generic [ref=e1929]: 儿童科学实验，解密十万个为什么
+                - listitem [ref=e1931]:
+                  - link "查看 喜马拉雅儿童-故事儿歌绘本哄睡 安全无广告，听故事涨知识，守护孩子童年" [ref=e1933] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%96%9C%E9%A9%AC%E6%8B%89%E9%9B%85%E5%84%BF%E7%AB%A5-%E6%95%85%E4%BA%8B%E5%84%BF%E6%AD%8C%E7%BB%98%E6%9C%AC%E5%93%84%E7%9D%A1/id1436675436
+                    - generic [ref=e1934]: 查看
+                    - generic [ref=e1940]:
+                      - generic [ref=e1941]: 喜马拉雅儿童-故事儿歌绘本哄睡
+                      - generic [ref=e1943]: 安全无广告，听故事涨知识，守护孩子童年
+                - listitem [ref=e1945]:
+                  - link "查看 爱奇艺奇巴布 少儿动画儿歌启蒙" [ref=e1947] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%88%B1%E5%A5%87%E8%89%BA%E5%A5%87%E5%B7%B4%E5%B8%83/id874837944
+                    - generic [ref=e1948]: 查看
+                    - generic [ref=e1954]:
+                      - generic [ref=e1955]: 爱奇艺奇巴布
+                      - generic [ref=e1957]: 少儿动画儿歌启蒙
+                - listitem [ref=e1959]:
+                  - link "查看 熊猫博士小镇故事 创造你专属的奇妙世界和有趣的故事" [ref=e1961] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%86%8A%E7%8C%AB%E5%8D%9A%E5%A3%AB%E5%B0%8F%E9%95%87%E6%95%85%E4%BA%8B/id1184826289
+                    - generic [ref=e1962]: 查看
+                    - generic [ref=e1968]:
+                      - generic [ref=e1969]: 熊猫博士小镇故事
+                      - generic [ref=e1971]: 创造你专属的奇妙世界和有趣的故事
+            - 'generic "给小朋友和 Dora 一起探险开启《Dora: 探索与玩耍》的探索之旅Dora：探索与玩耍儿童英语启蒙与益智教育冒险" [ref=e1974]':
+              - generic [ref=e1985]:
+                - link "和 Dora 一起探险" [ref=e1986] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1874461283
+                  - generic [ref=e1989]:
+                    - paragraph [ref=e1990]:
+                      - generic [ref=e1991]: 给小朋友
+                    - generic [ref=e1992]: 和 Dora 一起探险
+                    - paragraph [ref=e1995]: "开启《Dora: 探索与玩耍》的探索之旅"
+                - link "查看 Dora：探索与玩耍 儿童英语启蒙与益智教育冒险" [ref=e2000] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/dora-%E6%8E%A2%E7%B4%A2%E4%B8%8E%E7%8E%A9%E8%80%8D/id6742843999
+                  - generic [ref=e2001]: 查看
+                  - generic [ref=e2007]:
+                    - generic [ref=e2008]: Dora：探索与玩耍
+                    - generic [ref=e2010]: 儿童英语启蒙与益智教育冒险
+            - link "小手画出大世界" [ref=e2013] [cursor=pointer]:
+              - /url: https://apps.apple.com/cn/iphone/story/id1547622288
+              - generic "释放创意小手画出大世界App 让孩子尽情施展艺术天赋" [ref=e2014]:
+                - link "小手画出大世界" [ref=e2021]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1547622288
+                  - generic [ref=e2024]:
+                    - paragraph [ref=e2025]:
+                      - generic [ref=e2026]: 释放创意
+                    - generic [ref=e2027]: 小手画出大世界
+                    - paragraph [ref=e2030]: App 让孩子尽情施展艺术天赋
+        - region "资深玩家，深度挑战勇闯多样难关，收获满满成就感" [ref=e2031]:
+          - heading "资深玩家，深度挑战" [level=2] [ref=e2034]
+          - paragraph [ref=e2035]: 勇闯多样难关，收获满满成就感
+          - generic [ref=e2037]:
+            - generic "主打推荐重回《地下城与勇士》的世界不可不玩的经典大作地下城与勇士：起源DNF正版手游 真的能打" [ref=e2039]:
+              - generic [ref=e2050]:
+                - link "重回《地下城与勇士》的世界" [ref=e2051] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1524927040
+                  - generic [ref=e2054]:
+                    - paragraph [ref=e2055]:
+                      - generic [ref=e2056]: 主打推荐
+                    - generic [ref=e2057]: 重回《地下城与勇士》的世界
+                    - paragraph [ref=e2060]: 不可不玩的经典大作
+                - link "查看 地下城与勇士：起源 DNF正版手游 真的能打" [ref=e2065] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%9C%B0%E4%B8%8B%E5%9F%8E%E4%B8%8E%E5%8B%87%E5%A3%AB-%E8%B5%B7%E6%BA%90/id1529851592
+                  - generic [ref=e2066]: 查看
+                  - generic [ref=e2072]:
+                    - generic [ref=e2073]: 地下城与勇士：起源
+                    - generic [ref=e2075]: DNF正版手游 真的能打
+            - generic "编辑最爱那一年，梦魇尚且年幼体验《小小梦魇》移动版小小梦魇全球知名恐怖冒险游戏" [ref=e2078]:
+              - generic [ref=e2089]:
+                - link "那一年，梦魇尚且年幼" [ref=e2090] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1884567051
+                  - generic [ref=e2093]:
+                    - paragraph [ref=e2094]:
+                      - generic [ref=e2095]: 编辑最爱
+                    - generic [ref=e2096]: 那一年，梦魇尚且年幼
+                    - paragraph [ref=e2099]: 体验《小小梦魇》移动版
+                - link "查看 小小梦魇 全球知名恐怖冒险游戏" [ref=e2104] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/app/%E5%B0%8F%E5%B0%8F%E6%A2%A6%E9%AD%87/id6753931080
+                  - generic [ref=e2105]: 查看
+                  - generic [ref=e2111]:
+                    - generic [ref=e2112]: 小小梦魇
+                    - generic [ref=e2114]: 全球知名恐怖冒险游戏
+        - region "电影之夜为电影迷打造的出色 App" [ref=e2116]:
+          - heading "电影之夜" [level=2] [ref=e2119]
+          - paragraph [ref=e2120]: 为电影迷打造的出色 App
+          - generic [ref=e2122]:
+            - generic "主打推荐谈恋爱不如“嗑 CP”" [ref=e2124]:
+              - generic [ref=e2130]:
+                - link "谈恋爱不如“嗑 CP”" [ref=e2131] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1665798762
+                  - generic [ref=e2134]:
+                    - paragraph [ref=e2135]:
+                      - generic [ref=e2136]: 主打推荐
+                    - generic [ref=e2137]: 谈恋爱不如“嗑 CP”
+                - generic [ref=e2140]:
+                  - link "腾讯视频-沈腾携《现在就出发4》爆笑回归" [ref=e2141] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%85%BE%E8%AE%AF%E8%A7%86%E9%A2%91-%E6%B2%88%E8%85%BE%E6%90%BA-%E7%8E%B0%E5%9C%A8%E5%B0%B1%E5%87%BA%E5%8F%914-%E7%88%86%E7%AC%91%E5%9B%9E%E5%BD%92/id458318329
+                  - link "爱奇艺-《我不是大师》以骗治骗" [ref=e2145] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%88%B1%E5%A5%87%E8%89%BA-%E6%88%91%E4%B8%8D%E6%98%AF%E5%A4%A7%E5%B8%88-%E4%BB%A5%E9%AA%97%E6%B2%BB%E9%AA%97/id393765873
+                  - link "哔哩哔哩-弹幕番剧直播高清视频" [ref=e2149] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9-%E5%BC%B9%E5%B9%95%E7%95%AA%E5%89%A7%E7%9B%B4%E6%92%AD%E9%AB%98%E6%B8%85%E8%A7%86%E9%A2%91/id736536022
+                  - link "哔哩哔哩漫画-看漫画小说大全" [ref=e2153] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E6%BC%AB%E7%94%BB-%E7%9C%8B%E6%BC%AB%E7%94%BB%E5%B0%8F%E8%AF%B4%E5%A4%A7%E5%85%A8/id1426252715
+                  - link "优酷视频-《无可替代》全网独播" [ref=e2157] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E4%BC%98%E9%85%B7%E8%A7%86%E9%A2%91-%E6%97%A0%E5%8F%AF%E6%9B%BF%E4%BB%A3-%E5%85%A8%E7%BD%91%E7%8B%AC%E6%92%AD/id336141475
+            - generic "主打推荐两个平台，成倍快乐iPhone 加 Mac，优势叠加" [ref=e2162]:
+              - generic [ref=e2173]:
+                - link "两个平台，成倍快乐" [ref=e2174] [cursor=pointer]:
+                  - /url: https://apps.apple.com/cn/iphone/story/id1676418286
+                  - generic [ref=e2177]:
+                    - paragraph [ref=e2178]:
+                      - generic [ref=e2179]: 主打推荐
+                    - generic [ref=e2180]: 两个平台，成倍快乐
+                    - paragraph [ref=e2183]: iPhone 加 Mac，优势叠加
+                - generic [ref=e2186]:
+                  - link "抖音" [ref=e2187] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3/id1142110895
+                  - link "腾讯视频-沈腾携《现在就出发4》爆笑回归" [ref=e2191] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%85%BE%E8%AE%AF%E8%A7%86%E9%A2%91-%E6%B2%88%E8%85%BE%E6%90%BA-%E7%8E%B0%E5%9C%A8%E5%B0%B1%E5%87%BA%E5%8F%914-%E7%88%86%E7%AC%91%E5%9B%9E%E5%BD%92/id458318329
+                  - link "爱奇艺-《我不是大师》以骗治骗" [ref=e2195] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E7%88%B1%E5%A5%87%E8%89%BA-%E6%88%91%E4%B8%8D%E6%98%AF%E5%A4%A7%E5%B8%88-%E4%BB%A5%E9%AA%97%E6%B2%BB%E9%AA%97/id393765873
+                  - link "芒果TV" [ref=e2199] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E8%8A%92%E6%9E%9Ctv/id629774477
+                  - link "djay - DJ 打碟 & 混音器" [ref=e2203] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/djay-dj-%E6%89%93%E7%A2%9F-%E6%B7%B7%E9%9F%B3%E5%99%A8/id450527929
+                  - link "库乐队" [ref=e2207] [cursor=pointer]:
+                    - /url: https://apps.apple.com/cn/app/%E5%BA%93%E4%B9%90%E9%98%9F/id408709785
+    - generic [ref=e2213]:
+      - paragraph [ref=e2214]:
+        - generic [ref=e2215]:
+          - text: Copyright © 2026
+          - link "Apple Inc." [ref=e2216] [cursor=pointer]:
+            - /url: https://www.apple.com.cn
+        - text: 保留所有权利。
+      - list [ref=e2217]:
+        - listitem [ref=e2218]:
+          - link "互联网服务条款" [ref=e2219] [cursor=pointer]:
+            - /url: https://www.apple.com.cn/legal/internet-services/
+        - listitem [ref=e2220]:
+          - link "App Store 与隐私" [ref=e2221] [cursor=pointer]:
+            - /url: https://www.apple.com/legal/privacy/data/zh-cn/app-store/
+        - listitem [ref=e2222]:
+          - link "Cookie 警告" [ref=e2223] [cursor=pointer]:
+            - /url: https://www.apple.com/legal/privacy/szh/cookies/
+        - listitem [ref=e2224]:
+          - link "支持" [ref=e2225] [cursor=pointer]:
+            - /url: https://support.apple.com/zh-cn/billing

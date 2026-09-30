@@ -1,0 +1,4 @@
+[     757ms] [WARNING] "debugSource" found.
+This will override any same-named client-supplied configSource fields.
+This setting "sticks" across session, use "setDebugSource(null)" to clear @ https://apps.apple.com/assets/mt-client-logger-core.esm~DFLHsSWhNI.js:0
+[    1992ms] [ERROR] Manifest: Line: 1, column: 1, Syntax error. @ https://apps.apple.com/manifest.json:0

@@ -1,0 +1,221 @@
+- generic [active] [ref=f4e1]:
+  - banner [ref=f4e2]:
+    - button "跳至内容" [ref=f4e3] [cursor=pointer]
+    - button "辅助功能反馈" [ref=f4e6] [cursor=pointer]
+    - generic [ref=f4e9]:
+      - link [ref=f4e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "返回到必应搜索" [level=1] [ref=f4e11]
+      - search [ref=f4e12]:
+        - button "搜索" [ref=f4e15] [cursor=pointer]
+        - searchbox "在此处输入你的搜索 — 输入时会显示搜索建议" [ref=f4e16]: Apple Freeform app limitations reddit
+        - generic [ref=f4e17] [cursor=pointer]
+        - button "使用图像搜索" [ref=f4e22] [cursor=pointer]
+    - complementary "帐户奖励和偏好设置" [ref=f4e24]:
+      - button "Microsoft Rewards" [ref=f4e25] [cursor=pointer]:
+        - generic [ref=f4e26]: Rewards
+      - link "登录" [ref=f4e42] [cursor=pointer]:
+        - /url: javascript:void(0)
+    - navigation "主菜单" [ref=f4e44]:
+      - list [ref=f4e45]:
+        - listitem [ref=f4e46]:
+          - link "全部" [ref=f4e47] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=f4e48]:
+          - link "搜索" [ref=f4e49] [cursor=pointer]:
+            - /url: /copilotsearch?q=Apple+Freeform+app+limitations+reddit&FORM=CSSCOP
+        - listitem [ref=f4e52]:
+          - link "图片" [ref=f4e53] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=ed603c16c770cd5a07895c607baf6e5ab6ed05cf802e8f434a5300b30aa1381eJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L2ltYWdlcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSthcHArbGltaXRhdGlvbnMrcmVkZGl0JkZPUk09SERSU0Mz&ntb=1
+        - listitem [ref=f4e54]:
+          - link "视频" [ref=f4e55] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=5d1c07a621611f3ce109f8fb1ff1d9e2ed41757ac2df5fbad7860a11a75c20fbJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1BcHBsZStGcmVlZm9ybSthcHArbGltaXRhdGlvbnMrcmVkZGl0JkZPUk09SERSU0M0&ntb=1
+        - listitem [ref=f4e56]:
+          - link "地图" [ref=f4e57] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=319d11289760726322fef2cdc5ccf8f1f33ddb843142967f32f50c6aa9f836feJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L21hcHM_cT1BcHBsZStGcmVlZm9ybSthcHArbGltaXRhdGlvbnMrcmVkZGl0JkZPUk09SERSU0M2&ntb=1
+        - listitem [ref=f4e58]:
+          - link "资讯" [ref=f4e59] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=c5428f7db3ad63e1e5edbdb6eb1e53e9194de74313d412782021879949ba89afJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L25ld3Mvc2VhcmNoP3E9QXBwbGUrRnJlZWZvcm0rYXBwK2xpbWl0YXRpb25zK3JlZGRpdCZGT1JNPUhEUlNDNw&ntb=1
+        - listitem [ref=f4e60]:
+          - button [ref=f4e61] [cursor=pointer]
+  - generic [ref=f4e65]:
+    - main "搜索结果" [ref=f4e66]:
+      - generic [ref=f4e68]:
+        - generic [aria-hidden] [ref=f4e69]:
+          - generic [ref=f4e70] [cursor=pointer]
+          - generic [ref=f4e72] [cursor=pointer]
+          - generic [ref=f4e75] [cursor=pointer]
+        - text: 约 794 个结果
+      - list [ref=f4e78]:
+        - listitem [ref=f4e79]:
+          - generic [ref=f4e80]:
+            - link "浏览此图像" [ref=f4e83] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=2a45f14efab1bb847661ad007ca797c650eac4c8e39955336106065eab68ada9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2FwcGxlZnJlZWZvcm0v&ntb=1
+            - generic [ref=f4e85]:
+              - link "Reddit" [ref=f4e87] [cursor=pointer]:
+                - /url: https://www.bing.com/ck/a?!&&p=2a45f14efab1bb847661ad007ca797c650eac4c8e39955336106065eab68ada9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2FwcGxlZnJlZWZvcm0v&ntb=1
+                - img "全球 Web 图标" [ref=f4e91]
+                - generic [ref=f4e92]:
+                  - generic [ref=f4e93]: Reddit
+                  - generic [ref=f4e95]:
+                    - generic [ref=f4e96]: https://www.reddit.com › applefreeform
+                    - generic [ref=f4e97]: 翻译此结果
+              - heading [level=2] [ref=f4e98]:
+                - link "applefreeform - Reddit" [ref=f4e99] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=2a45f14efab1bb847661ad007ca797c650eac4c8e39955336106065eab68ada9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2FwcGxlZnJlZWZvcm0v&ntb=1
+              - paragraph [ref=f4e100]:
+                - text: I’m thinking I’m going to have to use another app or platform where my writing documents create a URL I …
+                - link "阅读更多" [ref=f4e101] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=2a45f14efab1bb847661ad007ca797c650eac4c8e39955336106065eab68ada9JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2FwcGxlZnJlZWZvcm0v&ntb=1
+        - listitem [ref=f4e103]:
+          - link "Reddit" [ref=f4e105] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=19e1a69c6789c1a4d5cf26920fbf2866a0242ad4c99253dbf0590877c6b2aaeaJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lwYWQvY29tbWVudHMvMWJpcDVmNi9yYW50X2FwcGxlX2ZyZWVmb3JtX2lzX3ZlcnlfYmFkLw&ntb=1
+            - img "全球 Web 图标" [ref=f4e109]
+            - generic [ref=f4e110]:
+              - generic [ref=f4e111]: Reddit
+              - generic [ref=f4e113]:
+                - generic [ref=f4e114]: https://www.reddit.com › ipad › comments › ...
+                - generic [ref=f4e115]: 翻译此结果
+          - heading [level=2] [ref=f4e116]:
+            - 'link "[Rant] Apple Freeform is very bad : r/ipad - Reddit" [ref=f4e117] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=19e1a69c6789c1a4d5cf26920fbf2866a0242ad4c99253dbf0590877c6b2aaeaJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lwYWQvY29tbWVudHMvMWJpcDVmNi9yYW50X2FwcGxlX2ZyZWVmb3JtX2lzX3ZlcnlfYmFkLw&ntb=1
+          - paragraph [ref=f4e119]: Freeform feels like a half-baked, rushed-to-market app and lacks the same quality that I expect from the other 1st party apps that …
+        - listitem [ref=f4e120]:
+          - link "Apple Support Community" [ref=f4e122] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=5507fcbf238aaa6970462b2748dccf51e5de7b126630341314167d35046b8da2JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaXNjdXNzaW9ucy5hcHBsZS5jb20vdGhyZWFkLzI1NDYyMDg4OA&ntb=1
+            - generic [ref=f4e127]:
+              - generic [ref=f4e128]: Apple Support Community
+              - generic [ref=f4e130]:
+                - generic [ref=f4e131]: https://discussions.apple.com › thread
+                - generic [ref=f4e132]: 翻译此结果
+          - heading [level=2] [ref=f4e133]:
+            - link "Apple Freeform is so lagging when using A… - Apple Community" [ref=f4e134] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=5507fcbf238aaa6970462b2748dccf51e5de7b126630341314167d35046b8da2JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaXNjdXNzaW9ucy5hcHBsZS5jb20vdGhyZWFkLzI1NDYyMDg4OA&ntb=1
+          - paragraph [ref=f4e136]: 2023年2月8日 · After writing a first few chapters, the screen is getting laggy when using Apple Pencil. It only happens in Freeform. …
+        - listitem [ref=f4e137]:
+          - link "Apple Support Community" [ref=f4e139] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1dab0ddfb038d9a68c9b26e3eb87b660477b0729acf2ac17e8e9db541e4641ecJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaXNjdXNzaW9ucy5hcHBsZS5jb20vdGhyZWFkLzI1NTczNjMzNw&ntb=1
+            - generic [ref=f4e144]:
+              - generic [ref=f4e145]: Apple Support Community
+              - generic [ref=f4e147]:
+                - generic [ref=f4e148]: https://discussions.apple.com › thread
+                - generic [ref=f4e149]: 翻译此结果
+          - heading [level=2] [ref=f4e150]:
+            - link "New iPad M4 - Freeform draining battery, … - Apple Community" [ref=f4e151] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=1dab0ddfb038d9a68c9b26e3eb87b660477b0729acf2ac17e8e9db541e4641ecJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9kaXNjdXNzaW9ucy5hcHBsZS5jb20vdGhyZWFkLzI1NTczNjMzNw&ntb=1
+          - paragraph [ref=f4e153]: 2024年8月28日 · It's a nice upgrade, BUT the Freeform problem STILL persists! AND, with freeform opened (and no apps running in …
+        - listitem [ref=f4e154]:
+          - link "howtogadget.blog" [ref=f4e156] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=c3c0e203665e81fc2beb54ff2f26acf8fc706ab51ec918592ab585663c17d9a7JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ob3d0b2dhZGdldC5ibG9nL2FwcGxlLWZyZWVmb3JtLWFwcC1saW1pdGF0aW9ucy1yZWFzb25z&ntb=1
+            - generic [ref=f4e161]:
+              - generic [ref=f4e162]: howtogadget.blog
+              - generic [ref=f4e164]:
+                - generic [ref=f4e165]: https://howtogadget.blog › apple-freeform-app-limitations-reasons
+                - generic [ref=f4e166]: 翻译此结果
+          - heading [level=2] [ref=f4e167]:
+            - link "8 Reasons Apple's Freeform App Isn't for Everyone [Analysis]" [ref=f4e168] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=c3c0e203665e81fc2beb54ff2f26acf8fc706ab51ec918592ab585663c17d9a7JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ob3d0b2dhZGdldC5ibG9nL2FwcGxlLWZyZWVmb3JtLWFwcC1saW1pdGF0aW9ucy1yZWFzb25z&ntb=1
+          - paragraph [ref=f4e170]: 2026年7月16日 · Discover 8 reasons why Apple's Freeform app might fail your workflow. From ecosystem lock-in to lack of structure, …
+        - listitem [ref=f4e171]:
+          - link "知乎" [ref=f4e173] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=e03256c52c31e900f58aa25194303d569ce74ffc571757a2e60a08e877a942aeJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzU2MjczNzEyNg&ntb=1
+            - img "全球 Web 图标" [ref=f4e177]
+            - generic [ref=f4e178]:
+              - generic [ref=f4e179]: 知乎
+              - generic [ref=f4e180]: https://www.zhihu.com › question
+          - heading [level=2] [ref=f4e183]:
+            - link "苹果推出的无边记（Apple Freeform）软件上手体验怎么样？" [ref=f4e184] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=e03256c52c31e900f58aa25194303d569ce74ffc571757a2e60a08e877a942aeJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzU2MjczNzEyNg&ntb=1
+          - paragraph [ref=f4e186]: 刚刚更新了iPad OS 16.2正式版，来聊一下 Freeform 无边记的使用体验， Freeform 无边记是一款效率软件和笔记软件，同时也是免费 …
+        - listitem [ref=f4e187]:
+          - link "Screen Rant" [ref=f4e189] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1b3bc5ab1fe280a53e9f3e4571351d75331322f2846bcf4321d62296cc16e646JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zY3JlZW5yYW50LmNvbS9hcHBsZS1ub3Rlcy12cy1mcmVlZm9ybS1ub3RlLXRha2luZy1hcHAtY29tcGFyaXNvbi8&ntb=1
+            - generic [ref=f4e194]:
+              - generic [ref=f4e195]: Screen Rant
+              - generic [ref=f4e197]:
+                - generic [ref=f4e198]: https://screenrant.com › apple-notes-vs-freeform...
+                - generic [ref=f4e199]: 翻译此结果
+          - heading [level=2] [ref=f4e200]:
+            - 'link "Notes Vs. Freeform: Which Apple App Is Best For Note-Taking?" [ref=f4e201] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=1b3bc5ab1fe280a53e9f3e4571351d75331322f2846bcf4321d62296cc16e646JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zY3JlZW5yYW50LmNvbS9hcHBsZS1ub3Rlcy12cy1mcmVlZm9ybS1ub3RlLXRha2luZy1hcHAtY29tcGFyaXNvbi8&ntb=1
+          - paragraph [ref=f4e203]: 2023年7月16日 · While there isn't unlimited space on a Freeform Board, there's a lot more room for content and flexibility when …
+        - listitem [ref=f4e204]:
+          - link "soydemac.com" [ref=f4e206] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=e5f7eee6686ea2d614c5a4a731c122242b2d0ae5227442e6431c882fcc13f8d0JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9lbi5zb3lkZW1hYy5jb20vSG93LXRvLXVzZS1BcHBsZS1GcmVlZm9ybS1vbi1XaW5kb3dzLWRldmljZXMlM0EtcG9zc2liaWxpdGllcy1hbmQtbGltaXRhdGlvbnMv&ntb=1
+            - generic [ref=f4e211]:
+              - generic [ref=f4e212]: soydemac.com
+              - generic [ref=f4e214]:
+                - generic [ref=f4e215]: https://en.soydemac.com › How-to-use-Apple-Freeform...
+                - generic [ref=f4e216]: 翻译此结果
+          - heading [level=2] [ref=f4e217]:
+            - 'link "How to use Apple''s Freeform on Windows devices: possibilities and ..." [ref=f4e218] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=e5f7eee6686ea2d614c5a4a731c122242b2d0ae5227442e6431c882fcc13f8d0JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9lbi5zb3lkZW1hYy5jb20vSG93LXRvLXVzZS1BcHBsZS1GcmVlZm9ybS1vbi1XaW5kb3dzLWRldmljZXMlM0EtcG9zc2liaWxpdGllcy1hbmQtbGltaXRhdGlvbnMv&ntb=1
+          - paragraph [ref=f4e220]: Want to use Freeform on Windows? Discover alternatives and how to share your Apple digital work, even from a PC.
+        - listitem [ref=f4e221]:
+          - link "workapes.com" [ref=f4e223] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=9d8073b2d2e79023839482e7c4cfe40debb38125f3f7275b258bd8e15346d00dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ibG9nLndvcmthcGVzLmNvbS9hLXJldmlldy1vZi1mcmVlZm9ybS1hLWRpZ2l0YWwtd2hpdGVib2FyZC1hcHAv&ntb=1
+            - img "全球 Web 图标" [ref=f4e227]
+            - generic [ref=f4e228]:
+              - generic [ref=f4e229]: workapes.com
+              - generic [ref=f4e231]:
+                - generic [ref=f4e232]: https://blog.workapes.com › a-review-of-freeform-a...
+                - generic [ref=f4e233]: 翻译此结果
+          - heading [level=2] [ref=f4e234]:
+            - 'link "A Review of Freeform: A Digital Whiteboard App - Workapes Blog :" [ref=f4e235] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=9d8073b2d2e79023839482e7c4cfe40debb38125f3f7275b258bd8e15346d00dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9ibG9nLndvcmthcGVzLmNvbS9hLXJldmlldy1vZi1mcmVlZm9ybS1hLWRpZ2l0YWwtd2hpdGVib2FyZC1hcHAv&ntb=1
+          - paragraph [ref=f4e237]: 2023年11月21日 · Freeform is an excellent app for brainstorming and collaborating, but it has some significant limitations. The app's …
+        - listitem [ref=f4e238]:
+          - link "Setapp" [ref=f4e240] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=73022c7332afe205446b63f719de486e59a7f0fcca753b1ba97a49cbc4dcb90dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zZXRhcHAuY29tL2xpZmVzdHlsZS9hcHBsZS1mcmVlZm9ybS1hbHRlcm5hdGl2ZXM&ntb=1
+            - generic [ref=f4e245]:
+              - generic [ref=f4e246]: Setapp
+              - generic [ref=f4e248]:
+                - generic [ref=f4e249]: https://setapp.com › lifestyle › apple-freeform-alternatives
+                - generic [ref=f4e250]: 翻译此结果
+          - heading [level=2] [ref=f4e251]:
+            - link "Best Apple Freeform alternatives for Mac & iPad" [ref=f4e252] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=73022c7332afe205446b63f719de486e59a7f0fcca753b1ba97a49cbc4dcb90dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9zZXRhcHAuY29tL2xpZmVzdHlsZS9hcHBsZS1mcmVlZm9ybS1hbHRlcm5hdGl2ZXM&ntb=1
+          - paragraph [ref=f4e254]: 2026年7月14日 · Compare 6 whiteboard apps that do what Apple Freeform can't — from mind maps to team boards — with pros, …
+        - listitem [ref=f4e255]:
+          - generic [ref=f4e257]:
+            - heading "其他用户还问了以下问题" [level=2] [ref=f4e258]
+            - list [ref=f4e262]:
+              - listitem [ref=f4e263]:
+                - heading [level=3] [ref=f4e264]:
+                  - button "Does Freeform work on iPad?" [ref=f4e265] [cursor=pointer]
+              - listitem [ref=f4e267]:
+                - heading [level=3] [ref=f4e268]:
+                  - button "Does Freeform work on Mac?" [ref=f4e269] [cursor=pointer]
+              - listitem [ref=f4e271]:
+                - heading [level=3] [ref=f4e272]:
+                  - button "Is freeform better than apple notes?" [ref=f4e273] [cursor=pointer]
+              - listitem [ref=f4e275]:
+                - heading [level=3] [ref=f4e276]:
+                  - button "Is freeform the default note-taking app on Apple devices?" [ref=f4e277] [cursor=pointer]
+        - listitem [ref=f4e280]:
+          - navigation "Apple Freeform app limitations reddit 的更多搜索结果":
+            - list:
+              - listitem [ref=f4e281]:
+                - generic "第 1 页" [ref=f4e282]: "1"
+              - listitem [ref=f4e283]:
+                - link "第 2 页" [ref=f4e284] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+app+limitations+reddit&FPIG=D1377CA9F0844BDE92A703F86E2DA2AB&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=f4e285]:
+                - link "第 3 页" [ref=f4e286] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+app+limitations+reddit&FPIG=D1377CA9F0844BDE92A703F86E2DA2AB&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=f4e287]:
+                - link "下一页" [ref=f4e288] [cursor=pointer]:
+                  - /url: /search?q=Apple+Freeform+app+limitations+reddit&FPIG=D1377CA9F0844BDE92A703F86E2DA2AB&first=11&FORM=PORE
+    - complementary "更多结果" [ref=f4e289]:
+      - list
+  - contentinfo [ref=f4e290]:
+    - generic [ref=f4e291]:
+      - list:
+        - listitem [ref=f4e292]:
+          - link "隐私" [ref=f4e293] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d660dfeed4c7740b4c04ebab64e8cff0d315208bd6440962533707a517911c01JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=f4e294]:
+          - link "条款" [ref=f4e295] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=962d8e0a64d73880b363a406cb28d0387916f70e99e4f804c717e77523f62567JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1

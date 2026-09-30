@@ -1,0 +1,267 @@
+- generic [active] [ref=f8e1]:
+  - banner [ref=f8e2]:
+    - button "跳至内容" [ref=f8e3] [cursor=pointer]
+    - button "辅助功能反馈" [ref=f8e6] [cursor=pointer]
+    - generic [ref=f8e9]:
+      - link [ref=f8e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "返回到必应搜索" [level=1] [ref=f8e11]
+      - search [ref=f8e12]:
+        - button "搜索" [ref=f8e15] [cursor=pointer]
+        - searchbox "在此处输入你的搜索 — 输入时会显示搜索建议" [ref=f8e16]: iThoughts subscription reddit
+        - generic [ref=f8e17] [cursor=pointer]
+        - button "使用图像搜索" [ref=f8e22] [cursor=pointer]
+    - complementary "帐户奖励和偏好设置" [ref=f8e24]:
+      - button "Microsoft Rewards" [ref=f8e25] [cursor=pointer]:
+        - generic [ref=f8e26]: Rewards
+      - link "登录" [ref=f8e42] [cursor=pointer]:
+        - /url: javascript:void(0)
+    - navigation "主菜单" [ref=f8e44]:
+      - list [ref=f8e45]:
+        - listitem [ref=f8e46]:
+          - link "全部" [ref=f8e47] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=f8e48]:
+          - link "搜索" [ref=f8e49] [cursor=pointer]:
+            - /url: /copilotsearch?q=iThoughts+subscription+reddit&FORM=CSSCOP
+        - listitem [ref=f8e52]:
+          - link "图片" [ref=f8e53] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=e510a312d286ca4b8a72a52ffbdcef7fedfc759321d08155af14016da3928aa8JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L2ltYWdlcy9zZWFyY2g_cT1pVGhvdWdodHMrc3Vic2NyaXB0aW9uK3JlZGRpdCZGT1JNPUhEUlNDMw&ntb=1
+        - listitem [ref=f8e54]:
+          - link "视频" [ref=f8e55] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=cefeabe8100e4152a8a86dae38fcb0168c4ac61136a7b72bc12cc963587f0ed2JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1pVGhvdWdodHMrc3Vic2NyaXB0aW9uK3JlZGRpdCZGT1JNPUhEUlNDNA&ntb=1
+        - listitem [ref=f8e56]:
+          - link "地图" [ref=f8e57] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=116389e45a2f4f0ac263a5769b0521300a024a825608153c39c383441f998c07JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L21hcHM_cT1pVGhvdWdodHMrc3Vic2NyaXB0aW9uK3JlZGRpdCZGT1JNPUhEUlNDNg&ntb=1
+        - listitem [ref=f8e58]:
+          - link "资讯" [ref=f8e59] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=c022178c21dd4e87f7a25b70632b4f20fcdcd6516a2c968a3c43958a8ed12909JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L25ld3Mvc2VhcmNoP3E9aVRob3VnaHRzK3N1YnNjcmlwdGlvbityZWRkaXQmRk9STT1IRFJTQzc&ntb=1
+        - listitem [ref=f8e60]:
+          - button [ref=f8e61] [cursor=pointer]
+  - generic [ref=f8e65]:
+    - main "搜索结果" [ref=f8e66]:
+      - generic [ref=f8e68]:
+        - generic [aria-hidden] [ref=f8e69]:
+          - generic [ref=f8e70] [cursor=pointer]
+          - generic [ref=f8e72] [cursor=pointer]
+          - generic [ref=f8e75] [cursor=pointer]
+        - text: 约 106,000 个结果
+      - list [ref=f8e78]:
+        - listitem [ref=f8e79]:
+          - link "Reddit" [ref=f8e81] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=fae98463fab5838b65184266caf039e4335a234cb474f06d0d06b5196a1ac544JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzLzE0a2RxdmsvdXNlZF9pdGhvdWdodHNfZm9yX2FfbW9udGhfaV93YXNfd29uZGVyaW5nX3doYXQv&ntb=1
+            - img "全球 Web 图标" [ref=f8e85]
+            - generic [ref=f8e86]:
+              - generic [ref=f8e87]: Reddit
+              - generic [ref=f8e89]:
+                - generic [ref=f8e90]: https://www.reddit.com › mindmapping › comments
+                - generic [ref=f8e91]: 翻译此结果
+          - heading [level=2] [ref=f8e92]:
+            - link "Used iThoughts for a month. I was wondering what would happen" [ref=f8e93] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=fae98463fab5838b65184266caf039e4335a234cb474f06d0d06b5196a1ac544JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzLzE0a2RxdmsvdXNlZF9pdGhvdWdodHNfZm9yX2FfbW9udGhfaV93YXNfd29uZGVyaW5nX3doYXQv&ntb=1
+          - generic [ref=f8e94]:
+            - paragraph [ref=f8e95]:
+              - text: 4.2K subscribers in the mindmapping community. Mindmapping is a brainstorming technique that allows you to solve problems and …
+              - link "阅读更多" [ref=f8e96] [cursor=pointer]:
+                - /url: https://www.bing.com/ck/a?!&&p=fae98463fab5838b65184266caf039e4335a234cb474f06d0d06b5196a1ac544JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRtYXBwaW5nL2NvbW1lbnRzLzE0a2RxdmsvdXNlZF9pdGhvdWdodHNfZm9yX2FfbW9udGhfaV93YXNfd29uZGVyaW5nX3doYXQv&ntb=1
+            - generic [ref=f8e98]:
+              - list [ref=f8e99]:
+                - listitem [ref=f8e100]:
+                  - generic [ref=f8e101]: "评论数: 8"
+              - list
+        - listitem [ref=f8e102]:
+          - link "Reddit" [ref=f8e104] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=bb0d62cddc6caa06527208200b2d82903b041cebf77ca75aae1f8c4d403a2dc3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lvcy9jb21tZW50cy8xYW1pNHBoL2l0aG91Z3Roc19jbG91c2VkX2FwcF9taW5kbm9kZS8&ntb=1
+            - img "全球 Web 图标" [ref=f8e108]
+            - generic [ref=f8e109]:
+              - generic [ref=f8e110]: Reddit
+              - generic [ref=f8e112]:
+                - generic [ref=f8e113]: https://www.reddit.com › ios › comments › ...
+                - generic [ref=f8e114]: 翻译此结果
+          - heading [level=2] [ref=f8e115]:
+            - 'link "iThougths cloused (app mindnode) : r/ios - Reddit" [ref=f8e116] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=bb0d62cddc6caa06527208200b2d82903b041cebf77ca75aae1f8c4d403a2dc3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL2lvcy9jb21tZW50cy8xYW1pNHBoL2l0aG91Z3Roc19jbG91c2VkX2FwcF9taW5kbm9kZS8&ntb=1
+          - paragraph [ref=f8e118]: Escape has a Hybrid Subscription, it's like when you buy an app for a fixed price, and then you upgrade when you want new features. …
+        - listitem [ref=f8e119]:
+          - link "知乎专栏" [ref=f8e121] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=abf990852571d839a6c914a921d5217eab6224dde5ce82cf5ede3699a2ed1a96JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC82ODY2Mzg4OTg&ntb=1
+            - generic [ref=f8e126]:
+              - generic [ref=f8e127]: 知乎专栏
+              - generic [ref=f8e128]: https://zhuanlan.zhihu.com
+          - heading [level=2] [ref=f8e131]:
+            - link "如何看待一代思维导图神器iThoughts的落幕 - 知乎" [ref=f8e132] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=abf990852571d839a6c914a921d5217eab6224dde5ce82cf5ede3699a2ed1a96JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC82ODY2Mzg4OTg&ntb=1
+          - paragraph [ref=f8e134]: 一代思维导图神器 iThoughts 在2024年1月30号停止销售了（toketaware.com/），之前曾经在 Microsoft Store 上购买的ithoughts，只 …
+        - listitem [ref=f8e135]:
+          - link "V2EX" [ref=f8e137] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=0ad0afc89ca9bf414f852db257e7be96001c83f585bfee4a10d2d53c198c106bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC8xMDkyODIw&ntb=1
+            - img "全球 Web 图标" [ref=f8e141]
+            - generic [ref=f8e142]:
+              - generic [ref=f8e143]: V2EX
+              - generic [ref=f8e144]: https://www.v2ex.com
+          - heading [level=2] [ref=f8e147]:
+            - link "iThoughts 下架了，能否还能下载到 ios 旧版本呢？ - V2EX" [ref=f8e148] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=0ad0afc89ca9bf414f852db257e7be96001c83f585bfee4a10d2d53c198c106bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC8xMDkyODIw&ntb=1
+          - paragraph [ref=f8e150]: 作者停止开发了，然后应该是证书到期了，就被苹果下架了 那么不知以前的旧版本（我买过）还能下载到吗？ 有没有什么便捷的办 …
+        - listitem [ref=f8e151]:
+          - link "Reddit" [ref=f8e153] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=bee185388ae4bb7bcf0086f9e4fd697f2706ce90df4684529724a0e4cc8a7587JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21hY2FwcHMvY29tbWVudHMvcW5pNmpoL3JlY29tbWVuZF9tZV9hX25vdF9zdWJzY3JpcHRpb25fYmFzZWRfbWluZF9tYXBfYXBwLw&ntb=1
+            - generic [ref=f8e158]:
+              - generic [ref=f8e159]: Reddit
+              - generic [ref=f8e161]:
+                - generic [ref=f8e162]: https://www.reddit.com › macapps › comments › ...
+                - generic [ref=f8e163]: 翻译此结果
+          - heading [level=2] [ref=f8e164]:
+            - link "Recommend me a not subscription based mind map app - Reddit" [ref=f8e165] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=bee185388ae4bb7bcf0086f9e4fd697f2706ce90df4684529724a0e4cc8a7587JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21hY2FwcHMvY29tbWVudHMvcW5pNmpoL3JlY29tbWVuZF9tZV9hX25vdF9zdWJzY3JpcHRpb25fYmFzZWRfbWluZF9tYXBfYXBwLw&ntb=1
+          - paragraph [ref=f8e167]: Depending on what other apps you’re paying subscriptions for you might be able to consolidate costs with Setapp, it’s pricy but …
+        - listitem [ref=f8e168]:
+          - link "Podfeet Podcasts" [ref=f8e170] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=61d039ffdd277540a77715199d239f5c8baa898ae34e9ba8da37e4544bdccca6JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucG9kZmVldC5jb20vYmxvZy8yMDI0LzAzL2l0aG91Z2h0cy1yZXBsYWNlbWVudC8&ntb=1
+            - generic [ref=f8e175]:
+              - generic [ref=f8e176]: Podfeet Podcasts
+              - generic [ref=f8e178]:
+                - generic [ref=f8e179]: https://www.podfeet.com › blog › ithoughts-replacement
+                - generic [ref=f8e180]: 翻译此结果
+          - heading [level=2] [ref=f8e181]:
+            - link "RIP iThoughts – Choosing a New Mind Mapping Tool - Podfeet Podcasts" [ref=f8e182] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=61d039ffdd277540a77715199d239f5c8baa898ae34e9ba8da37e4544bdccca6JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucG9kZmVldC5jb20vYmxvZy8yMDI0LzAzL2l0aG91Z2h0cy1yZXBsYWNlbWVudC8&ntb=1
+          - paragraph [ref=f8e184]: 2024年3月6日 · EdrawMind met my pricing criteria with both a subscription price at $59/year and a perpetual price of $118. You get …
+        - listitem [ref=f8e185]:
+          - link "百度贴吧" [ref=f8e187] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=746752847e86850a8aa0fc650e388985efdfdf55a8db0c6791c84e31624ff8d8JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly90aWViYS5iYWlkdS5jb20vcC85MTMwNTQwMzQ0&ntb=1
+            - generic [ref=f8e192]:
+              - generic [ref=f8e193]: 百度贴吧
+              - generic [ref=f8e194]: https://tieba.baidu.com
+          - heading [level=2] [ref=f8e197]:
+            - link "ithoughts完全下架会影响后续使用吗_ithoughts吧_百度贴吧" [ref=f8e198] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=746752847e86850a8aa0fc650e388985efdfdf55a8db0c6791c84e31624ff8d8JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly90aWViYS5iYWlkdS5jb20vcC85MTMwNTQwMzQ0&ntb=1
+          - paragraph [ref=f8e200]: 最近才发现公司倒闭，发布者删除这个软件了，我现在还能用，但是担心后续ithoughts里的复习资料会突然没有！ 请问大家！
+        - listitem [ref=f8e201]:
+          - link "Marginnote" [ref=f8e203] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=e8a8ebd9690b2e1473c55e1b80a28cbb352ea6a204684763cac0b7b819418d05JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9mb3J1bS5tYXJnaW5ub3RlLmNvbS90L2l0aG91Z2h0cy1oYXMtY2Vhc2VkLXRvLWJlLzk1ODI&ntb=1
+            - generic [ref=f8e208]:
+              - generic [ref=f8e209]: Marginnote
+              - generic [ref=f8e211]:
+                - generic [ref=f8e212]: https://forum.marginnote.com › ithoughts-has-ceased-to-be
+                - generic [ref=f8e213]: 翻译此结果
+          - heading [level=2] [ref=f8e214]:
+            - link "iThoughts has ceased to be - Start Asking - Marginnote" [ref=f8e215] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=e8a8ebd9690b2e1473c55e1b80a28cbb352ea6a204684763cac0b7b819418d05JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9mb3J1bS5tYXJnaW5ub3RlLmNvbS90L2l0aG91Z2h0cy1oYXMtY2Vhc2VkLXRvLWJlLzk1ODI&ntb=1
+          - paragraph [ref=f8e217]: 2024年8月14日 · While this is somewhat old news, as it happened in January of 2024, I just learned today that toketaware has …
+        - listitem [ref=f8e218]:
+          - link "toketaWare" [ref=f8e220] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1268b3b168ebb655f38ef34f96b295f5c4ba1586273d4ff623183e9e5e23859aJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudG9rZXRhd2FyZS5jb20v&ntb=1
+            - generic [ref=f8e225]:
+              - generic [ref=f8e226]: toketaWare
+              - generic [ref=f8e228]:
+                - generic [ref=f8e229]: https://www.toketaware.com
+                - generic [ref=f8e230]: 翻译此结果
+          - heading [level=2] [ref=f8e231]:
+            - link "toketaWare" [ref=f8e232] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=1268b3b168ebb655f38ef34f96b295f5c4ba1586273d4ff623183e9e5e23859aJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudG9rZXRhd2FyZS5jb20v&ntb=1
+          - paragraph [ref=f8e234]: 2024年1月30日 · My business, toketaWare, has now ceased trading after 11years. I would like to thank everyone who has helped and …
+        - listitem [ref=f8e235]:
+          - link "literatureandlatte.com" [ref=f8e237] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=4c2862b9a2b48c3bc3e0611a0e5e70e44ae9774bd070054a26c217ef80da5c23JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9mb3J1bS5saXRlcmF0dXJlYW5kbGF0dGUuY29tL3QvaXRob3VnaHRzLW5vLWxvbmdlci13aXRoLXVzLzE1MzAyMg&ntb=1
+            - generic [ref=f8e242]:
+              - generic [ref=f8e243]: literatureandlatte.com
+              - generic [ref=f8e245]:
+                - generic [ref=f8e246]: https://forum.literatureandlatte.com › ithoughts-no-longer-with-us
+                - generic [ref=f8e247]: 翻译此结果
+          - heading [level=2] [ref=f8e248]:
+            - link "iThoughts no longer with us - Other Software & Development" [ref=f8e249] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=4c2862b9a2b48c3bc3e0611a0e5e70e44ae9774bd070054a26c217ef80da5c23JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9mb3J1bS5saXRlcmF0dXJlYW5kbGF0dGUuY29tL3QvaXRob3VnaHRzLW5vLWxvbmdlci13aXRoLXVzLzE1MzAyMg&ntb=1
+          - paragraph [ref=f8e251]: 2026年2月5日 · A bad news for those who used iThoughts as a (temporary) companion to Scapple on the iPhone/iPad. The …
+        - listitem [ref=f8e252]:
+          - generic [ref=f8e254]:
+            - heading "其他用户还问了以下问题" [level=2] [ref=f8e255]
+            - list [ref=f8e259]:
+              - listitem [ref=f8e260]:
+                - heading [level=3] [ref=f8e261]:
+                  - button "Can ithoughts be downloaded from the App Store?" [ref=f8e262] [cursor=pointer]
+              - listitem [ref=f8e264]:
+                - heading [level=3] [ref=f8e265]:
+                  - button "Does ithoughts still work?" [ref=f8e266] [cursor=pointer]
+              - listitem [ref=f8e268]:
+                - heading [level=3] [ref=f8e269]:
+                  - button "Where can I find alternatives to ithoughts?" [ref=f8e270] [cursor=pointer]
+              - listitem [ref=f8e272]:
+                - heading [level=3] [ref=f8e273]:
+                  - button "Is ithoughts a good MINDMAP app?" [ref=f8e274] [cursor=pointer]
+        - listitem [ref=f8e277]:
+          - generic [ref=f8e278]:
+            - heading [level=2] [ref=f8e279]:
+              - strong [ref=f8e280]: iThoughts subscription reddit
+              - text: 的相关搜索
+            - list [ref=f8e281]:
+              - listitem [ref=f8e282]:
+                - link [ref=f8e283] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=0b293d94ca45f9c413ce305c3ed4334ddefb8fc477e3190192301655c5e92b63JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyslZTclOWYlYTUlZTQlYjklOGUmRk9STT1RU1JFMQ&ntb=1
+                  - generic [ref=f8e285]:
+                    - text: ithoughts
+                    - strong [ref=f8e286]: 知乎
+              - listitem [ref=f8e287]:
+                - link [ref=f8e288] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=ec755e0c86b41d3440047943d74f9227474ffbf071931702f898762069fc09b7JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyslZTQlYjglOGIlZTglYmQlYmQmRk9STT1RU1JFMg&ntb=1
+                  - generic [ref=f8e290]:
+                    - text: ithoughts
+                    - strong [ref=f8e291]: 下载
+              - listitem [ref=f8e292]:
+                - link [ref=f8e293] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=527d3b053998f6b472edfb850919ad18c51013c97b210c07f52e053b75c74eecJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyVlNiU5OCVhZiVlNCViYiU4MCVlNCViOSU4OCZGT1JNPVFTUkUz&ntb=1
+                  - generic [ref=f8e295]:
+                    - text: ithoughts
+                    - strong [ref=f8e296]: 是什么
+        - listitem [ref=f8e297]:
+          - link "某些结果已被删除" [ref=f8e299] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=11b3cc2cde7b3b694e3909433b43156c82527f0a9b8199a396679e06a1293121JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9NjE3MzUw&ntb=1
+        - listitem [ref=f8e300]:
+          - navigation "iThoughts subscription reddit 的更多搜索结果":
+            - list:
+              - listitem [ref=f8e301]:
+                - generic "第 1 页" [ref=f8e302]: "1"
+              - listitem [ref=f8e303]:
+                - link "第 2 页" [ref=f8e304] [cursor=pointer]:
+                  - /url: /search?q=iThoughts+subscription+reddit&FPIG=39213FF94A754EBE95FD19D956570D40&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=f8e305]:
+                - link "第 3 页" [ref=f8e306] [cursor=pointer]:
+                  - /url: /search?q=iThoughts+subscription+reddit&FPIG=39213FF94A754EBE95FD19D956570D40&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=f8e307]:
+                - link "下一页" [ref=f8e308] [cursor=pointer]:
+                  - /url: /search?q=iThoughts+subscription+reddit&FPIG=39213FF94A754EBE95FD19D956570D40&first=11&FORM=PORE
+    - complementary "更多结果" [ref=f8e309]:
+      - list [ref=f8e310]:
+        - listitem [ref=f8e311]:
+          - generic "相关搜索" [ref=f8e312]:
+            - generic [ref=f8e314]:
+              - heading [level=2] [ref=f8e316]:
+                - strong [ref=f8e317]: iThoughts subscription reddit
+                - text: 的相关搜索
+              - generic [ref=f8e318]:
+                - link [ref=f8e320] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=c64c0590ffaca03e86055e64aa2c62758ae65440675612c4e135ae13806a054aJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyslZTclOWYlYTUlZTQlYjklOGUmRk9STT1SNUZE&ntb=1
+                  - generic [ref=f8e322]:
+                    - text: ithoughts
+                    - strong [ref=f8e323]: 知乎
+                - link [ref=f8e325] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=8a2a58948d0db1237252472663a0b93187a99d93690c5682dbc7e8b9caa57489JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyslZTQlYjglOGIlZTglYmQlYmQmRk9STT1SNUZEMQ&ntb=1
+                  - generic [ref=f8e327]:
+                    - text: ithoughts
+                    - strong [ref=f8e328]: 下载
+                - link [ref=f8e330] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=a65107bff823a1780ec9ec09726581f0bc54274f611ef0e4efaa9548c55eea83JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPWl0aG91Z2h0cyVlNiU5OCVhZiVlNCViYiU4MCVlNCViOSU4OCZGT1JNPVI1RkQy&ntb=1
+                  - generic [ref=f8e332]:
+                    - text: ithoughts
+                    - strong [ref=f8e333]: 是什么
+  - contentinfo [ref=f8e334]:
+    - generic [ref=f8e335]:
+      - list:
+        - listitem [ref=f8e336]:
+          - link "隐私" [ref=f8e337] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d660dfeed4c7740b4c04ebab64e8cff0d315208bd6440962533707a517911c01JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=f8e338]:
+          - link "条款" [ref=f8e339] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=962d8e0a64d73880b363a406cb28d0387916f70e99e4f804c717e77523f62567JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1

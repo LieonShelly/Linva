@@ -1,0 +1,257 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - button "跳至内容" [ref=f2e3] [cursor=pointer]
+    - button "辅助功能反馈" [ref=f2e6] [cursor=pointer]
+    - generic [ref=f2e9]:
+      - link [ref=f2e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "返回到必应搜索" [level=1] [ref=f2e11]
+      - search [ref=f2e12]:
+        - button "搜索" [ref=f2e15] [cursor=pointer]
+        - searchbox "在此处输入你的搜索 — 输入时会显示搜索建议" [ref=f2e16]: MindNode subscription too expensive reddit
+        - generic [ref=f2e17] [cursor=pointer]
+        - button "使用图像搜索" [ref=f2e22] [cursor=pointer]
+    - complementary "帐户奖励和偏好设置" [ref=f2e24]:
+      - button "Microsoft Rewards" [ref=f2e25] [cursor=pointer]
+      - link "登录" [ref=f2e26] [cursor=pointer]:
+        - /url: javascript:void(0)
+    - navigation "主菜单" [ref=f2e28]:
+      - list [ref=f2e29]:
+        - listitem [ref=f2e30]:
+          - link "全部" [ref=f2e31] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=f2e32]:
+          - link "搜索" [ref=f2e33] [cursor=pointer]:
+            - /url: /copilotsearch?q=MindNode+subscription+too+expensive+reddit&FORM=CSSCOP
+        - listitem [ref=f2e36]:
+          - link "图片" [ref=f2e37] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=180745ccf34fbbdd11e037c6bb3d5f0d50b82a8571216c5a4b20252cb4dfc9a3JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L2ltYWdlcy9zZWFyY2g_cT1NaW5kTm9kZStzdWJzY3JpcHRpb24rdG9vK2V4cGVuc2l2ZStyZWRkaXQmRk9STT1IRFJTQzM&ntb=1
+        - listitem [ref=f2e38]:
+          - link "视频" [ref=f2e39] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1bef808bd9a80451c8c8c7b5641e0fa5907fb5e01d0e845efdf3793cb8ea4993JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3ZpZGVvcy9zZWFyY2g_cT1NaW5kTm9kZStzdWJzY3JpcHRpb24rdG9vK2V4cGVuc2l2ZStyZWRkaXQmRk9STT1IRFJTQzQ&ntb=1
+        - listitem [ref=f2e40]:
+          - link "地图" [ref=f2e41] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=ddc78f16dc55301990c555c5fc608844fa150474d33c4b67fe06aa86d4a1af7fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L21hcHM_cT1NaW5kTm9kZStzdWJzY3JpcHRpb24rdG9vK2V4cGVuc2l2ZStyZWRkaXQmRk9STT1IRFJTQzY&ntb=1
+        - listitem [ref=f2e42]:
+          - link "资讯" [ref=f2e43] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=b26fd933dfda3409f9d27d0ac87296218058a04e8d4f9611bf69e58f6bf0c48cJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L25ld3Mvc2VhcmNoP3E9TWluZE5vZGUrc3Vic2NyaXB0aW9uK3RvbytleHBlbnNpdmUrcmVkZGl0JkZPUk09SERSU0M3&ntb=1
+        - listitem [ref=f2e44]:
+          - button [ref=f2e45] [cursor=pointer]
+  - generic [ref=f2e49]:
+    - main "搜索结果" [ref=f2e50]:
+      - generic [ref=f2e52]:
+        - generic [aria-hidden] [ref=f2e53]:
+          - generic [ref=f2e54] [cursor=pointer]
+          - generic [ref=f2e57] [cursor=pointer]
+          - generic [ref=f2e60] [cursor=pointer]
+        - text: 约 312 个结果
+      - list [ref=f2e63]:
+        - listitem [ref=f2e64]:
+          - link "Reddit" [ref=f2e66] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=7c52b89351365ddb445adc35a96aecc5b27cf9c74b20e9bb777db08b0b95ab78JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRub2RlL2NvbW1lbnRzL3MzNGZlMC9taW5kbm9kZS8&ntb=1
+            - generic [ref=f2e71]:
+              - generic [ref=f2e72]: Reddit
+              - generic [ref=f2e74]:
+                - generic [ref=f2e75]: https://www.reddit.com › mindnode › comments › mindnode
+                - generic [ref=f2e76]: 翻译此结果
+          - heading [level=2] [ref=f2e77]:
+            - 'link "Mindnode : r/mindnode - Reddit" [ref=f2e78] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=7c52b89351365ddb445adc35a96aecc5b27cf9c74b20e9bb777db08b0b95ab78JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRub2RlL2NvbW1lbnRzL3MzNGZlMC9taW5kbm9kZS8&ntb=1
+          - paragraph [ref=f2e80]:
+            - text: "This is what I was told: Hi Michael, you can reinstall the version of MindNode you purchased via the App Store using the same Apple …"
+            - link "阅读更多" [ref=f2e81] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=7c52b89351365ddb445adc35a96aecc5b27cf9c74b20e9bb777db08b0b95ab78JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRub2RlL2NvbW1lbnRzL3MzNGZlMC9taW5kbm9kZS8&ntb=1
+        - listitem [ref=f2e82]:
+          - link "Reddit" [ref=f2e84] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=6482ca0464f2aaeb1cfe425b4c60887d0f9ac77c45eb2a50414af11c0b9d0c5fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRub2RlLw&ntb=1
+            - generic [ref=f2e89]:
+              - generic [ref=f2e90]: Reddit
+              - generic [ref=f2e92]:
+                - generic [ref=f2e93]: https://www.reddit.com › mindnode
+                - generic [ref=f2e94]: 翻译此结果
+          - heading [level=2] [ref=f2e95]:
+            - link "MindNode - Reddit" [ref=f2e96] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=6482ca0464f2aaeb1cfe425b4c60887d0f9ac77c45eb2a50414af11c0b9d0c5fJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cucmVkZGl0LmNvbS9yL21pbmRub2RlLw&ntb=1
+          - paragraph [ref=f2e98]: I just paid for the subscription because I have been searching for a mindmap app that works smoothly for my iPad, and this one …
+        - listitem [ref=f2e99]:
+          - link "V2EX" [ref=f2e101] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=cc1bfac7ff116c79edcc5c1f0f31f00e30b1e5dce372d795408b81b33e940d88JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC84NzU5ODk&ntb=1
+            - generic [ref=f2e106]:
+              - generic [ref=f2e107]: V2EX
+              - generic [ref=f2e108]: https://www.v2ex.com
+          - heading [level=2] [ref=f2e111]:
+            - link "记 MindNode 7 买断版本下载的问题 - V2EX" [ref=f2e112] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=cc1bfac7ff116c79edcc5c1f0f31f00e30b1e5dce372d795408b81b33e940d88JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC84NzU5ODk&ntb=1
+          - paragraph [ref=f2e114]: 2022年8月28日 · XMind 一年 388 的订阅费用太贵了，还限制五台设备。 如果 XMind 能用学生优惠价格购买（这个需要提供学信网的 …
+        - listitem [ref=f2e115]:
+          - link "V2EX" [ref=f2e117] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=89f46b962cdd1074d463bf77b0431a23b6ea570164df9718f6b8c9803e206ff2JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC8xMDYyNjYz&ntb=1
+            - generic [ref=f2e122]:
+              - generic [ref=f2e123]: V2EX
+              - generic [ref=f2e124]: https://www.v2ex.com
+          - heading [level=2] [ref=f2e127]:
+            - link "MindNode 这个软件一般会有什么时间打折吗？ - V2EX" [ref=f2e128] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=89f46b962cdd1074d463bf77b0431a23b6ea570164df9718f6b8c9803e206ff2JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cudjJleC5jb20vdC8xMDYyNjYz&ntb=1
+          - paragraph [ref=f2e130]: 2024年8月5日 · MindNode 这个软件一般会有什么时间打折吗？
+        - listitem [ref=f2e131]:
+          - link "glarity.app" [ref=f2e133] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=5a4c9fc369ce27e4b7701a683c3fef471e07640ebe9bff064adf741ea5501e6dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9hc2thaS5nbGFyaXR5LmFwcC96aC1DTi9zZWFyY2gvTWluZE5vZGUtJUU0JUJCJUI3JUU2JUEwJUJDJUU2JTk4JUFGJUU1JTkwJUE2JUU1JTkwJTg4JUU3JTkwJTg2&ntb=1
+            - generic [ref=f2e138]:
+              - generic [ref=f2e139]: glarity.app
+              - generic [ref=f2e140]: https://askai.glarity.app › zh-CN › search › MindNode-价格是否合理
+          - heading [level=2] [ref=f2e143]:
+            - link "MindNode 价格是否合理？ - 问答 - Glarity" [ref=f2e144] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=5a4c9fc369ce27e4b7701a683c3fef471e07640ebe9bff064adf741ea5501e6dJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9hc2thaS5nbGFyaXR5LmFwcC96aC1DTi9zZWFyY2gvTWluZE5vZGUtJUU0JUJCJUI3JUU2JUEwJUJDJUU2JTk4JUFGJUU1JTkwJUE2JUU1JTkwJTg4JUU3JTkwJTg2&ntb=1
+          - paragraph [ref=f2e146]: 2025年4月24日 · 总的来说，MindNode 的价格是否合理取决于用户的需求和预算。 对于需要强大思维导图功能的用户来 …
+        - listitem [ref=f2e147]:
+          - link "appstoreprice.org" [ref=f2e149] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1d2cd4a770c41c5142fcb85da698ebcbc6aed42d916e424c23e9807006b31343JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9hcHBzdG9yZXByaWNlLm9yZy96aC9hcHBzLzY0NDYxMTY1MzI&ntb=1
+            - generic [ref=f2e154]:
+              - generic [ref=f2e155]: appstoreprice.org
+              - generic [ref=f2e156]: https://appstoreprice.org › zh › apps
+          - heading [level=2] [ref=f2e159]:
+            - link "MindNode 全球价格对比 - App Store Price" [ref=f2e160] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=1d2cd4a770c41c5142fcb85da698ebcbc6aed42d916e424c23e9807006b31343JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly9hcHBzdG9yZXByaWNlLm9yZy96aC9hcHBzLzY0NDYxMTY1MzI&ntb=1
+          - paragraph [ref=f2e162]: MindNode Plus is available as a monthly or yearly subscription and comes with a FREE trial.
+        - listitem [ref=f2e163]:
+          - link "MindNode" [ref=f2e165] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=5c99580e180f5a4c14bf9b8241a1b3784c2fae924e554a8b1c296f6d12eed86bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cubWluZG5vZGUuY29tL3N1cHBvcnQvZ3VpZGVzL21pbmRub2RlLXBsdXM&ntb=1
+            - generic [ref=f2e170]:
+              - generic [ref=f2e171]: MindNode
+              - generic [ref=f2e173]:
+                - generic [ref=f2e174]: https://www.mindnode.com › support › guides › mindnode-plus
+                - generic [ref=f2e175]: 翻译此结果
+          - heading [level=2] [ref=f2e176]:
+            - link "What is the MindNode Plus Subscription?" [ref=f2e177] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=5c99580e180f5a4c14bf9b8241a1b3784c2fae924e554a8b1c296f6d12eed86bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cubWluZG5vZGUuY29tL3N1cHBvcnQvZ3VpZGVzL21pbmRub2RlLXBsdXM&ntb=1
+          - paragraph [ref=f2e179]: We offer both a monthly and yearly subscription to MindNode Plus (Learn more about pricing). MindNode Plus comes with a free trial. …
+        - listitem [ref=f2e180]:
+          - link "smallmindmap.com" [ref=f2e182] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1be9e3f583364d64dc4faaa71537696bdf6740720065c12da8b7ebdf1e489c74JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuc21hbGxtaW5kbWFwLmNvbS9uZXdzL2ktc3BlbnQtNS15ZWFycy0yMDI2LTA1LTIxLmh0bWw&ntb=1
+            - generic [ref=f2e187]:
+              - generic [ref=f2e188]: smallmindmap.com
+              - generic [ref=f2e189]: https://www.smallmindmap.com › news
+          - heading [level=2] [ref=f2e192]:
+            - link "我在MindNode上花了5年。今年我为什么换掉了它。 - 小导图资讯" [ref=f2e193] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=1be9e3f583364d64dc4faaa71537696bdf6740720065c12da8b7ebdf1e489c74JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cuc21hbGxtaW5kbWFwLmNvbS9uZXdzL2ktc3BlbnQtNS15ZWFycy0yMDI2LTA1LTIxLmh0bWw&ntb=1
+          - paragraph [ref=f2e195]: 2026年5月21日 · 我从2018年开始使用MindNode。 曾深爱它简洁的Mac原生体验——从每周计划到读书笔记，它都是我的首选工具。 …
+        - listitem [ref=f2e196]:
+          - link "知乎专栏" [ref=f2e198] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=abb9a9a6f662581ab9843c20077a4c2bced4936a70dcb39b07d227a6b178c5f7JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC8yMjE2OTk1MQ&ntb=1
+            - generic [ref=f2e203]:
+              - generic [ref=f2e204]: 知乎专栏
+              - generic [ref=f2e205]: https://zhuanlan.zhihu.com
+          - heading [level=2] [ref=f2e208]:
+            - link "重磅限免｜原价 ¥68，最强思维导图软件 MindNode 限时免费" [ref=f2e209] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=abb9a9a6f662581ab9843c20077a4c2bced4936a70dcb39b07d227a6b178c5f7JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC8yMjE2OTk1MQ&ntb=1
+          - paragraph [ref=f2e211]: MindNode 是一款知名的思维导图应用，凭借强大的功能、颜值颇高的界面以及相当高的易用性，成为了 iOS 平台最优秀的 思维导图 …
+        - listitem [ref=f2e212]:
+          - link "MindNode" [ref=f2e214] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=0fd3649171bb2ef5fa3b618ca9080fad5c56b08029c99ba1eeeb24974f902f75JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cubWluZG5vZGUuY29tLw&ntb=1
+            - generic [ref=f2e219]:
+              - generic [ref=f2e220]: MindNode
+              - generic [ref=f2e222]:
+                - generic [ref=f2e223]: https://www.mindnode.com
+                - generic [ref=f2e224]: 翻译此结果
+          - heading [level=2] [ref=f2e225]:
+            - link "MindNode" [ref=f2e226] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=0fd3649171bb2ef5fa3b618ca9080fad5c56b08029c99ba1eeeb24974f902f75JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cHM6Ly93d3cubWluZG5vZGUuY29tLw&ntb=1
+          - paragraph [ref=f2e228]: Please do not subscribe to the newsletter if you do not wish to receive our newsletter. You can unsubscribe from the newsletter and …
+        - listitem [ref=f2e229]:
+          - generic [ref=f2e230]:
+            - heading [level=2] [ref=f2e231]:
+              - strong [ref=f2e232]: MindNode subscription too expensive reddit
+              - text: 的相关搜索
+            - list [ref=f2e233]:
+              - listitem [ref=f2e234]:
+                - link [ref=f2e235] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=9737471a094d18794c5d83464349132c46bc4251f7d491807fd672a621dab95bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU0JWI5JWIwJWU2JTk2JWFkJkZPUk09UVNSRTE&ntb=1
+                  - generic [ref=f2e237]:
+                    - text: mindnode
+                    - strong [ref=f2e238]: 7 买断
+              - listitem [ref=f2e239]:
+                - link [ref=f2e240] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=4c5e62195a9959c0d4f2cd00725a2aaab47ad6d8d891b82d90f1625889c77e57JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU0JWI4JThiJWU4JWJkJWJkJkZPUk09UVNSRTI&ntb=1
+                  - generic [ref=f2e242]:
+                    - text: mindnode
+                    - strong [ref=f2e243]: 7 下载
+              - listitem [ref=f2e244]:
+                - link [ref=f2e245] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=73b367ca5d5f5d0555cb728fe03493cd6d4abbb1cce54e03a92019eab354be28JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU2JTk3JWE3JWU3JTg5JTg4JWU2JTljJWFjJkZPUk09UVNSRTM&ntb=1
+                  - generic [ref=f2e247]:
+                    - text: mindnode
+                    - strong [ref=f2e248]: 7 旧版本
+              - listitem [ref=f2e249]:
+                - link [ref=f2e250] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=f49dfad79561393114cab9b606f5b576d9b580467a2f24fcf68c4bf5047b6ca4JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU4JWI0JWFkJWU0JWI5JWIwJkZPUk09UVNSRTQ&ntb=1
+                  - generic [ref=f2e252]:
+                    - text: mindnode
+                    - strong [ref=f2e253]: 7 购买
+              - listitem [ref=f2e254]:
+                - link [ref=f2e255] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=71fe962f78f383405ebb3cc99efe4b352042f3be27446a6154f360e96f648ec8JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU1JWFkJWE2JWU3JTk0JTlmJWU0JWJjJTk4JWU2JTgzJWEwJkZPUk09UVNSRTU&ntb=1
+                  - generic [ref=f2e257]:
+                    - text: mindnode
+                    - strong [ref=f2e258]: 7 学生优惠
+        - listitem [ref=f2e259]:
+          - link "某些结果已被删除" [ref=f2e261] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=11b3cc2cde7b3b694e3909433b43156c82527f0a9b8199a396679e06a1293121JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9NjE3MzUw&ntb=1
+        - listitem [ref=f2e262]:
+          - navigation "MindNode subscription too expensive reddit 的更多搜索结果":
+            - list:
+              - listitem [ref=f2e263]:
+                - generic "第 1 页" [ref=f2e264]: "1"
+              - listitem [ref=f2e265]:
+                - link "第 2 页" [ref=f2e266] [cursor=pointer]:
+                  - /url: /search?q=MindNode+subscription+too+expensive+reddit&FPIG=44DFD25D03324725A8BC48F9DFD1CE94&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=f2e267]:
+                - link "第 3 页" [ref=f2e268] [cursor=pointer]:
+                  - /url: /search?q=MindNode+subscription+too+expensive+reddit&FPIG=44DFD25D03324725A8BC48F9DFD1CE94&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=f2e269]:
+                - link "下一页" [ref=f2e270] [cursor=pointer]:
+                  - /url: /search?q=MindNode+subscription+too+expensive+reddit&FPIG=44DFD25D03324725A8BC48F9DFD1CE94&first=11&FORM=PORE
+    - complementary "更多结果" [ref=f2e271]:
+      - list [ref=f2e272]:
+        - listitem [ref=f2e273]:
+          - generic "相关搜索" [ref=f2e274]:
+            - generic [ref=f2e276]:
+              - heading [level=2] [ref=f2e278]:
+                - strong [ref=f2e279]: MindNode subscription too expensive reddit
+                - text: 的相关搜索
+              - generic [ref=f2e280]:
+                - link [ref=f2e282] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=e3edd876bcf20525c819f6a55e7c55ff07f540070ebd004f35818fd49de64411JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU0JWI5JWIwJWU2JTk2JWFkJkZPUk09UjVGRA&ntb=1
+                  - generic [ref=f2e284]:
+                    - text: mindnode
+                    - strong [ref=f2e285]: 7 买断
+                - link [ref=f2e287] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=3dd92619001cc7ec0e51887e60b491e9ed63114a09f1c00e9a76b923e564448bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU0JWI4JThiJWU4JWJkJWJkJkZPUk09UjVGRDE&ntb=1
+                  - generic [ref=f2e289]:
+                    - text: mindnode
+                    - strong [ref=f2e290]: 7 下载
+                - link [ref=f2e292] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=713cdd63f9d28f6f0295fb44df6ffa4a212f1cfe4310862e6f2fd12bab93502bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU2JTk3JWE3JWU3JTg5JTg4JWU2JTljJWFjJkZPUk09UjVGRDI&ntb=1
+                  - generic [ref=f2e294]:
+                    - text: mindnode
+                    - strong [ref=f2e295]: 7 旧版本
+                - link [ref=f2e297] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=f648b1e127f38316df548d578e0e2bea125eca705c57959e4b2d6a4cf172804bJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU4JWI0JWFkJWU0JWI5JWIwJkZPUk09UjVGRDM&ntb=1
+                  - generic [ref=f2e299]:
+                    - text: mindnode
+                    - strong [ref=f2e300]: 7 购买
+                - link [ref=f2e302] [cursor=pointer]:
+                  - /url: https://www.bing.com/ck/a?!&&p=32f0d75effc475e4a795016d4362230620876ac59b7dab4e056932efc028954eJmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1L3NlYXJjaD9xPW1pbmRub2RlKzcrJWU1JWFkJWE2JWU3JTk0JTlmJWU0JWJjJTk4JWU2JTgzJWEwJkZPUk09UjVGRDQ&ntb=1
+                  - generic [ref=f2e304]:
+                    - text: mindnode
+                    - strong [ref=f2e305]: 7 学生优惠
+  - contentinfo [ref=f2e306]:
+    - generic [ref=f2e307]:
+      - list:
+        - listitem [ref=f2e308]:
+          - link "隐私" [ref=f2e309] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d660dfeed4c7740b4c04ebab64e8cff0d315208bd6440962533707a517911c01JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=f2e310]:
+          - link "条款" [ref=f2e311] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=962d8e0a64d73880b363a406cb28d0387916f70e99e4f804c717e77523f62567JmltdHM9MTc5MDcyNjQwMA&ptn=3&ver=2&hsh=4&fclid=0fc43d69-c39b-6a3a-1729-2a8dc22c6b0e&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1

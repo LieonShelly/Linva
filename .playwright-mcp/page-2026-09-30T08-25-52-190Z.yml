@@ -1,0 +1,36 @@
+- generic [ref=f19e1]:
+  - banner [ref=f19e2]:
+    - generic [ref=f19e3]: YMind 迁移闭环 · 交互线框 v0
+    - navigation [ref=f19e4]:
+      - generic [ref=f19e5] [cursor=pointer]: 导入
+      - generic [ref=f19e6] [cursor=pointer]: 导出 PDF
+      - generic [ref=f19e7] [cursor=pointer]: 崩溃恢复
+  - main [ref=f19e8]:
+    - img [ref=f19e10]:
+      - generic [ref=f19e18]: 2026-Q4 路线图
+      - generic [ref=f19e21]: 上架就绪
+      - generic [ref=f19e24]: 迁移闭环
+      - generic [ref=f19e27]: 沙盒/公证
+      - generic [ref=f19e30]: 产品页
+      - generic [ref=f19e33]: 导入 Markdown
+      - generic [ref=f19e36]: 导出 PDF
+      - generic [ref=f19e39]: 自动保存
+    - generic [ref=f19e43]:
+      - heading "导入旧图" [level=2] [ref=f19e44]
+      - paragraph [ref=f19e45]: 文件 → 导入 → Markdown…（v1.0 首路径；OPML / FreeMind 顺带）
+      - generic [ref=f19e46]:
+        - generic [ref=f19e47] [cursor=pointer]: 新建…
+        - generic [ref=f19e48] [cursor=pointer]: 打开…
+        - generic [ref=f19e49] [cursor=pointer]: ▸ 导入 → Markdown… / OPML / FreeMind
+        - generic [ref=f19e50] [cursor=pointer]
+        - generic [ref=f19e51] [cursor=pointer]: 导出 Markdown…
+        - generic [ref=f19e52] [cursor=pointer]: 导出 PNG…
+        - generic [ref=f19e53] [cursor=pointer]: 导出 PDF…
+      - generic [ref=f19e54]:
+        - generic [ref=f19e55]: Markdown 预览（选中示例后）
+        - generic [ref=f19e56]: "# 2026-Q4 路线图 ## 上架就绪 - 沙盒 / 公证 - 产品页与截图 ## 迁移闭环 - 导入 Markdown - 导出 PDF - 自动保存与崩溃恢复"
+      - generic [ref=f19e57]:
+        - button "选择 Markdown…" [active] [ref=f19e58] [cursor=pointer]
+        - button "确认导入（9 节点 · 可撤销）" [ref=f19e62] [cursor=pointer]
+      - paragraph [ref=f19e60]: 导入＝载入新文档；导入前后均在 Undo 栈内，⌘Z 可回。
+      - generic [ref=f19e61]: 依据 FR-I1 / FR-I2 · 机会卡片 §4

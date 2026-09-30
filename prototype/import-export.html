@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YMind — 迁移闭环线框（导入 · 导出 PDF · 崩溃恢复）</title>
+  <style>
+    :root {
+      --paper: #e7e4dc;
+      --ink: #26221b;
+      --accent: #b85c3a;
+      --line: #c9c4b8;
+      --panel: #f6f3ec;
+      --ok: #2f6f4f;
+      --warn: #9a5b1f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--paper); color: var(--ink); font-size: 14px;
+    }
+    header { display: flex; align-items: center; gap: 18px; padding: 10px 18px;
+      background: #26221b; color: #f6f3ec; }
+    header .brand { font-weight: 700; letter-spacing: .5px; }
+    header .brand small { opacity: .6; font-weight: 400; margin-left: 8px; }
+    .tabs { display: flex; gap: 4px; }
+    .tab { padding: 6px 14px; border-radius: 8px; cursor: pointer; color: #cfc9bc; }
+    .tab.active { background: #3a342a; color: #fff; }
+    main { display: grid; grid-template-columns: 1fr 380px; gap: 0; height: calc(100vh - 52px); }
+    .stage { position: relative; overflow: hidden; }
+    .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .node rect { fill: #fff; stroke: var(--ink); stroke-width: 1.2; rx: 8; }
+    .node.root rect { fill: var(--ink); }
+    .node.root text { fill: #fff; }
+    .node text { fill: var(--ink); font-size: 13px; }
+    .edge { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+    .panel { background: var(--panel); border-left: 1px solid var(--line);
+      overflow-y: auto; padding: 16px; }
+    .panel h2 { margin: 0 0 4px; font-size: 16px; }
+    .panel .sub { color: #6e685c; margin: 0 0 14px; font-size: 12px; }
+    .menu-mock { border: 1px solid var(--line); background: #fff; border-radius: 8px;
+      padding: 6px 0; width: 260px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    .menu-mock div { padding: 7px 14px; cursor: pointer; }
+    .menu-mock div:hover, .menu-mock div.hl { background: #f0ece2; }
+    .menu-mock div.hl { font-weight: 600; }
+    .menu-mock .sep { border-top: 1px solid var(--line); margin: 5px 10px; padding: 0; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+      background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+    .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .field { margin: 10px 0; }
+    .field label { display: block; font-size: 12px; color: #6e685c; margin-bottom: 5px; }
+    .radio-row { display: flex; gap: 14px; }
+    .radio-row label { display: flex; gap: 5px; align-items: center; font-size: 13px; color: var(--ink); }
+    select, input[type=text] { width: 100%; padding: 6px 8px; border: 1px solid var(--line);
+      border-radius: 6px; background: #fff; font-size: 13px; }
+    .hint { font-size: 12px; color: #6e685c; margin-top: 6px; }
+    .tree-preview { background: #fff; border: 1px solid var(--line); border-radius: 8px;
+      padding: 10px 14px; font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+      max-height: 220px; overflow: auto; white-space: pre; }
+    .toast { margin-top: 14px; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    .toast.ok { background: #e2efe6; border: 1px solid #b8d6c2; color: var(--ok); }
+    .toast.warn { background: #f6ead6; border: 1px solid #e3cda4; color: var(--warn); }
+    .page-thumbs { display: flex; gap: 10px; margin-top: 10px; }
+    .page { width: 86px; height: 112px; background: #fff; border: 1px solid var(--line);
+      border-radius: 4px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .page svg { width: 100%; flex: 1; }
+    .page .num { font-size: 10px; color: #6e685c; text-align: center; }
+    .restore-bar { display: flex; align-items: center; gap: 12px; border: 1px solid #e3cda4;
+      background: #faf3e4; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .restore-bar .icon { font-size: 20px; }
+    .restore-bar .ttl { font-weight: 600; }
+    .restore-bar .meta { font-size: 12px; color: #6e685c; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .badge-free { display: inline-block; background: var(--ok); color: #fff; border-radius: 20px;
+      padding: 2px 10px; font-size: 11px; }
+    kbd { background: #efece3; border: 1px solid var(--line); border-bottom-width: 2px;
+      border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+    .mark { background: #ffe9a8; padding: 0 2px; }
+    .xref { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 10px;
+      font-size: 12px; color: #6e685c; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">YMind <small>迁移闭环 · 交互线框 v0</small></div>
+    <nav class="tabs">
+      <div class="tab active" data-tab="import">导入</div>
+      <div class="tab" data-tab="export">导出 PDF</div>
+      <div class="tab" data-tab="restore">崩溃恢复</div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 画布舞台：示意被操作的导图 -->
+    <div class="stage">
+      <svg id="map" viewBox="0 0 700 400"></svg>
+    </div>
+
+    <!-- 场景面板 -->
+    <div class="panel">
+      <!-- 场景 A：导入 -->
+      <section id="pane-import">
+        <h2>导入旧图</h2>
+        <p class="sub">文件 → 导入 → Markdown…（v1.0 首路径；OPML / FreeMind 顺带）</p>
+
+        <div class="menu-mock">
+          <div>新建…</div>
+          <div>打开…</div>
+          <div class="hl">▸ 导入 → <span class="mark">Markdown…</span> / OPML / FreeMind</div>
+          <div class="sep"></div>
+          <div>导出 Markdown…</div>
+          <div>导出 PNG…</div>
+          <div>导出 PDF…</div>
+        </div>
+
+        <div class="field">
+          <label>Markdown 预览（选中示例后）</label>
+          <div class="tree-preview" id="md-preview"></div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="btn-import-preview">选择 Markdown…</button>
+          <button class="btn ok" id="btn-import-confirm" disabled>确认导入（可撤销）</button>
+        </div>
+        <p class="hint">导入＝载入新文档；导入前后均在 Undo 栈内，⌘Z 可回。</p>
+
+        <div class="toast ok" id="import-done" hidden>
+          ✅ 已导入 9 个节点（4 级深度），侧/折叠按原结构恢复。可继续编辑。
+        </div>
+
+        <div class="xref">依据 FR-I1 / FR-I2 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 B：导出 PDF -->
+      <section id="pane-export" hidden>
+        <h2>导出 PDF</h2>
+        <p class="sub">矢量输出 · 打印友好 · 逻辑树完整交付（含折叠枝）</p>
+
+        <div class="field">
+          <label>范围</label>
+          <div class="radio-row">
+            <label><input type="radio" name="scope" checked /> 全部内容</label>
+            <label><input type="radio" name="scope" /> 当前选中枝</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>页面</label>
+          <div class="radio-row">
+            <label><input type="radio" name="fit" checked /> 横向 A4 · 按宽度分页</label>
+            <label><input type="radio" name="fit" /> 缩放至单页</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>文件名</label>
+          <input type="text" value="2026-Q4-路线图" />
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="btn-export">导出 PDF…</button>
+        </div>
+        <p class="hint">沿用 <kbd>LayoutSnapshot</kbd> 管线（与 PNG 导出同源），矢量文字、可打印。</p>
+
+        <div id="export-result" hidden>
+          <div class="toast ok">✅ 已导出 3 页 · 矢量文字 · 打印友好</div>
+          <div class="page-thumbs" id="page-thumbs"></div>
+        </div>
+
+        <div class="xref">依据 FR-E1 / FR-E2 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 C：崩溃恢复 -->
+      <section id="pane-restore" hidden>
+        <h2>崩溃恢复</h2>
+        <p class="sub">自动保存兜底：<span class="mark">崩溃不丢进度</span></p>
+
+        <div class="restore-bar">
+          <div class="icon">⚠️</div>
+          <div>
+            <div class="ttl">检测到上次未保存的更改</div>
+            <div class="meta">「2026-Q4-路线图.ymind」 · 最近自动保存 14:32 · 3 处修改未写盘（含「导出策略」节点）</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn ok" id="btn-restore">恢复更改</button>
+          <button class="btn" id="btn-discard">忽略（丢弃草稿）</button>
+        </div>
+        <p class="hint">自动保存：脏后 2 秒防抖写临时副本（<kbd>~/Library/.../Unsaved/</kbd>）；正常保存后自动清除。</p>
+
+        <div class="toast warn" id="restore-done" hidden>
+          ↺ 已载入草稿并标记为「未保存」——可继续编辑，也可 ⌘Z 逐级撤销回来。
+        </div>
+
+        <div class="xref">依据 FR-S1 / FR-S2 · 机会卡片 §4</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // —— 画布示意（静态小地图，随场景高亮）——
+    const tree = [
+      { x: 350, y: 200, t: "2026-Q4 路线图", root: true },
+      { x: 130, y: 95,  t: "上架就绪" },
+      { x: 130, y: 300, t: "迁移闭环", hl: true },
+      { x: 300, y: 60,  t: "沙盒/公证" },
+      { x: 300, y: 130, t: "产品页" },
+      { x: 300, y: 260, t: "导入 Markdown" },
+      { x: 300, y: 345, t: "导出 PDF" },
+      { x: 470, y: 260, t: "自动保存" },
+    ];
+    const edges = [[0,1],[0,2],[1,3],[1,4],[2,5],[2,6],[2,7]];
+    function renderMap() {
+      const svg = document.getElementById("map");
+      svg.innerHTML =
+        edges.map(([a,b]) =>
+          `<path class="edge" d="M${tree[a].x} ${tree[a].y} C ${(tree[a].x+tree[b].x)/2} ${tree[a].y}, ${(tree[a].x+tree[b].x)/2} ${tree[b].y}, ${tree[b].x} ${tree[b].y}"/>`).join("") +
+        tree.map(n => {
+          const w = n.t.length * 13 + 28, x = n.x - w/2, y = n.y - 15;
+          const cls = `node ${n.root ? "root" : ""}`;
+          return `<g class="${cls}"><rect x="${x}" y="${y}" width="${w}" height="30"/><text x="${n.x}" y="${n.y+5}" text-anchor="middle">${n.t}</text></g>`;
+        }).join("") +
+        (highlight ? `<rect x="0" y="0" width="700" height="400" fill="none" stroke="#b85c3a" stroke-width="3" stroke-dasharray="6 4" rx="6"/>` : "");
+    }
+    let highlight = false;
+
+    // —— 标签切换 ——
+    document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      ["import","export","restore"].forEach(k =>
+        document.getElementById("pane-" + k).hidden = (k !== t.dataset.tab));
+    }));
+
+    // —— A 导入 ——
+    const SAMPLE_MD = `# 2026-Q4 路线图
+## 上架就绪
+- 沙盒 / 公证
+- 产品页与截图
+## 迁移闭环
+- 导入 Markdown
+- 导出 PDF
+- 自动保存与崩溃恢复`;
+    document.getElementById("md-preview").textContent = SAMPLE_MD;
+    document.getElementById("btn-import-preview").addEventListener("click", () => {
+      const b = document.getElementById("btn-import-confirm");
+      b.disabled = false;
+      b.textContent = "确认导入（9 节点 · 可撤销）";
+    });
+    document.getElementById("btn-import-confirm").addEventListener("click", () => {
+      document.getElementById("import-done").hidden = false;
+      highlight = true; renderMap();
+    });
+
+    // —— B 导出 PDF ——
+    const thumbs = [
+      [[350,40,"路线图"],[130,40,"上架"],[130,110,"迁移"],[350,110,"自动保存"]],
+      [[200,40,"沙盒"],[200,110,"产品页"]],
+      [[200,40,"导入"],[200,110,"导出 PDF"]],
+    ];
+    function thumbSvg(nodes) {
+      return `<svg viewBox="0 0 100 130">` +
+        nodes.map(n => {
+          const w = n[2].length * 7 + 14, x = n[0]-w/2, y = n[1]-9;
+          return `<rect x="${x}" y="${y}" width="${w}" height="18" rx="4" fill="#fff" stroke="#26221b"/><text x="${n[0]}" y="${n[1]+3}" font-size="8" text-anchor="middle">${n[2]}</text>`;
+        }).join("") + `</svg>`;
+    }
+    document.getElementById("btn-export").addEventListener("click", () => {
+      const box = document.getElementById("export-result");
+      box.hidden = false;
+      document.getElementById("page-thumbs").innerHTML =
+        thumbs.map((t,i) => `<div class="page">${thumbSvg(t)}<div class="num">第 ${i+1} 页</div></div>`).join("");
+      highlight = true; renderMap();
+    });
+
+    // —— C 崩溃恢复 ——
+    document.getElementById("btn-restore").addEventListener("click", () => {
+      document.getElementById("restore-done").hidden = false;
+      highlight = true; renderMap();
+    });
+    document.getElementById("btn-discard").addEventListener("click", () => {
+      document.querySelector(".restore-bar").innerHTML =
+        `<div class="icon">🗑️</div><div><div class="ttl">草稿已丢弃</div><div class="meta">自动保存副本已删除；当前为上次保存版本</div></div>`;
+    });
+
+    renderMap();
+  </script>
+</body>
+</html>
