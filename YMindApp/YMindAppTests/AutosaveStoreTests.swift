@@ -52,7 +52,7 @@ struct AutosaveStoreTests {
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = AutosaveStore(directory: dir)
         let oldID = UUID(); let newID = UUID()
-        var doc = MindMapDocument.blank(rootText: "根")
+        let doc = MindMapDocument.blank(rootText: "根")
         try store.write(document: doc, meta: AutosaveMeta(
             documentID: oldID, originalURL: nil,
             savedAt: Date(timeIntervalSince1970: 1000), changeCount: 1, rootText: "旧"))
@@ -69,7 +69,7 @@ struct AutosaveStoreTests {
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = AutosaveStore(directory: dir)
         let docID = UUID()
-        var doc = MindMapDocument.blank(rootText: "根")
+        let doc = MindMapDocument.blank(rootText: "根")
         try store.write(document: doc, meta: AutosaveMeta(
             documentID: docID, originalURL: nil, savedAt: Date(), changeCount: 0, rootText: "根"))
 
@@ -82,7 +82,7 @@ struct AutosaveStoreTests {
         let dir = try tempDir()
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = AutosaveStore(directory: dir)
-        var doc = MindMapDocument.blank(rootText: "根")
+        let doc = MindMapDocument.blank(rootText: "根")
         try store.write(document: doc, meta: AutosaveMeta(
             documentID: UUID(), originalURL: nil, savedAt: Date(), changeCount: 0, rootText: "r1"))
         try store.write(document: doc, meta: AutosaveMeta(
@@ -99,7 +99,7 @@ struct AutosaveStoreTests {
         let store = AutosaveStore(directory: dir)
         let docID = UUID()
         let url = "file:///tmp/x.ymind"
-        var doc = MindMapDocument.blank(rootText: "根")
+        let doc = MindMapDocument.blank(rootText: "根")
         try store.write(document: doc, meta: AutosaveMeta(
             documentID: docID, originalURL: url, savedAt: Date(timeIntervalSince1970: 42),
             changeCount: 7, rootText: "根"))

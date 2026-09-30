@@ -385,6 +385,24 @@ struct DocumentSessionAutosaveTests {
         #expect(session.documentID != oldID)  // 新文档换新 docID（供自动保存配对）
         #expect(session.recovery == nil)      // 清 recovery 态
     }
+
+    @Test func loadImported_clearsRecovery() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let session = DocumentSession(autosaveStore: AutosaveStore(directory: dir))
+        let oldID = session.documentID
+        session.recovery = RecoveryOffer(meta: AutosaveMeta(
+            documentID: oldID, originalURL: nil,
+            savedAt: Date(), changeCount: 1, rootText: "根"))
+        #expect(session.recovery != nil)
+
+        var doc = MindMapDocument.blank(rootText: "导入根")
+        doc.root.children = [Node(text: "子")]
+        session.loadImported(doc)
+
+        #expect(session.documentID != oldID)  // 导入换新 docID（供自动保存配对）
+        #expect(session.recovery == nil)      // 清 recovery 态，避免 stale 横幅覆盖导入文档（final review F1）
+    }
 }
 
 @Suite("DocumentSessionRecovery")

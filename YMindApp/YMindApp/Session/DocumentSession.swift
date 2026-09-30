@@ -166,6 +166,7 @@ final class DocumentSession: ObservableObject {
         // lastSavedDocument 保持导入前的旧值，撤销回载入态时 isDirty 仍需保持 true。
         isDirty = true
         documentID = UUID()
+        recovery = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""

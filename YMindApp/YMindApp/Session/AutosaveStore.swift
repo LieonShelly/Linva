@@ -1,5 +1,4 @@
 // Session/AutosaveStore.swift
-import Combine
 import Foundation
 
 /// 临时副本配对元信息（随副本落盘，不写入文档本身）。
