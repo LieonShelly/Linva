@@ -784,12 +784,18 @@ final class MetalRenderer {
         )
     }
 
-    /// 导出：把 `contentBounds` 以 `scale = min(2, maxDimension / 长边)` 光栅化到离屏纹理，
+    /// 导出：把 `contentBounds` 以面积预算驱动的 scale 光栅化到离屏纹理，
     /// 仅画边/节点块/文字/填色（不画分叉 ± 与交互 UI），返回 CGImage。
+    ///
+    /// scale 由总像素预算决定（内容越大包围盒越大 → 图越大，直到预算上限），
+    /// 而非固定长边像素硬降采样——否则上千节点的大树被压到固定像素而模糊。
+    /// 单纹理受轴上限（`tileMax`）限制：超限时沿轴分块渲染、逐块拼回整图。
     func renderImage(
         snapshot: LayoutSnapshot,
         contentBounds: CGRect,
-        maxDimension: CGFloat = 2400,
+        maxPixelBudget: Int = 100_000_000,   // 导出总像素预算（默认 1 亿像素 ≈ 400MB 纹理）
+        maxScale: CGFloat = 2,
+        minScale: CGFloat = 0.25,
         padding: CGFloat = 48,
         paper: NSColor
     ) -> CGImage? {
@@ -797,75 +803,101 @@ final class MetalRenderer {
 
         let contentW = max(contentBounds.width, 1)
         let contentH = max(contentBounds.height, 1)
-        let scale = min(max(maxDimension / max(contentW, contentH), 0.35), 2)
+        // 面积预算驱动：scale² × 面积 ≈ 预算 → scale = sqrt(预算/面积)。
+        let area = (contentW + padding * 2) * (contentH + padding * 2)
+        let scale = min(max(sqrt(CGFloat(maxPixelBudget) / max(area, 1)), minScale), maxScale)
         let pixelW = max(Int(ceil((contentW + padding * 2) * scale)), 1)
         let pixelH = max(Int(ceil((contentH + padding * 2) * scale)), 1)
 
-        var camera = Camera()
-        camera.scale = scale
-        camera.translation = CGPoint(
-            x: padding * scale - contentBounds.minX * scale,
-            y: padding * scale - contentBounds.minY * scale
-        )
+        // 单纹理轴上限（保守 8192，规避极端设备差异）：超限分块。
+        let tileMax = 8192
+        let cols = max(Int(ceil(Double(pixelW) / Double(tileMax))), 1)
+        let rows = max(Int(ceil(Double(pixelH) / Double(tileMax))), 1)
 
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .bgra8Unorm,
-            width: pixelW,
-            height: pixelH,
-            mipmapped: false
-        )
-        textureDescriptor.usage = [.renderTarget, .shaderRead]
-        guard let texture = device.makeTexture(descriptor: textureDescriptor),
-              let commandBuffer = commandQueue.makeCommandBuffer() else {
-            return nil
-        }
-
-        let descriptor = MTLRenderPassDescriptor()
-        descriptor.colorAttachments[0].texture = texture
-        descriptor.colorAttachments[0].loadAction = .clear
-        descriptor.colorAttachments[0].storeAction = .store
-        let background = rgba(paper)
-        descriptor.colorAttachments[0].clearColor = MTLClearColor(
-            red: Double(background.x),
-            green: Double(background.y),
-            blue: Double(background.z),
-            alpha: Double(background.w)
-        )
-
-        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor) else {
-            return nil
-        }
-        encoder.label = "YMind 导出"
+        // 整图 buffer（RGBA）。分块各自渲染后写入对应行偏移。
+        var big = [UInt8](repeating: 0, count: pixelW * pixelH * 4)
 
         // 导出不含分叉 ± 控件：LayoutSnapshot 缺省 branchToggles 为空。
         let exportSnapshot = LayoutSnapshot(frames: snapshot.frames, edges: snapshot.edges)
-
-        // 导出固定按浅色纸面解析动态语义色，结果与系统外观无关。
         let appearance = NSAppearance(named: .aqua)
-        appearance?.performAsCurrentDrawingAppearance {
-            encodeContent(
-                into: encoder,
-                viewportSize: CGSize(width: pixelW, height: pixelH),
-                snapshot: exportSnapshot,
-                camera: camera,
-                displayScale: 1,
-                selectedIds: [],
-                selectionAnchorId: nil,
-                cutSourceIds: [],
-                intent: nil,
-                searchHitId: nil,
-                marquee: nil
-            )
+
+        for row in 0..<rows {
+            for col in 0..<cols {
+                let tileX = col * tileMax
+                let tileY = row * tileMax
+                let tw = min(tileMax, pixelW - tileX)
+                let th = min(tileMax, pixelH - tileY)
+                guard tw > 0, th > 0 else { continue }
+
+                // camera：世界坐标 → 整图像素坐标（tile 原点对齐整图该块位置）。
+                var camera = Camera()
+                camera.scale = scale
+                camera.translation = CGPoint(
+                    x: CGFloat(tileX) - contentBounds.minX * scale,
+                    y: CGFloat(tileY) - contentBounds.minY * scale
+                )
+
+                let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+                    pixelFormat: .bgra8Unorm,
+                    width: tw,
+                    height: th,
+                    mipmapped: false
+                )
+                textureDescriptor.usage = [.renderTarget, .shaderRead]
+                guard let texture = device.makeTexture(descriptor: textureDescriptor),
+                      let commandBuffer = commandQueue.makeCommandBuffer() else {
+                    return nil
+                }
+
+                let descriptor = MTLRenderPassDescriptor()
+                descriptor.colorAttachments[0].texture = texture
+                descriptor.colorAttachments[0].loadAction = .clear
+                descriptor.colorAttachments[0].storeAction = .store
+                let background = rgba(paper)
+                descriptor.colorAttachments[0].clearColor = MTLClearColor(
+                    red: Double(background.x),
+                    green: Double(background.y),
+                    blue: Double(background.z),
+                    alpha: Double(background.w)
+                )
+
+                guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor) else {
+                    return nil
+                }
+                encoder.label = "YMind 导出"
+
+                appearance?.performAsCurrentDrawingAppearance {
+                    encodeContent(
+                        into: encoder,
+                        viewportSize: CGSize(width: tw, height: th),
+                        snapshot: exportSnapshot,
+                        camera: camera,
+                        displayScale: 1,
+                        selectedIds: [],
+                        selectionAnchorId: nil,
+                        cutSourceIds: [],
+                        intent: nil,
+                        searchHitId: nil,
+                        marquee: nil
+                    )
+                }
+                encoder.endEncoding()
+                commandBuffer.commit()
+                commandBuffer.waitUntilCompleted()
+
+                // 读回本块像素，写入整图对应行。
+                let region = MTLRegionMake2D(0, 0, tw, th)
+                var tileBytes = [UInt8](repeating: 0, count: tw * th * 4)
+                texture.getBytes(&tileBytes, bytesPerRow: tw * 4, from: region, mipmapLevel: 0)
+                for r in 0..<th {
+                    let src = r * tw * 4
+                    let dst = ((tileY + r) * pixelW + tileX) * 4
+                    big.replaceSubrange(dst..<(dst + tw * 4), with: tileBytes[src..<(src + tw * 4)])
+                }
+            }
         }
-        encoder.endEncoding()
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
 
-        let region = MTLRegionMake2D(0, 0, pixelW, pixelH)
-        var bytes = [UInt8](repeating: 0, count: pixelW * pixelH * 4)
-        texture.getBytes(&bytes, bytesPerRow: pixelW * 4, from: region, mipmapLevel: 0)
-
-        guard let provider = CGDataProvider(data: Data(bytes) as CFData),
+        guard let provider = CGDataProvider(data: Data(big) as CFData),
               let image = CGImage(
                 width: pixelW,
                 height: pixelH,

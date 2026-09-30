@@ -7,9 +7,11 @@ import MetalKit
 /// 流程：复制并展开副本 → 布局 → 按包围盒离屏光栅化；原文档不动、不入 Undo（FR-E4）。
 enum PNGExporter {
     /// 生成 PNG 数据；失败返回 nil。
+    /// `maxPixelBudget` = 导出总像素预算（内容越大包围盒越大 → 图越大，直到预算上限；
+    /// 取代旧的固定长边 2400 硬降采样——后者让上千节点的大树模糊）。
     static func data(
         document: MindMapDocument,
-        maxDimension: CGFloat = 2400,
+        maxPixelBudget: Int = 100_000_000,
         padding: CGFloat = 48
     ) -> Data? {
         let expanded = fullyExpanded(document)
@@ -25,7 +27,7 @@ enum PNGExporter {
             guard let image = renderer.renderImage(
                 snapshot: snapshot,
                 contentBounds: bounds,
-                maxDimension: maxDimension,
+                maxPixelBudget: maxPixelBudget,
                 padding: padding,
                 paper: paperColor
             ) else {
