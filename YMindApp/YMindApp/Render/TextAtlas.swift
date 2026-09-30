@@ -108,10 +108,11 @@ final class BranchToggleAtlas {
     private var entries: [String: CacheEntry] = [:]
 
     static func label(for toggle: BranchToggle) -> String {
+        // 图标表示「点击后的动作」：折叠态点击会展开整棵子树 → 加号；展开态点击会折叠 → 减号。
         if toggle.collapsed {
-            return toggle.hiddenCount > 0 ? "−\(toggle.hiddenCount)" : "−"
+            return toggle.hiddenCount > 0 ? "＋\(toggle.hiddenCount)" : "＋"
         }
-        return "＋"
+        return "−"
     }
 
     func texture(
