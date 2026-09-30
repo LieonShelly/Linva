@@ -71,6 +71,17 @@ struct ContentView: View {
                         .padding()
                         .accessibilityLabel("画布错误：\(errorMessage)")
                 }
+
+                if let preview = session.importPreview {
+                    ImportPreviewView(
+                        sourceName: preview.sourceName,
+                        nodeCount: preview.nodeCount,
+                        depth: preview.depth,
+                        document: preview.document,
+                        onConfirm: { session.loadImported(preview.document) },
+                        onCancel: { session.cancelImport() }
+                    )
+                }
             }
             .toolbar {
                 MainToolbar(
