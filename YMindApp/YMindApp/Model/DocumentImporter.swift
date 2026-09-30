@@ -10,3 +10,20 @@ enum ImportError: Error, Equatable {
 protocol DocumentImporter {
     func parse(_ data: Data) throws -> MindMapDocument
 }
+
+/// 按文件扩展名路由到具体导入器（XMind 后续在此注册，v1.1）。
+enum DocumentImporterRegistry {
+    static let markdown = MarkdownImporter()
+    static let opml = OPMLImporter()
+    static let freeMind = FreeMindImporter()
+
+    /// 大小写不敏感；未知扩展名返回 nil。
+    static func importer(for pathExtension: String) -> DocumentImporter? {
+        switch pathExtension.lowercased() {
+        case "md", "markdown": return markdown
+        case "opml": return opml
+        case "mm": return freeMind
+        default: return nil
+        }
+    }
+}
