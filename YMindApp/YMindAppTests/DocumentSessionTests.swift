@@ -386,3 +386,93 @@ struct DocumentSessionAutosaveTests {
         #expect(session.recovery == nil)      // 清 recovery 态
     }
 }
+
+@Suite("DocumentSessionRecovery")
+struct DocumentSessionRecoveryTests {
+    private func tempDir() throws -> URL {
+        try FileManager.default.url(
+            for: .itemReplacementDirectory,
+            in: .userDomainMask,
+            appropriateFor: FileManager.default.temporaryDirectory,
+            create: true
+        )
+    }
+
+    @Test func scan_returnsOffer_whenPendingCopyExists() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let session = DocumentSession(autosaveStore: AutosaveStore(directory: dir))
+        var doc = MindMapDocument.blank(rootText: "草稿根")
+        doc.root.children = [Node(text: "a")]
+        try AutosaveStore(directory: dir).write(
+            document: doc,
+            meta: AutosaveMeta(documentID: session.documentID, originalURL: nil,
+                               savedAt: Date(), changeCount: 3, rootText: "草稿根"))
+
+        let offer = session.scanForRecovery()
+        #expect(offer != nil)
+        #expect(offer?.meta.documentID == session.documentID)
+    }
+
+    @Test func restore_loadsDraft_asDirtyDocument() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = AutosaveStore(directory: dir)
+        let session = DocumentSession(autosaveStore: store)
+        var doc = MindMapDocument.blank(rootText: "草稿")
+        doc.root.children = [Node(text: "恢复的内容")]
+        let meta = AutosaveMeta(documentID: session.documentID, originalURL: nil,
+                                savedAt: Date(), changeCount: 3, rootText: "草稿")
+        try store.write(document: doc, meta: meta)
+
+        let offer = RecoveryOffer(meta: meta)
+        try session.restore(draftFrom: offer)
+
+        #expect(session.model.document.root.children.map(\.text) == ["恢复的内容"])
+        #expect(session.isDirty)          // 恢复后标记未保存
+        #expect(store.latestPending() == nil)  // 恢复后删该副本
+    }
+
+    @Test func discard_clearsAll_andKeepsLastSaved() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = AutosaveStore(directory: dir)
+        let session = DocumentSession(autosaveStore: store)
+        var doc = MindMapDocument.blank(rootText: "草稿")
+        doc.root.children = [Node(text: "x")]
+        let meta = AutosaveMeta(documentID: session.documentID, originalURL: nil,
+                                savedAt: Date(), changeCount: 1, rootText: "草稿")
+        try store.write(document: doc, meta: meta)
+
+        try session.discardDraft()
+
+        #expect(store.latestPending() == nil)  // 忽略：清空副本
+        #expect(session.isDirty == false)      // 回到最近正式保存版本（无 → 空文档 clean）
+    }
+
+    @Test func restore_undoAll_keepsDirtyTrue() throws {
+        let dir = try tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = AutosaveStore(directory: dir)
+        let session = DocumentSession(autosaveStore: store)
+        var doc = MindMapDocument.blank(rootText: "草稿")
+        doc.root.children = [Node(text: "恢复的内容")]
+        let meta = AutosaveMeta(documentID: session.documentID, originalURL: nil,
+                                savedAt: Date(), changeCount: 3, rootText: "草稿")
+        try store.write(document: doc, meta: meta)
+
+        try session.restore(draftFrom: RecoveryOffer(meta: meta))
+
+        // 恢复后执行一条命令，再全部撤销回到恢复的载入态
+        if let childID = session.model.document.root.children.first?.id {
+            session.commandBus.execute(.addChild(parentId: childID, text: "新节点"))
+        }
+        while session.commandBus.canUndo {
+            session.commandBus.undo()
+        }
+
+        // 恢复的草稿无磁盘文件：撤销回载入态仍必须保持 dirty，否则新建/打开/退出会静默丢弃。
+        #expect(session.isDirty)
+        #expect(session.fileURL == nil)
+    }
+}

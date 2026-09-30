@@ -180,6 +180,53 @@ final class DocumentSession: ObservableObject {
         errorMessage = nil
     }
 
+    // MARK: - 自动保存恢复（Task 3）
+
+    /// 启动扫描：若存在未保存副本，返回「最新一份」的 offer；否则 nil。
+    @discardableResult
+    func scanForRecovery() -> RecoveryOffer? {
+        guard let meta = autosaveStore.latestPending() else { return nil }
+        let offer = RecoveryOffer(meta: meta)
+        recovery = offer
+        return offer
+    }
+
+    /// 「恢复更改」：载入副本为当前文档，标记未保存，删除该副本。
+    func restore(draftFrom offer: RecoveryOffer) throws {
+        let doc = try autosaveStore.load(documentID: offer.meta.documentID)
+        commitEditingIfNeeded()
+        model.document = doc
+        model.selectOnly(doc.root.id)
+        syncSelectionFromModel()
+        commandBus.clearHistory()
+        undoRevision += 1
+        // 有原文件则恢复其 URL；未命名则保持 nil
+        fileURL = offer.meta.originalURL.flatMap(URL.init(string:))
+        // 注意：不要在此把 lastSavedDocument 设为恢复的草稿 —— 草稿没有磁盘文件，
+        // lastSavedDocument 保持原值，撤销回载入态时 isDirty 仍需保持 true（同 loadImported）。
+        isDirty = true
+        documentID = offer.meta.documentID
+        editingId = nil
+        draftText = ""
+        originalEditingText = ""
+        camera = Camera()
+        recovery = nil
+        relayout()
+        errorMessage = nil
+        try? autosaveStore.delete(documentID: offer.meta.documentID)
+        try? autosaveStore.clearAll()   // 恢复后清其余残留（忽略清全部；恢复也顺手清，避免再提示）
+    }
+
+    /// 「忽略（丢弃草稿）」：清空副本，载入最近正式保存版本（无 → 保持当前 clean）。
+    func discardDraft() throws {
+        commandBus.clearHistory()
+        undoRevision += 1
+        isDirty = false
+        recovery = nil
+        try autosaveStore.clearAll()
+        documentID = UUID()
+    }
+
     func load(from url: URL) throws {
         commitEditingIfNeeded()
         let doc = try securityScopedAccess.replace(with: url) {
