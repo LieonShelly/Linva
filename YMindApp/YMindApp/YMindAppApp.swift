@@ -68,6 +68,12 @@ private struct DocumentCommands: Commands {
                 DocumentWorkflow.open(session)
             }
             .keyboardShortcut("o", modifiers: .command)
+
+            Menu("导入…") {
+                Button("Markdown…") { DocumentWorkflow.importMarkdown(session) }
+                Button("OPML…") { DocumentWorkflow.importOPML(session) }
+                Button("FreeMind…") { DocumentWorkflow.importFreeMind(session) }
+            }
         }
 
         CommandGroup(replacing: .saveItem) {
@@ -265,6 +271,50 @@ enum DocumentWorkflow {
         } catch {
             session.errorMessage = error.localizedDescription
         }
+    }
+
+    /// 导入入口（FR-I1/I2）：选文件 → 解析 → 暂存 importPreview（不载入），等预览确认。
+    static func importMarkdown(_ session: DocumentSession) { presentImportPanel(session, extensions: ["md", "markdown"]) }
+    static func importOPML(_ session: DocumentSession)     { presentImportPanel(session, extensions: ["opml"]) }
+    static func importFreeMind(_ session: DocumentSession) { presentImportPanel(session, extensions: ["mm"]) }
+
+    private static func presentImportPanel(_ session: DocumentSession, extensions: [String]) {
+        guard confirmReplacement(of: session) else { return }
+
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = extensions.compactMap { UTType(filenameExtension: $0) }
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+
+        guard panel.runModal() == .OK, let url = panel.url,
+              let importer = DocumentImporterRegistry.importer(for: url.pathExtension) else {
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: url)
+            let document = try importer.parse(data)
+            session.importPreview = ImportPreviewState(
+                sourceName: url.lastPathComponent,
+                document: document,
+                nodeCount: nodeCount(of: document.root),
+                depth: depth(of: document.root)
+            )
+        } catch ImportError.unrecognizedOutline {
+            session.errorMessage = "未识别为导图大纲（缺少标题）"
+        } catch ImportError.invalidXML {
+            session.errorMessage = "文件不是有效的 XML 导图"
+        } catch {
+            session.errorMessage = "导入失败：\(error.localizedDescription)"
+        }
+    }
+
+    private static func nodeCount(of node: Node) -> Int {
+        1 + node.children.reduce(0) { $0 + nodeCount(of: $1) }
+    }
+    private static func depth(of node: Node) -> Int {
+        1 + (node.children.map { depth(of: $0) }.max() ?? 0)
     }
 
     static func confirmReplacement(of session: DocumentSession) -> Bool {
