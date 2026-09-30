@@ -150,7 +150,7 @@ extension PDFExporter {
 
         // 绘制顺序：边 → 节点块 → 文字（对齐 Metal encodeContent）
         for edge in snapshot.edges {
-            drawEdge(ctx, edge)
+            drawEdge(ctx, edge, scale: scale)
         }
         for frame in snapshot.frames.values.sorted(by: {
             $0.center.x < $1.center.x   // 稳定序（对齐 orderedFrames 的确定性）
@@ -163,10 +163,10 @@ extension PDFExporter {
         ctx.restoreGState()
     }
 
-    private static func drawEdge(_ ctx: CGContext, _ edge: EdgeGeometry) {
+    private static func drawEdge(_ ctx: CGContext, _ edge: EdgeGeometry, scale: CGFloat) {
         guard let first = edge.points.first else { return }
         ctx.setStrokeColor(cgColor(.separatorColor))
-        ctx.setLineWidth(max(1.25, 2))        // 世界 pt 线宽（scale=1 时对齐 Metal max(1.25,2*scale)）
+        ctx.setLineWidth(max(1.25, 2 * scale))   // 世界 pt 线宽（对齐 Metal max(1.25,2*scale)）
         ctx.beginPath()
         ctx.move(to: first)
         for p in edge.points.dropFirst() {
