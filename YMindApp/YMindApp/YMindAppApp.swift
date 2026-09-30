@@ -95,6 +95,9 @@ private struct DocumentCommands: Commands {
             Button("导出 PNG…") {
                 DocumentWorkflow.exportPNG(session)
             }
+            Button("导出 PDF…") {
+                DocumentWorkflow.exportPDF(session)
+            }
         }
 
         CommandGroup(replacing: .undoRedo) {
@@ -273,7 +276,34 @@ enum DocumentWorkflow {
         }
     }
 
-    /// 导入入口（FR-I1/I2）：选文件 → 解析 → 暂存 importPreview（不载入），等预览确认。
+    /// 导出 PDF（FR-E1）：scope 由选中态决定——单选→子树、无选中→整树、多选→整树（选中枝禁用时）。
+    static func exportPDF(_ session: DocumentSession) {
+        session.commitEditingIfNeeded()
+        // scope 拍板：单选 → subtree(anchor)；否则 full
+        let scope: PDFScope
+        if session.selectedIds.count == 1, let anchor = session.selectionAnchorId,
+           anchor != session.model.document.root.id {
+            scope = .subtree(anchor)
+        } else {
+            scope = .full
+        }
+        guard let data = PDFExporter.data(document: session.model.document, scope: scope) else {
+            session.errorMessage = "导出 PDF 失败：无法生成文档"
+            return
+        }
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.pdf]
+        panel.nameFieldStringValue = ExportNaming.safeFilename(
+            base: session.model.document.root.text,
+            ext: "pdf"
+        )
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            session.errorMessage = error.localizedDescription
+        }
+    }
     static func importMarkdown(_ session: DocumentSession) { presentImportPanel(session, extensions: ["md", "markdown"]) }
     static func importOPML(_ session: DocumentSession)     { presentImportPanel(session, extensions: ["opml"]) }
     static func importFreeMind(_ session: DocumentSession) { presentImportPanel(session, extensions: ["mm"]) }
