@@ -276,7 +276,8 @@ enum DocumentWorkflow {
         }
     }
 
-    /// 导出 PDF（FR-E1）：scope 由选中态决定——单选→子树、无选中→整树、多选→整树（选中枝禁用时）。
+    /// 导出 PDF（FR-E1）：scope 由选中态决定——单选→子树、无选中→整树、多选→整树（选中枝禁用时）；
+    /// 页模式由 SavePanel 附件单选钮决定——按宽度分页（默认）/ 缩放单页。
     static func exportPDF(_ session: DocumentSession) {
         session.commitEditingIfNeeded()
         // scope 拍板：单选 → subtree(anchor)；否则 full
@@ -287,17 +288,32 @@ enum DocumentWorkflow {
         } else {
             scope = .full
         }
-        guard let data = PDFExporter.data(document: session.model.document, scope: scope) else {
-            session.errorMessage = "导出 PDF 失败：无法生成文档"
-            return
-        }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.pdf]
         panel.nameFieldStringValue = ExportNaming.safeFilename(
             base: session.model.document.root.text,
             ext: "pdf"
         )
+        // 页模式选择（FR-E1 · spec §5.1）：tag 0 = 按宽度分页（默认），tag 1 = 缩放单页。
+        let accessory = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 52))
+        let byWidth = NSButton(radioButtonWithTitle: "横向 A4 · 按宽度分页", target: nil, action: nil)
+        byWidth.tag = 0
+        byWidth.state = .on
+        byWidth.frame = NSRect(x: 0, y: 30, width: 240, height: 18)
+        let fitSingle = NSButton(radioButtonWithTitle: "缩放至单页", target: nil, action: nil)
+        fitSingle.tag = 1
+        fitSingle.state = .off
+        fitSingle.frame = NSRect(x: 0, y: 8, width: 240, height: 18)
+        accessory.addSubview(byWidth)
+        accessory.addSubview(fitSingle)
+        panel.accessoryView = accessory
+
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        let mode = PDFPageMode(fit: byWidth.state == .on ? .paginateByWidth : .fitSinglePage)
+        guard let data = PDFExporter.data(document: session.model.document, scope: scope, mode: mode) else {
+            session.errorMessage = "导出 PDF 失败：无法生成文档"
+            return
+        }
         do {
             try data.write(to: url, options: .atomic)
         } catch {
