@@ -95,12 +95,13 @@ extension PDFExporter {
 
         // 5. CG PDF context（内存 consumer）
         let data = NSMutableData()
+        let mediaBox = CGRect(x: 0, y: 0, width: mode.pageSize.width, height: mode.pageSize.height)
+        var mb = mediaBox
         guard let consumer = CGDataConsumer(data: data as CFMutableData),
-              let ctx = CGContext(consumer: consumer, mediaBox: nil, nil) else {
+              let ctx = CGContext(consumer: consumer, mediaBox: &mb, nil) else {
             return nil
         }
         // PDF 每页
-        let mediaBox = CGRect(x: 0, y: 0, width: mode.pageSize.width, height: mode.pageSize.height)
 
         let appearance = NSAppearance(named: .aqua)
         appearance?.performAsCurrentDrawingAppearance {
