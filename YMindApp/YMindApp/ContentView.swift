@@ -72,6 +72,14 @@ struct ContentView: View {
                         .accessibilityLabel("画布错误：\(errorMessage)")
                 }
 
+                if let offer = session.recovery {
+                    RecoveryBannerView(
+                        offer: offer,
+                        onRestore: { DocumentWorkflow.restoreDraft(session) },
+                        onDiscard: { DocumentWorkflow.discardDraft(session) }
+                    )
+                }
+
                 if let preview = session.importPreview {
                     ImportPreviewView(
                         sourceName: preview.sourceName,

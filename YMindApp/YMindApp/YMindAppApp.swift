@@ -48,6 +48,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DocumentWorkflow.confirmReplacement(of: $0)
     }
 
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        guard let session else { return }
+        DocumentWorkflow.scanForRecovery(session)
+    }
+
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let session else { return .terminateNow }
         return confirmationHandler(session) ? .terminateNow : .terminateCancel
@@ -366,6 +371,30 @@ enum DocumentWorkflow {
     }
     private static func depth(of node: Node) -> Int {
         1 + (node.children.map { depth(of: $0) }.max() ?? 0)
+    }
+
+    /// 启动扫描：有未保存副本 → session.recovery 非 nil → 横幅提示（只最新）。
+    static func scanForRecovery(_ session: DocumentSession) {
+        _ = session.scanForRecovery()
+    }
+
+    /// 「恢复更改」：载入草稿，标记未保存。
+    static func restoreDraft(_ session: DocumentSession) {
+        guard let offer = session.recovery else { return }
+        do {
+            try session.restore(draftFrom: offer)
+        } catch {
+            session.errorMessage = "恢复失败：\(error.localizedDescription)"
+        }
+    }
+
+    /// 「忽略（丢弃草稿）」：清空副本，载入最近正式版。
+    static func discardDraft(_ session: DocumentSession) {
+        do {
+            try session.discardDraft()
+        } catch {
+            session.errorMessage = error.localizedDescription
+        }
     }
 
     static func confirmReplacement(of session: DocumentSession) -> Bool {
