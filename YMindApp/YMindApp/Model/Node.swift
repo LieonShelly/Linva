@@ -2,12 +2,10 @@ import Foundation
 
 struct Node: Identifiable, Equatable, Codable, Sendable {
     var id: UUID
-    var text: String
+    var blocks: [ContentBlock]
     var collapsed: Bool
     var side: Side?
     var fill: NodeFill?
-    var image: Data?
-    var imagePixelSize: ImagePixelSize?
     var children: [Node]
 
     init(
@@ -21,23 +19,60 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
         children: [Node] = []
     ) {
         self.id = id
-        self.text = text
+        if let image, let imagePixelSize {
+            // 构造兼容：旧单图形态 → 图在上、文在下（保持旧视觉）。
+            self.blocks = [
+                ContentBlock(id: UUID(), kind: .image(.init(data: image, pixelSize: imagePixelSize))),
+                ContentBlock(id: UUID(), kind: .text(text)),
+            ]
+        } else {
+            self.blocks = [ContentBlock(id: UUID(), kind: .text(text))]
+        }
         self.collapsed = collapsed
         self.side = side
         self.fill = fill
-        self.image = image
-        self.imagePixelSize = imagePixelSize
         self.children = children
     }
 
+    /// 只读兼容：文本块按序以 "\n" 连接（搜索/编辑 draft/导出标题零改动）。
+    var text: String {
+        blocks.compactMap { if case .text(let s) = $0.kind { s } else { nil } }.joined(separator: "\n")
+    }
+
+    /// 只读兼容：首个图片块数据（单图读方零改动；多图读方走 blocks）。
+    var image: Data? {
+        for b in blocks {
+            if case .image(let img) = b.kind { return img.data }
+        }
+        return nil
+    }
+
+    /// 只读兼容：与 `image` 同块。
+    var imagePixelSize: ImagePixelSize? {
+        for b in blocks {
+            if case .image(let img) = b.kind { return img.pixelSize }
+        }
+        return nil
+    }
+
     private enum CodingKeys: String, CodingKey {
-        case id, text, collapsed, side, fill, image, imagePixelSize, children
+        case id, text, collapsed, side, fill, image, imagePixelSize, blocks, children
+    }
+
+    func encode(to encoder: Encoder) throws {
+        // v4：只写存储属性（blocks 为准）；text/image/imagePixelSize 是计算属性，不落盘。
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(blocks, forKey: .blocks)
+        try c.encode(collapsed, forKey: .collapsed)
+        try c.encodeIfPresent(side, forKey: .side)
+        try c.encodeIfPresent(fill, forKey: .fill)
+        try c.encode(children, forKey: .children)
     }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(UUID.self, forKey: .id)
-        text = try c.decode(String.self, forKey: .text)
         collapsed = try c.decodeIfPresent(Bool.self, forKey: .collapsed) ?? false
         side = try c.decodeIfPresent(Side.self, forKey: .side)
         if let raw = try c.decodeIfPresent(String.self, forKey: .fill),
@@ -46,17 +81,31 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
         } else {
             self.fill = nil
         }
-        image = try c.decodeIfPresent(Data.self, forKey: .image)
-        // 容错：宽高非法（<=0 或非有限）→ 视为无图片尺寸，不拒文件。
-        // ImagePixelSize 的 failable init 不参与 Codable 合成，须在此显式校验。
-        do {
-            imagePixelSize = try c.decodeIfPresent(ImagePixelSize.self, forKey: .imagePixelSize)
-            if let ps = imagePixelSize, !(ps.width > 0 && ps.height > 0 && ps.width.isFinite && ps.height.isFinite) {
-                imagePixelSize = nil
-            }
-        } catch {
-            imagePixelSize = nil
-        }
         children = try c.decodeIfPresent([Node].self, forKey: .children) ?? []
+
+        // v4：直接读 blocks。
+        if let blocks = try c.decodeIfPresent([ContentBlock].self, forKey: .blocks) {
+            self.blocks = blocks
+            return
+        }
+        // v1/v2/v3 fallback：text + image/imagePixelSize → 合成块（图在上、文在下）。
+        let text = try c.decodeIfPresent(String.self, forKey: .text) ?? ""
+        var blocks: [ContentBlock] = []
+        if let image = try c.decodeIfPresent(Data.self, forKey: .image) {
+            var px: ImagePixelSize? = nil
+            do {
+                px = try c.decodeIfPresent(ImagePixelSize.self, forKey: .imagePixelSize)
+                if let ps = px, !(ps.width > 0 && ps.height > 0 && ps.width.isFinite && ps.height.isFinite) {
+                    px = nil
+                }
+            } catch {
+                px = nil
+            }
+            if let px {
+                blocks.append(ContentBlock(id: UUID(), kind: .image(.init(data: image, pixelSize: px))))
+            }
+        }
+        blocks.append(ContentBlock(id: UUID(), kind: .text(text)))
+        self.blocks = blocks
     }
 }

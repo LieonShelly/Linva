@@ -108,6 +108,8 @@ final class DocumentSession: ObservableObject {
     private var autoSaveDebounce: AnyCancellable?
     private var lastSavedDocument: MindMapDocument
     private var originalEditingText = ""
+    /// 编辑提交的 Undo 基线（内容流聚拢前的块序列）。
+    private var originalBlocks: [ContentBlock] = []
 
     var primarySelectedId: UUID? { model.primarySelectedId }
 
@@ -152,6 +154,7 @@ final class DocumentSession: ObservableObject {
         selectedImageId = nil
         editingId = nil
         draftText = ""
+        originalBlocks = []
         originalEditingText = ""
         camera = Camera()
         relayout()
@@ -175,6 +178,7 @@ final class DocumentSession: ObservableObject {
         selectedImageId = nil
         editingId = nil
         draftText = ""
+        originalBlocks = []
         originalEditingText = ""
         camera = Camera()
         importPreview = nil
@@ -215,6 +219,7 @@ final class DocumentSession: ObservableObject {
         documentID = offer.meta.documentID
         editingId = nil
         draftText = ""
+        originalBlocks = []
         originalEditingText = ""
         selectedImageId = nil
         camera = Camera()
@@ -254,6 +259,7 @@ final class DocumentSession: ObservableObject {
         selectedImageId = nil
         editingId = nil
         draftText = ""
+        originalBlocks = []
         originalEditingText = ""
         camera = Camera()
         relayout()
@@ -450,33 +456,50 @@ final class DocumentSession: ObservableObject {
 
     // MARK: - 节点图片（FR-G2）
 
-    /// 写/清图片。清除时若处于图片级选中，目标为被选图片所在节点（⌫ 分派）。
+    /// 过渡壳：⌫ 清图 → 删除选中节点首个图片块；非清除 → 追加。Task 3 由 removeSelectedImageBlock 取代。
     func setImage(_ image: Data?, pixelSize: ImagePixelSize?) {
         commitEditingIfNeeded()
-        if image == nil, let selectedImageId {
-            let ids = [selectedImageId]
-            self.selectedImageId = nil   // 清图后回落：选中回节点
-            commandBus.execute(.setImage(ids: ids, image: nil, pixelSize: nil))
+        if let image, let pixelSize {
+            self.selectedImageId = nil
+            for id in Array(model.selectedIds) {
+                commandBus.execute(.appendImageBlock(id: id, image: image, pixelSize: pixelSize))
+            }
             return
         }
-        selectedImageId = nil
-        commandBus.execute(.setImage(ids: Array(model.selectedIds), image: image, pixelSize: pixelSize))
+        // 清除：删除选中节点（或 ⌫ 分派目标）的首个图片块。
+        let targetIds = selectedImageId.map { [$0] } ?? Array(model.selectedIds)
+        self.selectedImageId = nil
+        for id in targetIds {
+            guard let node = model.node(id: id),
+                  let first = node.blocks.first(where: {
+                      if case .image = $0.kind { return true } else { return false }
+                  }) else { continue }
+            commandBus.execute(.removeImageBlock(id: id, blockId: first.id))
+        }
     }
 
-    /// 粘贴/拖入入口：归一 + 入栈。要求有选中节点；失败（无归一器/无选中/数据非法）返回 false 由壳层提示。
+    /// 粘贴/拖入入口：归一 + 追加图片块到节点末尾。要求有选中节点。
     @discardableResult
-    func setPastedImage(from data: Data) -> Bool {
+    func appendPastedImage(from data: Data) -> Bool {
         commitEditingIfNeeded()
         guard let normalizer = imageNormalizer,
               !model.selectedIds.isEmpty,
               let normalized = normalizer(data) else {
             return false
         }
-        selectedImageId = nil
-        commandBus.execute(
-            .setImage(ids: Array(model.selectedIds), image: normalized.data, pixelSize: normalized.pixelSize)
-        )
+        self.selectedImageId = nil
+        for id in Array(model.selectedIds) {
+            commandBus.execute(
+                .appendImageBlock(id: id, image: normalized.data, pixelSize: normalized.pixelSize)
+            )
+        }
         return true
+    }
+
+    /// 过渡壳：Task 3 前 ContentView/CanvasMetalView 仍调用旧名；Task 3 切到 appendPastedImage 后删除。
+    @discardableResult
+    func setPastedImage(from data: Data) -> Bool {
+        appendPastedImage(from: data)
     }
 
     /// 双击图片区域：进入图片级选中（节点选中态不变）。
@@ -518,6 +541,7 @@ final class DocumentSession: ObservableObject {
         }
         selectOnly(id)
         originalEditingText = node.text
+        originalBlocks = node.blocks      // 新增：Undo 基线
         draftText = node.text
         editingId = id
     }
@@ -529,11 +553,27 @@ final class DocumentSession: ObservableObject {
             ? "未命名"
             : draftText
         self.editingId = nil
-        if committedText != originalEditingText {
+        // 聚拢规则：文本合并单块；图片按原相对顺序聚拢单侧——
+        // 原序列首个非空块是图片 → [images] + [text]（图上文下）；否则 [text] + [images]（文上图下）。
+        let images = originalBlocks.filter { block in
+            if case .image = block.kind { return true } else { return false }
+        }
+        let firstBlockIsImage: Bool = {
+            guard let first = originalBlocks.first else { return false }
+            if case .image = first.kind { return true } else { return false }
+        }()
+        var newBlocks: [ContentBlock]
+        if firstBlockIsImage {
+            newBlocks = images + [ContentBlock(id: UUID(), kind: .text(committedText))]
+        } else {
+            newBlocks = [ContentBlock(id: UUID(), kind: .text(committedText))] + images
+        }
+        if newBlocks != originalBlocks {
             commandBus.execute(
-                .setText(id: editingId, old: originalEditingText, new: committedText)
+                .setBlocks(id: editingId, old: originalBlocks, new: newBlocks)
             )
         }
+        originalBlocks = []
         originalEditingText = ""
         return true
     }
@@ -541,6 +581,7 @@ final class DocumentSession: ObservableObject {
     func cancelEditing() {
         draftText = originalEditingText
         originalEditingText = ""
+        originalBlocks = []
         editingId = nil
     }
 

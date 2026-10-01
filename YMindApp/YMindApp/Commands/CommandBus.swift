@@ -92,11 +92,11 @@ final class CommandBus {
         case let .delete(ids):
             return applyDelete(ids: ids)
 
-        case let .setText(id, old, new):
-            model.setText(id: id, new)
+        case let .setBlocks(id, old, new):
+            guard model.setBlocks(id: id, old: old, new: new) else { return nil }
             return Entry(
-                undo: { self.model.setText(id: id, old) },
-                redo: { self.model.setText(id: id, new) }
+                undo: { _ = self.model.setBlocks(id: id, old: new, new: old) },
+                redo: { _ = self.model.setBlocks(id: id, old: old, new: new) }
             )
 
         case let .toggleCollapse(id):
@@ -247,21 +247,33 @@ final class CommandBus {
                 }
             )
 
-        case let .setImage(ids, image, pixelSize):
-            let changes = model.setImage(ids: ids, image: image, pixelSize: pixelSize)
-            guard !changes.isEmpty else { return nil }
+        case let .appendImageBlock(id, image, pixelSize):
+            let blockId = model.appendImageBlock(id: id, image: image, pixelSize: pixelSize)
+            return Entry(
+                undo: { _ = self.model.removeImageBlock(id: id, blockId: blockId) },
+                redo: { _ = self.model.appendImageBlock(id: id, image: image, pixelSize: pixelSize, blockId: blockId) }
+            )
+
+        case let .replaceImageBlock(id, blockId, image, pixelSize):
+            guard let old = model.replaceImageBlock(id: id, blockId: blockId, image: image, pixelSize: pixelSize) else {
+                return nil
+            }
             return Entry(
                 undo: {
-                    for c in changes {
-                        _ = self.model.mutate(id: c.id) {
-                            $0.image = c.oldImage
-                            $0.imagePixelSize = c.oldPixelSize
-                        }
+                    if case let .image(oldImg) = old.kind {
+                        _ = self.model.replaceImageBlock(id: id, blockId: blockId, image: oldImg.data, pixelSize: oldImg.pixelSize)
                     }
                 },
-                redo: {
-                    _ = self.model.setImage(ids: ids, image: image, pixelSize: pixelSize)
-                }
+                redo: { _ = self.model.replaceImageBlock(id: id, blockId: blockId, image: image, pixelSize: pixelSize) }
+            )
+
+        case let .removeImageBlock(id, blockId):
+            guard let removed = model.removeImageBlock(id: id, blockId: blockId) else { return nil }
+            return Entry(
+                undo: {
+                    _ = self.model.mutate(id: id) { $0.blocks.insert(removed.block, at: min(removed.index, $0.blocks.count)) }
+                },
+                redo: { _ = self.model.removeImageBlock(id: id, blockId: blockId) }
             )
 
         case let .pasteAsChild(payload, parentId):

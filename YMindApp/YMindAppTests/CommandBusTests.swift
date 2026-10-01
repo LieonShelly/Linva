@@ -18,18 +18,6 @@ struct CommandBusTests {
         #expect(model.document.root.children[0].text == "子")
     }
 
-    @Test func setText_undo() {
-        let model = MindMapModel.makeNew()
-        let bus = CommandBus(model: model)
-        let id = model.document.root.id
-        bus.execute(.setText(id: id, old: "中心主题", new: "会议"))
-        #expect(model.document.root.text == "会议")
-        bus.undo()
-        #expect(model.document.root.text == "中心主题")
-        bus.redo()
-        #expect(model.document.root.text == "会议")
-    }
-
     @Test func delete_root_isNoOp() {
         let model = MindMapModel.makeNew()
         let bus = CommandBus(model: model)
@@ -397,51 +385,79 @@ struct CommandBusTests {
     }
 }
 
-@Suite("setImage 命令")
-struct SetImageCommandTests {
-    private let bytesA = Data([0x01])
-    private let bytesB = Data([0x02])
-    private let sizeA = ImagePixelSize(width: 10, height: 10)
-
-    @Test func setImage_undoRedoRestoresPreviousImage() {
+@Suite("块命令")
+struct BlockCommandTests {
+    @Test func setBlocks_undoRedo() {
         let model = MindMapModel.makeNew()
         let bus = CommandBus(model: model)
         let root = model.document.root.id
-        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
-        #expect(model.node(id: root)?.image == bytesA)
-
-        bus.execute(.setImage(ids: [root], image: bytesB, pixelSize: sizeA))
+        let old = model.document.root.blocks
+        let new = [ContentBlock(id: UUID(), kind: .text("新文本"))]
+        bus.execute(.setBlocks(id: root, old: old, new: new))
+        #expect(model.node(id: root)?.blocks == new)
         bus.undo()
-        #expect(model.node(id: root)?.image == bytesA)
+        #expect(model.node(id: root)?.blocks == old)
         bus.redo()
-        #expect(model.node(id: root)?.image == bytesB)
+        #expect(model.node(id: root)?.blocks == new)
     }
 
-    @Test func clearImage_undoRestoresImage() {
+    @Test func appendImageBlock_undoRemoves_redoReinsertsSameId() {
         let model = MindMapModel.makeNew()
         let bus = CommandBus(model: model)
         let root = model.document.root.id
-        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
-        bus.execute(.setImage(ids: [root], image: nil, pixelSize: nil))
-        #expect(model.node(id: root)?.image == nil)
+        let px = ImagePixelSize(width: 10, height: 10)!
+        bus.execute(.appendImageBlock(id: root, image: Data([0x01]), pixelSize: px))
+        let blockId = model.node(id: root)!.blocks[1].id
+        #expect(model.node(id: root)?.blocks.count == 2)
         bus.undo()
-        #expect(model.node(id: root)?.image == bytesA)
+        #expect(model.node(id: root)?.blocks.count == 1)
+        bus.redo()
+        #expect(model.node(id: root)?.blocks[1].id == blockId)
     }
 
-    @Test func noOpSetImage_doesNotEnterUndoStack() {
-        let model = MindMapModel.makeNew()
-        let bus = CommandBus(model: model)
-        bus.execute(.setImage(ids: [model.document.root.id], image: nil, pixelSize: nil))
-        #expect(bus.canUndo == false)
-    }
-
-    @Test func setImage_keepsSelection() {
+    @Test func replaceImageBlock_undoRestoresOld() {
         let model = MindMapModel.makeNew()
         let bus = CommandBus(model: model)
         let root = model.document.root.id
-        let child = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
-        model.selectOnly(child)
-        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
-        #expect(model.selectedIds == [child])
+        let px = ImagePixelSize(width: 10, height: 10)!
+        bus.execute(.appendImageBlock(id: root, image: Data([0x01]), pixelSize: px))
+        let blockId = model.node(id: root)!.blocks[1].id
+        bus.execute(.replaceImageBlock(id: root, blockId: blockId, image: Data([0x02]), pixelSize: px))
+        if case .image(let img) = model.node(id: root)!.blocks[1].kind {
+            #expect(img.data == Data([0x02]))
+        }
+        bus.undo()
+        if case .image(let img) = model.node(id: root)!.blocks[1].kind {
+            #expect(img.data == Data([0x01]))
+        }
+        bus.redo()
+        if case .image(let img) = model.node(id: root)!.blocks[1].kind {
+            #expect(img.data == Data([0x02]))
+        }
+    }
+
+    @Test func removeImageBlock_undoRestoresBlockAtSameIndex() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        bus.execute(.appendImageBlock(id: root, image: Data([0x01]), pixelSize: px))
+        let blockId = model.node(id: root)!.blocks[1].id
+        bus.execute(.removeImageBlock(id: root, blockId: blockId))
+        #expect(model.node(id: root)?.blocks.count == 1)
+        bus.undo()
+        #expect(model.node(id: root)?.blocks.count == 2)
+        #expect(model.node(id: root)?.blocks[1].id == blockId)
+        bus.redo()
+        #expect(model.node(id: root)?.blocks.count == 1)
+    }
+
+    @Test func noOpSetBlocks_doesNotEnterUndoStack() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let old = model.document.root.blocks
+        bus.execute(.setBlocks(id: root, old: old, new: old))
+        #expect(bus.canUndo == false)
     }
 }

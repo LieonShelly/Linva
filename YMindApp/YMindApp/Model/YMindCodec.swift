@@ -38,6 +38,10 @@ enum YMindCodec {
         if doc.version == 2 {
             doc.version = 3
         }
+        // 迁移：v3 → v4（blocks 由 Node 解码器 fallback 合成，此处仅抬版本号）。
+        if doc.version == 3 {
+            doc.version = 4
+        }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
         }

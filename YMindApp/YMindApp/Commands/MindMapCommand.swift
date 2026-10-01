@@ -4,7 +4,10 @@ enum MindMapCommand: Equatable {
     case addChild(parentId: UUID, text: String)
     case addSibling(selectedId: UUID, text: String)
     case delete(ids: [UUID])
-    case setText(id: UUID, old: String, new: String)
+    case setBlocks(id: UUID, old: [ContentBlock], new: [ContentBlock])
+    case appendImageBlock(id: UUID, image: Data, pixelSize: ImagePixelSize)
+    case replaceImageBlock(id: UUID, blockId: UUID, image: Data, pixelSize: ImagePixelSize)
+    case removeImageBlock(id: UUID, blockId: UUID)
     case toggleCollapse(id: UUID)
     case setCollapsed(ids: [UUID], collapsed: Bool)
     case moveToParent(ids: [UUID], parentId: UUID)
@@ -13,5 +16,4 @@ enum MindMapCommand: Equatable {
     case applyRootSide(ids: [UUID], side: Side)
     case pasteAsChild(payload: [Node], parentId: UUID)
     case setFill(ids: [UUID], fill: NodeFill?)
-    case setImage(ids: [UUID], image: Data?, pixelSize: ImagePixelSize?)
 }

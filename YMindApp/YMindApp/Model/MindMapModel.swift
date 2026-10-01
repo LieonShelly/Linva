@@ -197,8 +197,56 @@ final class MindMapModel {
         return removed
     }
 
-    func setText(id: UUID, _ text: String) {
-        _ = mutate(id: id) { $0.text = text }
+    /// 整块序列替换（编辑提交）。前置校验：old 须与当前一致（防串改覆盖），且 old != new（无变化不入栈）。
+    @discardableResult
+    func setBlocks(id: UUID, old: [ContentBlock], new: [ContentBlock]) -> Bool {
+        guard let node = node(id: id), node.blocks == old, old != new else { return false }
+        _ = mutate(id: id) { $0.blocks = new }
+        return true
+    }
+
+    /// 末尾追加图片块；返回新块 id（redo 用同 id 重插，经 blockId 参数）。
+    @discardableResult
+    func appendImageBlock(
+        id: UUID,
+        image: Data,
+        pixelSize: ImagePixelSize,
+        blockId: UUID? = nil
+    ) -> UUID {
+        let block = ContentBlock(id: blockId ?? UUID(), kind: .image(.init(data: image, pixelSize: pixelSize)))
+        _ = mutate(id: id) { $0.blocks.append(block) }
+        return block.id
+    }
+
+    /// 替换指定图片块数据（块 id 不变）；返回旧块供 Undo；无该块返回 nil。
+    @discardableResult
+    func replaceImageBlock(id: UUID, blockId: UUID, image: Data, pixelSize: ImagePixelSize) -> ContentBlock? {
+        guard let node = node(id: id),
+              let index = node.blocks.firstIndex(where: { $0.id == blockId }),
+              case .image = node.blocks[index].kind else {
+            return nil
+        }
+        let old = node.blocks[index]
+        _ = mutate(id: id) {
+            $0.blocks[index] = ContentBlock(
+                id: blockId,
+                kind: .image(.init(data: image, pixelSize: pixelSize))
+            )
+        }
+        return old
+    }
+
+    /// 删除图片块；返回被删块与下标供 Undo 按原位置恢复；无该块/非图片块返回 nil。
+    @discardableResult
+    func removeImageBlock(id: UUID, blockId: UUID) -> (block: ContentBlock, index: Int)? {
+        guard let node = node(id: id),
+              let index = node.blocks.firstIndex(where: { $0.id == blockId }),
+              case .image = node.blocks[index].kind else {
+            return nil
+        }
+        let block = node.blocks[index]
+        _ = mutate(id: id) { $0.blocks.remove(at: index) }
+        return (block, index)
     }
 
     func toggleCollapse(id: UUID) {
@@ -218,27 +266,6 @@ final class MindMapModel {
             guard let node = node(id: id), node.fill != fill else { continue }
             changes.append((id, node.fill))
             _ = mutate(id: id) { $0.fill = fill }
-        }
-        return changes
-    }
-
-    /// 对选中集每个节点写同一图片（nil = 清除）；返回被改节点旧值供 Undo。不改选中。
-    @discardableResult
-    func setImage(
-        ids: [UUID],
-        image: Data?,
-        pixelSize: ImagePixelSize?
-    ) -> [(id: UUID, oldImage: Data?, oldPixelSize: ImagePixelSize?)] {
-        var changes: [(id: UUID, oldImage: Data?, oldPixelSize: ImagePixelSize?)] = []
-        var seen = Set<UUID>()
-        for id in ids where seen.insert(id).inserted {
-            guard let node = node(id: id),
-                  node.image != image || node.imagePixelSize != pixelSize else { continue }
-            changes.append((id, node.image, node.imagePixelSize))
-            _ = mutate(id: id) {
-                $0.image = image
-                $0.imagePixelSize = image == nil ? nil : pixelSize
-            }
         }
         return changes
     }
