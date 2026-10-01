@@ -542,9 +542,7 @@ final class DocumentSession: ObservableObject {
     @discardableResult
     func commitEditingIfNeeded() -> Bool {
         guard let editingId else { return false }
-        let committedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? "未命名"
-            : draftText
+        let committedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         self.editingId = nil
         // 聚拢规则：文本合并单块；图片按原相对顺序聚拢单侧——
         // 原序列首个非空块是图片 → [images] + [text]（图上文下）；否则 [text] + [images]（文上图下）。
@@ -565,7 +563,11 @@ final class DocumentSession: ObservableObject {
             return false   // 全空文本块 / 无块 → 文本在前默认
         }()
         var newBlocks: [ContentBlock]
-        if firstBlockIsImage {
+        if committedText.isEmpty {
+            // 文字删空：不带文本块（用户拍板「一律允许空文字」）。
+            // 有图片块 → 只留图片；纯文本节点 → 空 blocks（node.text 为空，布局退化为极小 padding 节点，不崩）。
+            newBlocks = images
+        } else if firstBlockIsImage {
             newBlocks = images + [ContentBlock(id: UUID(), kind: .text(committedText))]
         } else {
             newBlocks = [ContentBlock(id: UUID(), kind: .text(committedText))] + images

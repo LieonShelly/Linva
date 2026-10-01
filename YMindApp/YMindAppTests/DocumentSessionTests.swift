@@ -749,8 +749,8 @@ struct SessionConsolidationTests {
         #expect(kinds == [.text("纯文本新值")])
     }
 
-    /// M1-4：全图节点（无文本块，编辑态 draft 空）→ [images, .text("未命名")]（保 node.text 非空不变量）。
-    @Test func allImageNode_emptyDraft_keepsTextBlockUnnamed() {
+    /// M1-4：全图节点（无文本块，编辑态 draft 空）→ [images]（用户拍板「一律允许空文字」，不补「未命名」）。
+    @Test func allImageNode_emptyDraft_keepsOnlyImages() {
         let session = DocumentSession()
         let root = session.model.document.root.id
         let px = ImagePixelSize(width: 10, height: 10)!
@@ -760,7 +760,7 @@ struct SessionConsolidationTests {
 
         let kinds = commit(session, nodeId: root, draft: "")
 
-        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("未命名")])
+        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px))])
     }
 
     /// M4：首个非空块判定——空文本块跳过：[.text(""), .image] → 首个非空是图 → 图上文下。
@@ -775,5 +775,47 @@ struct SessionConsolidationTests {
         let kinds = commit(session, nodeId: root, draft: "新文")
 
         #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("新文")])
+    }
+
+    /// 用户场景：有图节点「新主题」，删空文字 → 只留图片（不补「未命名」文本块）。
+    @Test func imageNode_deleteAllText_keepsOnlyImage() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [textBlock("新主题"), imageBlock(data: Data([0x01]), pixelSize: px)]
+        }
+
+        let kinds = commit(session, nodeId: root, draft: "")
+
+        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px))])
+        #expect(session.model.node(id: root)?.text == "")
+    }
+
+    /// 用户场景边界：纯文本节点删空文字 → 空 blocks（「一律允许空文字」）。
+    @Test func pureTextNode_deleteAllText_becomesEmpty() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+
+        let kinds = commit(session, nodeId: root, draft: "")
+
+        #expect(kinds == [])
+        #expect(session.model.node(id: root)?.text == "")
+    }
+
+    /// 有图节点删空 → 只留图；Undo 精确恢复原「文字 + 图片」块序列。
+    @Test func imageNode_deleteAllText_undoRestoresTextAndImage() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [textBlock("新主题"), imageBlock(data: Data([0x01]), pixelSize: px)]
+        }
+
+        _ = commit(session, nodeId: root, draft: "")
+        #expect(session.model.node(id: root)?.blocks.map(\.kind) == [.image(.init(data: Data([0x01]), pixelSize: px))])
+
+        session.commandBus.undo()
+        #expect(session.model.node(id: root)?.blocks.map(\.kind) == [.text("新主题"), .image(.init(data: Data([0x01]), pixelSize: px))])
     }
 }
