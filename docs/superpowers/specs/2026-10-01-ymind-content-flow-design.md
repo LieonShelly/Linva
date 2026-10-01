@@ -159,15 +159,16 @@ override func paste(_ sender: Any?) {
 - `originalBlocks = node.blocks`（Undo 基线）。
 
 提交：
-1. `newText = draftText`；仅作空判断时去首尾空白（`trimmingCharacters(...).isEmpty`），**非空保留 draftText 原样**——沿用 v3 现状：非空保留首尾空白，不改行为；空 → `"未命名"`。
+1. `newText = draftText.trimmingCharacters(...)`（去首尾空白）。
 2. 收集 `images = originalBlocks` 中全部图片块（按原相对顺序）。
 3. 重组：
-   - 原序列**首个非空块是图片** → `blocks = images + [.text(newText)]`（图上文下）；
+   - **`newText` 为空** → `blocks = images`（文字删空：有图只留图片；纯文本 → 空 blocks，`node.text` 为空。用户拍板「一律允许空文字」，不补「未命名」）；
+   - `newText` 非空且原序列**首个非空块是图片** → `blocks = images + [.text(newText)]`（图上文下）；
    - 否则 → `blocks = [.text(newText)] + images`（文上图下）。
 4. `commandBus.execute(.setBlocks(id: editingId, old: originalBlocks, new: 重组))`。
 
-- 纯文本节点 → 退化为 `[.text(newText)]`，与现状行为一致（原 setText 语义）。
-- 全图节点（无文本块，编辑态 draft 为空）→ 提交后 `[images] + [.text("未命名")]`（文本块始终存在，保 `node.text` 非空不变量）。
+- 纯文本节点（非空）→ 退化为 `[.text(newText)]`，与现状行为一致（原 setText 语义）。
+- 全图节点（无文本块，编辑态 draft 为空）→ 提交后 `[images]`（只留图片，不补「未命名」）。
 - 穿插形态（文-图-文）→ 自动聚拢为 `[text] + [images]`，与「图片不穿插在文字中央」取向一致。
 - 「首个非空块」判定：`.text("")` 空文本块跳过（如 `[.text(""), .image]` → 首个非空是图 → 图上文下）；全空文本块 / 无块 → 按文本在前默认（文上图下）。
 
@@ -261,7 +262,7 @@ struct MarkdownImage: Equatable {
 2. **`Node.text` 计算属性**：任何「写 text」的旧路径（如遗留 `setText`）会编译期报错 → 强制收敛到块操作，无静默漂移。
 3. **编辑态图片不可见**：单文本域合并设计下，图片块在编辑时不可见、位置不可调——受「图片不穿插」取向约束，接受；块级重排（拖拽/上移下移）明确不做（§8）。
 4. **snapshot Equatable 含 Data**：沿 v3 设计（COW 引用比较），仅 relayout 触发，接受。
-5. **全图节点**：编辑态只显示空文本域；提交自动补「未命名」文本块。罕见，接受。
+5. **全图节点 / 删空文字**：编辑态只显示空文本域；提交后只留图片（文字删空不补「未命名」，用户拍板「一律允许空文字」）。纯文本节点删空 → 空 blocks（极小 padding 节点，`node.text` 为空）。罕见，接受。
 
 ## 8. 明确不做
 
