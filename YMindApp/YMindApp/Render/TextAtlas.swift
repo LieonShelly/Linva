@@ -19,13 +19,14 @@ final class TextAtlas {
 
     func texture(
         for frame: NodeFrame,
-        text: String,
+        block: BlockLayoutFrame,
         scale: CGFloat,
         device: MTLDevice
     ) -> MTLTexture? {
         let displayScale = max(scale, 1)
-        let width = max(Int(ceil(frame.size.width * displayScale)), 1)
-        let height = max(Int(ceil(frame.size.height * displayScale)), 1)
+        let width = max(Int(ceil(block.rect.width * displayScale)), 1)
+        let height = max(Int(ceil(block.rect.height * displayScale)), 1)
+        let text = block.text ?? ""
         let key = CacheKey(
             text: text,
             width: width,
@@ -34,7 +35,7 @@ final class TextAtlas {
             isRoot: frame.isRoot
         )
 
-        if let cached = entries[frame.id], cached.key == key {
+        if let cached = entries[block.blockId], cached.key == key {
             return cached.texture
         }
 
@@ -54,17 +55,15 @@ final class TextAtlas {
             ]
         )
 
+        // 文本块 rect 已含垂直内缩（Task 2 布局）；此处仅按块 rect 横向留 padding 居中。
         let horizontalPadding: CGFloat = frame.isRoot
             ? LayoutConstants.rootPadX
             : LayoutConstants.nodePadX
-        let verticalPadding: CGFloat = frame.isRoot
-            ? LayoutConstants.rootPadY
-            : LayoutConstants.nodePadY
         let textRect = CGRect(
             x: horizontalPadding,
-            y: verticalPadding,
-            width: max(frame.size.width - horizontalPadding * 2, 1),
-            height: max(frame.size.height - verticalPadding * 2, 1)
+            y: 0,
+            width: max(block.rect.width - horizontalPadding * 2, 1),
+            height: max(block.rect.height, 1)
         )
 
         guard let bitmap = TextTextureRasterizer.makeBitmap(
@@ -81,12 +80,12 @@ final class TextAtlas {
             width: width,
             height: height,
             bitmap: bitmap,
-            label: "文字纹理 \(frame.id)"
+            label: "文字纹理 \(block.blockId)"
         ) else {
             return nil
         }
 
-        entries[frame.id] = CacheEntry(key: key, texture: texture)
+        entries[block.blockId] = CacheEntry(key: key, texture: texture)
         return texture
     }
 }

@@ -550,29 +550,66 @@ struct SessionImageTests {
         }
     }
 
-    /// 回归（Important #2，spec §5.2）：selectImage 后 selectOnly(nil)（点空白）→ 清图片选中。
-    @Test func selectImage_thenSelectOnlyNil_clearsSelectedImageId() {
+    /// 回归（Important #2，spec §5.2）：selectImageBlock 后 selectOnly(nil)（点空白）→ 清图片选中。
+    @Test func selectImageBlock_thenSelectOnlyNil_clearsSelection() {
         let session = DocumentSession()
         let root = session.model.document.root.id
-        session.selectImage(root)
-        #expect(session.selectedImageId == root)
+        let blockId = session.model.appendImageBlock(
+            id: root, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
+        )
+        session.selectImageBlock(nodeId: root, blockId: blockId)
+        #expect(session.selectedImageBlock != nil)
 
         session.selectOnly(nil)
-        #expect(session.selectedImageId == nil)
+        #expect(session.selectedImageBlock == nil)
         #expect(session.selectedIds.isEmpty)
     }
 
-    /// 回归（Important #2，spec §5.2）：selectImage 后选中其它节点 → 亦清图片选中。
-    @Test func selectImage_thenSelectOtherNode_clearsSelectedImageId() {
+    /// 回归（Important #2，spec §5.2）：selectImageBlock 后选中其它节点 → 亦清图片选中。
+    @Test func selectImageBlock_thenSelectOtherNode_clearsSelection() {
         let session = DocumentSession()
         let root = session.model.document.root.id
         let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
         let b = session.model.insertChild(parentId: root, text: "B", side: .right, at: nil)
-        session.selectImage(a)
-        #expect(session.selectedImageId == a)
+        let blockId = session.model.appendImageBlock(
+            id: a, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
+        )
+        session.selectImageBlock(nodeId: a, blockId: blockId)
+        #expect(session.selectedImageBlock != nil)
 
         session.selectOnly(b)
-        #expect(session.selectedImageId == nil)
+        #expect(session.selectedImageBlock == nil)
         #expect(session.selectedIds == [b])
+    }
+
+    /// ⌫ 分派：删除选中的图片块并回落选中；无图片选中则 no-op。
+    @Test func removeSelectedImageBlock_deletesBlockAndClearsSelection() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let blockId = session.model.appendImageBlock(
+            id: root,
+            image: Data([0x01]),
+            pixelSize: ImagePixelSize(width: 10, height: 10)!
+        )
+        session.selectImageBlock(nodeId: root, blockId: blockId)
+        #expect(session.selectedImageBlock != nil)
+
+        session.removeSelectedImageBlock()
+        #expect(session.model.node(id: root)?.blocks.count == 1)
+        #expect(session.selectedImageBlock == nil)
+    }
+
+    /// 选中/清选是会话态：不入 Undo 栈；删除块本身才入栈。
+    @Test func selectImageBlock_clearOnEscapeProxy_andNotInUndoStack() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let blockId = session.model.appendImageBlock(
+            id: root, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
+        )
+        session.selectImageBlock(nodeId: root, blockId: blockId)
+        #expect(session.selectedImageBlock?.blockId == blockId)
+        session.clearImageSelection()
+        #expect(session.selectedImageBlock == nil)
+        #expect(session.commandBus.canUndo == false)
     }
 }

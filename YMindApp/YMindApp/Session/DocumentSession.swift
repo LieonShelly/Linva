@@ -92,8 +92,8 @@ final class DocumentSession: ObservableObject {
     @Published var errorMessage: String?
     @Published private(set) var clipboard: ClipboardPayload?
     @Published private(set) var cutSourceIds: Set<UUID> = []
-    /// 图片级选中（节点内子元素）；不入命令栈，同时最多一个。
-    @Published private(set) var selectedImageId: UUID?
+    /// 图片块级选中（节点内子元素）；不入命令栈，同时最多一个。
+    @Published private(set) var selectedImageBlock: (nodeId: UUID, blockId: UUID)?
     /// 图片归一注入点（App 组合根赋 ImageNormalizer.normalize；测试注入 stub）。Session 白名单无 ImageIO。
     var imageNormalizer: ((Data) -> (data: Data, pixelSize: ImagePixelSize)?)?
     @Published var importPreview: ImportPreviewState?
@@ -151,7 +151,7 @@ final class DocumentSession: ObservableObject {
         isDirty = false
         documentID = UUID()
         recovery = nil
-        selectedImageId = nil
+        selectedImageBlock = nil
         editingId = nil
         draftText = ""
         originalBlocks = []
@@ -175,7 +175,7 @@ final class DocumentSession: ObservableObject {
         isDirty = true
         documentID = UUID()
         recovery = nil
-        selectedImageId = nil
+        selectedImageBlock = nil
         editingId = nil
         draftText = ""
         originalBlocks = []
@@ -221,7 +221,7 @@ final class DocumentSession: ObservableObject {
         draftText = ""
         originalBlocks = []
         originalEditingText = ""
-        selectedImageId = nil
+        selectedImageBlock = nil
         camera = Camera()
         recovery = nil
         relayout()
@@ -256,7 +256,7 @@ final class DocumentSession: ObservableObject {
         isDirty = false
         documentID = UUID()
         recovery = nil
-        selectedImageId = nil
+        selectedImageBlock = nil
         editingId = nil
         draftText = ""
         originalBlocks = []
@@ -313,8 +313,8 @@ final class DocumentSession: ObservableObject {
     func selectOnly(_ id: UUID?) {
         model.selectOnly(id)
         syncSelectionFromModel()
-        // 换选中集即退出图片级选中（spec §5.2：点空白 / 换选节点均清；selectImage 不经此路，安全）。
-        selectedImageId = nil
+        // 换选中集即退出图片级选中（spec §5.2：点空白 / 换选节点均清；selectImageBlock 不经此路，安全）。
+        selectedImageBlock = nil
     }
 
     func toggleInSelection(_ id: UUID) {
@@ -335,7 +335,7 @@ final class DocumentSession: ObservableObject {
     func clearSelection() {
         model.clearSelection()
         syncSelectionFromModel()
-        selectedImageId = nil   // 点空白清图片选中（spec §5.2）
+        selectedImageBlock = nil   // 点空白清图片选中（spec §5.2）
     }
 
     func copySelection() {
@@ -456,26 +456,12 @@ final class DocumentSession: ObservableObject {
 
     // MARK: - 节点图片（FR-G2）
 
-    /// 过渡壳：⌫ 清图 → 删除选中节点首个图片块；非清除 → 追加。Task 3 由 removeSelectedImageBlock 取代。
-    func setImage(_ image: Data?, pixelSize: ImagePixelSize?) {
+    /// 删除选中的图片块（⌫ 分派）。无图片选中则 no-op。
+    func removeSelectedImageBlock() {
         commitEditingIfNeeded()
-        if let image, let pixelSize {
-            self.selectedImageId = nil
-            for id in Array(model.selectedIds) {
-                commandBus.execute(.appendImageBlock(id: id, image: image, pixelSize: pixelSize))
-            }
-            return
-        }
-        // 清除：删除选中节点（或 ⌫ 分派目标）的首个图片块。
-        let targetIds = selectedImageId.map { [$0] } ?? Array(model.selectedIds)
-        self.selectedImageId = nil
-        for id in targetIds {
-            guard let node = model.node(id: id),
-                  let first = node.blocks.first(where: {
-                      if case .image = $0.kind { return true } else { return false }
-                  }) else { continue }
-            commandBus.execute(.removeImageBlock(id: id, blockId: first.id))
-        }
+        guard let selected = selectedImageBlock else { return }
+        self.selectedImageBlock = nil   // 删块后回落：选中回节点
+        commandBus.execute(.removeImageBlock(id: selected.nodeId, blockId: selected.blockId))
     }
 
     /// 粘贴/拖入入口：归一 + 追加图片块到节点末尾。要求有选中节点。
@@ -487,7 +473,7 @@ final class DocumentSession: ObservableObject {
               let normalized = normalizer(data) else {
             return false
         }
-        self.selectedImageId = nil
+        self.selectedImageBlock = nil
         for id in Array(model.selectedIds) {
             commandBus.execute(
                 .appendImageBlock(id: id, image: normalized.data, pixelSize: normalized.pixelSize)
@@ -496,20 +482,14 @@ final class DocumentSession: ObservableObject {
         return true
     }
 
-    /// 过渡壳：Task 3 前 ContentView/CanvasMetalView 仍调用旧名；Task 3 切到 appendPastedImage 后删除。
-    @discardableResult
-    func setPastedImage(from data: Data) -> Bool {
-        appendPastedImage(from: data)
-    }
-
-    /// 双击图片区域：进入图片级选中（节点选中态不变）。
-    func selectImage(_ id: UUID) {
-        guard model.node(id: id) != nil else { return }
-        selectedImageId = id
+    /// 双击图片块：进入图片级选中（节点选中态不变）。
+    func selectImageBlock(nodeId: UUID, blockId: UUID) {
+        guard model.node(id: nodeId) != nil else { return }
+        selectedImageBlock = (nodeId, blockId)
     }
 
     func clearImageSelection() {
-        selectedImageId = nil
+        selectedImageBlock = nil
     }
 
     func move(_ ids: [UUID], to targetId: UUID) {

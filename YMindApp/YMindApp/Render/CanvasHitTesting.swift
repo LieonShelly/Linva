@@ -63,24 +63,25 @@ func hitTestNode(
         .id
 }
 
-/// 双击命中图片区：命中返回节点 id（图片属节点，selectedImageId 记节点 id）。
-/// imageRect 为节点局部 top-left 原点矩形，世界 rect = frame.rect.origin + 偏移。
-func hitTestImageRect(
+/// 双击命中图片块：返回 (nodeId, blockId)。图片块 text 为 nil，
+/// 块 rect 为节点局部 top-left 原点矩形，世界 rect = frame.rect.origin + 偏移。
+func hitTestImageBlock(
     screenPoint: CGPoint,
     snapshot: LayoutSnapshot,
     camera: Camera
-) -> UUID? {
+) -> (nodeId: UUID, blockId: UUID)? {
     let world = camera.screenToWorld(screenPoint)
     for frame in snapshot.frames.values {
-        guard let local = frame.imageRect else { continue }
-        let worldRect = CGRect(
-            x: frame.rect.minX + local.minX,
-            y: frame.rect.minY + local.minY,
-            width: local.width,
-            height: local.height
-        )
-        if worldRect.contains(world) {
-            return frame.id
+        for block in frame.blocks where block.text == nil {
+            let worldRect = CGRect(
+                x: frame.rect.minX + block.rect.minX,
+                y: frame.rect.minY + block.rect.minY,
+                width: block.rect.width,
+                height: block.rect.height
+            )
+            if worldRect.contains(world) {
+                return (frame.id, block.blockId)
+            }
         }
     }
     return nil

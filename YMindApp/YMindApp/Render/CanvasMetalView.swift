@@ -216,7 +216,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             camera: session.camera,
             selectedIds: session.selectedIds,
             selectionAnchorId: session.selectionAnchorId,
-            selectedImageId: session.selectedImageId,
+            selectedImageBlock: session.selectedImageBlock,
             cutSourceIds: session.cutSourceIds,
             intent: gesture.currentDropIntent,
             searchHitId: session.search.currentMatchId,
@@ -286,12 +286,12 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case let .node(id):
             let intent = wasEditing ? .replace : selectIntent(for: event)
             if event.clickCount == 2 {
-                if hitTestImageRect(
+                if let hit = hitTestImageBlock(
                     screenPoint: point,
                     snapshot: session.snapshot,
                     camera: session.camera
-                ) == id {
-                    session.selectImage(id)      // 双击图片区 → 图片级选中
+                ) {
+                    session.selectImageBlock(nodeId: hit.nodeId, blockId: hit.blockId)
                 } else {
                     actions.edit(id)             // 双击文字区 → 进文字编辑（现状）
                 }
@@ -473,13 +473,13 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case 36, 76:
             actions.addSibling()
         case 51, 117:
-            if session.selectedImageId != nil {
-                actions.clearImage()      // 选中图片 → 只清图
+            if session.selectedImageBlock != nil {
+                actions.clearImage()      // 选中图片块 → 删块
             } else {
-                actions.delete()          // 现状：删节点
+                actions.delete()          // 删节点
             }
         case 53:
-            if session.selectedImageId != nil {
+            if session.selectedImageBlock != nil {
                 session.clearImageSelection()   // Esc 先退图片选中
             } else if !session.cutSourceIds.isEmpty {
                 actions.cancelCut()
@@ -545,7 +545,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             camera: session.camera
         ) else { return false }
         session.selectOnly(nodeId)
-        if !session.setPastedImage(from: data) {
+        if !session.appendPastedImage(from: data) {
             DispatchQueue.main.async { self.session.errorMessage = "无法读取图片" }
         }
         return true

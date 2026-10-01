@@ -61,7 +61,8 @@ struct PNGWithImageTests {
         let expanded = PNGExporter.fullyExpanded(doc)
         let snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
         let frame = try #require(snapshot.frames[doc.root.id])
-        let local = try #require(frame.imageRect)
+        let imageBlock = try #require(frame.blocks.first { $0.text == nil })
+        let local = imageBlock.rect
         let worldRect = CGRect(
             x: frame.rect.minX + local.minX, y: frame.rect.minY + local.minY,
             width: local.width, height: local.height)

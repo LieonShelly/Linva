@@ -78,7 +78,7 @@ final class MetalRenderer {
         camera: Camera,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
-        selectedImageId: UUID?,
+        selectedImageBlock: (nodeId: UUID, blockId: UUID)?,
         cutSourceIds: Set<UUID>,
         intent: DropIntent?,
         searchHitId: UUID?,
@@ -115,7 +115,7 @@ final class MetalRenderer {
             displayScale: view.window?.backingScaleFactor ?? 1,
             selectedIds: selectedIds,
             selectionAnchorId: selectionAnchorId,
-            selectedImageId: selectedImageId,
+            selectedImageBlock: selectedImageBlock,
             cutSourceIds: cutSourceIds,
             intent: intent,
             searchHitId: searchHitId,
@@ -136,7 +136,7 @@ final class MetalRenderer {
         displayScale: CGFloat,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
-        selectedImageId: UUID?,
+        selectedImageBlock: (nodeId: UUID, blockId: UUID)?,
         cutSourceIds: Set<UUID>,
         intent: DropIntent?,
         searchHitId: UUID?,
@@ -159,7 +159,7 @@ final class MetalRenderer {
         )
         drawImage(
             snapshot: snapshot, camera: camera, displayScale: displayScale,
-            selectedImageId: selectedImageId,
+            selectedImageBlock: selectedImageBlock,
             encoder: encoder, viewport: &viewport
         )
         drawText(
@@ -181,7 +181,7 @@ final class MetalRenderer {
             camera: camera,
             selectedIds: selectedIds,
             selectionAnchorId: selectionAnchorId,
-            selectedImageId: selectedImageId,
+            selectedImageBlock: selectedImageBlock,
             encoder: encoder,
             viewport: &viewport
         )
@@ -261,31 +261,38 @@ final class MetalRenderer {
         encoder.setFragmentSamplerState(sampler, index: 0)
 
         for frame in orderedFrames(snapshot) {
-            guard let texture = textAtlas.texture(
-                for: frame,
-                text: frame.text,
-                scale: rasterScale,
-                device: device
-            ) else {
-                continue
+            for block in frame.blocks where block.text != nil {
+                guard let texture = textAtlas.texture(
+                    for: frame,
+                    block: block,
+                    scale: rasterScale,
+                    device: device
+                ) else {
+                    continue
+                }
+                let worldRect = CGRect(
+                    x: frame.rect.minX + block.rect.minX,
+                    y: frame.rect.minY + block.rect.minY,
+                    width: block.rect.width,
+                    height: block.rect.height
+                )
+                let color = rgba(frame.isRoot ? .white : .labelColor)
+                let vertices = texturedQuad(rect: screenRect(worldRect, camera: camera), color: color)
+                guard let buffer = device.makeBuffer(
+                    bytes: vertices,
+                    length: MemoryLayout<TexturedVertex>.stride * vertices.count
+                ) else {
+                    continue
+                }
+                encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+                encoder.setVertexBytes(
+                    &viewport,
+                    length: MemoryLayout<ViewportUniforms>.stride,
+                    index: 1
+                )
+                encoder.setFragmentTexture(texture, index: 0)
+                encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
             }
-
-            let color = rgba(frame.isRoot ? .white : .labelColor)
-            let vertices = texturedQuad(frame: frame, camera: camera, color: color)
-            guard let buffer = device.makeBuffer(
-                bytes: vertices,
-                length: MemoryLayout<TexturedVertex>.stride * vertices.count
-            ) else {
-                continue
-            }
-            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-            encoder.setVertexBytes(
-                &viewport,
-                length: MemoryLayout<ViewportUniforms>.stride,
-                index: 1
-            )
-            encoder.setFragmentTexture(texture, index: 0)
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         }
     }
 
@@ -294,7 +301,7 @@ final class MetalRenderer {
         snapshot: LayoutSnapshot,
         camera: Camera,
         displayScale: CGFloat,
-        selectedImageId: UUID?,
+        selectedImageBlock: (nodeId: UUID, blockId: UUID)?,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
@@ -328,42 +335,43 @@ final class MetalRenderer {
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
 
         for frame in orderedFrames(snapshot) {
-            guard let local = frame.imageRect,
-                  let payload = snapshot.imagePayloads[frame.id] else { continue }
-            let worldRect = CGRect(
-                x: frame.rect.minX + local.minX,
-                y: frame.rect.minY + local.minY,
-                width: local.width,
-                height: local.height
-            )
-            // 视口剔除：图片世界 rect 与相机视口不相交 → 连纹理都不建（显存纪律一）。
-            guard worldRect.intersects(viewportWorldRect) else { continue }
-            knownIds.insert(frame.id)
+            for block in frame.blocks where block.text == nil {
+                guard let payload = snapshot.imagePayloads[block.blockId] else { continue }
+                let worldRect = CGRect(
+                    x: frame.rect.minX + block.rect.minX,
+                    y: frame.rect.minY + block.rect.minY,
+                    width: block.rect.width,
+                    height: block.rect.height
+                )
+                // 视口剔除：图片世界 rect 与相机视口不相交 → 连纹理都不建（显存纪律一）。
+                guard worldRect.intersects(viewportWorldRect) else { continue }
+                knownIds.insert(block.blockId)
 
-            guard let texture = imageTextureCache.texture(
-                id: frame.id,
-                localRect: local,
-                payload: payload,
-                displayScale: rasterScale,
-                device: device
-            ) else { continue }
+                guard let texture = imageTextureCache.texture(
+                    id: block.blockId,
+                    localRect: block.rect,
+                    payload: payload,
+                    displayScale: rasterScale,
+                    device: device
+                ) else { continue }
 
-            let vertices = texturedQuad(
-                rect: screenRect(worldRect, camera: camera),
-                color: SIMD4<Float>(1, 1, 1, 1)
-            )
-            guard let buffer = device.makeBuffer(
-                bytes: vertices,
-                length: MemoryLayout<TexturedVertex>.stride * vertices.count
-            ) else { continue }
-            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-            encoder.setVertexBytes(
-                &viewport,
-                length: MemoryLayout<ViewportUniforms>.stride,
-                index: 1
-            )
-            encoder.setFragmentTexture(texture, index: 0)
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+                let vertices = texturedQuad(
+                    rect: screenRect(worldRect, camera: camera),
+                    color: SIMD4<Float>(1, 1, 1, 1)
+                )
+                guard let buffer = device.makeBuffer(
+                    bytes: vertices,
+                    length: MemoryLayout<TexturedVertex>.stride * vertices.count
+                ) else { continue }
+                encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+                encoder.setVertexBytes(
+                    &viewport,
+                    length: MemoryLayout<ViewportUniforms>.stride,
+                    index: 1
+                )
+                encoder.setFragmentTexture(texture, index: 0)
+                encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+            }
         }
         imageTextureCache.evictUnused(known: knownIds)   // 节点删除/折叠后清理（显存纪律三）
     }
@@ -479,7 +487,7 @@ final class MetalRenderer {
         camera: Camera,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
-        selectedImageId: UUID?,
+        selectedImageBlock: (nodeId: UUID, blockId: UUID)?,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
@@ -503,15 +511,15 @@ final class MetalRenderer {
                 )
             }
         }
-        // 图片级选中：imageRect 世界 rect → 直角 4 边近似（v1 不新增圆角 shader）。
-        if let selectedImageId,
-           let frame = snapshot.frames[selectedImageId],
-           let local = frame.imageRect {
+        // 图片块级选中：按块世界 rect → 直角 4 边近似（v1 不新增圆角 shader）。
+        if let sel = selectedImageBlock,
+           let frame = snapshot.frames[sel.nodeId],
+           let block = frame.blocks.first(where: { $0.blockId == sel.blockId }) {
             let worldRect = CGRect(
-                x: frame.rect.minX + local.minX,
-                y: frame.rect.minY + local.minY,
-                width: local.width,
-                height: local.height
+                x: frame.rect.minX + block.rect.minX,
+                y: frame.rect.minY + block.rect.minY,
+                width: block.rect.width,
+                height: block.rect.height
             )
             vertices += strokeVertices(
                 rect: screenRect(worldRect, camera: camera),
@@ -760,14 +768,6 @@ final class MetalRenderer {
     }
 
     private func texturedQuad(
-        frame: NodeFrame,
-        camera: Camera,
-        color: SIMD4<Float>
-    ) -> [TexturedVertex] {
-        texturedQuad(rect: screenRect(frame.rect, camera: camera), color: color)
-    }
-
-    private func texturedQuad(
         rect: CGRect,
         color: SIMD4<Float>
     ) -> [TexturedVertex] {
@@ -899,7 +899,7 @@ final class MetalRenderer {
         maxDimension: CGFloat = 2400,
         padding: CGFloat = 48,
         paper: NSColor,
-        selectedImageId: UUID? = nil
+        selectedImageBlock: (nodeId: UUID, blockId: UUID)? = nil
     ) -> CGImage? {
         guard !contentBounds.isNull, !contentBounds.isEmpty else { return nil }
 
@@ -964,7 +964,7 @@ final class MetalRenderer {
                 displayScale: 1,
                 selectedIds: [],
                 selectionAnchorId: nil,
-                selectedImageId: selectedImageId,
+                selectedImageBlock: selectedImageBlock,
                 cutSourceIds: [],
                 intent: nil,
                 searchHitId: nil,

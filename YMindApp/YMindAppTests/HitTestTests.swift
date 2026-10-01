@@ -237,32 +237,48 @@ struct HitTestTests {
 
 @Suite("图片命中")
 struct ImageHitTests {
-    @Test func hitTestImageRect_insideImage_returnsNodeID() {
+    @Test func hitTestImageBlock_insideImage_returnsNodeAndBlock() {
         let id = UUID()
+        let blockId = UUID()
         let frame = NodeFrame(
             id: id, text: "主题", center: .zero, size: NodeSize(width: 100, height: 100),
             isRoot: false, side: .right, collapsed: false, hiddenCount: 0,
-            imageRect: CGRect(x: 0, y: 0, width: 100, height: 50)   // 节点上半
+            blocks: [
+                BlockLayoutFrame(
+                    blockId: blockId,
+                    text: nil,
+                    rect: CGRect(x: 0, y: 0, width: 100, height: 50)   // 节点上半
+                ),
+            ]
         )
         let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
         let camera = Camera()
-        // imageRect top-left 原点：世界 rect = frame.rect.min + local 偏移
+        // 块 rect top-left 原点：世界 rect = frame.rect.min + local 偏移
         let worldRect = CGRect(
             x: frame.rect.minX, y: frame.rect.minY, width: 100, height: 50)
         let screenPoint = camera.worldToScreen(CGPoint(x: worldRect.midX, y: worldRect.midY))
-        #expect(hitTestImageRect(screenPoint: screenPoint, snapshot: snapshot, camera: camera) == id)
+        let hit = hitTestImageBlock(screenPoint: screenPoint, snapshot: snapshot, camera: camera)
+        #expect(hit?.nodeId == id)
+        #expect(hit?.blockId == blockId)
         // 文字区（下半）不算图片
         let textPoint = camera.worldToScreen(CGPoint(x: frame.rect.midX, y: frame.rect.maxY - 5))
-        #expect(hitTestImageRect(screenPoint: textPoint, snapshot: snapshot, camera: camera) == nil)
+        #expect(hitTestImageBlock(screenPoint: textPoint, snapshot: snapshot, camera: camera) == nil)
     }
 
-    @Test func hitTestImageRect_outsideNode_returnsNil() {
+    @Test func hitTestImageBlock_outsideNode_returnsNil() {
         let id = UUID()
         let frame = NodeFrame(
             id: id, text: "n", center: .zero, size: NodeSize(width: 80, height: 40),
             isRoot: false, side: .right, collapsed: false, hiddenCount: 0,
-            imageRect: CGRect(x: 0, y: 0, width: 80, height: 20))
+            blocks: [
+                BlockLayoutFrame(
+                    blockId: UUID(),
+                    text: nil,
+                    rect: CGRect(x: 0, y: 0, width: 80, height: 20)
+                ),
+            ]
+        )
         let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
-        #expect(hitTestImageRect(screenPoint: CGPoint(x: 500, y: 500), snapshot: snapshot, camera: Camera()) == nil)
+        #expect(hitTestImageBlock(screenPoint: CGPoint(x: 500, y: 500), snapshot: snapshot, camera: Camera()) == nil)
     }
 }

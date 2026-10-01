@@ -42,7 +42,7 @@ final class ImageTextureCache {
     /// 数据非法 / 解码失败 → nil（按无图显示，降级不崩）。
     func texture(
         id: UUID,
-        localRect: CGRect,      // pt（= frame.imageRect）
+        localRect: CGRect,      // pt（= 图片块的局部 rect）
         payload: ImagePayload,
         displayScale: CGFloat,  // renderer 已乘 rasterBucket
         device: MTLDevice

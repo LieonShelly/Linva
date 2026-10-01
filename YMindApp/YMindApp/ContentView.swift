@@ -46,7 +46,7 @@ struct ContentView: View {
                         cut: cutSelection,
                         paste: paste,
                         cancelCut: cancelCut,
-                        clearImage: { session.setImage(nil, pixelSize: nil) }
+                        clearImage: { session.removeSelectedImageBlock() }
                     )
                 )
 
@@ -258,8 +258,8 @@ struct ContentView: View {
         let ids = Array(session.selectedIds)
         guard ids.contains(where: { $0 != session.model.document.root.id }) else { return }
         session.commandBus.execute(.delete(ids: ids))
-        // 删除含被选图片的节点后，图片选中悬空 → 回落 nil。
-        if let imageId = session.selectedImageId, session.model.node(id: imageId) == nil {
+        // 删除含被选图片块的节点后，图片选中悬空 → 回落 nil。
+        if let sel = session.selectedImageBlock, session.model.node(id: sel.nodeId) == nil {
             session.clearImageSelection()
         }
     }
@@ -293,7 +293,7 @@ struct ContentView: View {
         guard !session.selectedIds.isEmpty else { return }   // ② 无选中不尝试图片
         let pb = NSPasteboard.general
         guard let data = pb.data(forType: .png) ?? pb.data(forType: .tiff) else { return }
-        if !session.setPastedImage(from: data) {
+        if !session.appendPastedImage(from: data) {
             session.errorMessage = "无法读取图片"
         }
     }
