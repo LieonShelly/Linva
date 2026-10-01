@@ -133,9 +133,12 @@ struct MarkdownWithImageTests {
         let child = Node(text: "带图节点", image: png, imagePixelSize: ImagePixelSize(width: 10, height: 10))
         doc.root.children = [child]
         let output = MarkdownExporter.output(from: doc)
-        #expect(output.text.contains("![图片](assets/\(child.id.uuidString).png)"))
+        let imageBlockId = child.blocks.first(where: {
+            if case .image = $0.kind { return true } else { return false }
+        })!.id
+        #expect(output.text.contains("![图片](assets/\(imageBlockId.uuidString).png)"))
         #expect(output.images.count == 1)
-        #expect(output.images[0].nodeId == child.id)
+        #expect(output.images[0].blockId == imageBlockId)
         #expect(output.images[0].data == png)
     }
 
@@ -155,6 +158,21 @@ struct MarkdownWithImageTests {
         doc.root.children = [child]
         let output = MarkdownExporter.output(from: doc)
         #expect(output.images.count == 1)   // walk 忽略折叠（纯结构遍历）
+    }
+
+    @Test func multiImageNode_exportsAllReferences() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        let px = ImagePixelSize(width: 10, height: 10)!
+        var child = Node(text: "多图节点")
+        child.blocks.append(ContentBlock(id: UUID(), kind: .image(.init(data: png, pixelSize: px))))
+        child.blocks.append(ContentBlock(id: UUID(), kind: .image(.init(data: png, pixelSize: px))))
+        doc.root.children = [child]
+        let output = MarkdownExporter.output(from: doc)
+        let refs = output.images
+        #expect(refs.count == 2)
+        for ref in refs {
+            #expect(output.text.contains("![图片](assets/\(ref.blockId.uuidString).png)"))
+        }
     }
 }
 

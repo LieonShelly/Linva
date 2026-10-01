@@ -8,9 +8,9 @@ import Foundation
 /// 标题 `#`×depth（depth>6 用 `######`）；内容为列表项（不缩进，符号按深度循环 - / * / +）。
 /// 理由：兄弟节点类型一致（层级不错乱），且深分支不会拉高其他兄弟分支下的浅叶子。
 
-/// 单个节点图片：节点 id 对应导出后 assets/<id>.png 文件名。
+/// 单个图片块：块 id 对应导出后 assets/<id>.png 文件名。
 struct MarkdownImage: Equatable {
-    let nodeId: UUID
+    let blockId: UUID
     let data: Data
 }
 
@@ -37,9 +37,11 @@ enum MarkdownExporter {
         var lines: [String] = []
         var images: [MarkdownImage] = []
         var rootLine = "# \(collapsedText(document.root.text))"
-        if let image = document.root.image {
-            rootLine += " ![图片](assets/\(document.root.id.uuidString).png)"
-            images.append(MarkdownImage(nodeId: document.root.id, data: image))
+        for block in document.root.blocks {
+            if case .image(let img) = block.kind {
+                rootLine += " ![图片](assets/\(block.id.uuidString).png)"
+                images.append(MarkdownImage(blockId: block.id, data: img.data))
+            }
         }
         lines.append(rootLine)
         walk(children: document.root.children, depth: 2, into: &lines, images: &images)
@@ -51,9 +53,11 @@ enum MarkdownExporter {
         let groupHasBranch = children.contains { !$0.children.isEmpty }
         for child in children {
             var content = collapsedText(child.text)
-            if let image = child.image {
-                content += " ![图片](assets/\(child.id.uuidString).png)"
-                images.append(MarkdownImage(nodeId: child.id, data: image))
+            for block in child.blocks {
+                if case .image(let img) = block.kind {
+                    content += " ![图片](assets/\(block.id.uuidString).png)"
+                    images.append(MarkdownImage(blockId: block.id, data: img.data))
+                }
             }
             if groupHasBranch {
                 let level = min(max(depth, 1), 6)

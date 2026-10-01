@@ -266,7 +266,7 @@ enum DocumentWorkflow {
                 to: packageDir.appendingPathComponent("\(folderName).md"), options: .atomic)
             for image in output.images {
                 try image.data.write(
-                    to: assetsDir.appendingPathComponent("\(image.nodeId.uuidString).png"),
+                    to: assetsDir.appendingPathComponent("\(image.blockId.uuidString).png"),
                     options: .atomic)
             }
         } catch {
