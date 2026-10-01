@@ -690,23 +690,47 @@ func size(for node: Node, isRoot: Bool) -> NodeSize {
 
 - [ ] **Step 3: `RadialLayout.swift` 产出块布局 + payload 按块 id**
 
-`placeBranch`/`rootFrame` 中：
+`BranchMetadata` 增 `let blocks: [BlockLayoutFrame]`；`subtreeHeight` 内：
 
 ```swift
-let m = measure.measure(for: node, isRoot: isRoot)   // isRoot 由调用点传
-let centeredBlocks = m.blocks.map { b -> BlockLayoutFrame in
-    var rect = b.rect
-    // 水平居中：文本块撑满内容宽、图片块居中。
-    if b.text != nil {
-        rect = CGRect(x: 0, y: b.rect.minY, width: m.size.width, height: b.rect.height)
-    } else {
-        rect = CGRect(x: (m.size.width - b.rect.width) / 2, y: b.rect.minY, width: b.rect.width, height: b.rect.height)
+func subtreeHeight(_ node: Node, isRoot: Bool) -> BranchMetadata {
+    let m = measure.measure(for: node, isRoot: isRoot)
+    let size = m.size
+    guard !node.collapsed, !node.children.isEmpty else {
+        return BranchMetadata(size: size, height: size.height, blocks: m.blocks, children: [])
     }
-    return BlockLayoutFrame(blockId: b.blockId, text: b.text, rect: rect)
+    // ... children 同现状 ...
+    return BranchMetadata(size: size, height: max(size.height, childrenHeight), blocks: m.blocks, children: childLayouts)
 }
 ```
 
-`collectPayloads` 改为：
+`placeBranch`/`rootFrame` 中（`metadata` 携带 `blocks`）：
+
+```swift
+let centeredBlocks = metadata.blocks.map { b -> BlockLayoutFrame in
+    if b.text != nil {
+        // 文本块：水平撑满节点内容宽（居中栅格化）。
+        return BlockLayoutFrame(
+            blockId: b.blockId,
+            text: b.text,
+            rect: CGRect(x: 0, y: b.rect.minY, width: metadata.size.width, height: b.rect.height)
+        )
+    }
+    // 图片块：水平居中。
+    return BlockLayoutFrame(
+        blockId: b.blockId,
+        text: nil,
+        rect: CGRect(
+            x: (metadata.size.width - b.rect.width) / 2,
+            y: b.rect.minY,
+            width: b.rect.width,
+            height: b.rect.height
+        )
+    )
+}
+```
+
+`NodeFrame` 构造：`imageRect: Self.imageRect(...)` → `blocks: centeredBlocks`（`subtreeHeight` 返回的 metadata 需先经此居中映射，placeBranch 内对 `metadata` 调用）。`collectPayloads` 改为：
 
 ```swift
 func collectPayloads(_ node: Node) {
