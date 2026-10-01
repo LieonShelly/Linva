@@ -63,7 +63,7 @@ enum ImageNormalizer {
 
 流程：CGImageSource 解码 → gif 取首帧 → 最长边 > 1024px 等比缩 → PNG 编码 → 若 > 5MB 再降到 512px → 仍超限返回 nil（调用方状态提示，不入栈）。
 
-- **放 App 层**：需要 ImageIO/AppKit；`Model` 只许 Foundation、`Session` 无 AppKit/ImageIO——**零新增 import**（App 白名单已含 AppKit；`scripts/check-boundaries.sh` 保持绿，兑现 PRD「不新增 import」承诺）。
+- **放 App 层**：需要 ImageIO/AppKit；`Model` 只许 Foundation、`Session` 无 AppKit/ImageIO——需 `import ImageIO`（CGImageSource 属 ImageIO 而非 AppKit/CoreGraphics）；按仓库规约把 ImageIO 加入 App 白名单并同步 §5 记录。
 - 产出同时带 `pixelSize`（CGImageSource 属性，不二次解码）。
 - **Session 适配**（`Session/DocumentSession.swift`）：Session 白名单无 AppKit/ImageIO，归一器以**闭包注入**保持 Session 可单测——Session 声明 `var imageNormalizer: (Data) -> (data: Data, pixelSize: ImagePixelSize)?`（默认空实现返回 nil），App 层组合根（`YMindAppApp`/`ContentView` 构建 Session 处）赋值 `ImageNormalizer.normalize`。入口 `func setPastedImage(from data: Data) -> Bool`：归一成功 → `setImage` 入栈返回 true；失败返回 false，壳层状态提示「无法读取图片」。
 
