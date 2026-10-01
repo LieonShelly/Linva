@@ -582,6 +582,21 @@ struct SessionImageTests {
         #expect(session.selectedIds == [b])
     }
 
+    /// 回归（Important #2，spec §5.2）：selectImageBlock 后 replaceSelection（⌘A / 框选路径）→ 亦清图片选中。
+    @Test func selectImageBlock_thenReplaceSelection_clearsSelection() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let blockId = session.model.appendImageBlock(
+            id: root, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
+        )
+        session.selectImageBlock(nodeId: root, blockId: blockId)
+        #expect(session.selectedImageBlock != nil)
+
+        session.replaceSelection([root], anchorId: root)
+        #expect(session.selectedImageBlock == nil)
+        #expect(session.selectedIds == [root])
+    }
+
     /// ⌫ 分派：删除选中的图片块并回落选中；无图片选中则 no-op。
     @Test func removeSelectedImageBlock_deletesBlockAndClearsSelection() {
         let session = DocumentSession()

@@ -260,8 +260,10 @@ final class MetalRenderer {
         encoder.setRenderPipelineState(texturedPipeline)
         encoder.setFragmentSamplerState(sampler, index: 0)
 
+        var knownIds = Set<UUID>()
         for frame in orderedFrames(snapshot) {
             for block in frame.blocks where block.text != nil {
+                knownIds.insert(block.blockId)
                 guard let texture = textAtlas.texture(
                     for: frame,
                     block: block,
@@ -294,6 +296,7 @@ final class MetalRenderer {
                 encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
             }
         }
+        textAtlas.evictUnused(known: knownIds)   // 节点删除/折叠/文本编辑后清理（显存纪律三）
     }
 
     /// 图片 quad：视口剔除 → 缓存纹理 → texturedQuad（与文字同管线）。

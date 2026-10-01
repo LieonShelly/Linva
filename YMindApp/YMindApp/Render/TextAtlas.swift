@@ -88,6 +88,15 @@ final class TextAtlas {
         entries[block.blockId] = CacheEntry(key: key, texture: texture)
         return texture
     }
+
+    /// 帧不在 `known` 集合内的条目全部释放（回屏后按需重建）。
+    /// 编辑提交新建 ContentBlock → 旧 blockId 条目不再被引用，必须驱逐（显存纪律三）。
+    func evictUnused(known: Set<UUID>) {
+        let stale = entries.keys.filter { !known.contains($0) }
+        for id in stale {
+            entries.removeValue(forKey: id)
+        }
+    }
 }
 
 final class BranchToggleAtlas {

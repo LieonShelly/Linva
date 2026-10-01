@@ -5,7 +5,7 @@ import ImageIO
 import Metal
 
 /// 图片纹理缓存（spec §4.1）：脏键 = 节点 id + 显示像素尺寸 + scale 桶 + 内容身份；
-/// 命中 O(1) baseAddress/count 比对，miss（重建）时才算 FNV-1a 全哈希并 memoize；
+/// 内容身份即源 Data 缓冲区的 baseAddress/count，命中 O(1) 比对，无需内容哈希；
 /// 解码即降采样（CGImageSource thumbnail，按显示尺寸 × scale）；LRU 字节预算驱逐。
 final class ImageTextureCache {
     /// 命中比对的源数据身份：持有 Data 值（COW，只加引用不拷贝字节）锁定缓冲区 + 预存 baseAddress/count。
@@ -22,7 +22,6 @@ final class ImageTextureCache {
         let widthPx: Int
         let heightPx: Int
         let scaleMilli: Int          // Int((displayScale * 100).rounded())，与 TextAtlas 同法
-        let fingerprint: Int         // FNV-1a 全哈希（miss 时算一次并 memoize）
         let source: SourceData
         let texture: MTLTexture
         let bytes: Int
@@ -53,7 +52,7 @@ final class ImageTextureCache {
         let heightPx = max(Int(ceil(localRect.height * displayScale)), 1)
         let scaleMilli = Int((displayScale * 100).rounded())
 
-        // 命中：同维度 + 同 scale 桶 + 同内容身份（O(1)，不付 O(n) 全哈希）。
+        // 命中：同维度 + 同 scale 桶 + 同内容身份（O(1) baseAddress/count 比对）。
         let currentAddress = payload.data.withUnsafeBytes { $0.baseAddress.map { UInt(bitPattern: $0) } }
         if let cached = entries[id],
            cached.widthPx == widthPx,
@@ -101,7 +100,7 @@ final class ImageTextureCache {
             bitmap: bitmap, label: "图片纹理 \(id)"
         ) else { return nil }
 
-        // miss → 重建；此时才付 O(n) FNV-1a 全哈希并 memoize 进条目（命中路径已提前返回）。
+        // miss → 重建（命中路径已提前返回）；身份即新 SourceData 的 baseAddress/count。
         let sourceData = SourceData(
             data: payload.data,
             address: currentAddress ?? 0,
@@ -109,7 +108,6 @@ final class ImageTextureCache {
         )
         insert(
             id: id, widthPx: widthPx, heightPx: heightPx, scaleMilli: scaleMilli,
-            fingerprint: Self.fnv1a(of: payload.data),
             source: sourceData, texture: texture, bytes: widthPx * heightPx * 4
         )
         return texture
@@ -130,24 +128,9 @@ final class ImageTextureCache {
         entries[id]?.lastUse = tick
     }
 
-    /// 内容全哈希（spec §4.1 指纹语义修订：内容身份 / 全哈希）。
-    /// FNV-1a 64 位，对任意字节差异敏感；只在校验 miss（重建）时计算一次并 memoize，
-    /// 命中路径 O(1) baseAddress/count 身份比对、不付 O(n) 全哈希。
-    /// 替代原「字节数 + 首尾 8 字节」：本应用图片全为 PNG，prefix/suffix 恒为文件签名
-    /// 89504E470D0A1A0A / IEND 尾 49454E44AE426082，等长 PNG 指纹只剩字节数、全碰撞 → 显示旧图。
-    /// 也不用 Data.hashValue：实测 NSData.hash 只取前缀字节，改尾部字节指纹不变。
-    private static func fnv1a(of data: Data) -> Int {
-        var hash: UInt64 = 0xcbf29ce484222325   // FNV-1a 64 位 offset basis
-        for byte in data {
-            hash ^= UInt64(byte)
-            hash &*= 0x100000001b3              // FNV-1a 64 位 prime
-        }
-        return Int(truncatingIfNeeded: hash)
-    }
-
     private func insert(
         id: UUID, widthPx: Int, heightPx: Int, scaleMilli: Int,
-        fingerprint: Int, source: SourceData, texture: MTLTexture, bytes: Int
+        source: SourceData, texture: MTLTexture, bytes: Int
     ) {
         // 同节点脏键变化覆盖旧条目：先回吐旧字节，避免 bytesUsed 漂移导致误驱逐。
         if let old = entries[id] {
@@ -157,7 +140,7 @@ final class ImageTextureCache {
         bytesUsed += bytes
         entries[id] = Entry(
             widthPx: widthPx, heightPx: heightPx, scaleMilli: scaleMilli,
-            fingerprint: fingerprint, source: source, texture: texture, bytes: bytes, lastUse: tick
+            source: source, texture: texture, bytes: bytes, lastUse: tick
         )
         while bytesUsed > byteBudget, let victim = entries.min(by: { $0.value.lastUse < $1.value.lastUse }) {
             bytesUsed -= victim.value.bytes

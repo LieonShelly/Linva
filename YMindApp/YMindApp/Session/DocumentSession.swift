@@ -308,13 +308,15 @@ final class DocumentSession: ObservableObject {
     func syncSelectionFromModel() {
         selectedIds = model.selectedIds
         selectionAnchorId = model.selectionAnchorId
+        // 换选中集即退出图片级选中（spec §5.2：点空白 / 换选节点均清）。所有换选入口
+        // （selectOnly / toggle / 范围选 / replaceSelection / ⌘A / 框选 / undo-redo）都经此收敛点；
+        // selectImageBlock 不经此路直接赋值，图片块选中不受影响。
+        selectedImageBlock = nil
     }
 
     func selectOnly(_ id: UUID?) {
         model.selectOnly(id)
         syncSelectionFromModel()
-        // 换选中集即退出图片级选中（spec §5.2：点空白 / 换选节点均清；selectImageBlock 不经此路，安全）。
-        selectedImageBlock = nil
     }
 
     func toggleInSelection(_ id: UUID) {
@@ -335,7 +337,6 @@ final class DocumentSession: ObservableObject {
     func clearSelection() {
         model.clearSelection()
         syncSelectionFromModel()
-        selectedImageBlock = nil   // 点空白清图片选中（spec §5.2）
     }
 
     func copySelection() {
