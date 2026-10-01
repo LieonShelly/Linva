@@ -305,21 +305,13 @@ case let .removeImageBlock(id, blockId):
     )
 ```
 
-- [ ] **Step 8: `DocumentSession.swift` 接口改造**
+- [ ] **Step 8: `DocumentSession.swift` 粘贴入口改造（保留 selectedImageId/setImage 过渡壳）**
 
-替换 `setImage`（第 453-464 行）、`setPastedImage`（第 468-479 行）、`selectImage`/`clearImageSelection`（第 484-490 行）为：
+**关键约束**：`selectedImageId`（节点 id）与 `setImage` 被 `ContentView.clearImage`、`CanvasMetalView` 双击/⌫/Esc、`MetalRenderer` 选中描边引用，而这些的块级改造依赖 `NodeFrame.blocks`（Task 2）与 `hitTestImageBlock`（Task 3）。**本任务保留 `selectedImageId` 声明与 `setImage` 签名不删**，只改粘贴入口与命令调用，保证 Task 1 独立可编译；块级选中态彻底改造见 Task 3 Step 4。
+
+替换 `setPastedImage`（第 468-479 行）为：
 
 ```swift
-// MARK: - 节点图片（FR-G2，v4 内容流）
-
-/// 删除选中的图片块（⌫ 分派）。无图片选中则 no-op。
-func removeSelectedImageBlock() {
-    commitEditingIfNeeded()
-    guard let selected = selectedImageBlock else { return }
-    self.selectedImageBlock = nil   // 删块后回落：选中回节点
-    commandBus.execute(.removeImageBlock(id: selected.nodeId, blockId: selected.blockId))
-}
-
 /// 粘贴/拖入入口：归一 + 追加图片块到节点末尾。要求有选中节点。
 @discardableResult
 func appendPastedImage(from data: Data) -> Bool {
@@ -329,7 +321,7 @@ func appendPastedImage(from data: Data) -> Bool {
           let normalized = normalizer(data) else {
         return false
     }
-    self.selectedImageBlock = nil
+    self.selectedImageId = nil
     for id in Array(model.selectedIds) {
         commandBus.execute(
             .appendImageBlock(id: id, image: normalized.data, pixelSize: normalized.pixelSize)
@@ -337,26 +329,35 @@ func appendPastedImage(from data: Data) -> Bool {
     }
     return true
 }
-
-/// 双击图片块：进入图片级选中（节点选中态不变）。
-func selectImageBlock(nodeId: UUID, blockId: UUID) {
-    guard model.node(id: nodeId) != nil else { return }
-    selectedImageBlock = (nodeId, blockId)
-}
-
-func clearImageSelection() {
-    selectedImageBlock = nil
-}
 ```
 
-替换状态声明（第 95-96 行）与全部 `selectedImageId` 引用为 `selectedImageBlock`：
+替换 `setImage`（第 453-464 行）为过渡壳（沿用 `selectedImageId` 节点 id 语义，`image == nil` 时删除该节点**首个图片块**；非 nil 分支追加——保留签名以不破坏 `ContentView.clearImage` 回调）：
 
 ```swift
-/// 图片级选中（节点内子元素）；不入命令栈，同时最多一个。
-@Published private(set) var selectedImageBlock: (nodeId: UUID, blockId: UUID)?
+/// 过渡壳：⌫ 清图 → 删除选中节点首个图片块；非清除 → 追加。Task 3 由 removeSelectedImageBlock 取代。
+func setImage(_ image: Data?, pixelSize: ImagePixelSize?) {
+    commitEditingIfNeeded()
+    if let image, let pixelSize {
+        self.selectedImageId = nil
+        for id in Array(model.selectedIds) {
+            commandBus.execute(.appendImageBlock(id: id, image: image, pixelSize: pixelSize))
+        }
+        return
+    }
+    // 清除：删除选中节点（或 ⌫ 分派目标）的首个图片块。
+    let targetIds = selectedImageId.map { [$0] } ?? Array(model.selectedIds)
+    self.selectedImageId = nil
+    for id in targetIds {
+        guard let node = model.node(id: id),
+              let first = node.blocks.first(where: {
+                  if case .image = $0.kind { return true } else { return false }
+              }) else { continue }
+        commandBus.execute(.removeImageBlock(id: id, blockId: first.id))
+    }
+}
 ```
 
-（`newDocument`/`loadImported`/`restoreRecovery`/`load`/`save`/`selectOnly`/`clearSelection`/`syncSelectionFromModel` 等所有 `selectedImageId = nil` 出现处逐一改为 `selectedImageBlock = nil`。）
+`selectImage`/`clearImageSelection`（第 484-490 行）**保留不动**（仍操作 `selectedImageId`）。
 
 - [ ] **Step 9: `DocumentSession.swift` 聚拢规则（startEditing + commitEditingIfNeeded）**
 
@@ -539,40 +540,28 @@ func commitEditingIfNeeded() -> Bool {
 
 - [ ] **Step 12: 更新 `DocumentSessionTests.swift`**
 
-`setPastedImage_commitsEditingFirst` 改名为 `appendPastedImage_commitsEditingFirst`（调 `appendPastedImage(from:)`，断言不变）；`⌫ 分派` 用例（第 527-534 行）改为：
+`setPastedImage_commitsEditingFirst` 改名为 `appendPastedImage_commitsEditingFirst`（调 `appendPastedImage(from:)`，断言不变）；**删除** ⌫ 分派、`selectImage` 相关用例（`removeSelectedImageBlock`/`selectImageBlock` 尚未存在，Task 3 才引入——Task 3 Step 4 会重建这些用例）。新增：
 
 ```swift
-@Test func removeSelectedImageBlock_deletesBlockAndClearsSelection() {
+@Test func appendPastedImage_appendsBlockAtEnd() {
     let session = DocumentSession()
     let root = session.model.document.root.id
-    let blockId = session.model.appendImageBlock(
-        id: root,
-        image: Data([0x01]),
-        pixelSize: ImagePixelSize(width: 10, height: 10)!
-    )
-    session.selectImageBlock(nodeId: root, blockId: blockId)
-    #expect(session.selectedImageBlock != nil)
-
-    session.removeSelectedImageBlock()
-    #expect(session.model.node(id: root)?.blocks.count == 1)
-    #expect(session.selectedImageBlock == nil)
-}
-
-@Test func selectImageBlock_clearOnEscapeProxy_andNotInUndoStack() {
-    let session = DocumentSession()
-    let root = session.model.document.root.id
-    let blockId = session.model.appendImageBlock(
-        id: root, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
-    )
-    session.selectImageBlock(nodeId: root, blockId: blockId)
-    #expect(session.selectedImageBlock?.blockId == blockId)
-    session.clearImageSelection()
-    #expect(session.selectedImageBlock == nil)
-    #expect(session.commandBus.canUndo == false)
+    let px = ImagePixelSize(width: 10, height: 10)!
+    let normalizer: (Data) -> (data: Data, pixelSize: ImagePixelSize)? = {
+        ($0, px)
+    }
+    session.imageNormalizer = normalizer
+    session.selectOnly(root)
+    let ok = session.appendPastedImage(from: Data([0x01]))
+    #expect(ok == true)
+    #expect(session.model.node(id: root)?.blocks.count == 2)
+    if case .image(let img) = session.model.node(id: root)!.blocks[1].kind {
+        #expect(img.data == Data([0x01]))
+    } else {
+        Issue.record("blocks[1] 应为图片")
+    }
 }
 ```
-
-（其余 `selectImage(...)` 相关用例逐一改为 `selectImageBlock`。）
 
 - [ ] **Step 13: 编译 + 全量测试**
 
@@ -806,8 +795,41 @@ git commit -m "feat: 布局层块序合成（BlockLayoutFrame + TextMeasure.meas
 ### Task 3: 渲染层 —— TextAtlas 块化 + drawImage 遍历 + 块级命中/选中
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Render/TextAtlas.swift`、`Render/ImageTextureCache.swift`、`Render/MetalRenderer.swift`、`Render/CanvasHitTesting.swift`、`Render/CanvasMetalView.swift`、`ContentView.swift`
-- Test: `YMindApp/YMindAppTests/ImageTextureCacheTests.swift`、`HitTestTests.swift`、`PNGExporterTests.swift`
+- Modify: `YMindApp/YMindApp/Render/TextAtlas.swift`、`Render/ImageTextureCache.swift`、`Render/MetalRenderer.swift`、`Render/CanvasHitTesting.swift`、`Render/CanvasMetalView.swift`、`ContentView.swift`、`Session/DocumentSession.swift`
+- Test: `YMindApp/YMindAppTests/ImageTextureCacheTests.swift`、`HitTestTests.swift`、`PNGExporterTests.swift`、`DocumentSessionTests.swift`
+
+- [ ] **Step 0: 块级选中态彻底改造（DocumentSession selectedImageId → selectedImageBlock）**
+
+`NodeFrame.blocks`（Task 2）与 `hitTestImageBlock`（本任务）就绪后，把 Task 1 保留的 `selectedImageId`/`setImage` 过渡壳换成块级语义：
+
+`DocumentSession.swift`：
+- 状态声明（第 95-96 行）：`@Published private(set) var selectedImageId: UUID?` → `@Published private(set) var selectedImageBlock: (nodeId: UUID, blockId: UUID)?`；
+- 全部 `selectedImageId` 出现处（`newDocument`/`loadImported`/`restoreRecovery`/`load`/`save`/`selectOnly`/`clearSelection`/`syncSelectionFromModel`/`appendPastedImage`/`setImage`）逐一改为 `selectedImageBlock`（置 nil）；
+- 删除过渡壳 `setImage(_:pixelSize:)`（Task 1 版本），替换为：
+
+```swift
+/// 删除选中的图片块（⌫ 分派）。无图片选中则 no-op。
+func removeSelectedImageBlock() {
+    commitEditingIfNeeded()
+    guard let selected = selectedImageBlock else { return }
+    self.selectedImageBlock = nil   // 删块后回落：选中回节点
+    commandBus.execute(.removeImageBlock(id: selected.nodeId, blockId: selected.blockId))
+}
+```
+
+- `selectImage`/`clearImageSelection`（Task 1 保留的 `selectedImageId` 版本）替换为块级：
+
+```swift
+/// 双击图片块：进入图片级选中（节点选中态不变）。
+func selectImageBlock(nodeId: UUID, blockId: UUID) {
+    guard model.node(id: nodeId) != nil else { return }
+    selectedImageBlock = (nodeId, blockId)
+}
+
+func clearImageSelection() {
+    selectedImageBlock = nil
+}
+```
 
 - [ ] **Step 1: `TextAtlas.swift` 按块栅格化**
 
@@ -1019,6 +1041,41 @@ if let sel = session.selectedImageBlock, session.model.node(id: sel.nodeId) == n
 - [ ] **Step 8: 更新测试**
 
 `ImageTextureCacheTests`：`imageRect:` 参数 → `blocks:` 数组（含一个 `BlockLayoutFrame(text: nil, ...)`），`frame.imageRect!` → 取 blocks 中图片块的 `rect`。`HitTestTests`：`hitTestImageRect` → `hitTestImageBlock`（返回 tuple，`#expect(hit?.nodeId == id)` / `#expect(hit == nil)`）。`PNGExporterTests` 同改。
+
+`DocumentSessionTests`：Task 1 删除的块级选中用例在此重建（`selectedImageBlock` 现可用）：
+
+```swift
+@Test func removeSelectedImageBlock_deletesBlockAndClearsSelection() {
+    let session = DocumentSession()
+    let root = session.model.document.root.id
+    let blockId = session.model.appendImageBlock(
+        id: root,
+        image: Data([0x01]),
+        pixelSize: ImagePixelSize(width: 10, height: 10)!
+    )
+    session.selectImageBlock(nodeId: root, blockId: blockId)
+    #expect(session.selectedImageBlock != nil)
+
+    session.removeSelectedImageBlock()
+    #expect(session.model.node(id: root)?.blocks.count == 1)
+    #expect(session.selectedImageBlock == nil)
+}
+
+@Test func selectImageBlock_clearOnEscapeProxy_andNotInUndoStack() {
+    let session = DocumentSession()
+    let root = session.model.document.root.id
+    let blockId = session.model.appendImageBlock(
+        id: root, image: Data([0x01]), pixelSize: ImagePixelSize(width: 10, height: 10)!
+    )
+    session.selectImageBlock(nodeId: root, blockId: blockId)
+    #expect(session.selectedImageBlock?.blockId == blockId)
+    session.clearImageSelection()
+    #expect(session.selectedImageBlock == nil)
+    #expect(session.commandBus.canUndo == false)
+}
+```
+
+（原 Task 1 保留的 `selectImage(...)` 用例改为 `selectImageBlock`。）
 
 - [ ] **Step 9: 编译 + 测试**
 
