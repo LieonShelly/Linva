@@ -11,6 +11,7 @@ struct NodeFrame: Equatable {
     let collapsed: Bool
     let hiddenCount: Int
     let fill: NodeFill?
+    let imageRect: CGRect?
 
     init(
         id: UUID,
@@ -21,7 +22,8 @@ struct NodeFrame: Equatable {
         side: Side?,
         collapsed: Bool,
         hiddenCount: Int,
-        fill: NodeFill? = nil
+        fill: NodeFill? = nil,
+        imageRect: CGRect? = nil
     ) {
         self.id = id
         self.text = text
@@ -32,6 +34,7 @@ struct NodeFrame: Equatable {
         self.collapsed = collapsed
         self.hiddenCount = hiddenCount
         self.fill = fill
+        self.imageRect = imageRect
     }
 
     var rect: CGRect {
@@ -63,14 +66,23 @@ struct LayoutSnapshot: Equatable {
     let frames: [UUID: NodeFrame]
     let edges: [EdgeGeometry]
     let branchToggles: [BranchToggle]
+    let imagePayloads: [UUID: ImagePayload]
 
     init(
         frames: [UUID: NodeFrame],
         edges: [EdgeGeometry],
-        branchToggles: [BranchToggle] = []
+        branchToggles: [BranchToggle] = [],
+        imagePayloads: [UUID: ImagePayload] = [:]
     ) {
         self.frames = frames
         self.edges = edges
         self.branchToggles = branchToggles
+        self.imagePayloads = imagePayloads
     }
+}
+
+/// 有图节点的图片载荷：Layout 从 Model 拷出像素数据与尺寸，Render 只消费 Snapshot。
+struct ImagePayload: Equatable {
+    let pixelSize: ImagePixelSize
+    let data: Data
 }

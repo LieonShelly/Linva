@@ -14,4 +14,6 @@ enum LayoutConstants {
     static let branchToggleGap: CGFloat = 18
     static let branchToggleVisualRadius: CGFloat = 11
     static let branchToggleHitRadius: CGFloat = 14
+    static let imageMaxDisplayWidth: CGFloat = 300
+    static let imageTextGap: CGFloat = 6
 }
