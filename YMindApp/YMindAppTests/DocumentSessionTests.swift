@@ -549,4 +549,30 @@ struct SessionImageTests {
             Issue.record("blocks[1] 应为图片")
         }
     }
+
+    /// 回归（Important #2，spec §5.2）：selectImage 后 selectOnly(nil)（点空白）→ 清图片选中。
+    @Test func selectImage_thenSelectOnlyNil_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+
+        session.selectOnly(nil)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds.isEmpty)
+    }
+
+    /// 回归（Important #2，spec §5.2）：selectImage 后选中其它节点 → 亦清图片选中。
+    @Test func selectImage_thenSelectOtherNode_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = session.model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        session.selectImage(a)
+        #expect(session.selectedImageId == a)
+
+        session.selectOnly(b)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds == [b])
+    }
 }

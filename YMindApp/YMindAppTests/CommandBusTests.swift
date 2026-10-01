@@ -460,4 +460,47 @@ struct BlockCommandTests {
         bus.execute(.setBlocks(id: root, old: old, new: old))
         #expect(bus.canUndo == false)
     }
+
+    // M1：guard 分支——old 过期（node.blocks 已被并发改动）→ 拒绝执行，且不覆盖现状。
+    @Test func setBlocks_staleOld_doesNotOverwrite() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let old = model.document.root.blocks
+        let new = [ContentBlock(id: UUID(), kind: .text("新文本"))]
+        let concurrent = [ContentBlock(id: UUID(), kind: .text("并发写入"))]
+        model.mutate(id: root) { $0.blocks = concurrent }   // 模拟并发/过期：blocks 已与 old 不同
+
+        bus.execute(.setBlocks(id: root, old: old, new: new))
+
+        #expect(bus.canUndo == false)
+        #expect(model.node(id: root)?.blocks == concurrent)  // 保持手动改后的值，未被 old 覆盖
+    }
+
+    // M1：guard 分支——replaceImageBlock 目标块不存在 → 返回 nil 不入栈。
+    @Test func replaceImageBlock_missingBlock_noOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        let before = model.document.root.blocks
+
+        bus.execute(.replaceImageBlock(id: root, blockId: UUID(), image: Data([0x02]), pixelSize: px))
+
+        #expect(bus.canUndo == false)
+        #expect(model.node(id: root)?.blocks == before)
+    }
+
+    // M1：guard 分支——removeImageBlock 目标块不存在 → 返回 nil 不入栈。
+    @Test func removeImageBlock_missingBlock_noOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let before = model.document.root.blocks
+
+        bus.execute(.removeImageBlock(id: root, blockId: UUID()))
+
+        #expect(bus.canUndo == false)
+        #expect(model.node(id: root)?.blocks == before)
+    }
 }
