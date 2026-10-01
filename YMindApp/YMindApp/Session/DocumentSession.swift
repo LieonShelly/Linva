@@ -536,12 +536,21 @@ final class DocumentSession: ObservableObject {
         self.editingId = nil
         // 聚拢规则：文本合并单块；图片按原相对顺序聚拢单侧——
         // 原序列首个非空块是图片 → [images] + [text]（图上文下）；否则 [text] + [images]（文上图下）。
+        // 首个非空块判定：.text("") 空文本块跳过（spec「首个非空块」，如 [.text(""), .image] → 图上文下）；
+        // 全空文本块 / 无块 → 按文本在前默认（文上图下）。
         let images = originalBlocks.filter { block in
             if case .image = block.kind { return true } else { return false }
         }
         let firstBlockIsImage: Bool = {
-            guard let first = originalBlocks.first else { return false }
-            if case .image = first.kind { return true } else { return false }
+            for block in originalBlocks {
+                switch block.kind {
+                case .text(let s):
+                    if !s.isEmpty { return false }   // 首个非空块是文本 → 文上图下
+                case .image:
+                    return true                      // 首个非空块是图片 → 图上文下
+                }
+            }
+            return false   // 全空文本块 / 无块 → 文本在前默认
         }()
         var newBlocks: [ContentBlock]
         if firstBlockIsImage {
@@ -549,7 +558,8 @@ final class DocumentSession: ObservableObject {
         } else {
             newBlocks = [ContentBlock(id: UUID(), kind: .text(committedText))] + images
         }
-        if newBlocks != originalBlocks {
+        // no-op 判定按内容（忽略块 id）：文本块每次提交新建 id，整块 Equatable 比较恒不等（spec §2.1 no-op 不入栈）。
+        if newBlocks.map(\.kind) != originalBlocks.map(\.kind) {
             commandBus.execute(
                 .setBlocks(id: editingId, old: originalBlocks, new: newBlocks)
             )

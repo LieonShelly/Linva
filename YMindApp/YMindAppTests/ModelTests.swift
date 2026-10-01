@@ -173,6 +173,26 @@ struct ModelTests {
         #expect(copy.children[0].id != copy.id)
     }
 
+    /// P1-A：duplicate 重生成块 id——副本图片块不得与原节点共享块 id
+    /// （纹理缓存/导出 assets/<blockId>.png 按块 id 寻址，共享即碰撞）。
+    @Test func duplicate_regeneratesBlockIds() {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        let p = model.insertChild(parentId: root, text: "P", side: .right, at: nil)
+        let px = ImagePixelSize(width: 10, height: 10)!
+        let imgBlockId = model.appendImageBlock(id: p, image: Data([0x01]), pixelSize: px)
+        let src = model.node(id: p)!
+
+        let copy = model.duplicate(src)
+
+        let srcBlocks = src.blocks
+        let copyBlocks = copy.blocks
+        #expect(srcBlocks.count == copyBlocks.count)                       // 块数保持
+        #expect(srcBlocks.map(\.kind) == copyBlocks.map(\.kind))           // 内容与顺序保持
+        #expect(Set(srcBlocks.map(\.id)).isDisjoint(with: copyBlocks.map(\.id)))  // 块 id 全部重生成
+        #expect(copyBlocks.contains(where: { $0.id == imgBlockId }) == false)     // 原图片块 id 不出现在副本
+    }
+
     @Test func reparent_movesUnderTarget_andExpands() {
         let model = MindMapModel.makeNew()
         let root = model.document.root.id

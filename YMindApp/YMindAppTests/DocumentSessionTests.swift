@@ -142,6 +142,21 @@ struct DocumentSessionTests {
         try? FileManager.default.removeItem(at: url)
     }
 
+    /// P1-B：双击未改字提交 → 内容无变化 → no-op 不入栈、不脏（spec §2.1）。
+    @Test func commitEditingIfNeeded_noChange_doesNotEnterUndoStack() {
+        let session = DocumentSession()
+        let rootId = session.model.document.root.id
+        session.startEditing(rootId)
+        #expect(session.commandBus.canUndo == false)
+
+        session.commitEditingIfNeeded()
+
+        #expect(session.editingId == nil)
+        #expect(session.commandBus.canUndo == false)   // 无变化不 setBlocks 入栈
+        #expect(session.isDirty == false)
+        #expect(session.model.document.root.text == "中心主题")
+    }
+
     @Test func securityScopedAccess_startsBeforeOperation_andBalancesOwnedScopes() throws {
         let first = URL(fileURLWithPath: "/tmp/first.ymind")
         let second = URL(fileURLWithPath: "/tmp/second.ymind")

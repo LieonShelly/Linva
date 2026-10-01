@@ -161,9 +161,12 @@ final class MindMapModel {
     }
 
     /// 深拷贝子树并递归换新 UUID（Node 为值类型，结构天然深拷贝，只需换 id）。
+    /// 块 id 一并重生成：剪贴板复制粘贴的副本不得与原节点共享块 id
+    /// （imagePayloads/纹理缓存/导出 assets/<blockId>.png 按块 id 寻址，共享即碰撞）。
     func duplicate(_ node: Node) -> Node {
         var copy = node
         copy.id = UUID()
+        copy.blocks = node.blocks.map { ContentBlock(id: UUID(), kind: $0.kind) }
         copy.children = node.children.map { duplicate($0) }
         return copy
     }
