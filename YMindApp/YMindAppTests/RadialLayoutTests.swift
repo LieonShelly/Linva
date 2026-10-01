@@ -109,6 +109,19 @@ struct RadialLayoutTests {
         #expect(twoLines.height == LayoutConstants.nodeLineHeight * 2 + LayoutConstants.nodePadY * 2)
     }
 
+    @Test func textBlock_minY_keepsVerticalPadding() {
+        // 旧观感：TextAtlas 整盒内 textRect.y = verticalPadding → 纯文本节点文字顶 = 盒顶 + vPad（上下对称）。
+        let measure = TextMeasure()
+        let node = measure.measure(for: Node(text: "文"), isRoot: false)
+        #expect(node.blocks.count == 1)
+        #expect(node.blocks[0].rect.minY == LayoutConstants.nodePadY)
+        #expect(node.size.height - node.blocks[0].rect.maxY == LayoutConstants.nodePadY)
+
+        let root = measure.measure(for: Node(text: "根"), isRoot: true)
+        #expect(root.blocks[0].rect.minY == LayoutConstants.rootPadY)
+        #expect(root.size.height - root.blocks[0].rect.maxY == LayoutConstants.rootPadY)
+    }
+
     @Test func frameCarriesNodeFill() {
         var doc = MindMapDocument.blank()
         doc.root.fill = .sage
@@ -156,6 +169,25 @@ struct ImageLayoutTests {
         let rect = imageBlocks[0].rect
         #expect(rect.width == 50)
         #expect(abs(rect.midX - frame.size.width / 2) < 0.001)
+    }
+
+    @Test func imageBlock_topAligned_likeOldImageRect() {
+        // 旧观感：imageRect y=0 贴顶（无 vPad）；文字在图片下方，文本顶 = 图底 + gap + vPad。
+        var doc = MindMapDocument.blank(rootText: "根")
+        doc.root = Node(
+            text: "根",
+            image: Data([0x01]),
+            imagePixelSize: ImagePixelSize(width: 100, height: 50)
+        )
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        let frame = snapshot.frames[doc.root.id]!
+        #expect(frame.blocks.count == 2)
+        #expect(frame.blocks[0].text == nil)
+        #expect(frame.blocks[0].rect.minY == 0)
+        #expect(
+            frame.blocks[1].rect.minY
+                == frame.blocks[0].rect.height + LayoutConstants.imageTextGap + LayoutConstants.rootPadY
+        )
     }
 
     @Test func imagelessNode_hasNoImageBlocksOrPayload() {

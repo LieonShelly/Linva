@@ -13,6 +13,8 @@ struct TextMeasure {
     }
 
     /// 块序尺寸合成：按块序叠加——文本块累行高、图片块累图高，块间 imageTextGap，末块后无 gap。
+    /// 锚点对齐旧观感：文本块顶部留 verticalPadding（旧 TextAtlas 整盒内 textRect.y 语义），
+    /// 图片块贴顶（旧 imageRect y=0 语义），节点底部统一留 verticalPadding。
     func measure(for node: Node, isRoot: Bool) -> BlockMeasure {
         let font = NSFont.systemFont(
             ofSize: isRoot ? 18.4 : 14.7,
@@ -39,17 +41,20 @@ struct TextMeasure {
                 let width = ceil(measured + horizontalPadding * 2)
                 let height = ceil(CGFloat(lines) * lineHeight)
                 maxBlockWidth = max(maxBlockWidth, width)
+                // 文本顶 = 分配槽顶 + verticalPadding（旧 TextAtlas 整盒内 textRect.y=verticalPadding）
+                let y = contentHeight + verticalPadding
                 blocks.append(BlockLayoutFrame(
                     blockId: block.id,
                     text: s,
-                    rect: CGRect(x: 0, y: contentHeight, width: width, height: height)
+                    rect: CGRect(x: 0, y: y, width: width, height: height)
                 ))
-                contentHeight += height
+                contentHeight = y + height
             case .image(let img):
                 guard img.pixelSize.width > 0, img.pixelSize.height > 0 else { continue }
                 let width = min(CGFloat(img.pixelSize.width), LayoutConstants.imageMaxDisplayWidth)
                 let height = width * CGFloat(img.pixelSize.height) / CGFloat(img.pixelSize.width)
                 maxBlockWidth = max(maxBlockWidth, width + horizontalPadding * 2)
+                // 图片贴顶（旧 imageRect y=0，无 padding）
                 blocks.append(BlockLayoutFrame(
                     blockId: block.id,
                     text: nil,
@@ -64,7 +69,8 @@ struct TextMeasure {
         return BlockMeasure(
             size: NodeSize(
                 width: ceil(max(maxBlockWidth, 1)),
-                height: ceil(contentHeight + verticalPadding * 2)
+                // 顶部 padding 已随文本块偏移计入 contentHeight，此处只补底部 verticalPadding
+                height: ceil(contentHeight + verticalPadding)
             ),
             blocks: blocks
         )
