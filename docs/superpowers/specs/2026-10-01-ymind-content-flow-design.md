@@ -1,8 +1,8 @@
 # 设计文档：节点图文内容流 + 编辑态贴图
 
 - **日期：** 2026-10-01
-- **状态：** 设计定稿（待实现计划）
-- **流程：** Superpowers brainstorming → 本 spec → writing-plans → 实现
+- **状态：** 已实现（2026-10-01，提交 62a220f..87d0477 + 文档 §18）
+- **流程：** Superpowers brainstorming → 本 spec → writing-plans → subagent-driven 实现
 - **关联：** 承 `2026-10-01-ymind-image-node-design.md`（v3 单图），本文档将其升级为**多图多段内容流**并修复**编辑态 ⌘V 粘贴图片失败**
 
 ## 0. 背景与两个问题
