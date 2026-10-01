@@ -8,6 +8,7 @@ import Foundation
 enum ImageNormalizer {
     private static let maxPixelEdge: Int = 1024
     private static let secondPassEdge: Int = 512
+    // 8-bit 源 1024² 编码 ≈3.4MB 恒不超限；仅深色深度源（16-bit 等）会触发二级降采样
     private static let maxEncodedBytes = 5 * 1024 * 1024
 
     static func normalize(_ data: Data) -> (data: Data, pixelSize: ImagePixelSize)? {
@@ -27,8 +28,10 @@ enum ImageNormalizer {
 
         var encoded = encodePNG(cg)
         if (encoded?.count ?? 0) > maxEncodedBytes {
+            // 二级降采样：8-bit 源 1024² 编码 ≈3.4MB 恒不触发；仅深色深度源（如 16-bit 噪声）可能超 5MB
             let scale = CGFloat(secondPassEdge) / CGFloat(max(CGFloat(cg.width), CGFloat(cg.height)))
             if let smaller = drawScaled(cg, scale: scale) {
+                cg = smaller  // 成功时必须同步更新 cg：pixelSize 须与返回 bytes 一致
                 encoded = encodePNG(smaller)
             }
         }
@@ -36,7 +39,7 @@ enum ImageNormalizer {
               let size = ImagePixelSize(width: Double(cg.width), height: Double(cg.height)) else {
             return nil
         }
-        // PNG 编码含透明通道与颜色配置，尺寸以最终 CGImage 为准
+        // PNG 编码含透明通道与颜色配置，尺寸以最终 CGImage（含二级降采样结果）为准
         return (bytes, size)
     }
 

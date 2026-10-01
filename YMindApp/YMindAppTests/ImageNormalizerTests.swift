@@ -8,7 +8,7 @@ import Testing
 @Suite("图片归一")
 struct ImageNormalizerTests {
     /// 生成纯色位图 → 指定格式 bytes
-    private func imageData(width: Int, height: Int, type: UTType = .png, color: NSColor = .red) -> Data? {
+    private func imageData(width: Int, height: Int, color: NSColor = .red) -> Data? {
         guard let rep = NSBitmapImageRep(
             bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
             bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
@@ -69,5 +69,38 @@ struct ImageNormalizerTests {
         }
         let result = try #require(ImageNormalizer.normalize(data as Data))
         #expect(result.pixelSize == ImagePixelSize(width: Double(100), height: Double(50)))
+    }
+
+    @Test func sixteenBitNoise_overLimitTriggersSecondPass() throws {
+        // 16-bit 噪声 1024²：PNG 编码 >5MB，触发二级降采样。
+        // 回归：pixelSize 必须与返回 bytes 实际尺寸一致、最长边 ≤512（防 512² bytes / 1024² pixelSize 矛盾）。
+        let width = 1024, height = 1024
+        let count = width * height * 4
+        var samples = [UInt16](repeating: 0, count: count)
+        var seed: UInt64 = 0x9E37_79B9_7F4A_7C15
+        for i in 0..<count {
+            seed = (seed &* 6364136223846793005) &+ 1442695040888963407
+            samples[i] = UInt16(truncatingIfNeeded: seed >> 32)
+        }
+        let pixelData = samples.withUnsafeBytes { Data($0) }
+        let provider = try #require(CGDataProvider(data: pixelData as CFData))
+        let cg = try #require(CGImage(
+            width: width, height: height, bitsPerComponent: 16, bitsPerPixel: 64,
+            bytesPerRow: width * 8, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+            provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
+        ))
+        let png = NSMutableData()
+        let dest = try #require(CGImageDestinationCreateWithData(
+            png, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(dest, cg, nil)
+        #expect(CGImageDestinationFinalize(dest))
+        #expect(png.length > 5 * 1024 * 1024)  // 源须 >5MB 才会进二级分支（可达性前置）
+        let result = try #require(ImageNormalizer.normalize(png as Data))
+        #expect(result.pixelSize.width <= 512)
+        #expect(result.pixelSize.height <= 512)
+        // pixelSize 必须等于返回 PNG 的实际像素尺寸
+        let outRep = try #require(NSBitmapImageRep(data: result.data))
+        #expect(result.pixelSize == ImagePixelSize(width: Double(outRep.pixelsWide), height: Double(outRep.pixelsHigh)))
     }
 }
