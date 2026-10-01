@@ -159,7 +159,7 @@ override func paste(_ sender: Any?) {
 - `originalBlocks = node.blocks`（Undo 基线）。
 
 提交：
-1. `newText = draftText` 去首尾空白；空 → `"未命名"`（现状语义不变）。
+1. `newText = draftText`；仅作空判断时去首尾空白（`trimmingCharacters(...).isEmpty`），**非空保留 draftText 原样**——沿用 v3 现状：非空保留首尾空白，不改行为；空 → `"未命名"`。
 2. 收集 `images = originalBlocks` 中全部图片块（按原相对顺序）。
 3. 重组：
    - 原序列**首个非空块是图片** → `blocks = images + [.text(newText)]`（图上文下）；
@@ -169,6 +169,7 @@ override func paste(_ sender: Any?) {
 - 纯文本节点 → 退化为 `[.text(newText)]`，与现状行为一致（原 setText 语义）。
 - 全图节点（无文本块，编辑态 draft 为空）→ 提交后 `[images] + [.text("未命名")]`（文本块始终存在，保 `node.text` 非空不变量）。
 - 穿插形态（文-图-文）→ 自动聚拢为 `[text] + [images]`，与「图片不穿插在文字中央」取向一致。
+- 「首个非空块」判定：`.text("")` 空文本块跳过（如 `[.text(""), .image]` → 首个非空是图 → 图上文下）；全空文本块 / 无块 → 按文本在前默认（文上图下）。
 
 ### 3.3 非编辑态粘贴（现状升级）
 

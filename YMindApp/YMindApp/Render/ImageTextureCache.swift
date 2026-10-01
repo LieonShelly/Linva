@@ -4,7 +4,7 @@ import Foundation
 import ImageIO
 import Metal
 
-/// 图片纹理缓存（spec §4.1）：脏键 = 节点 id + 显示像素尺寸 + scale 桶 + 内容身份；
+/// 图片纹理缓存（spec §4.1）：脏键 = 块 id + 显示像素尺寸 + scale 桶 + 内容身份；
 /// 内容身份即源 Data 缓冲区的 baseAddress/count，命中 O(1) 比对，无需内容哈希；
 /// 解码即降采样（CGImageSource thumbnail，按显示尺寸 × scale）；LRU 字节预算驱逐。
 final class ImageTextureCache {

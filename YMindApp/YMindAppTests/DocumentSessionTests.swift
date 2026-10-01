@@ -691,3 +691,89 @@ struct SessionImageTests {
         #expect(session.commandBus.canUndo == false)
     }
 }
+
+/// 聚拢规则（spec §3.2）：首块文 → 文上图下；首块图 → 图上文下；纯文本退化；全图节点保文本块。
+/// 走 startEditing → draftText → commitEditingIfNeeded 全链，断言重组后的块 Kind 序列。
+@Suite("Session 聚拢规则")
+struct SessionConsolidationTests {
+    private func textBlock(_ s: String) -> ContentBlock {
+        ContentBlock(id: UUID(), kind: .text(s))
+    }
+
+    private func imageBlock(data: Data, pixelSize: ImagePixelSize) -> ContentBlock {
+        ContentBlock(id: UUID(), kind: .image(.init(data: data, pixelSize: pixelSize)))
+    }
+
+    private func commit(_ session: DocumentSession, nodeId: UUID, draft: String) -> [ContentBlock.Kind] {
+        session.startEditing(nodeId)
+        session.draftText = draft
+        session.commitEditingIfNeeded()
+        return session.model.node(id: nodeId)!.blocks.map(\.kind)
+    }
+
+    /// M1-1：首块文 → 文上图下 [text, images]。
+    @Test func firstBlockText_textBeforeImages() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [textBlock("原文"), imageBlock(data: Data([0x01]), pixelSize: px)]
+        }
+
+        let kinds = commit(session, nodeId: root, draft: "新文")
+
+        #expect(kinds == [.text("新文"), .image(.init(data: Data([0x01]), pixelSize: px))])
+    }
+
+    /// M1-2：首块图 → 图上文下 [images, text]。
+    @Test func firstBlockImage_imageBeforeText() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [imageBlock(data: Data([0x01]), pixelSize: px), textBlock("原文")]
+        }
+
+        let kinds = commit(session, nodeId: root, draft: "新文")
+
+        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("新文")])
+    }
+
+    /// M1-3：纯文本 → 退化为 [.text(newText)]。
+    @Test func pureText_degradesToSingleTextBlock() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+
+        let kinds = commit(session, nodeId: root, draft: "纯文本新值")
+
+        #expect(kinds == [.text("纯文本新值")])
+    }
+
+    /// M1-4：全图节点（无文本块，编辑态 draft 空）→ [images, .text("未命名")]（保 node.text 非空不变量）。
+    @Test func allImageNode_emptyDraft_keepsTextBlockUnnamed() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [imageBlock(data: Data([0x01]), pixelSize: px)]
+        }
+
+        let kinds = commit(session, nodeId: root, draft: "")
+
+        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("未命名")])
+    }
+
+    /// M4：首个非空块判定——空文本块跳过：[.text(""), .image] → 首个非空是图 → 图上文下。
+    @Test func emptyFirstTextBlock_isSkipped_imageWins() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        session.model.mutate(id: root) {
+            $0.blocks = [textBlock(""), imageBlock(data: Data([0x01]), pixelSize: px)]
+        }
+
+        let kinds = commit(session, nodeId: root, draft: "新文")
+
+        #expect(kinds == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("新文")])
+    }
+}
