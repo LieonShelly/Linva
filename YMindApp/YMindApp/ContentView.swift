@@ -5,6 +5,7 @@
 //  Created by 李仁军 on 2026/9/24.
 //
 
+import AppKit
 import SwiftUI
 
 struct ContentView: View {
@@ -44,7 +45,8 @@ struct ContentView: View {
                         copy: copySelection,
                         cut: cutSelection,
                         paste: paste,
-                        cancelCut: cancelCut
+                        cancelCut: cancelCut,
+                        clearImage: { session.setImage(nil, pixelSize: nil) }
                     )
                 )
 
@@ -256,6 +258,10 @@ struct ContentView: View {
         let ids = Array(session.selectedIds)
         guard ids.contains(where: { $0 != session.model.document.root.id }) else { return }
         session.commandBus.execute(.delete(ids: ids))
+        // 删除含被选图片的节点后，图片选中悬空 → 回落 nil。
+        if let imageId = session.selectedImageId, session.model.node(id: imageId) == nil {
+            session.clearImageSelection()
+        }
     }
 
     private func move(_ ids: [UUID], to targetId: UUID) {
@@ -280,7 +286,16 @@ struct ContentView: View {
 
     private func paste() {
         if session.editingId != nil { commitEditing() }
-        session.pasteToPrimary()
+        if session.clipboard != nil {
+            session.pasteToPrimary()      // ① 内部节点剪贴板优先（现状）
+            return
+        }
+        guard !session.selectedIds.isEmpty else { return }   // ② 无选中不尝试图片
+        let pb = NSPasteboard.general
+        guard let data = pb.data(forType: .png) ?? pb.data(forType: .tiff) else { return }
+        if !session.setPastedImage(from: data) {
+            session.errorMessage = "无法读取图片"
+        }
     }
 
     private func cancelCut() {

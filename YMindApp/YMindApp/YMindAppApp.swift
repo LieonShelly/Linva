@@ -23,6 +23,7 @@ struct YMindAppApp: App {
 
     init() {
         let session = DocumentSession()
+        session.imageNormalizer = ImageNormalizer.normalize
         _session = StateObject(wrappedValue: session)
         appDelegate.session = session
     }

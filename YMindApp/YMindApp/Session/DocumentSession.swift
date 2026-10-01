@@ -216,6 +216,7 @@ final class DocumentSession: ObservableObject {
         editingId = nil
         draftText = ""
         originalEditingText = ""
+        selectedImageId = nil
         camera = Camera()
         recovery = nil
         relayout()
