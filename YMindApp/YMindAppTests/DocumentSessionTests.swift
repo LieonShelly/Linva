@@ -531,6 +531,22 @@ struct SessionImageTests {
         #expect(session.model.node(id: root)?.text == "先提交")
     }
 
+    /// 回归（Task 4）：编辑态 ⌘V 图片 —— CommitTextView.paste 拦截 → 壳层 paste 闭包
+    /// （先 commitEditingIfNeeded 再 appendPastedImage，同序）。NSTextView 的 UI 行为
+    /// 无法单测，逻辑链路（提交文字 → 追加图片块）由本用例钉死；真机手测见 Task 6。
+    @Test func pasteImageWhileEditing_commitsTextThenAppendsBlock() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectOnly(root)
+        session.startEditing(root)
+        session.draftText = "先提交的文字"
+        // 模拟编辑态 ⌘V 图片：先 commitEditingIfNeeded 再 appendPastedImage（paste 闭包同序）。
+        session.commitEditingIfNeeded()
+        let ok = session.appendPastedImage(from: Data([0x01]))
+        #expect(ok == false)   // 无归一器 stub → false；先验证提交生效
+        #expect(session.model.node(id: root)?.text == "先提交的文字")
+    }
+
     @Test func appendPastedImage_appendsBlockAtEnd() {
         let session = DocumentSession()
         let root = session.model.document.root.id

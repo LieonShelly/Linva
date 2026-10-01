@@ -7,13 +7,15 @@ struct NodeEditorOverlay: View {
     @Binding var text: String
     let onCommit: () -> Void
     let onCancel: () -> Void
+    let onPasteImage: () -> Void
 
     var body: some View {
         NodeTextEditor(
             text: $text,
             isRoot: isRoot,
             onCommit: onCommit,
-            onCancel: onCancel
+            onCancel: onCancel,
+            onPasteImage: onPasteImage
         )
         .frame(
             width: max(screenRect.width, 80),
@@ -35,6 +37,7 @@ private struct NodeTextEditor: NSViewRepresentable {
     let isRoot: Bool
     let onCommit: () -> Void
     let onCancel: () -> Void
+    let onPasteImage: () -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
@@ -60,6 +63,7 @@ private struct NodeTextEditor: NSViewRepresentable {
         textView.string = text
         textView.onCommit = onCommit
         textView.onCancel = onCancel
+        textView.onPasteImage = onPasteImage
         scrollView.documentView = textView
         return scrollView
     }
@@ -70,6 +74,7 @@ private struct NodeTextEditor: NSViewRepresentable {
         }
         textView.onCommit = onCommit
         textView.onCancel = onCancel
+        textView.onPasteImage = onPasteImage
         if textView.string != text {
             textView.string = text
         }
@@ -94,6 +99,7 @@ private struct NodeTextEditor: NSViewRepresentable {
 private final class CommitTextView: NSTextView {
     var onCommit: () -> Void = {}
     var onCancel: () -> Void = {}
+    var onPasteImage: (() -> Void)?
     private var didRequestFocus = false
 
     override func viewDidMoveToWindow() {
@@ -117,6 +123,16 @@ private final class CommitTextView: NSTextView {
             onCancel()
         default:
             super.keyDown(with: event)
+        }
+    }
+
+    override func paste(_ sender: Any?) {
+        let pb = NSPasteboard.general
+        let hasImage = pb.data(forType: .png) != nil || pb.data(forType: .tiff) != nil
+        if hasImage, let onPasteImage {
+            onPasteImage()          // 图片粘贴走壳层（先提交文字再追加图片块）
+        } else {
+            super.paste(sender)     // 纯文本 → 正常 NSTextView 粘贴
         }
     }
 }

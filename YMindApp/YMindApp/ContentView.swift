@@ -57,7 +57,8 @@ struct ContentView: View {
                         isRoot: frame.isRoot,
                         text: $session.draftText,
                         onCommit: commitEditing,
-                        onCancel: cancelEditing
+                        onCancel: cancelEditing,
+                        onPasteImage: paste
                     )
                 }
 
