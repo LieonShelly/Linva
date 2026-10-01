@@ -92,6 +92,10 @@ final class DocumentSession: ObservableObject {
     @Published var errorMessage: String?
     @Published private(set) var clipboard: ClipboardPayload?
     @Published private(set) var cutSourceIds: Set<UUID> = []
+    /// 图片级选中（节点内子元素）；不入命令栈，同时最多一个。
+    @Published private(set) var selectedImageId: UUID?
+    /// 图片归一注入点（App 组合根赋 ImageNormalizer.normalize；测试注入 stub）。Session 白名单无 ImageIO。
+    var imageNormalizer: ((Data) -> (data: Data, pixelSize: ImagePixelSize)?)?
     @Published var importPreview: ImportPreviewState?
     /// 自动保存/恢复配对用（未命名文档亦然）。导入 plan 已引入，勿重复声明。
     var documentID = UUID()
@@ -145,6 +149,7 @@ final class DocumentSession: ObservableObject {
         isDirty = false
         documentID = UUID()
         recovery = nil
+        selectedImageId = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""
@@ -167,6 +172,7 @@ final class DocumentSession: ObservableObject {
         isDirty = true
         documentID = UUID()
         recovery = nil
+        selectedImageId = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""
@@ -244,6 +250,7 @@ final class DocumentSession: ObservableObject {
         isDirty = false
         documentID = UUID()
         recovery = nil
+        selectedImageId = nil
         editingId = nil
         draftText = ""
         originalEditingText = ""
@@ -435,6 +442,47 @@ final class DocumentSession: ObservableObject {
     func setFill(_ fill: NodeFill?) {
         commitEditingIfNeeded()
         commandBus.execute(.setFill(ids: Array(model.selectedIds), fill: fill))
+    }
+
+    // MARK: - 节点图片（FR-G2）
+
+    /// 写/清图片。清除时若处于图片级选中，目标为被选图片所在节点（⌫ 分派）。
+    func setImage(_ image: Data?, pixelSize: ImagePixelSize?) {
+        commitEditingIfNeeded()
+        if image == nil, let selectedImageId {
+            let ids = [selectedImageId]
+            self.selectedImageId = nil   // 清图后回落：选中回节点
+            commandBus.execute(.setImage(ids: ids, image: nil, pixelSize: nil))
+            return
+        }
+        selectedImageId = nil
+        commandBus.execute(.setImage(ids: Array(model.selectedIds), image: image, pixelSize: pixelSize))
+    }
+
+    /// 粘贴/拖入入口：归一 + 入栈。要求有选中节点；失败（无归一器/无选中/数据非法）返回 false 由壳层提示。
+    @discardableResult
+    func setPastedImage(from data: Data) -> Bool {
+        commitEditingIfNeeded()
+        guard let normalizer = imageNormalizer,
+              !model.selectedIds.isEmpty,
+              let normalized = normalizer(data) else {
+            return false
+        }
+        selectedImageId = nil
+        commandBus.execute(
+            .setImage(ids: Array(model.selectedIds), image: normalized.data, pixelSize: normalized.pixelSize)
+        )
+        return true
+    }
+
+    /// 双击图片区域：进入图片级选中（节点选中态不变）。
+    func selectImage(_ id: UUID) {
+        guard model.node(id: id) != nil else { return }
+        selectedImageId = id
+    }
+
+    func clearImageSelection() {
+        selectedImageId = nil
     }
 
     func move(_ ids: [UUID], to targetId: UUID) {
