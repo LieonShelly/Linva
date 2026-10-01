@@ -19,11 +19,11 @@ license: proprietary
 1. **`currentVersion` 是硬校验**：`decode` 先做版本迁移（见规则 2），再 `guard doc.version == MindMapDocument.currentVersion else { throw .unsupportedVersion }`。**不在迁移链内的版本直接拒绝**。所以：
    - 每改一次序列化 schema，**必须递增 `currentVersion`**。
    - **已在迁移链内的旧版本**（如 v1）由内置迁移抬到当前版本，**不再抛** `unsupportedVersion`；**迁移链外的版本**（如未来未知版本）仍抛 `unsupportedVersion` —— 需要你为它写下一段迁移。
-   - **现状：`currentVersion == 2`（v2 新增 `Node.fill` 节点填色）**。v1→v2 迁移**已内置**：旧文件无 `fill` 视为无填色，不再被拒绝。改 schema 仍须递增到 3，并按下面的流程写 v2→v3 迁移。
+   - **现状：`currentVersion == 3`（v2 新增 `Node.fill` 节点填色；v3 新增 `Node.image` / `imagePixelSize` 节点内嵌图片）**。v1→v2、v2→v3 迁移**均已内置**：旧文件无 `fill` 视为无填色、无 `image`/`imagePixelSize` 视为无图，不再被拒绝。改 schema 仍须递增到 4，并按下面的流程写 v3→v4 迁移。
 2. **改 schema 的正确流程**：
    - 递增 `currentVersion`；
    - 新增字段在 `MindMapDocument`/`Node` 上加（`Codable` 合成，缺省要有合理默认值）；
-   - **必须写迁移**：旧版本 decode 后要能把老数据抬到新 schema。`decode` 用 `if doc.version == 1 { doc.version = 2 }` 逐版本迁移（v1→v2 已内置；旧文件无 `fill` 视为无填色），新增时在末尾追加下一段 `if` 迁移，逐版本抬到 `currentVersion`。
+   - **必须写迁移**：旧版本 decode 后要能把老数据抬到新 schema。`decode` 用 `if doc.version == 1 { doc.version = 2 }`、`if doc.version == 2 { doc.version = 3 }` 逐版本迁移（v1→v2、v2→v3 已内置；旧文件无 `fill` 视为无填色、无 `image`/`imagePixelSize` 视为无图），新增时在末尾追加下一段 `if` 迁移，逐版本抬到 `currentVersion`。
    - 迁移要在 `decode` 里、`sanitize` 前完成。
 3. **`sanitize` 的 `side` 消毒（重要不变量）**：`side` 字段**只允许出现在根节点下第一层**。`sanitize` 会：
    - 强制 `root.side = nil`；
