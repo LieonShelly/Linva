@@ -13,4 +13,5 @@ enum MindMapCommand: Equatable {
     case applyRootSide(ids: [UUID], side: Side)
     case pasteAsChild(payload: [Node], parentId: UUID)
     case setFill(ids: [UUID], fill: NodeFill?)
+    case setImage(ids: [UUID], image: Data?, pixelSize: ImagePixelSize?)
 }

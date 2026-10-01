@@ -396,3 +396,52 @@ struct CommandBusTests {
         #expect(!bus.canUndo)
     }
 }
+
+@Suite("setImage 命令")
+struct SetImageCommandTests {
+    private let bytesA = Data([0x01])
+    private let bytesB = Data([0x02])
+    private let sizeA = ImagePixelSize(width: 10, height: 10)
+
+    @Test func setImage_undoRedoRestoresPreviousImage() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
+        #expect(model.node(id: root)?.image == bytesA)
+
+        bus.execute(.setImage(ids: [root], image: bytesB, pixelSize: sizeA))
+        bus.undo()
+        #expect(model.node(id: root)?.image == bytesA)
+        bus.redo()
+        #expect(model.node(id: root)?.image == bytesB)
+    }
+
+    @Test func clearImage_undoRestoresImage() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
+        bus.execute(.setImage(ids: [root], image: nil, pixelSize: nil))
+        #expect(model.node(id: root)?.image == nil)
+        bus.undo()
+        #expect(model.node(id: root)?.image == bytesA)
+    }
+
+    @Test func noOpSetImage_doesNotEnterUndoStack() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        bus.execute(.setImage(ids: [model.document.root.id], image: nil, pixelSize: nil))
+        #expect(bus.canUndo == false)
+    }
+
+    @Test func setImage_keepsSelection() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        let child = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        model.selectOnly(child)
+        bus.execute(.setImage(ids: [root], image: bytesA, pixelSize: sizeA))
+        #expect(model.selectedIds == [child])
+    }
+}
