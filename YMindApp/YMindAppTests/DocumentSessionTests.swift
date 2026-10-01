@@ -544,6 +544,43 @@ struct SessionImageTests {
         #expect(session.commandBus.canUndo == false)
     }
 
+    /// 回归（Important #2，spec §5.2）：selectImage 后 selectOnly(nil)（点空白）→ 清图片选中。
+    @Test func selectImage_thenSelectOnlyNil_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+
+        session.selectOnly(nil)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds.isEmpty)
+    }
+
+    /// 回归（Important #2，spec §5.2）：selectImage 后选中其它节点 → 亦清图片选中。
+    @Test func selectImage_thenSelectOtherNode_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = session.model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        session.selectImage(a)
+        #expect(session.selectedImageId == a)
+
+        session.selectOnly(b)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds == [b])
+    }
+
+    /// 回归（Important #2 真实路径）：点空白走 clearSelection()，同样清图片选中。
+    @Test func selectImage_thenClearSelection_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+
+        session.clearSelection()
+        #expect(session.selectedImageId == nil)
+    }
+
     @Test func setPastedImage_commitsEditingFirst() {
         let session = DocumentSession()
         session.imageNormalizer = { _ in (Data([0xAA]), px!) }

@@ -298,7 +298,11 @@ final class MetalRenderer {
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        guard !snapshot.imagePayloads.isEmpty else { return }
+        guard !snapshot.imagePayloads.isEmpty else {
+            // 全文档无图：提前返回前也清缓存（节点删图/折叠后 payloads 清空的兜底，显存纪律三）。
+            imageTextureCache.evictUnused(known: [])
+            return
+        }
         encoder.setRenderPipelineState(texturedPipeline)
         encoder.setFragmentSamplerState(sampler, index: 0)
 
@@ -511,7 +515,7 @@ final class MetalRenderer {
             )
             vertices += strokeVertices(
                 rect: screenRect(worldRect, camera: camera),
-                thickness: 2,
+                thickness: max(1.5, 2 * camera.scale),
                 color: rgba(.controlAccentColor)
             )
         }

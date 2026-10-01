@@ -42,6 +42,41 @@ struct ImageTextureCacheTests {
         #expect(t2 !== t1)  // 数据变了 → 重建
     }
 
+    /// 回归（Important #1）：两张等长、内容不同、都合法的 PNG（红/蓝 24×24）→ 必须重建。
+    /// 旧指纹 = 字节数 + 首尾 8 字节，而 PNG 的 prefix/suffix 恒为文件签名/IEND 尾，
+    /// 等长时指纹只剩字节数 → key 碰撞 → 显示旧图。此用例旧实现必挂。
+    @Test func equalLengthDistinctPNGs_rebuildTexture() throws {
+        let device = try #require(MTLCreateSystemDefaultDevice())
+        let cache = ImageTextureCache(byteBudget: 8 * 1024 * 1024)
+        let red = solidPNG(color: .red, size: 24)
+        let blue = solidPNG(color: .blue, size: 24)
+        #expect(red.count == blue.count)   // 等长：旧「字节数+首尾8字节」指纹必碰撞
+        let size = ImagePixelSize(width: 24, height: 24)!
+        let id = UUID()
+        let frame = NodeFrame(
+            id: id, text: "n", center: .zero, size: NodeSize(width: 100, height: 100),
+            isRoot: false, side: .right, collapsed: false, hiddenCount: 0,
+            imageRect: CGRect(x: 0, y: 0, width: 24, height: 24)
+        )
+        let t1 = try #require(cache.texture(id: id, localRect: frame.imageRect!, payload: ImagePayload(pixelSize: size, data: red), displayScale: 1, device: device))
+        let t2 = cache.texture(id: id, localRect: frame.imageRect!, payload: ImagePayload(pixelSize: size, data: blue), displayScale: 1, device: device)
+        #expect(t2 !== t1)   // 内容不同 → 重建（等长 PNG 不再碰撞）
+    }
+
+    private func solidPNG(color: NSColor, size: Int) -> Data {
+        let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: size, pixelsHigh: size,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        )!
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        color.setFill()
+        NSRect(x: 0, y: 0, width: size, height: size).fill()
+        NSGraphicsContext.restoreGraphicsState()
+        return rep.representation(using: .png, properties: [:])!
+    }
+
     @Test func lru_evictsLeastRecentlyUsed_overBudget() throws {
         let device = try #require(MTLCreateSystemDefaultDevice())
         // 预算只装得下 2 张 100×100（×4 字节 = 40KB）

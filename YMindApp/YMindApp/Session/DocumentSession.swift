@@ -307,6 +307,8 @@ final class DocumentSession: ObservableObject {
     func selectOnly(_ id: UUID?) {
         model.selectOnly(id)
         syncSelectionFromModel()
+        // 换选中集即退出图片级选中（spec §5.2：点空白 / 换选节点均清；selectImage 不经此路，安全）。
+        selectedImageId = nil
     }
 
     func toggleInSelection(_ id: UUID) {
@@ -327,6 +329,7 @@ final class DocumentSession: ObservableObject {
     func clearSelection() {
         model.clearSelection()
         syncSelectionFromModel()
+        selectedImageId = nil   // 点空白清图片选中（spec §5.2）
     }
 
     func copySelection() {
