@@ -30,6 +30,7 @@ final class MetalRenderer {
     private let sampler: MTLSamplerState
     private let textAtlas = TextAtlas()
     private let branchToggleAtlas = BranchToggleAtlas()
+    private let imageTextureCache: ImageTextureCache
 
     init(device: MTLDevice) throws {
         self.device = device
@@ -68,6 +69,7 @@ final class MetalRenderer {
             throw RendererError.shaderFunctionUnavailable("无法创建文字采样器")
         }
         self.sampler = sampler
+        self.imageTextureCache = ImageTextureCache()
     }
 
     func draw(
@@ -76,6 +78,7 @@ final class MetalRenderer {
         camera: Camera,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
+        selectedImageId: UUID?,
         cutSourceIds: Set<UUID>,
         intent: DropIntent?,
         searchHitId: UUID?,
@@ -112,6 +115,7 @@ final class MetalRenderer {
             displayScale: view.window?.backingScaleFactor ?? 1,
             selectedIds: selectedIds,
             selectionAnchorId: selectionAnchorId,
+            selectedImageId: selectedImageId,
             cutSourceIds: cutSourceIds,
             intent: intent,
             searchHitId: searchHitId,
@@ -132,6 +136,7 @@ final class MetalRenderer {
         displayScale: CGFloat,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
+        selectedImageId: UUID?,
         cutSourceIds: Set<UUID>,
         intent: DropIntent?,
         searchHitId: UUID?,
@@ -141,7 +146,7 @@ final class MetalRenderer {
             size: SIMD2(Float(viewportSize.width), Float(viewportSize.height))
         )
 
-        // 绘制顺序：边 → 节点底色 → 文字 → 分叉控件 → 多选描边。
+        // 绘制顺序：边 → 节点底色 → 图片 → 文字 → 分叉控件 → 多选描边。
         drawSolid(
             edgeVertices(snapshot: snapshot, camera: camera),
             encoder: encoder,
@@ -151,6 +156,11 @@ final class MetalRenderer {
             fillVertices(snapshot: snapshot, camera: camera),
             encoder: encoder,
             viewport: &viewport
+        )
+        drawImage(
+            snapshot: snapshot, camera: camera, displayScale: displayScale,
+            selectedImageId: selectedImageId,
+            encoder: encoder, viewport: &viewport
         )
         drawText(
             snapshot: snapshot,
@@ -171,6 +181,7 @@ final class MetalRenderer {
             camera: camera,
             selectedIds: selectedIds,
             selectionAnchorId: selectionAnchorId,
+            selectedImageId: selectedImageId,
             encoder: encoder,
             viewport: &viewport
         )
@@ -276,6 +287,81 @@ final class MetalRenderer {
             encoder.setFragmentTexture(texture, index: 0)
             encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
         }
+    }
+
+    /// 图片 quad：视口剔除 → 缓存纹理 → texturedQuad（与文字同管线）。
+    private func drawImage(
+        snapshot: LayoutSnapshot,
+        camera: Camera,
+        displayScale: CGFloat,
+        selectedImageId: UUID?,
+        encoder: MTLRenderCommandEncoder,
+        viewport: inout ViewportUniforms
+    ) {
+        guard !snapshot.imagePayloads.isEmpty else { return }
+        encoder.setRenderPipelineState(texturedPipeline)
+        encoder.setFragmentSamplerState(sampler, index: 0)
+
+        // 相机视口世界 AABB：视口四角 screenToWorld 反投影，得世界矩形（硬约束 #3）。
+        let viewportSize = CGSize(width: CGFloat(viewport.size.x), height: CGFloat(viewport.size.y))
+        let viewportCorners = [
+            CGPoint(x: 0, y: 0),
+            CGPoint(x: viewportSize.width, y: 0),
+            CGPoint(x: 0, y: viewportSize.height),
+            CGPoint(x: viewportSize.width, y: viewportSize.height),
+        ]
+        let world = viewportCorners.map { camera.screenToWorld($0) }
+        let xs = world.map(\.x)
+        let ys = world.map(\.y)
+        let viewportWorldRect = CGRect(
+            x: xs.min()!,
+            y: ys.min()!,
+            width: xs.max()! - xs.min()!,
+            height: ys.max()! - ys.min()!
+        )
+
+        var knownIds = Set<UUID>()
+        let rasterScale = displayScale * Self.rasterBucket(camera.scale)
+
+        for frame in orderedFrames(snapshot) {
+            guard let local = frame.imageRect,
+                  let payload = snapshot.imagePayloads[frame.id] else { continue }
+            let worldRect = CGRect(
+                x: frame.rect.minX + local.minX,
+                y: frame.rect.minY + local.minY,
+                width: local.width,
+                height: local.height
+            )
+            // 视口剔除：图片世界 rect 与相机视口不相交 → 连纹理都不建（显存纪律一）。
+            guard worldRect.intersects(viewportWorldRect) else { continue }
+            knownIds.insert(frame.id)
+
+            guard let texture = imageTextureCache.texture(
+                id: frame.id,
+                localRect: local,
+                payload: payload,
+                displayScale: rasterScale,
+                device: device
+            ) else { continue }
+
+            let vertices = texturedQuad(
+                rect: screenRect(worldRect, camera: camera),
+                color: SIMD4<Float>(1, 1, 1, 1)
+            )
+            guard let buffer = device.makeBuffer(
+                bytes: vertices,
+                length: MemoryLayout<TexturedVertex>.stride * vertices.count
+            ) else { continue }
+            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+            encoder.setVertexBytes(
+                &viewport,
+                length: MemoryLayout<ViewportUniforms>.stride,
+                index: 1
+            )
+            encoder.setFragmentTexture(texture, index: 0)
+            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+        }
+        imageTextureCache.evictUnused(known: knownIds)   // 节点删除/折叠后清理（显存纪律三）
     }
 
     private func drawBranchToggles(
@@ -389,6 +475,7 @@ final class MetalRenderer {
         camera: Camera,
         selectedIds: Set<UUID>,
         selectionAnchorId: UUID?,
+        selectedImageId: UUID?,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
@@ -411,6 +498,22 @@ final class MetalRenderer {
                     color: anchorColor
                 )
             }
+        }
+        // 图片级选中：imageRect 世界 rect → 直角 4 边近似（v1 不新增圆角 shader）。
+        if let selectedImageId,
+           let frame = snapshot.frames[selectedImageId],
+           let local = frame.imageRect {
+            let worldRect = CGRect(
+                x: frame.rect.minX + local.minX,
+                y: frame.rect.minY + local.minY,
+                width: local.width,
+                height: local.height
+            )
+            vertices += strokeVertices(
+                rect: screenRect(worldRect, camera: camera),
+                thickness: 2,
+                color: rgba(.controlAccentColor)
+            )
         }
         drawSolid(vertices, encoder: encoder, viewport: &viewport)
     }
@@ -791,7 +894,8 @@ final class MetalRenderer {
         contentBounds: CGRect,
         maxDimension: CGFloat = 2400,
         padding: CGFloat = 48,
-        paper: NSColor
+        paper: NSColor,
+        selectedImageId: UUID? = nil
     ) -> CGImage? {
         guard !contentBounds.isNull, !contentBounds.isEmpty else { return nil }
 
@@ -838,7 +942,12 @@ final class MetalRenderer {
         encoder.label = "YMind 导出"
 
         // 导出不含分叉 ± 控件：LayoutSnapshot 缺省 branchToggles 为空。
-        let exportSnapshot = LayoutSnapshot(frames: snapshot.frames, edges: snapshot.edges)
+        // imagePayloads 必须随行：否则 drawImage 见不到图，导出缺图。
+        let exportSnapshot = LayoutSnapshot(
+            frames: snapshot.frames,
+            edges: snapshot.edges,
+            imagePayloads: snapshot.imagePayloads
+        )
 
         // 导出固定按浅色纸面解析动态语义色，结果与系统外观无关。
         let appearance = NSAppearance(named: .aqua)
@@ -851,6 +960,7 @@ final class MetalRenderer {
                 displayScale: 1,
                 selectedIds: [],
                 selectionAnchorId: nil,
+                selectedImageId: selectedImageId,
                 cutSourceIds: [],
                 intent: nil,
                 searchHitId: nil,

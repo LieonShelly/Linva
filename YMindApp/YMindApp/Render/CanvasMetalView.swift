@@ -213,6 +213,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             camera: session.camera,
             selectedIds: session.selectedIds,
             selectionAnchorId: session.selectionAnchorId,
+            selectedImageId: session.selectedImageId,
             cutSourceIds: session.cutSourceIds,
             intent: gesture.currentDropIntent,
             searchHitId: session.search.currentMatchId,

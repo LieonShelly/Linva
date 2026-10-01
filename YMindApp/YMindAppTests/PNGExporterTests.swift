@@ -35,3 +35,50 @@ struct PNGExporterTests {
         #expect(d.root.children[0].collapsed == true)
     }
 }
+
+@Suite("PNG 导出含图")
+struct PNGWithImageTests {
+    @Test func exportedPNG_containsImagePixels() throws {
+        // 造 4×4 纯红 PNG
+        let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: 4, pixelsHigh: 4,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep!)
+        NSColor.red.setFill()
+        NSBezierPath(rect: NSRect(x: 0, y: 0, width: 4, height: 4)).fill()
+        NSGraphicsContext.restoreGraphicsState()
+        let png = rep!.representation(using: .png, properties: [:])!
+
+        var doc = MindMapDocument.blank(rootText: "根")
+        doc.root.imagePixelSize = ImagePixelSize(width: 100, height: 100)
+        doc.root.image = png
+
+        let data = try #require(PNGExporter.data(document: doc))
+        let outRep = try #require(NSBitmapImageRep(data: data))
+
+        // 找根节点在导出快照中的图片区中心像素 → 应为红色（导出视口含全图）
+        let expanded = PNGExporter.fullyExpanded(doc)
+        let snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
+        let frame = try #require(snapshot.frames[doc.root.id])
+        let local = try #require(frame.imageRect)
+        let worldRect = CGRect(
+            x: frame.rect.minX + local.minX, y: frame.rect.minY + local.minY,
+            width: local.width, height: local.height)
+        let bounds = snapshot.frames.values.reduce(CGRect.null) { $0.union($1.rect) }
+        // renderImage: bounds + padding 48，长边缩到 2400；按同公式换算像素坐标
+        let scale = min(max(2400 / max(bounds.width, bounds.height), 0.35), 2)
+        let originX = bounds.minX - 48
+        let originY = bounds.minY - 48
+        let px = Int((worldRect.midX - originX) * scale)
+        let py = Int((worldRect.midY - originY) * scale)
+        guard let color = outRep.colorAt(x: px, y: py) else {
+            Issue.record("像素越界")
+            return
+        }
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        color.getRed(&r, green: &g, blue: &b, alpha: &a)
+        #expect(r > 0.6 && g < 0.4 && b < 0.4)
+    }
+}
