@@ -466,6 +466,8 @@ final class DocumentSession: ObservableObject {
     }
 
     /// 粘贴/拖入入口：归一 + 追加图片块到节点末尾。要求有选中节点。
+    /// 选中图片块时（spec §0-5 最小集：替换 + 删除）→ 替换该块（块 id 不变），
+    /// 否则追加到各选中节点末尾（spec §0-4）。
     @discardableResult
     func appendPastedImage(from data: Data) -> Bool {
         commitEditingIfNeeded()
@@ -473,6 +475,16 @@ final class DocumentSession: ObservableObject {
               !model.selectedIds.isEmpty,
               let normalized = normalizer(data) else {
             return false
+        }
+        // 选中图片块 → 替换（沿 v3「选中图时粘贴覆盖该图」先例；块 id 不变，纹理/导出不碰撞）。
+        // 替换后回落图片选中（与删块一致）；nodeId/blockId 失效则回落走追加分支。
+        if let selected = selectedImageBlock,
+           model.node(id: selected.nodeId)?.blocks.contains(where: { $0.id == selected.blockId }) == true {
+            self.selectedImageBlock = nil
+            commandBus.execute(
+                .replaceImageBlock(id: selected.nodeId, blockId: selected.blockId, image: normalized.data, pixelSize: normalized.pixelSize)
+            )
+            return true
         }
         self.selectedImageBlock = nil
         for id in Array(model.selectedIds) {

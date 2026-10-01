@@ -590,6 +590,29 @@ struct SessionImageTests {
         }
     }
 
+    /// P1-C：选中图片块后 ⌘V/拖入 → 替换该块（块 id 不变、块数不变），而非追加末尾。
+    @Test func appendPastedImage_replacesSelectedImageBlock() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let px = ImagePixelSize(width: 10, height: 10)!
+        let blockId = session.model.appendImageBlock(id: root, image: Data([0x01]), pixelSize: px)
+        session.imageNormalizer = { _ in (Data([0xBB]), px) }
+        session.selectImageBlock(nodeId: root, blockId: blockId)
+
+        let ok = session.appendPastedImage(from: Data([0x02]))
+
+        #expect(ok == true)
+        let blocks = session.model.node(id: root)?.blocks ?? []
+        #expect(blocks.count == 2)               // 替换非追加：块数不变
+        #expect(blocks[1].id == blockId)         // 块 id 不变
+        if case .image(let img) = blocks[1].kind {
+            #expect(img.data == Data([0xBB]))    // 数据被替换
+        } else {
+            Issue.record("blocks[1] 应为图片块")
+        }
+        #expect(session.selectedImageBlock == nil)  // 替换后回落，与删块一致
+    }
+
     /// 回归（Important #2，spec §5.2）：selectImageBlock 后 selectOnly(nil)（点空白）→ 清图片选中。
     @Test func selectImageBlock_thenSelectOnlyNil_clearsSelection() {
         let session = DocumentSession()
