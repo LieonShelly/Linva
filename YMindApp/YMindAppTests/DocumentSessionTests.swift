@@ -536,6 +536,7 @@ struct SessionImageTests {
     /// 无法单测，逻辑链路（提交文字 → 追加图片块）由本用例钉死；真机手测见 Task 6。
     @Test func pasteImageWhileEditing_commitsTextThenAppendsBlock() {
         let session = DocumentSession()
+        session.imageNormalizer = { _ in (Data([0xAA]), px!) }
         let root = session.model.document.root.id
         session.selectOnly(root)
         session.startEditing(root)
@@ -543,8 +544,16 @@ struct SessionImageTests {
         // 模拟编辑态 ⌘V 图片：先 commitEditingIfNeeded 再 appendPastedImage（paste 闭包同序）。
         session.commitEditingIfNeeded()
         let ok = session.appendPastedImage(from: Data([0x01]))
-        #expect(ok == false)   // 无归一器 stub → false；先验证提交生效
+        #expect(ok == true)
+        #expect(session.editingId == nil)
         #expect(session.model.node(id: root)?.text == "先提交的文字")
+        let blocks = session.model.node(id: root)?.blocks ?? []
+        #expect(blocks.count == 2)
+        if case .image(let img) = blocks[1].kind {
+            #expect(img.data == Data([0xAA]))
+        } else {
+            Issue.record("blocks[1] 应为图片块")
+        }
     }
 
     @Test func appendPastedImage_appendsBlockAtEnd() {
