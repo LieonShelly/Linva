@@ -241,29 +241,48 @@ enum DocumentWorkflow {
     }
 
     /// 导出 Markdown（FR-E2）：生成纯结构标题大纲，SavePanel 落地。
-    /// 无图 → 单文件；有图 → 文件夹包 <用户选的目录>/<N>/<N>.md + <N>/assets/<id>.png。
+    /// 无图 → 单文件；有图 → 文件夹包 <用户选的目录>/<N>.md + <用户选的目录>/assets/<id>.png。
+    /// 有图时 SavePanel 选择「目录」以取得沙盒目录级授权（user-selected 仅授权所选文件，
+    /// 在所选文件旁创建 assets 子目录会因沙盒权限被拒——曾报 "You don't have permission..."）。
     static func exportMarkdown(_ session: DocumentSession) {
         session.commitEditingIfNeeded()
         let output = MarkdownExporter.output(from: session.model.document)
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
+        if output.images.isEmpty {
+            // 无图：单文件（现状），选 .md 文件路径。
+            panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
+            panel.nameFieldStringValue = ExportNaming.safeFilename(
+                base: session.model.document.root.text,
+                ext: "md"
+            )
+            guard panel.runModal() == .OK, let url = panel.url else { return }
+            do {
+                try Data(output.text.utf8).write(to: url, options: .atomic)
+            } catch {
+                session.errorMessage = error.localizedDescription
+            }
+            return
+        }
+
+        // 有图：选目录 → 在该目录下生成 <N>.md + assets/<id>.png（文件夹包）。
+        // 沙盒对所选目录授予写权限，createDirectory / write 不再被拒。
+        // NSSavePanel 无 canChooseDirectories（NSOpenPanel 才有）；允许目录选择靠
+        // allowedContentTypes 置空（任意类型，用户可切到目录）。
+        panel.allowedContentTypes = []
         panel.nameFieldStringValue = ExportNaming.safeFilename(
             base: session.model.document.root.text,
             ext: "md"
-        )
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        ).replacingOccurrences(of: ".md", with: "")
+        guard panel.runModal() == .OK, let directoryURL = panel.url else { return }
         do {
-            if output.images.isEmpty {
-                try Data(output.text.utf8).write(to: url, options: .atomic)   // 无图：单文件现状
-                return
-            }
-            // 有图：文件夹包 <用户选的目录>/<N>/<N>.md + <N>/assets/<id>.png
-            let folderName = url.deletingPathExtension().lastPathComponent
-            let packageDir = url.deletingLastPathComponent().appendingPathComponent(folderName, isDirectory: true)
-            let assetsDir = packageDir.appendingPathComponent("assets", isDirectory: true)
+            let mdName = ExportNaming.safeFilename(
+                base: session.model.document.root.text,
+                ext: "md"
+            )
+            let mdURL = directoryURL.appendingPathComponent(mdName)
+            let assetsDir = directoryURL.appendingPathComponent("assets", isDirectory: true)
             try FileManager.default.createDirectory(at: assetsDir, withIntermediateDirectories: true)
-            try Data(output.text.utf8).write(
-                to: packageDir.appendingPathComponent("\(folderName).md"), options: .atomic)
+            try Data(output.text.utf8).write(to: mdURL, options: .atomic)
             for image in output.images {
                 try image.data.write(
                     to: assetsDir.appendingPathComponent("\(image.blockId.uuidString).png"),

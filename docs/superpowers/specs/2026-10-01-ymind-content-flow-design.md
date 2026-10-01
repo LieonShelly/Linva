@@ -230,7 +230,7 @@ struct MarkdownImage: Equatable {
 ```
 
 - `walk`：遍历每节点 `blocks`，每个图片块追加 ` ![图片](assets/<blockId>.png)` 尾缀并收集 `MarkdownImage`；文本块内容 = 合并文本（`node.text`）。
-- `DocumentWorkflow` 导出：`images` 非空 → 文件夹包（`N/N.md` + `N/assets/<blockId>.png`）；无图 → 单文件不变（字节级兼容保持）。
+- `DocumentWorkflow` 导出：`images` 非空 → **SavePanel 选目录**（取得沙盒目录级授权）→ 在该目录下生成 `<N>.md` + `assets/<blockId>.png`；无图 → 单文件不变（字节级兼容保持）。**沙盒修复（2026-10-01）**：原实现让用户选 `.md` 文件路径、再在其旁创建 `assets/` 子目录，沙盒 `user-selected.read-write` 仅授权所选文件、创建子目录被拒（报 "You don't have permission to save the file 'assets'..."）；改为选目录后沙盒授予目录写权，`createDirectory`/`write` 不再被拒。
 - 折叠节点带图仍导出（walk 忽略折叠，纯结构遍历，不变）。
 
 ### 5.2 搜索
