@@ -10,9 +10,10 @@ enum RadialLayout {
         var edges: [EdgeGeometry] = []
 
         func subtreeHeight(_ node: Node, isRoot: Bool) -> BranchMetadata {
-            let size = measure.size(for: node, isRoot: isRoot)
+            let m = measure.measure(for: node, isRoot: isRoot)
+            let size = m.size
             guard !node.collapsed, !node.children.isEmpty else {
-                return BranchMetadata(size: size, height: size.height, children: [])
+                return BranchMetadata(size: size, height: size.height, blocks: m.blocks, children: [])
             }
 
             let childLayouts = node.children.map {
@@ -24,6 +25,7 @@ enum RadialLayout {
             return BranchMetadata(
                 size: size,
                 height: max(size.height, childrenHeight),
+                blocks: m.blocks,
                 children: childLayouts
             )
         }
@@ -75,7 +77,7 @@ enum RadialLayout {
                 collapsed: node.collapsed,
                 hiddenCount: node.collapsed ? countDescendants(node) : 0,
                 fill: node.fill,
-                imageRect: Self.imageRect(size: metadata.size, pixelSize: node.imagePixelSize)
+                blocks: Self.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
             edges.append(edge(from: parent, to: frame, side: side))
@@ -122,14 +124,16 @@ enum RadialLayout {
                 ? countDescendants(document.root)
                 : 0,
             fill: document.root.fill,
-            imageRect: Self.imageRect(size: rootMetadata.size, pixelSize: document.root.imagePixelSize)
+            blocks: Self.centeredBlocks(from: rootMetadata)
         )
         frames[document.root.id] = rootFrame
 
         var payloads: [UUID: ImagePayload] = [:]
         func collectPayloads(_ node: Node) {
-            if let image = node.image, let px = node.imagePixelSize, frames[node.id] != nil {
-                payloads[node.id] = ImagePayload(pixelSize: px, data: image)
+            for block in node.blocks {
+                if case .image(let img) = block.kind, frames[node.id] != nil {
+                    payloads[block.id] = ImagePayload(pixelSize: img.pixelSize, data: img.data)
+                }
             }
             node.children.forEach(collectPayloads)
         }
@@ -261,17 +265,34 @@ enum RadialLayout {
         }
     }
 
-    /// 图片区（节点局部坐标，top-left 原点：图在上、文字在下）；水平居中。
-    private static func imageRect(size: NodeSize, pixelSize: ImagePixelSize?) -> CGRect? {
-        guard let px = pixelSize, px.width > 0, px.height > 0 else { return nil }
-        let width = min(CGFloat(px.width), LayoutConstants.imageMaxDisplayWidth)
-        let height = width * CGFloat(px.height) / CGFloat(px.width)
-        return CGRect(x: (size.width - width) / 2, y: 0, width: width, height: height)
+    /// 块布局从「测量宽」映射到「节点内容宽」：文本块水平撑满节点宽（居中栅格化），图片块水平居中。
+    /// rect 为节点局部坐标 top-left 原点（y 沿用测量时的块序偏移）。
+    private static func centeredBlocks(from metadata: BranchMetadata) -> [BlockLayoutFrame] {
+        metadata.blocks.map { b -> BlockLayoutFrame in
+            if b.text != nil {
+                return BlockLayoutFrame(
+                    blockId: b.blockId,
+                    text: b.text,
+                    rect: CGRect(x: 0, y: b.rect.minY, width: metadata.size.width, height: b.rect.height)
+                )
+            }
+            return BlockLayoutFrame(
+                blockId: b.blockId,
+                text: nil,
+                rect: CGRect(
+                    x: (metadata.size.width - b.rect.width) / 2,
+                    y: b.rect.minY,
+                    width: b.rect.width,
+                    height: b.rect.height
+                )
+            )
+        }
     }
 
     private struct BranchMetadata {
         let size: NodeSize
         let height: CGFloat
+        let blocks: [BlockLayoutFrame]
         let children: [BranchMetadata]
     }
 }

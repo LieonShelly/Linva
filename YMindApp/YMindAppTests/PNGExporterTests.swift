@@ -52,8 +52,7 @@ struct PNGWithImageTests {
         let png = rep!.representation(using: .png, properties: [:])!
 
         var doc = MindMapDocument.blank(rootText: "根")
-        doc.root.imagePixelSize = ImagePixelSize(width: 100, height: 100)
-        doc.root.image = png
+        doc.root = Node(text: "根", image: png, imagePixelSize: ImagePixelSize(width: 100, height: 100))
 
         let data = try #require(PNGExporter.data(document: doc))
         let outRep = try #require(NSBitmapImageRep(data: data))

@@ -127,8 +127,7 @@ struct ImageLayoutTests {
     @Test func sizedNode_growsForImage_withinDisplayLimit() {
         var doc = MindMapDocument.blank(rootText: "根")
         // 图片 600×300pt 请求 → 上限 300 → 显示 300×150
-        doc.root.image = Data([0x01])
-        doc.root.imagePixelSize = ImagePixelSize(width: 600, height: 300)
+        doc.root = Node(text: "根", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 600, height: 300))
         let snapshot = RadialLayout.layout(document: doc, measure: measure())
         let frame = snapshot.frames[doc.root.id]!
 
@@ -136,29 +135,33 @@ struct ImageLayoutTests {
         let bareFrame = RadialLayout.layout(document: bare, measure: measure()).frames[bare.root.id]!
 
         #expect(frame.size.height == bareFrame.size.height + LayoutConstants.imageTextGap + 150)
-        #expect(frame.imageRect != nil)
-        let rect = frame.imageRect!
+        let imageBlocks = frame.blocks.filter { $0.text == nil }
+        #expect(imageBlocks.count == 1)
+        let rect = imageBlocks[0].rect
         #expect(rect.width == 300)
         #expect(abs(rect.height - 150) < 0.001)
         // 水平居中于节点
-        #expect(abs((rect.midX) - frame.size.width / 2) < 0.001)
-        #expect(snapshot.imagePayloads[doc.root.id] != nil)
+        #expect(abs(rect.midX - frame.size.width / 2) < 0.001)
+        // payload 按块 id 索引
+        #expect(snapshot.imagePayloads[imageBlocks[0].blockId] != nil)
     }
 
     @Test func smallImage_centered_whenTextDrivesWidth() {
         var doc = MindMapDocument.blank(rootText: "相当长的文字内容决定节点宽度")
-        doc.root.imagePixelSize = ImagePixelSize(width: 50, height: 50)
+        doc.root = Node(text: "相当长的文字内容决定节点宽度", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 50, height: 50))
         let snapshot = RadialLayout.layout(document: doc, measure: measure())
         let frame = snapshot.frames[doc.root.id]!
-        let rect = frame.imageRect!
+        let imageBlocks = frame.blocks.filter { $0.text == nil }
+        #expect(imageBlocks.count == 1)
+        let rect = imageBlocks[0].rect
         #expect(rect.width == 50)
         #expect(abs(rect.midX - frame.size.width / 2) < 0.001)
     }
 
-    @Test func imagelessNode_hasNoImageRectOrPayload() {
+    @Test func imagelessNode_hasNoImageBlocksOrPayload() {
         let doc = MindMapDocument.blank(rootText: "根")
         let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        #expect(snapshot.frames[doc.root.id]!.imageRect == nil)
+        #expect(snapshot.frames[doc.root.id]!.blocks.allSatisfy { $0.text != nil })
         #expect(snapshot.imagePayloads.isEmpty)
     }
 
@@ -170,5 +173,27 @@ struct ImageLayoutTests {
         let snapshot = RadialLayout.layout(document: doc, measure: measure())
         #expect(snapshot.frames[child.id] == nil)
         #expect(snapshot.imagePayloads[child.id] == nil)
+    }
+
+    @Test func multipleBlocks_stackVerticallyInOrder() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        let root = doc.root.id
+        var node = doc.root
+        node.blocks = [
+            ContentBlock(id: UUID(), kind: .text("文")),
+            ContentBlock(id: UUID(), kind: .image(.init(data: Data([0x01]), pixelSize: ImagePixelSize(width: 100, height: 100)!))),
+            ContentBlock(id: UUID(), kind: .text("尾")),
+        ]
+        node.id = root
+        doc.root = node
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        let frame = snapshot.frames[root]!
+        let blocks = frame.blocks
+        #expect(blocks.count == 3)
+        #expect(blocks[0].text == "文")
+        #expect(blocks[1].text == nil)
+        #expect(blocks[2].text == "尾")
+        #expect(blocks[1].rect.minY >= blocks[0].rect.maxY)
+        #expect(blocks[2].rect.minY >= blocks[1].rect.maxY)
     }
 }

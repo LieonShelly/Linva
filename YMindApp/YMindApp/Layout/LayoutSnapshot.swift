@@ -1,6 +1,13 @@
 import CoreGraphics
 import Foundation
 
+/// 块布局帧：文本块带内容，图片块 text 为 nil。rect 为节点局部坐标 top-left 原点。
+struct BlockLayoutFrame: Equatable {
+    let blockId: UUID
+    let text: String?
+    let rect: CGRect
+}
+
 struct NodeFrame: Equatable {
     let id: UUID
     let text: String
@@ -11,7 +18,7 @@ struct NodeFrame: Equatable {
     let collapsed: Bool
     let hiddenCount: Int
     let fill: NodeFill?
-    let imageRect: CGRect?
+    let blocks: [BlockLayoutFrame]
 
     init(
         id: UUID,
@@ -23,7 +30,7 @@ struct NodeFrame: Equatable {
         collapsed: Bool,
         hiddenCount: Int,
         fill: NodeFill? = nil,
-        imageRect: CGRect? = nil
+        blocks: [BlockLayoutFrame] = []
     ) {
         self.id = id
         self.text = text
@@ -34,7 +41,7 @@ struct NodeFrame: Equatable {
         self.collapsed = collapsed
         self.hiddenCount = hiddenCount
         self.fill = fill
-        self.imageRect = imageRect
+        self.blocks = blocks
     }
 
     var rect: CGRect {
