@@ -63,7 +63,7 @@ enum ImageNormalizer {
 
 流程：CGImageSource 解码 → gif 取首帧 → 最长边 > 1024px 等比缩 → PNG 编码 → 若 > 5MB 再降到 512px → 仍超限返回 nil（调用方状态提示，不入栈）。
 
-- **放 App 层**：需要 ImageIO/AppKit；`Model` 只许 Foundation、`Session` 无 AppKit/ImageIO——**零新增 import**（App 白名单已含 AppKit；`scripts/check-boundaries.sh` 保持绿，兑现 PRD「不新增 import」承诺）。
+- **放 App 层**：需要 ImageIO/AppKit；`Model` 只许 Foundation、`Session` 无 AppKit/ImageIO——需 `import ImageIO`（CGImageSource 属 ImageIO 而非 AppKit/CoreGraphics）；按仓库规约把 ImageIO 加入 App 白名单并同步 §5 记录。
 - 产出同时带 `pixelSize`（CGImageSource 属性，不二次解码）。
 - **Session 适配**（`Session/DocumentSession.swift`）：Session 白名单无 AppKit/ImageIO，归一器以**闭包注入**保持 Session 可单测——Session 声明 `var imageNormalizer: (Data) -> (data: Data, pixelSize: ImagePixelSize)?`（默认空实现返回 nil），App 层组合根（`YMindAppApp`/`ContentView` 构建 Session 处）赋值 `ImageNormalizer.normalize`。入口 `func setPastedImage(from data: Data) -> Bool`：归一成功 → `setImage` 入栈返回 true；失败返回 false，壳层状态提示「无法读取图片」。
 
@@ -114,7 +114,7 @@ hImg = wImg × pixelHeight / pixelWidth          // 等比，不裁切
 
 ### 4.1 ImageTextureCache（新文件 `Render/ImageTextureCache.swift`）
 
-- 脏键 = 节点 id + 显示像素尺寸（frame `imageRect` × displayScale 量化）+ scale 桶（复用 `rasterBucket` 思路）+ 数据指纹（字节数 + 首尾 8 字节；miss 时才计算）。
+- 脏键 = 节点 id + 显示像素尺寸（frame `imageRect` × displayScale 量化）+ scale 桶（复用 `rasterBucket` 思路）+ 数据指纹（**内容身份**：命中 O(1) baseAddress/count 比对，条目持有 Data 锁定缓冲区；miss 重建时才算 FNV-1a 全哈希并 memoize）。不用「字节数 + 首尾 8 字节」——本应用图片全为 PNG，prefix/suffix 恒为文件签名/IEND 尾，等长替换会全碰撞显示旧图；也不用 `Data.hashValue`（实测只取前缀字节）。
 - **LRU 字节预算 128MB**（按 `width×height×4` 记账），超限逐最久未用条目；回屏时重建（毫秒级）。
 - **解码即降采样**：`CGImageSourceCreateThumbnailAtIndex(kCGImageSourceCreateThumbnailFromImageAlways + maxPixelSize)` 按「显示尺寸 × displayScale」出图（200pt@2x = 400px 纹理，非 1024px 原图）——显存较原图路径降 4~6×。
 - 解码失败（数据非法）→ 返回 nil，该节点按无图显示（降级不崩）。

@@ -222,6 +222,27 @@ final class MindMapModel {
         return changes
     }
 
+    /// 对选中集每个节点写同一图片（nil = 清除）；返回被改节点旧值供 Undo。不改选中。
+    @discardableResult
+    func setImage(
+        ids: [UUID],
+        image: Data?,
+        pixelSize: ImagePixelSize?
+    ) -> [(id: UUID, oldImage: Data?, oldPixelSize: ImagePixelSize?)] {
+        var changes: [(id: UUID, oldImage: Data?, oldPixelSize: ImagePixelSize?)] = []
+        var seen = Set<UUID>()
+        for id in ids where seen.insert(id).inserted {
+            guard let node = node(id: id),
+                  node.image != image || node.imagePixelSize != pixelSize else { continue }
+            changes.append((id, node.image, node.imagePixelSize))
+            _ = mutate(id: id) {
+                $0.image = image
+                $0.imagePixelSize = image == nil ? nil : pixelSize
+            }
+        }
+        return changes
+    }
+
     func restoreChild(parentId: UUID, index: Int, node: Node) {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))

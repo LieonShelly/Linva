@@ -23,6 +23,7 @@ struct YMindAppApp: App {
 
     init() {
         let session = DocumentSession()
+        session.imageNormalizer = ImageNormalizer.normalize
         _session = StateObject(wrappedValue: session)
         appDelegate.session = session
     }
@@ -240,9 +241,10 @@ enum DocumentWorkflow {
     }
 
     /// 导出 Markdown（FR-E2）：生成纯结构标题大纲，SavePanel 落地。
+    /// 无图 → 单文件；有图 → 文件夹包 <用户选的目录>/<N>/<N>.md + <N>/assets/<id>.png。
     static func exportMarkdown(_ session: DocumentSession) {
         session.commitEditingIfNeeded()
-        let text = MarkdownExporter.markdown(from: session.model.document)
+        let output = MarkdownExporter.output(from: session.model.document)
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
         panel.nameFieldStringValue = ExportNaming.safeFilename(
@@ -251,7 +253,22 @@ enum DocumentWorkflow {
         )
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
-            try Data(text.utf8).write(to: url, options: .atomic)
+            if output.images.isEmpty {
+                try Data(output.text.utf8).write(to: url, options: .atomic)   // 无图：单文件现状
+                return
+            }
+            // 有图：文件夹包 <用户选的目录>/<N>/<N>.md + <N>/assets/<id>.png
+            let folderName = url.deletingPathExtension().lastPathComponent
+            let packageDir = url.deletingLastPathComponent().appendingPathComponent(folderName, isDirectory: true)
+            let assetsDir = packageDir.appendingPathComponent("assets", isDirectory: true)
+            try FileManager.default.createDirectory(at: assetsDir, withIntermediateDirectories: true)
+            try Data(output.text.utf8).write(
+                to: packageDir.appendingPathComponent("\(folderName).md"), options: .atomic)
+            for image in output.images {
+                try image.data.write(
+                    to: assetsDir.appendingPathComponent("\(image.nodeId.uuidString).png"),
+                    options: .atomic)
+            }
         } catch {
             session.errorMessage = error.localizedDescription
         }

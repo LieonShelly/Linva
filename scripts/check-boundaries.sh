@@ -23,8 +23,10 @@ ALLOW_RULES=(
   "Commands|Foundation"
   "Layout|Foundation AppKit CoreGraphics CoreText"
   "Session|Foundation Combine CoreGraphics"
-  "Render|Foundation AppKit CoreGraphics Metal MetalKit SwiftUI simd"
-  "App|Foundation AppKit SwiftUI"
+  # Render 追加 ImageIO：ImageTextureCache CGImageSource 降采样解码（2026-10-01 图片节点）。
+  "Render|Foundation AppKit CoreGraphics ImageIO Metal MetalKit SwiftUI simd"
+  # App 追加 ImageIO：图片归一器 CGImageSource 解码（2026-10-01 图片节点）。
+  "App|Foundation AppKit SwiftUI ImageIO"
 )
 
 # 源码根: 缺省推导仓库根下的 YMindApp/YMindApp

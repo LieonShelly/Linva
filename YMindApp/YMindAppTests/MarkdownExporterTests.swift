@@ -124,6 +124,40 @@ struct MarkdownExporterTests {
     }
 }
 
+@Suite("Markdown 含图导出")
+struct MarkdownWithImageTests {
+    private let png = Data([0x89, 0x50])
+
+    @Test func imageNode_appendsReferenceAndCollectsImage() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        let child = Node(text: "带图节点", image: png, imagePixelSize: ImagePixelSize(width: 10, height: 10))
+        doc.root.children = [child]
+        let output = MarkdownExporter.output(from: doc)
+        #expect(output.text.contains("![图片](assets/\(child.id.uuidString).png)"))
+        #expect(output.images.count == 1)
+        #expect(output.images[0].nodeId == child.id)
+        #expect(output.images[0].data == png)
+    }
+
+    @Test func imagelessDocument_textIdenticalToLegacy_andNoImages() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        doc.root.children = [Node(text: "纯文字")]
+        let output = MarkdownExporter.output(from: doc)
+        #expect(output.images.isEmpty)
+        #expect(output.text == MarkdownExporter.markdown(from: doc))  // 字节级兼容
+    }
+
+    @Test func collapsedBranchWithImage_stillExported() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        let child = Node(
+            text: "折叠带图", collapsed: true,
+            image: png, imagePixelSize: ImagePixelSize(width: 10, height: 10))
+        doc.root.children = [child]
+        let output = MarkdownExporter.output(from: doc)
+        #expect(output.images.count == 1)   // walk 忽略折叠（纯结构遍历）
+    }
+}
+
 @Suite("ExportNaming")
 struct ExportNamingTests {
     @Test func illegalCharacters_replaced() {

@@ -247,6 +247,23 @@ final class CommandBus {
                 }
             )
 
+        case let .setImage(ids, image, pixelSize):
+            let changes = model.setImage(ids: ids, image: image, pixelSize: pixelSize)
+            guard !changes.isEmpty else { return nil }
+            return Entry(
+                undo: {
+                    for c in changes {
+                        _ = self.model.mutate(id: c.id) {
+                            $0.image = c.oldImage
+                            $0.imagePixelSize = c.oldPixelSize
+                        }
+                    }
+                },
+                redo: {
+                    _ = self.model.setImage(ids: ids, image: image, pixelSize: pixelSize)
+                }
+            )
+
         case let .pasteAsChild(payload, parentId):
             let priorSelection = model.selectedIds
             let priorAnchor = model.selectionAnchorId

@@ -63,6 +63,7 @@ struct CanvasActions {
     var cut: () -> Void = {}
     var paste: () -> Void = {}
     var cancelCut: () -> Void = {}
+    var clearImage: () -> Void = {}
 }
 
 struct CanvasMetalView: NSViewRepresentable {
@@ -161,6 +162,8 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         preferredFramesPerSecond = 60
         clearColor = MTLClearColorMake(0, 0, 0, 1)
         delegate = self
+
+        registerForDraggedTypes([.png, .tiff, .fileURL])
     }
 
     @available(*, unavailable)
@@ -213,6 +216,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             camera: session.camera,
             selectedIds: session.selectedIds,
             selectionAnchorId: session.selectionAnchorId,
+            selectedImageId: session.selectedImageId,
             cutSourceIds: session.cutSourceIds,
             intent: gesture.currentDropIntent,
             searchHitId: session.search.currentMatchId,
@@ -282,7 +286,15 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case let .node(id):
             let intent = wasEditing ? .replace : selectIntent(for: event)
             if event.clickCount == 2 {
-                actions.edit(id)
+                if hitTestImageRect(
+                    screenPoint: point,
+                    snapshot: session.snapshot,
+                    camera: session.camera
+                ) == id {
+                    session.selectImage(id)      // 双击图片区 → 图片级选中
+                } else {
+                    actions.edit(id)             // 双击文字区 → 进文字编辑（现状）
+                }
                 gesture = .none
                 return
             }
@@ -461,9 +473,15 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case 36, 76:
             actions.addSibling()
         case 51, 117:
-            actions.delete()
+            if session.selectedImageId != nil {
+                actions.clearImage()      // 选中图片 → 只清图
+            } else {
+                actions.delete()          // 现状：删节点
+            }
         case 53:
-            if !session.cutSourceIds.isEmpty {
+            if session.selectedImageId != nil {
+                session.clearImageSelection()   // Esc 先退图片选中
+            } else if !session.cutSourceIds.isEmpty {
                 actions.cancelCut()
             } else {
                 actions.select(nil, .replace)
@@ -509,5 +527,46 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
             y: anchor.y - worldAnchor.y * newScale
         )
         setNeedsDisplay(bounds)
+    }
+
+    // MARK: - 图片拖入（FR-G2；独立于搬枝 DropIntent）
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        hasDraggableImage(sender) ? .copy : []
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let data = draggedImageData(sender) else { return false }
+        let point = convert(sender.draggingLocation, from: nil)
+        // 落点节点即为目标：先选中再贴图（未选中节点也能拖入该节点）
+        guard let nodeId = hitTestNode(
+            screenPoint: point,
+            snapshot: session.snapshot,
+            camera: session.camera
+        ) else { return false }
+        session.selectOnly(nodeId)
+        if !session.setPastedImage(from: data) {
+            DispatchQueue.main.async { self.session.errorMessage = "无法读取图片" }
+        }
+        return true
+    }
+
+    private func hasDraggableImage(_ sender: NSDraggingInfo) -> Bool {
+        draggedImageData(sender) != nil
+    }
+
+    private func draggedImageData(_ sender: NSDraggingInfo) -> Data? {
+        let pb = sender.draggingPasteboard
+        if let data = pb.data(forType: .png) ?? pb.data(forType: .tiff) {
+            return data
+        }
+        for url in (pb.readObjects(forClasses: [NSURL.self]) as? [URL]) ?? [] {
+            let ext = url.pathExtension.lowercased()
+            if ["png", "jpeg", "jpg", "gif", "tiff", "heic"].contains(ext),
+               let data = try? Data(contentsOf: url) {
+                return data
+            }
+        }
+        return nil
     }
 }

@@ -34,6 +34,10 @@ enum YMindCodec {
         if doc.version == 1 {
             doc.version = 2
         }
+        // 迁移：v2 → v3（image/imagePixelSize 缺省 nil，仅版本号升迁）。
+        if doc.version == 2 {
+            doc.version = 3
+        }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
         }

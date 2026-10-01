@@ -119,3 +119,56 @@ struct RadialLayoutTests {
         #expect(snap.frames[child.id]?.fill == .sky)
     }
 }
+
+@Suite("图片布局")
+struct ImageLayoutTests {
+    private func measure() -> TextMeasure { TextMeasure() }
+
+    @Test func sizedNode_growsForImage_withinDisplayLimit() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        // 图片 600×300pt 请求 → 上限 300 → 显示 300×150
+        doc.root.image = Data([0x01])
+        doc.root.imagePixelSize = ImagePixelSize(width: 600, height: 300)
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        let frame = snapshot.frames[doc.root.id]!
+
+        let bare = MindMapDocument.blank(rootText: "根")
+        let bareFrame = RadialLayout.layout(document: bare, measure: measure()).frames[bare.root.id]!
+
+        #expect(frame.size.height == bareFrame.size.height + LayoutConstants.imageTextGap + 150)
+        #expect(frame.imageRect != nil)
+        let rect = frame.imageRect!
+        #expect(rect.width == 300)
+        #expect(abs(rect.height - 150) < 0.001)
+        // 水平居中于节点
+        #expect(abs((rect.midX) - frame.size.width / 2) < 0.001)
+        #expect(snapshot.imagePayloads[doc.root.id] != nil)
+    }
+
+    @Test func smallImage_centered_whenTextDrivesWidth() {
+        var doc = MindMapDocument.blank(rootText: "相当长的文字内容决定节点宽度")
+        doc.root.imagePixelSize = ImagePixelSize(width: 50, height: 50)
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        let frame = snapshot.frames[doc.root.id]!
+        let rect = frame.imageRect!
+        #expect(rect.width == 50)
+        #expect(abs(rect.midX - frame.size.width / 2) < 0.001)
+    }
+
+    @Test func imagelessNode_hasNoImageRectOrPayload() {
+        let doc = MindMapDocument.blank(rootText: "根")
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        #expect(snapshot.frames[doc.root.id]!.imageRect == nil)
+        #expect(snapshot.imagePayloads.isEmpty)
+    }
+
+    @Test func collapsedDescendantWithImage_isAbsentFromFramesAndPayloads() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        let child = Node(text: "折叠", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 10, height: 10))
+        doc.root.children = [child]
+        doc.root.collapsed = true
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        #expect(snapshot.frames[child.id] == nil)
+        #expect(snapshot.imagePayloads[child.id] == nil)
+    }
+}

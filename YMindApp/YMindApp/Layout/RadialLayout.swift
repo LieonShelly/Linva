@@ -74,7 +74,8 @@ enum RadialLayout {
                 side: side,
                 collapsed: node.collapsed,
                 hiddenCount: node.collapsed ? countDescendants(node) : 0,
-                fill: node.fill
+                fill: node.fill,
+                imageRect: Self.imageRect(size: metadata.size, pixelSize: node.imagePixelSize)
             )
             frames[node.id] = frame
             edges.append(edge(from: parent, to: frame, side: side))
@@ -120,15 +121,26 @@ enum RadialLayout {
             hiddenCount: document.root.collapsed
                 ? countDescendants(document.root)
                 : 0,
-            fill: document.root.fill
+            fill: document.root.fill,
+            imageRect: Self.imageRect(size: rootMetadata.size, pixelSize: document.root.imagePixelSize)
         )
         frames[document.root.id] = rootFrame
+
+        var payloads: [UUID: ImagePayload] = [:]
+        func collectPayloads(_ node: Node) {
+            if let image = node.image, let px = node.imagePixelSize, frames[node.id] != nil {
+                payloads[node.id] = ImagePayload(pixelSize: px, data: image)
+            }
+            node.children.forEach(collectPayloads)
+        }
+        collectPayloads(document.root)
 
         guard !document.root.collapsed else {
             return LayoutSnapshot(
                 frames: frames,
                 edges: edges,
-                branchToggles: makeBranchToggles(frames: frames, root: document.root)
+                branchToggles: makeBranchToggles(frames: frames, root: document.root),
+                imagePayloads: payloads
             )
         }
 
@@ -174,10 +186,12 @@ enum RadialLayout {
 
         placeSide(leftBranches, side: .left)
         placeSide(rightBranches, side: .right)
+        collectPayloads(document.root)
         return LayoutSnapshot(
             frames: frames,
             edges: edges,
-            branchToggles: makeBranchToggles(frames: frames, root: document.root)
+            branchToggles: makeBranchToggles(frames: frames, root: document.root),
+            imagePayloads: payloads
         )
     }
 
@@ -245,6 +259,14 @@ enum RadialLayout {
         node.children.reduce(0) {
             $0 + 1 + countDescendants($1)
         }
+    }
+
+    /// 图片区（节点局部坐标，top-left 原点：图在上、文字在下）；水平居中。
+    private static func imageRect(size: NodeSize, pixelSize: ImagePixelSize?) -> CGRect? {
+        guard let px = pixelSize, px.width > 0, px.height > 0 else { return nil }
+        let width = min(CGFloat(px.width), LayoutConstants.imageMaxDisplayWidth)
+        let height = width * CGFloat(px.height) / CGFloat(px.width)
+        return CGRect(x: (size.width - width) / 2, y: 0, width: width, height: height)
     }
 
     private struct BranchMetadata {

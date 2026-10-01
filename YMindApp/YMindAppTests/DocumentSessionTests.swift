@@ -494,3 +494,101 @@ struct DocumentSessionRecoveryTests {
         #expect(session.fileURL == nil)
     }
 }
+
+@Suite("Session 图片")
+struct SessionImageTests {
+    private let png = Data([0x89, 0x50])
+    private let px = ImagePixelSize(width: 64, height: 32)
+
+    @Test func setPastedImage_normalizesAndCommits() {
+        let session = DocumentSession()
+        session.imageNormalizer = { _ in (Data([0xAA]), ImagePixelSize(width: 8, height: 8)!) }
+        let root = session.model.document.root.id
+
+        #expect(session.setPastedImage(from: Data([0x01])) == true)
+        #expect(session.model.node(id: root)?.image == Data([0xAA]))
+        #expect(session.isDirty)
+    }
+
+    @Test func setPastedImage_withoutNormalizerOrSelection_fails() {
+        let session = DocumentSession()
+        #expect(session.setPastedImage(from: Data([0x01])) == false)  // 无注入
+
+        session.imageNormalizer = { _ in (Data([0xAA]), ImagePixelSize(width: 8, height: 8)!) }
+        session.clearSelection()
+        #expect(session.setPastedImage(from: Data([0x01])) == false)  // 无选中
+    }
+
+    @Test func setImage_clearsSelectedImageId_andTargetsImageNode() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let child = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        session.selectOnly(child)
+        session.commandBus.execute(.setImage(ids: [child], image: png, pixelSize: px))
+        session.selectImage(child)
+        #expect(session.selectedImageId == child)
+
+        session.setImage(nil, pixelSize: nil)   // ⌫ 分派目标：图片
+        #expect(session.model.node(id: child)?.image == nil)
+        #expect(session.selectedImageId == nil)  // 清图后回落
+    }
+
+    @Test func selectImage_clearOnEscapeProxy_andNotInUndoStack() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+        session.clearImageSelection()
+        #expect(session.selectedImageId == nil)
+        // 选中态不入命令栈：仅 selectImage/clear 不产生 Undo
+        #expect(session.commandBus.canUndo == false)
+    }
+
+    /// 回归（Important #2，spec §5.2）：selectImage 后 selectOnly(nil)（点空白）→ 清图片选中。
+    @Test func selectImage_thenSelectOnlyNil_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+
+        session.selectOnly(nil)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds.isEmpty)
+    }
+
+    /// 回归（Important #2，spec §5.2）：selectImage 后选中其它节点 → 亦清图片选中。
+    @Test func selectImage_thenSelectOtherNode_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let a = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = session.model.insertChild(parentId: root, text: "B", side: .right, at: nil)
+        session.selectImage(a)
+        #expect(session.selectedImageId == a)
+
+        session.selectOnly(b)
+        #expect(session.selectedImageId == nil)
+        #expect(session.selectedIds == [b])
+    }
+
+    /// 回归（Important #2 真实路径）：点空白走 clearSelection()，同样清图片选中。
+    @Test func selectImage_thenClearSelection_clearsSelectedImageId() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        session.selectImage(root)
+        #expect(session.selectedImageId == root)
+
+        session.clearSelection()
+        #expect(session.selectedImageId == nil)
+    }
+
+    @Test func setPastedImage_commitsEditingFirst() {
+        let session = DocumentSession()
+        session.imageNormalizer = { _ in (Data([0xAA]), px!) }
+        let root = session.model.document.root.id
+        session.startEditing(root)
+        session.draftText = "先提交"
+        _ = session.setPastedImage(from: Data([0x01]))
+        #expect(session.editingId == nil)
+        #expect(session.model.node(id: root)?.text == "先提交")
+    }
+}

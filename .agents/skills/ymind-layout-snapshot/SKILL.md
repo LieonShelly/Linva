@@ -10,7 +10,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 
 ## 关键文件
 
-- `Layout/LayoutSnapshot.swift` —— `NodeFrame` / `EdgeGeometry` / `BranchToggle` / `LayoutSnapshot`
+- `Layout/LayoutSnapshot.swift` —— `NodeFrame` / `EdgeGeometry` / `BranchToggle` / `LayoutSnapshot`（含 `imagePayloads: [UUID: ImagePayload]`：有图节点的图片载荷，Layout 从 Model 拷出，Render 只消费 Snapshot）
 - `Layout/RadialLayout.swift` —— 中心辐射布局算法
 - `Layout/TextMeasure.swift`、`Layout/NodeSize.swift`、`Layout/LayoutConstants.swift`
 - `Render/CanvasMetalView.swift`、`Render/MetalRenderer.swift` —— 只消费 Snapshot + Camera
@@ -21,7 +21,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 1. **Metal 不理解树**：`MetalRenderer.draw(snapshot:camera:selectedId:)` 只吃 `LayoutSnapshot` + `Camera`，**不允许** Render 访问 `MindMapModel`/`Node`。任何「渲染需要但 Snapshot 没有」的信息，都要先加进 Snapshot，而不是让 Metal 去读模型。
 2. **数据流单向**：`Model 变更 → Session.relayout() → RadialLayout.layout() → snapshot → Render.draw()`。Layout 只读 Model，Render 只读 Snapshot。
 3. **`LayoutSnapshot` 是稳定接缝**：换布局算法（中心辐射 → 组织图等）或换渲染后端时，只要 Snapshot 契约不变，Render 无需改动。扩展字段时，要**同时**保证 Layout 产出、Render 消费两端一致。
-4. **`NodeFrame` 携带渲染所需的一切**：`id / text / center / size / isRoot / side / collapsed / hiddenCount`。新增渲染特性（如样式色、图标）应加字段进 `NodeFrame`（以及 Layout 产出它），而不是给 Render 开访问 Model 的口子。
+4. **`NodeFrame` 携带渲染所需的一切**：`id / text / center / size / isRoot / side / collapsed / hiddenCount / imageRect`。新增渲染特性（如样式色、图标）应加字段进 `NodeFrame`（以及 Layout 产出它），而不是给 Render 开访问 Model 的口子。
 5. **`EdgeGeometry` 是布局专用几何**：含 `fromId / toId / side / points`。若新布局需要不同的边几何，扩 `EdgeGeometry`，而非让 Metal 懂业务。
 
 ## RadialLayout 不变量

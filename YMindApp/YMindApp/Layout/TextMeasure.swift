@@ -52,9 +52,18 @@ struct TextMeasure {
             ? LayoutConstants.rootLineHeight
             : LayoutConstants.nodeLineHeight
 
+        let textWidth = ceil(measuredWidth + horizontalPadding * 2)
+        let textHeight = ceil(CGFloat(lineCount) * lineHeight + verticalPadding * 2)
+
+        guard let px = node.imagePixelSize, px.width > 0, px.height > 0 else {
+            return NodeSize(width: textWidth, height: textHeight)
+        }
+        // 图片显示宽 = min(像素宽, 上限)；等比高；节点宽取 max、高叠加（spec §3.1）
+        let imageWidth = min(CGFloat(px.width), LayoutConstants.imageMaxDisplayWidth)
+        let imageHeight = imageWidth * CGFloat(px.height) / CGFloat(px.width)
         return NodeSize(
-            width: ceil(measuredWidth + horizontalPadding * 2),
-            height: ceil(CGFloat(lineCount) * lineHeight + verticalPadding * 2)
+            width: ceil(max(textWidth, imageWidth + horizontalPadding * 2)),
+            height: ceil(textHeight + LayoutConstants.imageTextGap + imageHeight)
         )
     }
 

@@ -1,7 +1,7 @@
 import Foundation
 
 struct MindMapDocument: Equatable, Codable, Sendable {
-    static let currentVersion = 2
+    static let currentVersion = 3
     var version: Int
     var root: Node
 
