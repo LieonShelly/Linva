@@ -564,9 +564,21 @@ final class DocumentSession: ObservableObject {
         }()
         var newBlocks: [ContentBlock]
         if committedText.isEmpty {
-            // 文字删空：不带文本块（用户拍板「一律允许空文字」）。
-            // 有图片块 → 只留图片；纯文本节点 → 空 blocks（node.text 为空，布局退化为极小 padding 节点，不崩）。
-            newBlocks = images
+            // 文字删空（用户拍板「一律允许空文字」）：
+            // - 有图片块 → 只留图片；
+            // - 纯文本非根节点 → 直接删除该节点（不留下点不进去的空节点），走命令栈可 Undo；
+            // - 纯文本根节点 → 根不可删，补「未命名」保持有标题。
+            if !images.isEmpty {
+                newBlocks = images
+            } else if editingId != model.document.root.id {
+                let delId = editingId
+                originalBlocks = []
+                originalEditingText = ""
+                commandBus.execute(.delete(ids: [delId]))
+                return true
+            } else {
+                newBlocks = [ContentBlock(id: UUID(), kind: .text("未命名"))]
+            }
         } else if firstBlockIsImage {
             newBlocks = images + [ContentBlock(id: UUID(), kind: .text(committedText))]
         } else {

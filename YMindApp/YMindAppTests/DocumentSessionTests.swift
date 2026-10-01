@@ -792,15 +792,46 @@ struct SessionConsolidationTests {
         #expect(session.model.node(id: root)?.text == "")
     }
 
-    /// 用户场景边界：纯文本节点删空文字 → 空 blocks（「一律允许空文字」）。
-    @Test func pureTextNode_deleteAllText_becomesEmpty() {
+    /// 用户场景边界：根节点（中心主题）纯文本删空文字 → 根不可删，补「未命名」。
+    @Test func rootNode_deleteAllText_becomesUnnamed() {
         let session = DocumentSession()
         let root = session.model.document.root.id
 
         let kinds = commit(session, nodeId: root, draft: "")
 
-        #expect(kinds == [])
-        #expect(session.model.node(id: root)?.text == "")
+        #expect(kinds == [.text("未命名")])
+        #expect(session.model.node(id: root)?.text == "未命名")
+    }
+
+    /// 用户新需求：非根纯文本节点删空文字 → 直接删除该节点（不留点不进去的空节点）。
+    @Test func nonRootPureTextNode_deleteAllText_deletesNode() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let childId = session.model.insertChild(parentId: root, text: "子节点", side: nil, at: nil)
+        session.relayout()
+
+        // 编辑态把子节点文字删空 → commit 应删除该子节点。
+        session.startEditing(childId)
+        session.draftText = ""
+        session.commitEditingIfNeeded()
+
+        #expect(session.model.node(id: childId) == nil)
+    }
+
+    /// 非根纯文本删空删除节点可 Undo 恢复。
+    @Test func nonRootPureTextNode_deleteAllText_undoRestoresNode() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let childId = session.model.insertChild(parentId: root, text: "子节点", side: nil, at: nil)
+        session.relayout()
+
+        session.startEditing(childId)
+        session.draftText = ""
+        session.commitEditingIfNeeded()
+        #expect(session.model.node(id: childId) == nil)
+
+        session.commandBus.undo()
+        #expect(session.model.node(id: childId)?.text == "子节点")
     }
 
     /// 有图节点删空 → 只留图；Undo 精确恢复原「文字 + 图片」块序列。
