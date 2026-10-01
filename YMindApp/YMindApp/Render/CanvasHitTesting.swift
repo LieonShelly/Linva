@@ -63,6 +63,29 @@ func hitTestNode(
         .id
 }
 
+/// 双击命中图片区：命中返回节点 id（图片属节点，selectedImageId 记节点 id）。
+/// imageRect 为节点局部 top-left 原点矩形，世界 rect = frame.rect.origin + 偏移。
+func hitTestImageRect(
+    screenPoint: CGPoint,
+    snapshot: LayoutSnapshot,
+    camera: Camera
+) -> UUID? {
+    let world = camera.screenToWorld(screenPoint)
+    for frame in snapshot.frames.values {
+        guard let local = frame.imageRect else { continue }
+        let worldRect = CGRect(
+            x: frame.rect.minX + local.minX,
+            y: frame.rect.minY + local.minY,
+            width: local.width,
+            height: local.height
+        )
+        if worldRect.contains(world) {
+            return frame.id
+        }
+    }
+    return nil
+}
+
 /// 与框选世界矩形相交的可见节点（折叠隐藏的节点不在 `frames` 中，天然不可选）。
 func marqueeIntersectingIds(
     worldRect: CGRect,
