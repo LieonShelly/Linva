@@ -62,4 +62,24 @@ struct EditingControllerTests {
         #expect(controller.editingId == nil)
         #expect(model.document.root.text == "中心主题")
     }
+
+    /// commit("") 于非根纯文本节点 → .delete 命令 → 节点消失；undo 恢复。
+    @Test func commit_emptyOnNonRoot_deletesNode_andUndoRestores() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let controller = EditingController(model: model, commandBus: bus)
+        let root = model.document.root.id
+        let a = model.insertChild(parentId: root, text: "子节点", side: .right, at: nil)
+        let f = frames(for: model)
+
+        controller.begin(id: a, currentDraft: "", snapshotFrames: f)
+        controller.commit(draftText: "")
+
+        #expect(model.node(id: a) == nil)
+        #expect(controller.editingId == nil)
+
+        bus.undo()
+        #expect(model.node(id: a) != nil)
+        #expect(model.node(id: a)?.text == "子节点")
+    }
 }

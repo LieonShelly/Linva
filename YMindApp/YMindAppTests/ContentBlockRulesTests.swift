@@ -59,6 +59,14 @@ struct ContentBlockRulesTests {
         #expect(kinds(d) == [.image(.init(data: Data([0x01]), pixelSize: px)), .text("新文")])
     }
 
+    /// 删空：混合块（文本+图）→ 只留图（文本块被丢弃的 replaceBlocks 变换，非 noChange）。
+    @Test func mixedBlocks_emptyDraft_keepsOnlyImages() {
+        let d = ContentBlockRules.coalesce(
+            original: [textBlock("新主题"), imageBlock(data: Data([0x01]), pixelSize: px)],
+            committedText: "", isRoot: true)
+        #expect(kinds(d) == [.image(.init(data: Data([0x01]), pixelSize: px))])
+    }
+
     /// 删空：纯文本非根节点 → .deleteNode。
     @Test func pureTextNode_emptyDraft_deletesNode() {
         let d = ContentBlockRules.coalesce(
