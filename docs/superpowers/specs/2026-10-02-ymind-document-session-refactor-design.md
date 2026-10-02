@@ -164,7 +164,7 @@ sequenceDiagram
   else .noChange
     note over EC: 不入栈
   end
-  DS->>DS: editingId = nil; draftText = ""（镜像）
+  DS->>DS: 镜像 editingId=nil，draftText 清空
 ```
 
 - **`ContentBlockRules.coalesce` 返回值集中三态**：`.noChange`（no-op 不入栈，按内容比较忽略块 id）· `.replaceBlocks` · `.deleteNode`。现状 `commitEditingIfNeeded` 的 if/else 链整段搬进规则，语义逐字节不变。
