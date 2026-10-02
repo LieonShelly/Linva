@@ -80,7 +80,7 @@ flowchart TB
   EC --> Bus["CommandBus"]
   DS --> DP
   DP --> PB["protocol PersistenceBackend"]
-  PB --> YF["YMindFilePersistence<br/>（SecurityScopedAccess + 磁盘 I/O）"]
+  PB --> YF["YMindFilePersistence<br/>（纯字节读写）"]
   DP --> C
   DP --> AS["AutosaveStore（已有）"]
   DS --> LP
@@ -103,20 +103,22 @@ flowchart TB
 
 ```swift
 // Layout/LayoutEngine.swift（协议放 Layout 层，与 RadialLayout 同层）
+// RadialLayout 是 enum（静态方法），协议用 static 方法，空 conform 成立。
 protocol LayoutEngine {
-    func layout(document: MindMapDocument, measure: TextMeasure) -> LayoutSnapshot
+    static func layout(document: MindMapDocument, measure: TextMeasure) -> LayoutSnapshot
 }
 extension RadialLayout: LayoutEngine {}
 
 // Session/PersistenceBackend.swift（协议放 Session 层）
+// YMindFilePersistence 是纯字节读写；沙盒 scope 语义由 DocumentPersistence 持有 SecurityScopedAccess 处理。
 protocol PersistenceBackend {
-    func loadData(from url: URL) throws -> Data
-    func saveData(_ data: Data, to url: URL) throws
+    func readData(from url: URL) throws -> Data
+    func writeData(_ data: Data, to url: URL) throws
 }
-final class YMindFilePersistence: PersistenceBackend { /* 封装 SecurityScopedAccess */ }
+final class YMindFilePersistence: PersistenceBackend { /* 纯字节：Data(contentsOf:) / write(.atomic) */ }
 ```
 
-`DocumentSession.init` 增 `layoutEngine` / `persistenceBackend` 注入参数（默认现有实现，测试注入 stub）——方案 C 的 DI 落点。
+DI 落点（实际）：`DocumentSession.init` 注入 `layoutPipeline`（内部持 `LayoutEngine`，多布局经 pipeline 换实现）；持久化后端在 `DocumentPersistence.init` 注入（`backend: PersistenceBackend = YMindFilePersistence()`，测试注入 stub）；`DocumentSession.init` 的 persistence 注入留待云同步任务再 additive 扩展（YAGNI）。
 
 ## 5. 数据流
 
@@ -188,7 +190,7 @@ sequenceDiagram
 ## 6. 错误处理与边界
 
 - **错误类型不变**：`DocumentSessionError.noFileURL`、`errorMessage` 文案不变。
-- **依赖边界（check-boundaries.sh 白名单同步）**：新文件全在 Session 层，仍只 `Foundation/Combine/CoreGraphics`。`LayoutEngine` 协议放 Layout 层（纯协议，无新增 import）；`PersistenceBackend` 协议 + `YMindFilePersistence` 放 Session 层（封装 `SecurityScopedAccess`，无 AppKit/Metal）。**协议不放根目录**，规避根文件白名单例外。改完后同步 `scripts/check-boundaries.sh` 与架构现状 §5。
+- **依赖边界（check-boundaries.sh 白名单同步）**：新文件全在 Session 层，仍只 `Foundation/Combine/CoreGraphics`。`LayoutEngine` 协议放 Layout 层（纯协议，无新增 import）；`PersistenceBackend` 协议 + `YMindFilePersistence` 放 Session 层（`YMindFilePersistence` 纯字节读写；scope 语义由 `DocumentPersistence` 持有 `SecurityScopedAccess` 处理，无 AppKit/Metal）。**协议不放根目录**，规避根文件白名单例外。改完后同步 `scripts/check-boundaries.sh` 与架构现状 §5。
 
 ## 7. 测试策略
 
