@@ -40,7 +40,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 ## LogicLayout 不变量（逻辑图 / 总分树）
 
 - **根在最左、层级向右层层展开**；所有节点统一 `.right` side（无左右分组语义）。
-- **L 形边**：`EdgeGeometry.points` 为「水平出 → 垂直拐 → 水平入」三点折线。
+- **L 形边**：`EdgeGeometry.points` 为「水平出 → 垂直拐 → 水平入」四点折线。
 - **BranchToggle 一律在右侧**（`LayoutSupport.makeToggle(..., side: .right)`）；折叠子树高度视为 0、不占空间。
 - **side 降级（FR-L4）**：逻辑图下 `DocumentSession.canSetSide == false`（⌘←/⌘→ 置灰、`DropIntent` 侧向放置禁用），切回辐射恢复。
 
