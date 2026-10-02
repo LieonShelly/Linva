@@ -13,6 +13,7 @@
 | 搁置 | 图标 / 节点备注 / 富文本 | 同上（O6） | 4.0 | 上架后按用户反馈排（注：AppIcon 图标的「图标」≠ 节点图标，勿混） |
 | **就绪** | 节点内嵌图片（图 + 文共存） | [opportunities/2026-09-30-节点图片功能.md](opportunities/2026-09-30-节点图片功能.md) | 做（I9 C9 E7 → 11.6） | 竞品成熟度基线；**排期已定 A（进 1.0，与迁移闭环并行）**。PRD 已交付：[prd-ymind-image-node-2026-09-30](../../prds/prd-ymind-image-node-2026-09-30/prd.md)（含并行接缝 FR-G6）。下一步：开发 Agent 开工 |
 | **就绪** | 上架就绪（App Store 提交） | [launch-checklist-2026-09-30.md](launch-checklist-2026-09-30.md) | —（工程合规，非需求课题） | P0：AppIcon 填充 + 隐私清单 + 元数据；P1：崩溃实测 / 部署目标 / entitlements 确认。开发终端逐项销项 |
+| **就绪** | 新增布局类型：逻辑图（总分树）+ 布局切换器 | [opportunities/2026-10-02-新增布局类型.md](opportunities/2026-10-02-新增布局类型.md) | 做（I8 C8 E5 → 12.8） | 产品本人拍板场景「总分归纳」（读书笔记/知识体系）；Codec v5 + LogicLayout + 工具栏切换器；**排期待拍板（推荐紧随 1.0）**。PRD 已交付：[prd-ymind-layout-2026-10-02](../../prds/prd-ymind-layout-2026-10-02/prd.md) |
 
 ## 变更记录
 
@@ -24,6 +25,8 @@
 | 2026-09-30 | **PRD 已交付**：`docs/prds/prd-ymind-import-export-2026-09-30/`（prd.md + addendum.md），Fast path 出稿 |
 | 2026-09-30 | 新探索「节点内嵌图片」：竞品标配（XMind/MindNode）证据 + 成本评估（E≈7，Codec v3 迁移 + Render 图片纹理为主）；**决策做**（ICE 11.6），需求包就绪（卡片 + image-node.html 原型），排期待拍板 |
 | 2026-09-30 | 图片功能**排期定 A（进 1.0，与迁移闭环并行）**；PRD 已交付 `docs/prds/prd-ymind-image-node-2026-09-30/`（含并行接缝 FR-G6） |
+| 2026-10-02 | 新探索「新增布局类型」：调研（XMind 11 结构清单 + 适用场景 [EVIDENCE]）+ 内部访谈（产品本人选「总分归纳」场景）+ 机会卡片 + ICE 决策**做**（12.8，逻辑图）；原型 `prototype/layout-switcher.html`；**排期待拍板（推荐紧随 1.0）** |
+| 2026-10-02 | **PRD 已交付**：`docs/prds/prd-ymind-layout-2026-10-02/`（prd.md + addendum.md，bmad-prd Fast path），FR-L1…L5 + 验收要点；排期决策点仍开放（§9.1，推荐 A 紧随 1.0） |
 
 ---
 

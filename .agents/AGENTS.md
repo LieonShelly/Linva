@@ -33,11 +33,50 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 - 完整路由表见 **[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)**（实现 Apple 平台代码前先查）。
 - 画布优先序：`metal-gpu` → `metal-shader-expert` → `axiom-graphics`（`resizable-rendering.md` / `display-performance.md`）。
 
+## 子代理（pi-subagents，nicobailon 版）
+
+Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发现，字段如 `systemPromptMode`/`inheritSkills`/`defaultContext`）。**注意：不是 `tintinweb/pi-subagents`，那是另一个包，字段不同。**
+
+| Agent | 何时委派 |
+|-------|----------|
+| `designer` | 需要正式 UI 设计 / 视觉改版 / 上线级界面。产出「design token + 组件状态表 + HTML 原型」三件套，符合 Apple HIG。设计判断用主会话强模型；读图审稿委派 `vision-inspector` |
+| `vision-inspector` | 需分析图片内容（见下方「视觉委派」）。钉死视觉模型 `ark/glm-5.3-flash` |
+
 ## 基础约束
 
-- 优先用 **codegraph mcp** 检索代码；具体约束与 path 见 **[`.agents/rules/ymind-code-retrieval.md`](rules/ymind-code-retrieval.md)**。
-- 需要分析**图片内容**且父会话看不了 / 图多需精读时，委派视觉子代理（模型 `ark/glm-5.3-flash`）；触发条件、启动方式与提示模板见 **[`.agents/rules/ymind-vision-delegate.md`](rules/ymind-vision-delegate.md)**。
-- 图形（流程图 / 类图 / 架构图）优先用 **Mermaid**。
+### 代码检索（强制）— codegraph MCP
+
+**代码检索一律用 CodeGraph MCP（`codegraph_explore`），不得用文本方式（grep / Glob / Read 逐文件）人工翻代码兜底。**
+
+- 索引位于 **`YMindApp/.codegraph`**（SQLite：`codegraph.db`）。
+- 因仓库根不在索引根，**每次调用必须显式传 `projectPath: "YMindApp"`**（或 `YMindApp/.codegraph` 往上可达的路径），否则服务器无默认项目、答不了。
+- 一次 `codegraph_explore` 返回符号源 + 调用路径 + 波及面，替代「grep + Read 循环」。
+
+**必须用**：问符号/功能怎么工作、定位 bug/找字段/定义与调用方、改动前定波及范围、调查代码区/架构。
+
+**例外（可用常规工具）**：查目录结构/文件名/待检索清单（`glob`/`read` 目录）、纯文本层级匹配/Mermaid/文档内容、项目无索引或索引缺失时用内置工具（Read/Grep/Glob）完成——**不要擅自跑索引**，索引属用户决策。
+
+> 详细：`.agents/rules/ymind-code-retrieval.md`
+
+### 视觉委派（触发条件）— vision delegate
+
+需分析**图片内容**且满足任一条时，委派视觉子代理（模型 `ark/glm-5.3-flash`）：
+
+1. 父会话看不到图——读图返回占位 `[image/png]` 却无法描述，或用户消息内嵌图报"无法处理"；
+2. 图多/大/需精读（截图走查、逐元素对比、图表读数、图内 OCR），精读挤占父上下文；
+3. 需客观盲测式描述——父会话已持有预期答案，自己看图易被污染。
+
+**启动优先序**：① `task` + `delegate` 子代理（继承 `ark/glm-5.3-flash`，`read` 读图得内联图像）；② `xd://subagent` + `vision-inspector`（需 `pi` CLI，当前本机缺，暂不可用）；③ 兜底父会话直接 `read`（实测当前主模型能看图，失败即转 ①）。
+
+**任务模板防幻觉必填**：图片绝对路径 + 逐条编号问题清单 + 明示「只报告实际可见内容，禁止凭文件名/上下文猜测；看不到答 `CANNOT_SEE: <原因>`」+ 结构化输出（逐图 `## <路径>` + 要点）。**禁止**把预期答案写进任务（污染盲测，`task` 的 `context` 字段同样不得泄露）。
+
+**证据红线**：视觉结论必须来自子代理真实读图，不得从路径/文件名/会话上下文推断。
+
+> 详细与验证记录：`.agents/rules/ymind-vision-delegate.md`
+
+### 图形
+
+流程图 / 类图 / 架构图优先用 **Mermaid**。
 
 ## Claude 常犯的错误（犯两次就写进这里）
 

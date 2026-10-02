@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YMind — 布局切换 · 逻辑图线框（总分树）</title>
+  <style>
+    :root {
+      --paper: #e7e4dc; --ink: #26221b; --accent: #b85c3a; --line: #c9c4b8;
+      --panel: #f6f3ec; --ok: #2f6f4f; --warn: #9a5b1f; --muted: #6e685c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--paper); color: var(--ink); font-size: 14px; }
+    header { display: flex; align-items: center; gap: 18px; padding: 10px 18px;
+      background: #26221b; color: #f6f3ec; }
+    header .brand { font-weight: 700; letter-spacing: .5px; }
+    header .brand small { opacity: .6; font-weight: 400; margin-left: 8px; }
+    .tabs { display: flex; gap: 4px; }
+    .tab { padding: 6px 14px; border-radius: 8px; cursor: pointer; color: #cfc9bc; }
+    .tab.active { background: #3a342a; color: #fff; }
+    main { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 52px); }
+    .stage { position: relative; overflow: hidden; background: #fbf9f3; }
+    .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .stage .layout-badge { position: absolute; top: 12px; left: 12px; background: rgba(38,34,27,.82);
+      color: #f6f3ec; padding: 5px 12px; border-radius: 20px; font-size: 12px; letter-spacing: .5px; }
+    .node rect { fill: #fff; stroke: var(--ink); stroke-width: 1.2; rx: 8; }
+    .node.root rect { fill: var(--ink); }
+    .node.root text { fill: #fff; }
+    .node text { fill: var(--ink); font-size: 12px; }
+    .edge { stroke: var(--ink); stroke-width: 1.4; fill: none; }
+    .edge.logic { stroke: var(--accent); stroke-width: 1.6; }
+    .toggle { fill: #fff; stroke: var(--accent); stroke-width: 1.6; }
+    .toggle text { fill: var(--accent); font-size: 11px; text-anchor: middle; }
+    .panel { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; }
+    .panel h2 { margin: 0 0 4px; font-size: 16px; }
+    .panel .sub { color: var(--muted); margin: 0 0 14px; font-size: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+      background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+    .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .layout-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .layout-card { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; cursor: pointer;
+      background: #fff; text-align: center; }
+    .layout-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .layout-card svg { width: 100%; height: 90px; display: block; }
+    .layout-card .name { font-weight: 600; margin-top: 6px; font-size: 13px; }
+    .layout-card .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .kbd { background: #efece3; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .field { margin: 12px 0; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .toast { margin-top: 12px; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    .toast.ok { background: #e2efe6; border: 1px solid #b8d6c2; color: var(--ok); }
+    .toast.warn { background: #f6ead6; border: 1px solid #e3cda4; color: var(--warn); }
+    .xref { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 10px; font-size: 12px; color: var(--muted); }
+    ul { padding-left: 18px; margin: 8px 0; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">YMind <small>布局切换 · 交互线框 v0</small></div>
+    <nav class="tabs">
+      <div class="tab active" data-tab="switch">布局切换器</div>
+      <div class="tab" data-tab="logic">逻辑图形态</div>
+      <div class="tab" data-tab="limits">边界与非目标</div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="stage">
+      <div class="layout-badge" id="layout-badge">辐射布局</div>
+      <svg id="map" viewBox="0 0 900 520"></svg>
+    </div>
+
+    <div class="panel">
+      <!-- 场景 A：布局切换器 -->
+      <section id="pane-switch">
+        <h2>布局切换器</h2>
+        <p class="sub">工具栏「布局」菜单：辐射 ↔ 逻辑图，一键切换即重排</p>
+
+        <div class="layout-picker">
+          <div class="layout-card active" id="card-radial" data-layout="radial">
+            <svg viewBox="0 0 120 90">
+              <g stroke="#26221b" stroke-width="1">
+                <rect x="50" y="38" width="20" height="14" rx="4" fill="#26221b"/>
+                <line x1="55" y1="40" x2="18" y2="18"/><line x1="55" y1="44" x2="18" y2="44"/>
+                <line x1="55" y1="48" x2="18" y2="70"/><line x1="55" y1="48" x2="100" y2="18"/>
+                <line x1="55" y1="44" x2="100" y2="70"/>
+              </g>
+              <g fill="#fff" stroke="#26221b" stroke-width="1">
+                <rect x="4" y="10" width="14" height="8" rx="3"/><rect x="4" y="40" width="14" height="8" rx="3"/>
+                <rect x="4" y="66" width="14" height="8" rx="3"/><rect x="102" y="10" width="14" height="8" rx="3"/>
+                <rect x="102" y="66" width="14" height="8" rx="3"/>
+              </g>
+            </svg>
+            <div class="name">辐射布局</div>
+            <div class="desc">中心发散 · 头脑风暴</div>
+          </div>
+          <div class="layout-card" id="card-logic" data-layout="logic">
+            <svg viewBox="0 0 120 90">
+              <g stroke="#b85c3a" stroke-width="1.2">
+                <rect x="4" y="38" width="18" height="14" rx="4" fill="#26221b"/>
+                <line x1="22" y1="42" x2="44" y2="18"/><line x1="22" y1="45" x2="44" y2="45"/>
+                <line x1="22" y1="48" x2="44" y2="72"/>
+              </g>
+              <g stroke="#b85c3a" stroke-width="1">
+                <line x1="54" y1="18" x2="76" y2="10"/><line x1="54" y1="18" x2="76" y2="26"/>
+                <line x1="54" y1="45" x2="76" y2="45"/><line x1="54" y1="72" x2="76" y2="64"/>
+                <line x1="54" y1="72" x2="76" y2="80"/>
+              </g>
+              <g fill="#fff" stroke="#b85c3a" stroke-width="1">
+                <rect x="44" y="14" width="12" height="8" rx="3"/><rect x="44" y="41" width="12" height="8" rx="3"/>
+                <rect x="44" y="68" width="12" height="8" rx="3"/><rect x="76" y="6" width="10" height="7" rx="2.5"/>
+                <rect x="76" y="22" width="10" height="7" rx="2.5"/><rect x="76" y="41" width="10" height="7" rx="2.5"/>
+                <rect x="76" y="60" width="10" height="7" rx="2.5"/><rect x="76" y="76" width="10" height="7" rx="2.5"/>
+              </g>
+            </svg>
+            <div class="name">逻辑图</div>
+            <div class="desc">总分树 · 读书笔记/知识体系</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="btn-switch">切换布局（⌥L）</button>
+          <button class="btn" id="btn-undo" disabled>撤销（⌘Z）</button>
+        </div>
+        <p class="note">切换入命令栈：⌘Z 可撤销回上一布局；选中节点与相机视角保持。</p>
+
+        <div class="toast ok" id="switch-done" hidden>
+          ✅ 已切换到 <span id="switch-name">逻辑图</span> —— 同一棵树，换一种读法；布局随文档保存（.ymind v5），重新打开保持。
+        </div>
+
+        <div class="xref">依据 FR-L1 / FR-L3 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 B：逻辑图形态 -->
+      <section id="pane-logic" hidden>
+        <h2>逻辑图形态</h2>
+        <p class="sub">根在最左，层级向右层层展开；总分关系一目了然</p>
+
+        <div class="field">
+          <label>折叠分支（总分树也支持）</label>
+          <div class="row">
+            <button class="btn" id="btn-collapse">折叠「第二章」</button>
+            <button class="btn" id="btn-expand">展开全部</button>
+          </div>
+        </div>
+
+        <ul>
+          <li>边为 <b>L 形正交曲线</b>（与辐射的对称曲线区分），读序 = 从左到右、从总到分。</li>
+          <li>折叠 toggle 统一在<b>节点右侧</b>（无左右之分）。</li>
+          <li>节点填色 / 图片 / 选中 / 拖拽移动 / 插入线全部照常工作。</li>
+          <li>「设为左/右侧」操作在逻辑图下<b>置灰</b>（无左右语义，切回辐射不丢 side 数据）。</li>
+        </ul>
+
+        <div class="toast warn" id="side-warn" hidden>
+          ⓘ 逻辑图无左右之分：side 操作已置灰；切回辐射布局时左右分组保留。
+        </div>
+
+        <div class="xref">依据 FR-L2 / FR-L4 · 机会卡片 §4</div>
+      </section>
+
+      <!-- 场景 C：边界 -->
+      <section id="pane-limits" hidden>
+        <h2>边界与非目标</h2>
+        <p class="sub">本功能明确不做的事</p>
+
+        <ul>
+          <li><b>不做</b>主题/配色列表（用户提到的「主题列表」是另一课题，布局与主题解耦）。</li>
+          <li><b>不做</b>矩阵 / 鱼骨 / 时间轴 / 自由画布（候选对比后搁置）。</li>
+          <li><b>不做</b>多结构混用（同图不同分支不同结构——XMind 式高级能力）。</li>
+          <li><b>不做</b>切换动画过渡（瞬时切换即可）。</li>
+        </ul>
+
+        <div class="xref">机会卡片 §8 · backlog 状态表</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // —— 数据：一本书的目录结构（总分归纳示例）——
+    const TREE = {
+      id: 'r', text: '《认知觉醒》笔记', root: true, children: [
+        { id: 'c1', text: '第一章 大脑构造', children: [
+          { id: 'c1a', text: '本能脑/情绪脑/理智脑' },
+          { id: 'c1b', text: '三重脑的合作' },
+        ]},
+        { id: 'c2', text: '第二章 元认知', collapsed: false, children: [
+          { id: 'c2a', text: '元认知定义' },
+          { id: 'c2b', text: '反思与复盘' },
+        ]},
+        { id: 'c3', text: '第三章 行动力', children: [
+          { id: 'c3a', text: '清晰力' },
+        ]},
+      ],
+    };
+
+    const state = { layout: 'radial', collapsed: false, undo: [] };
+    const NODE_H = 34, HGAP = 90, VGAP = 18;
+    const svg = document.getElementById('map');
+    const badge = document.getElementById('layout-badge');
+
+    // —— 文本测量（简化 TextMeasure：按字符数估宽，上限 clamp）——
+    function nodeW(text) {
+      return Math.max(90, Math.min(280, text.length * 13 + 26));
+    }
+
+    // —— 布局算法（简化版，演示形态）——
+    function subtreeHeight(n) {
+      const kids = n.collapsed ? [] : (n.children || []);
+      const childH = kids.reduce((s, k) => s + subtreeHeight(k).h + VGAP, 0);
+      return { h: Math.max(NODE_H, childH - VGAP) };
+    }
+
+    function layoutRadial(root) {
+      const frames = []; const edges = [];
+      const totalH = root.children.reduce((s, c) => s + subtreeHeight(c).h + VGAP, 0);
+      let y = (520 - totalH) / 2;
+      const cx = 450, cy = 260;
+      const rootW = nodeW(root.text);
+      frames.push({ id: root.id, text: root.text, x: cx - rootW / 2, y: cy - NODE_H / 2, root: true });
+      for (const child of root.children) {
+        const h = subtreeHeight(child).h;
+        const cyChild = y + h / 2;
+        const left = child.id === 'c1';
+        const w = nodeW(child.text);
+        const gw = nodeW((child.children || [])[0]?.text || '');
+        const x = left ? 60 : cx + rootW / 2 + HGAP * 0.8;
+        const nx = left ? x - w : x;
+        frames.push({ id: child.id, text: child.text, x: nx, y: cyChild - NODE_H / 2, w });
+        edges.push({ from: { x: cx, y: cy }, to: { x: nx + (left ? w : 0), y: cyChild } });
+        // 孙节点
+        if (child.children && !child.collapsed) {
+          let sy = cyChild - ((child.children.length - 1) * (NODE_H + VGAP)) / 2;
+          for (const gc of child.children) {
+            const gcw = nodeW(gc.text);
+            const gx = left ? nx - HGAP - gcw : nx + w + HGAP;
+            frames.push({ id: gc.id, text: gc.text, x: gx, y: sy, w: gcw });
+            edges.push({ from: { x: nx + (left ? 0 : w), y: cyChild }, to: { x: nx + (left ? 0 : w) + (left ? -HGAP : HGAP), y: sy } });
+            sy += NODE_H + VGAP;
+          }
+        }
+        y += h + VGAP;
+      }
+      return { frames, edges };
+    }
+
+    function layoutLogic(root) {
+      const frames = []; const edges = [];
+      const rootY = (520 - NODE_H) / 2;
+      const rootW = nodeW(root.text);
+      frames.push({ id: root.id, text: root.text, x: 40, y: rootY, root: true, w: rootW });
+      let colX = 40 + rootW + HGAP;
+      let childY = (520 - root.children.reduce((s, c) => s + subtreeHeight(c).h + VGAP, 0)) / 2;
+      for (const child of root.children) {
+        const h = subtreeHeight(child).h;
+        const cy = childY + h / 2;
+        const w = nodeW(child.text);
+        frames.push({ id: child.id, text: child.text, x: colX, y: cy - NODE_H / 2, w });
+        edges.push({ from: { x: 40 + rootW, y: rootY + NODE_H / 2 }, to: { x: colX, y: cy } });
+        if (child.children && !child.collapsed) {
+          let sy = cy - ((child.children.length - 1) * (NODE_H + VGAP)) / 2;
+          for (const gc of child.children) {
+            const gcw = nodeW(gc.text);
+            frames.push({ id: gc.id, text: gc.text, x: colX + w + HGAP, y: sy, w: gcw });
+            edges.push({ from: { x: colX + w, y: cy }, to: { x: colX + w + HGAP, y: sy } });
+            sy += NODE_H + VGAP;
+          }
+        }
+        childY += h + VGAP;
+      }
+      return { frames, edges };
+    }
+
+    function render() {
+      const { frames, edges } = state.layout === 'radial' ? layoutRadial(TREE) : layoutLogic(TREE);
+      badge.textContent = state.layout === 'radial' ? '辐射布局' : '逻辑图 · 总分树';
+      document.getElementById('card-radial').classList.toggle('active', state.layout === 'radial');
+      document.getElementById('card-logic').classList.toggle('active', state.layout === 'logic');
+      const isLogic = state.layout === 'logic';
+      svg.innerHTML = '';
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      svg.appendChild(defs);
+      for (const e of edges) {
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const d = isLogic
+          // L 形正交：先水平再垂直（总→分 读序），区别于辐射的对称曲线
+          ? `M ${e.from.x} ${e.from.y} L ${e.to.x} ${e.from.y} L ${e.to.x} ${e.to.y}`
+          : `M ${e.from.x} ${e.from.y} C ${(e.from.x + e.to.x) / 2} ${e.from.y}, ${(e.from.x + e.to.x) / 2} ${e.to.y}, ${e.to.x} ${e.to.y}`;
+        p.setAttribute('d', d);
+        p.setAttribute('class', 'edge' + (isLogic ? ' logic' : ''));
+        svg.appendChild(p);
+      }
+      for (const f of frames) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'node' + (f.root ? ' root' : ''));
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', f.x); rect.setAttribute('y', f.y);
+        rect.setAttribute('width', f.w || nodeW(f.text)); rect.setAttribute('height', NODE_H);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', f.x + (f.w || nodeW(f.text)) / 2); text.setAttribute('y', f.y + NODE_H / 2 + 4);
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = f.text;
+        g.append(rect, text);
+        svg.appendChild(g);
+      }
+      // 折叠 toggle：演示逻辑图节点右侧 toggle（c2 分支）——展开显示 −，折叠显示 +（带隐藏数量）
+      if (isLogic) {
+        const c2 = frames.find(f => f.id === 'c2');
+        if (c2) {
+          const collapsed = !!TREE.children.find(c => c.id === 'c2').collapsed;
+          const t = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          t.setAttribute('class', 'toggle');
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', c2.x + (c2.w || nodeW(c2.text)) + 12); circle.setAttribute('cy', c2.y + NODE_H / 2); circle.setAttribute('r', 9);
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', c2.x + (c2.w || nodeW(c2.text)) + 12); label.setAttribute('y', c2.y + NODE_H / 2 + 3);
+          label.textContent = collapsed ? '+' : '−';
+          t.append(circle, label);
+          svg.appendChild(t);
+        }
+      }
+
+      // 自适应 viewBox：按内容 bounds 加边距，防左右/上下裁剪
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const f of frames) {
+        minX = Math.min(minX, f.x); minY = Math.min(minY, f.y);
+        maxX = Math.max(maxX, f.x + (f.w || nodeW(f.text))); maxY = Math.max(maxY, f.y + NODE_H);
+      }
+      for (const e of edges) {
+        minX = Math.min(minX, e.from.x, e.to.x); maxX = Math.max(maxX, e.from.x, e.to.x);
+        minY = Math.min(minY, e.from.y, e.to.y); maxY = Math.max(maxY, e.from.y, e.to.y);
+      }
+      const pad = 50;
+      svg.setAttribute('viewBox',
+        `${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`);
+    }
+
+    // —— 交互 ——
+    document.querySelectorAll('.layout-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const prev = state.layout;
+        state.layout = card.dataset.layout;
+        if (prev !== state.layout) state.undo.push(prev);
+        document.getElementById('btn-undo').disabled = state.undo.length === 0;
+        document.getElementById('switch-done').hidden = false;
+        document.getElementById('switch-name').textContent = state.layout === 'logic' ? '逻辑图' : '辐射布局';
+        render();
+      });
+    });
+    document.getElementById('btn-switch').addEventListener('click', () => {
+      const prev = state.layout;
+      state.layout = state.layout === 'radial' ? 'logic' : 'radial';
+      state.undo.push(prev);
+      document.getElementById('btn-undo').disabled = false;
+      document.getElementById('switch-done').hidden = false;
+      document.getElementById('switch-name').textContent = state.layout === 'logic' ? '逻辑图' : '辐射布局';
+      render();
+    });
+    document.getElementById('btn-undo').addEventListener('click', () => {
+      const prev = state.undo.pop();
+      if (prev) state.layout = prev;
+      document.getElementById('btn-undo').disabled = state.undo.length === 0;
+      document.getElementById('switch-done').hidden = false;
+      document.getElementById('switch-name').textContent = state.layout === 'logic' ? '逻辑图' : '辐射布局';
+      render();
+    });
+    document.getElementById('btn-collapse').addEventListener('click', () => {
+      state.collapsed = true; TREE.children.find(c => c.id === 'c2').collapsed = true;
+      document.getElementById('side-warn').hidden = true;
+      render();
+    });
+    document.getElementById('btn-expand').addEventListener('click', () => {
+      state.collapsed = false; TREE.children.find(c => c.id === 'c2').collapsed = false;
+      document.getElementById('side-warn').hidden = true;
+      render();
+    });
+    // tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.panel > section').forEach(s => s.hidden = true);
+        document.getElementById('pane-' + tab.dataset.tab).hidden = false;
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>
