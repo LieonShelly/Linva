@@ -41,7 +41,7 @@ license: proprietary
 
 ## 现有命令清单（新增前先看是否已存在）
 
-`addChild`、`addSibling`、`delete(ids:)`、`setText(id:old:new:)`、`toggleCollapse`、`setCollapsed(ids:collapsed:)`、`moveToParent(ids:parentId:)`、`insertSiblings(ids:anchorId:position:)`、`setSide(ids:side:)`、`applyRootSide(ids:side:)`、`pasteAsChild(payload:parentId:)`、`setFill(ids:fill:)`（设置节点填色，`fill: NodeFill?`，`nil` 恢复无填色）。
+`addChild`、`addSibling`、`delete(ids:)`、`setBlocks(id:old:new:)`、`toggleCollapse`、`setCollapsed(ids:collapsed:)`、`moveToParent(ids:parentId:)`、`insertSiblings(ids:anchorId:position:)`、`setSide(ids:side:)`、`applyRootSide(ids:side:)`、`pasteAsChild(payload:parentId:)`、`setFill(ids:fill:)`（设置节点填色，`fill: NodeFill?`，`nil` 恢复无填色）、`setLayout(kind: LayoutKind)`（切换文档布局 `.radial`/`.logic`，文档属性命令，no-op 不入栈，仿 `setFill`）。
 
 ## 验证
 
