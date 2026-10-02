@@ -9,27 +9,6 @@ enum RadialLayout {
         var frames: [UUID: NodeFrame] = [:]
         var edges: [EdgeGeometry] = []
 
-        func subtreeHeight(_ node: Node, isRoot: Bool) -> BranchMetadata {
-            let m = measure.measure(for: node, isRoot: isRoot)
-            let size = m.size
-            guard !node.collapsed, !node.children.isEmpty else {
-                return BranchMetadata(size: size, height: size.height, blocks: m.blocks, children: [])
-            }
-
-            let childLayouts = node.children.map {
-                subtreeHeight($0, isRoot: false)
-            }
-            let childrenHeight = childLayouts.reduce(0) { $0 + $1.height }
-                + LayoutConstants.vGap * CGFloat(childLayouts.count - 1)
-
-            return BranchMetadata(
-                size: size,
-                height: max(size.height, childrenHeight),
-                blocks: m.blocks,
-                children: childLayouts
-            )
-        }
-
         func edge(
             from parent: NodeFrame,
             to child: NodeFrame,
@@ -75,9 +54,9 @@ enum RadialLayout {
                 isRoot: false,
                 side: side,
                 collapsed: node.collapsed,
-                hiddenCount: node.collapsed ? countDescendants(node) : 0,
+                hiddenCount: node.collapsed ? LayoutSupport.countDescendants(node) : 0,
                 fill: node.fill,
-                blocks: Self.centeredBlocks(from: metadata)
+                blocks: LayoutSupport.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
             edges.append(edge(from: parent, to: frame, side: side))
@@ -111,7 +90,7 @@ enum RadialLayout {
             }
         }
 
-        let rootMetadata = subtreeHeight(document.root, isRoot: true)
+        let rootMetadata = LayoutSupport.subtreeHeight(document.root, isRoot: true, measure: measure)
         let rootFrame = NodeFrame(
             id: document.root.id,
             text: document.root.text,
@@ -121,23 +100,14 @@ enum RadialLayout {
             side: nil,
             collapsed: document.root.collapsed,
             hiddenCount: document.root.collapsed
-                ? countDescendants(document.root)
+                ? LayoutSupport.countDescendants(document.root)
                 : 0,
             fill: document.root.fill,
-            blocks: Self.centeredBlocks(from: rootMetadata)
+            blocks: LayoutSupport.centeredBlocks(from: rootMetadata)
         )
         frames[document.root.id] = rootFrame
 
-        var payloads: [UUID: ImagePayload] = [:]
-        func collectPayloads(_ node: Node) {
-            for block in node.blocks {
-                if case .image(let img) = block.kind, frames[node.id] != nil {
-                    payloads[block.id] = ImagePayload(pixelSize: img.pixelSize, data: img.data)
-                }
-            }
-            node.children.forEach(collectPayloads)
-        }
-        collectPayloads(document.root)
+        let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
         guard !document.root.collapsed else {
             return LayoutSnapshot(
@@ -190,7 +160,6 @@ enum RadialLayout {
 
         placeSide(leftBranches, side: .left)
         placeSide(rightBranches, side: .right)
-        collectPayloads(document.root)
         return LayoutSnapshot(
             frames: frames,
             edges: edges,
@@ -231,69 +200,14 @@ enum RadialLayout {
             let hasLeft = node.children.contains { $0.side == .left }
             let hasRight = node.children.contains { $0.side != .left }
             if node.collapsed || hasLeft {
-                toggles.append(makeToggle(node: node, frame: frame, side: .left))
+                toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .left))
             }
             if node.collapsed || hasRight {
-                toggles.append(makeToggle(node: node, frame: frame, side: .right))
+                toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .right))
             }
         } else if let side = frame.side {
-            toggles.append(makeToggle(node: node, frame: frame, side: side))
+            toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: side))
         }
-    }
-
-    private static func makeToggle(
-        node: Node,
-        frame: NodeFrame,
-        side: Side
-    ) -> BranchToggle {
-        let dir: CGFloat = side == .left ? -1 : 1
-        return BranchToggle(
-            nodeId: node.id,
-            side: side,
-            center: CGPoint(
-                x: frame.center.x + dir * (frame.size.width / 2 + LayoutConstants.branchToggleGap),
-                y: frame.center.y
-            ),
-            collapsed: node.collapsed,
-            hiddenCount: node.collapsed ? countDescendants(node) : 0
-        )
-    }
-
-    private static func countDescendants(_ node: Node) -> Int {
-        node.children.reduce(0) {
-            $0 + 1 + countDescendants($1)
-        }
-    }
-
-    /// 块布局从「测量宽」映射到「节点内容宽」：文本块水平撑满节点宽（居中栅格化），图片块水平居中。
-    /// rect 为节点局部坐标 top-left 原点（y 沿用测量时的块序偏移）。
-    private static func centeredBlocks(from metadata: BranchMetadata) -> [BlockLayoutFrame] {
-        metadata.blocks.map { b -> BlockLayoutFrame in
-            if b.text != nil {
-                return BlockLayoutFrame(
-                    blockId: b.blockId,
-                    text: b.text,
-                    rect: CGRect(x: 0, y: b.rect.minY, width: metadata.size.width, height: b.rect.height)
-                )
-            }
-            return BlockLayoutFrame(
-                blockId: b.blockId,
-                text: nil,
-                rect: CGRect(
-                    x: (metadata.size.width - b.rect.width) / 2,
-                    y: b.rect.minY,
-                    width: b.rect.width,
-                    height: b.rect.height
-                )
-            )
-        }
-    }
-
-    private struct BranchMetadata {
-        let size: NodeSize
-        let height: CGFloat
-        let blocks: [BlockLayoutFrame]
-        let children: [BranchMetadata]
     }
 }
 
