@@ -117,7 +117,8 @@ enum LogicLayout {
             guard let node = nodesById[id], !node.children.isEmpty else { continue }
             toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .right))
         }
-        return toggles
+        // 按 nodeId 确定性排序：frames 字典遍历序随机，须保证 LayoutSnapshot Equatable 确定（仿 MetalRenderer.orderedFrames）。
+        return toggles.sorted { $0.nodeId.uuidString < $1.nodeId.uuidString }
     }
 }
 
