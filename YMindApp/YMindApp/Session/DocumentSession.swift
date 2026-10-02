@@ -11,70 +11,6 @@ struct RecoveryOffer: Equatable {
     let meta: AutosaveMeta
 }
 
-final class SecurityScopedAccess {
-    typealias StartAccess = (URL) -> Bool
-    typealias StopAccess = (URL) -> Void
-
-    private let startAccess: StartAccess
-    private let stopAccess: StopAccess
-    private var activeURL: URL?
-
-    init(
-        startAccess: @escaping StartAccess = { $0.startAccessingSecurityScopedResource() },
-        stopAccess: @escaping StopAccess = { $0.stopAccessingSecurityScopedResource() }
-    ) {
-        self.startAccess = startAccess
-        self.stopAccess = stopAccess
-    }
-
-    deinit {
-        release()
-    }
-
-    /// Performs I/O while access is active, then adopts a successfully-started scope.
-    func replace<T>(with url: URL, operation: () throws -> T) rethrows -> T {
-        if activeURL == url {
-            return try operation()
-        }
-
-        let didStart = startAccess(url)
-        do {
-            let result = try operation()
-            release()
-            if didStart {
-                activeURL = url
-            }
-            return result
-        } catch {
-            if didStart {
-                stopAccess(url)
-            }
-            throw error
-        }
-    }
-
-    /// Performs I/O using the held scope, or a balanced temporary scope.
-    func withAccess<T>(to url: URL, operation: () throws -> T) rethrows -> T {
-        if activeURL == url {
-            return try operation()
-        }
-
-        let didStart = startAccess(url)
-        defer {
-            if didStart {
-                stopAccess(url)
-            }
-        }
-        return try operation()
-    }
-
-    func release() {
-        guard let activeURL else { return }
-        stopAccess(activeURL)
-        self.activeURL = nil
-    }
-}
-
 final class DocumentSession: ObservableObject {
     let model: MindMapModel
     let commandBus: CommandBus
@@ -103,11 +39,8 @@ final class DocumentSession: ObservableObject {
     @Published var recovery: RecoveryOffer?
 
     private let measure: TextMeasure
-    private let securityScopedAccess: SecurityScopedAccess
-    private let autosaveStore: AutosaveStore
+    private let persistence: DocumentPersistence
     private let editingController: EditingController
-    private var autoSaveDebounce: AnyCancellable?
-    private var lastSavedDocument: MindMapDocument
 
     var primarySelectedId: UUID? { model.primarySelectedId }
 
@@ -118,20 +51,35 @@ final class DocumentSession: ObservableObject {
     init(
         model: MindMapModel? = nil,
         measure: TextMeasure = TextMeasure(),
-        securityScopedAccess: SecurityScopedAccess = SecurityScopedAccess(),
-        autosaveStore: AutosaveStore = AutosaveStore()
+        autosaveStore: AutosaveStore = AutosaveStore(),
+        securityScopedAccess: SecurityScopedAccess = SecurityScopedAccess()
     ) {
         let model = model ?? MindMapModel.makeNew()
         self.model = model
         self.commandBus = CommandBus(model: model)
         self.measure = measure
-        self.securityScopedAccess = securityScopedAccess
-        self.autosaveStore = autosaveStore
+        self.persistence = DocumentPersistence(
+            backend: YMindFilePersistence(),
+            securityScopedAccess: securityScopedAccess,
+            autosaveStore: autosaveStore
+        )
+        // 采纳初始文档为 lastSaved：保持「未改动的初始文档即 clean」语义
+        // （`commandChanges_refreshUndoState_andReturnToCleanSnapshot` 与真实会话依赖）。
+        self.persistence.adopt(
+            document: model.document,
+            fileURL: nil,
+            isDirty: false,
+            keepLastSaved: false,
+            regenerateID: false,
+            clearRecovery: false
+        )
         self.editingController = EditingController(model: model, commandBus: commandBus)
-        self.lastSavedDocument = model.document
         self.snapshot = LayoutSnapshot(frames: [:], edges: [])
         self.selectedIds = model.selectedIds
         self.selectionAnchorId = model.selectionAnchorId
+        self.fileURL = nil
+        self.isDirty = false
+        self.documentID = persistence.documentID
         wireCommandBus()
         relayout()
     }
@@ -140,47 +88,19 @@ final class DocumentSession: ObservableObject {
         commitEditingIfNeeded()
         let doc = MindMapDocument.blank()
         model.document = doc
-        model.selectOnly(doc.root.id)
-        syncSelectionFromModel()
-        commandBus.clearHistory()
-        undoRevision += 1
-        securityScopedAccess.release()
-        fileURL = nil
-        lastSavedDocument = doc
-        isDirty = false
-        documentID = UUID()
-        recovery = nil
-        selectedImageBlock = nil
-        editingId = nil
-        draftText = ""
-        editingController.cancel()
-        camera = Camera()
-        relayout()
-        errorMessage = nil
+        persistence.adopt(document: doc, fileURL: nil, isDirty: false,
+                          keepLastSaved: false, regenerateID: true)
+        resetSessionState(selecting: doc.root.id)
     }
 
     /// 载入一次导入解析出的新树为当前文档：等同「打开」语义但 fileURL=nil、isDirty=true。
     func loadImported(_ document: MindMapDocument) {
         commitEditingIfNeeded()
         model.document = document
-        model.selectOnly(document.root.id)
-        syncSelectionFromModel()
-        commandBus.clearHistory()
-        undoRevision += 1
-        fileURL = nil
-        // 注意：不要在此把 lastSavedDocument 设为新文档 —— 导入文档没有磁盘文件，
-        // lastSavedDocument 保持导入前的旧值，撤销回载入态时 isDirty 仍需保持 true。
-        isDirty = true
-        documentID = UUID()
-        recovery = nil
-        selectedImageBlock = nil
-        editingId = nil
-        draftText = ""
-        editingController.cancel()
-        camera = Camera()
-        importPreview = nil
-        relayout()
-        errorMessage = nil
+        // keepLastSaved: true —— 导入文档无磁盘文件，撤销回载入态 isDirty 仍 true。
+        persistence.adopt(document: document, fileURL: nil, isDirty: true,
+                          keepLastSaved: true, regenerateID: true)
+        resetSessionState(selecting: document.root.id)
     }
 
     func cancelImport() {
@@ -188,107 +108,65 @@ final class DocumentSession: ObservableObject {
         errorMessage = nil
     }
 
-    // MARK: - 自动保存恢复（Task 3）
+    // MARK: - 自动保存恢复
 
     /// 启动扫描：若存在未保存副本，返回「最新一份」的 offer；否则 nil。
     @discardableResult
     func scanForRecovery() -> RecoveryOffer? {
-        guard let meta = autosaveStore.latestPending() else { return nil }
-        let offer = RecoveryOffer(meta: meta)
-        recovery = offer
+        let offer = persistence.scanForRecovery()
+        recovery = persistence.recovery
         return offer
     }
 
     /// 「恢复更改」：载入副本为当前文档，标记未保存，删除该副本。
     func restore(draftFrom offer: RecoveryOffer) throws {
-        let doc = try autosaveStore.load(documentID: offer.meta.documentID)
+        let doc = try persistence.restore(draftFrom: offer)
         commitEditingIfNeeded()
         model.document = doc
-        model.selectOnly(doc.root.id)
-        syncSelectionFromModel()
-        commandBus.clearHistory()
-        undoRevision += 1
-        // 有原文件则恢复其 URL；未命名则保持 nil
-        fileURL = offer.meta.originalURL.flatMap(URL.init(string:))
-        // 注意：不要在此把 lastSavedDocument 设为恢复的草稿 —— 草稿没有磁盘文件，
-        // lastSavedDocument 保持原值，撤销回载入态时 isDirty 仍需保持 true（同 loadImported）。
-        isDirty = true
-        documentID = offer.meta.documentID
-        editingId = nil
-        draftText = ""
-        editingController.cancel()
-        selectedImageBlock = nil
-        camera = Camera()
-        recovery = nil
-        relayout()
-        errorMessage = nil
-        try? autosaveStore.delete(documentID: offer.meta.documentID)
-        try? autosaveStore.clearAll()   // 恢复后清其余残留（忽略清全部；恢复也顺手清，避免再提示）
+        persistence.adopt(
+            document: doc,
+            fileURL: offer.meta.originalURL.flatMap(URL.init(string:)),
+            isDirty: true,
+            keepLastSaved: true,
+            regenerateID: false
+        )
+        resetSessionState(selecting: doc.root.id)
     }
 
     /// 「忽略（丢弃草稿）」：清空副本，载入最近正式保存版本（无 → 保持当前 clean）。
     func discardDraft() throws {
+        try persistence.discardDraft()
+        isDirty = persistence.isDirty
+        documentID = persistence.documentID
+        recovery = persistence.recovery
         commandBus.clearHistory()
         undoRevision += 1
-        isDirty = false
-        recovery = nil
-        try autosaveStore.clearAll()
-        documentID = UUID()
     }
 
     func load(from url: URL) throws {
         commitEditingIfNeeded()
-        let doc = try securityScopedAccess.replace(with: url) {
-            let data = try Data(contentsOf: url)
-            return try YMindCodec.decode(data)
-        }
+        let doc = try persistence.load(from: url)
         model.document = doc
-        model.selectOnly(doc.root.id)
-        syncSelectionFromModel()
-        commandBus.clearHistory()
-        undoRevision += 1
-        fileURL = url
-        lastSavedDocument = doc
-        isDirty = false
-        documentID = UUID()
-        recovery = nil
-        selectedImageBlock = nil
-        editingId = nil
-        draftText = ""
-        editingController.cancel()
-        camera = Camera()
-        relayout()
-        errorMessage = nil
+        persistence.adopt(document: doc, fileURL: url, isDirty: false,
+                          keepLastSaved: false, regenerateID: true)
+        resetSessionState(selecting: doc.root.id)
     }
 
     func save() throws {
         commitEditingIfNeeded()
-        guard let fileURL else {
-            throw DocumentSessionError.noFileURL
-        }
-        let data = try YMindCodec.encode(model.document)
-        try securityScopedAccess.withAccess(to: fileURL) {
-            try data.write(to: fileURL, options: .atomic)
-        }
-        lastSavedDocument = model.document
-        isDirty = false
-        try? autosaveStore.delete(documentID: documentID)
+        try persistence.save(document: model.document)
+        isDirty = persistence.isDirty
     }
 
     func saveAs(to url: URL) throws {
         commitEditingIfNeeded()
-        let data = try YMindCodec.encode(model.document)
-        try securityScopedAccess.replace(with: url) {
-            try data.write(to: url, options: .atomic)
-        }
-        fileURL = url
-        lastSavedDocument = model.document
-        isDirty = false
-        try? autosaveStore.delete(documentID: documentID)
+        try persistence.saveAs(document: model.document, to: url)
+        fileURL = persistence.fileURL
+        isDirty = persistence.isDirty
     }
 
     func markDirtyAndRelayout() {
-        isDirty = model.document != lastSavedDocument
+        isDirty = persistence.noteChange(current: model.document)
         relayout()
     }
 
@@ -553,39 +431,37 @@ final class DocumentSession: ObservableObject {
             syncSelectionFromModel()
             undoRevision += 1
             markDirtyAndRelayout()
-            scheduleAutoSave()
+            persistence.scheduleAutoSave(document: { self.model.document },
+                                         changeCount: { self.undoRevision })
         }
-    }
-
-    /// 脏后 2s 防抖写副本（FR-S1）。重订阅每次 cancel 旧的延时。
-    private func scheduleAutoSave() {
-        autoSaveDebounce = Just(())
-            .delay(for: .seconds(2), scheduler: RunLoop.main)
-            .sink { [weak self] _ in self?.flushAutoSave() }
     }
 
     /// 立即把当前文档写临时副本；失败静默（FR-S1）。internal 供单测直接调用。
     func flushAutoSave() {
-        guard hasLoadedEditableContent else { return }
-        let meta = AutosaveMeta(
-            documentID: documentID,
-            originalURL: fileURL?.absoluteString,
-            savedAt: Date(),
-            changeCount: pendingChangeCount(),
-            rootText: model.document.root.text
-        )
-        try? autosaveStore.write(document: model.document, meta: meta)
+        persistence.flushAutoSave(document: model.document, changeCount: undoRevision)
     }
 
-    /// 只对已加载且有内容的文档写副本（不建空树副本）。
-    private var hasLoadedEditableContent: Bool {
-        // fileURL != nil（已保存）或 isDirty（有改动）
-        fileURL != nil || isDirty
-    }
-
-    /// 距上次保存的变化计数：复用 undoRevision（每次命令/撤销/重做 +1）。
-    private func pendingChangeCount() -> Int {
-        undoRevision
+    /// 会话侧状态重置（adopt 已处理持久化态）：选中根、清命令栈、编辑/相机/导入预览/错误清空、
+    /// 镜像 persistence 的 fileURL/isDirty/documentID/recovery，末尾统一重布局。
+    /// 消除 newDocument/load/loadImported/restore 5 处重复的会话侧重置。
+    private func resetSessionState(selecting rootId: UUID) {
+        model.selectOnly(rootId)
+        syncSelectionFromModel()
+        commandBus.clearHistory()
+        undoRevision += 1
+        // 镜像持久化态（adopt 已重置）：Session 的 @Published 镜像必须同步，壳层直接读这些属性。
+        fileURL = persistence.fileURL
+        isDirty = persistence.isDirty
+        documentID = persistence.documentID
+        recovery = persistence.recovery
+        selectedImageBlock = nil
+        editingId = nil
+        draftText = ""
+        editingController.cancel()
+        camera = Camera()
+        importPreview = nil
+        errorMessage = nil
+        relayout()
     }
 }
 
