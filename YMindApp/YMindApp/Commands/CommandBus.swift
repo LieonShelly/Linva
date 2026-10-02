@@ -247,6 +247,13 @@ final class CommandBus {
                 }
             )
 
+        case let .setLayout(kind):
+            guard let old = model.setLayout(kind) else { return nil }
+            return Entry(
+                undo: { _ = self.model.setLayout(old) },
+                redo: { _ = self.model.setLayout(kind) }
+            )
+
         case let .appendImageBlock(id, image, pixelSize):
             let blockId = model.appendImageBlock(id: id, image: image, pixelSize: pixelSize)
             return Entry(

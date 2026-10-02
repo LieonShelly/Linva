@@ -383,6 +383,29 @@ struct CommandBusTests {
         bus.execute(.setFill(ids: [root], fill: .sage))
         #expect(!bus.canUndo)
     }
+
+    @Test func setLayout_undoRedo_roundTrips() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        #expect(model.document.layout == .radial)
+
+        bus.execute(.setLayout(kind: .logic))
+        #expect(model.document.layout == .logic)
+
+        bus.undo()
+        #expect(model.document.layout == .radial)
+
+        bus.redo()
+        #expect(model.document.layout == .logic)
+    }
+
+    @Test func setLayout_sameKind_isNoOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        bus.execute(.setLayout(kind: .radial))
+        #expect(!bus.canUndo)
+        #expect(model.document.layout == .radial)
+    }
 }
 
 @Suite("块命令")

@@ -273,6 +273,15 @@ final class MindMapModel {
         return changes
     }
 
+    /// 设置文档布局（文档属性，与选中无关）；返回旧值供 Undo；无变化返回 nil（no-op 不入栈）。
+    @discardableResult
+    func setLayout(_ kind: LayoutKind) -> LayoutKind? {
+        guard document.layout != kind else { return nil }
+        let old = document.layout
+        document.layout = kind
+        return old
+    }
+
     func restoreChild(parentId: UUID, index: Int, node: Node) {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))
