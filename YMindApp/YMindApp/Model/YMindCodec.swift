@@ -42,6 +42,10 @@ enum YMindCodec {
         if doc.version == 3 {
             doc.version = 4
         }
+        // 迁移：v4 → v5（layout 缺省 .radial；MindMapDocument 解码器对缺失 layout 天然容错）。
+        if doc.version == 4 {
+            doc.version = 5
+        }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
         }
@@ -61,7 +65,8 @@ enum YMindCodec {
             c.children = stripSide(c.children, warnings: &warnings)
             return c
         }
-        return MindMapDocument(version: document.version, root: root)
+        // layout 是文档属性：sanitize 重建时须保留，否则逻辑图文档消毒后被重置为辐射。
+        return MindMapDocument(version: document.version, root: root, layout: document.layout)
     }
 
     private static func stripSide(_ nodes: [Node], warnings: inout [String]?) -> [Node] {
