@@ -105,11 +105,9 @@ final class DocumentSession: ObservableObject {
     private let measure: TextMeasure
     private let securityScopedAccess: SecurityScopedAccess
     private let autosaveStore: AutosaveStore
+    private let editingController: EditingController
     private var autoSaveDebounce: AnyCancellable?
     private var lastSavedDocument: MindMapDocument
-    private var originalEditingText = ""
-    /// 编辑提交的 Undo 基线（内容流聚拢前的块序列）。
-    private var originalBlocks: [ContentBlock] = []
 
     var primarySelectedId: UUID? { model.primarySelectedId }
 
@@ -129,6 +127,7 @@ final class DocumentSession: ObservableObject {
         self.measure = measure
         self.securityScopedAccess = securityScopedAccess
         self.autosaveStore = autosaveStore
+        self.editingController = EditingController(model: model, commandBus: commandBus)
         self.lastSavedDocument = model.document
         self.snapshot = LayoutSnapshot(frames: [:], edges: [])
         self.selectedIds = model.selectedIds
@@ -154,8 +153,7 @@ final class DocumentSession: ObservableObject {
         selectedImageBlock = nil
         editingId = nil
         draftText = ""
-        originalBlocks = []
-        originalEditingText = ""
+        editingController.cancel()
         camera = Camera()
         relayout()
         errorMessage = nil
@@ -178,8 +176,7 @@ final class DocumentSession: ObservableObject {
         selectedImageBlock = nil
         editingId = nil
         draftText = ""
-        originalBlocks = []
-        originalEditingText = ""
+        editingController.cancel()
         camera = Camera()
         importPreview = nil
         relayout()
@@ -219,8 +216,7 @@ final class DocumentSession: ObservableObject {
         documentID = offer.meta.documentID
         editingId = nil
         draftText = ""
-        originalBlocks = []
-        originalEditingText = ""
+        editingController.cancel()
         selectedImageBlock = nil
         camera = Camera()
         recovery = nil
@@ -259,8 +255,7 @@ final class DocumentSession: ObservableObject {
         selectedImageBlock = nil
         editingId = nil
         draftText = ""
-        originalBlocks = []
-        originalEditingText = ""
+        editingController.cancel()
         camera = Camera()
         relayout()
         errorMessage = nil
@@ -525,80 +520,24 @@ final class DocumentSession: ObservableObject {
     }
 
     func startEditing(_ id: UUID) {
-        guard let node = model.node(id: id),
-              snapshot.frames[id] != nil else {
-            return
-        }
-        if editingId != nil, editingId != id {
-            commitEditingIfNeeded()
-        }
+        guard editingController.begin(id: id, currentDraft: draftText, snapshotFrames: snapshot.frames) else { return }
         selectOnly(id)
-        originalEditingText = node.text
-        originalBlocks = node.blocks      // 新增：Undo 基线
-        draftText = node.text
+        draftText = editingController.originalEditingText
         editingId = id
     }
 
     @discardableResult
     func commitEditingIfNeeded() -> Bool {
-        guard let editingId else { return false }
-        let committedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.editingId = nil
-        // 聚拢规则：文本合并单块；图片按原相对顺序聚拢单侧——
-        // 原序列首个非空块是图片 → [images] + [text]（图上文下）；否则 [text] + [images]（文上图下）。
-        // 首个非空块判定：.text("") 空文本块跳过（spec「首个非空块」，如 [.text(""), .image] → 图上文下）；
-        // 全空文本块 / 无块 → 按文本在前默认（文上图下）。
-        let images = originalBlocks.filter { block in
-            if case .image = block.kind { return true } else { return false }
-        }
-        let firstBlockIsImage: Bool = {
-            for block in originalBlocks {
-                switch block.kind {
-                case .text(let s):
-                    if !s.isEmpty { return false }   // 首个非空块是文本 → 文上图下
-                case .image:
-                    return true                      // 首个非空块是图片 → 图上文下
-                }
-            }
-            return false   // 全空文本块 / 无块 → 文本在前默认
-        }()
-        var newBlocks: [ContentBlock]
-        if committedText.isEmpty {
-            // 文字删空（用户拍板「一律允许空文字」）：
-            // - 有图片块 → 只留图片；
-            // - 纯文本非根节点 → 直接删除该节点（不留下点不进去的空节点），走命令栈可 Undo；
-            // - 纯文本根节点 → 根不可删，补「未命名」保持有标题。
-            if !images.isEmpty {
-                newBlocks = images
-            } else if editingId != model.document.root.id {
-                let delId = editingId
-                originalBlocks = []
-                originalEditingText = ""
-                commandBus.execute(.delete(ids: [delId]))
-                return true
-            } else {
-                newBlocks = [ContentBlock(id: UUID(), kind: .text("未命名"))]
-            }
-        } else if firstBlockIsImage {
-            newBlocks = images + [ContentBlock(id: UUID(), kind: .text(committedText))]
-        } else {
-            newBlocks = [ContentBlock(id: UUID(), kind: .text(committedText))] + images
-        }
-        // no-op 判定按内容（忽略块 id）：文本块每次提交新建 id，整块 Equatable 比较恒不等（spec §2.1 no-op 不入栈）。
-        if newBlocks.map(\.kind) != originalBlocks.map(\.kind) {
-            commandBus.execute(
-                .setBlocks(id: editingId, old: originalBlocks, new: newBlocks)
-            )
-        }
-        originalBlocks = []
-        originalEditingText = ""
+        guard editingId != nil else { return false }
+        editingController.commit(draftText: draftText)
+        editingId = nil
+        draftText = ""
         return true
     }
 
     func cancelEditing() {
-        draftText = originalEditingText
-        originalEditingText = ""
-        originalBlocks = []
+        draftText = editingController.originalEditingText
+        editingController.cancel()
         editingId = nil
     }
 
