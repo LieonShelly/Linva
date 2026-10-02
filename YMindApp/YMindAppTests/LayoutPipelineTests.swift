@@ -1,29 +1,28 @@
+import CoreGraphics
 import Foundation
 import Testing
 @testable import YMindApp
 
-/// 用于验证 LayoutPipeline 换引擎的假实现。
-struct FakeLayoutEngine: LayoutEngine {
-    static func layout(document: MindMapDocument, measure: TextMeasure) -> LayoutSnapshot {
-        LayoutSnapshot(frames: [:], edges: [])
-    }
-}
-
 @Suite("LayoutPipeline")
 struct LayoutPipelineTests {
-    /// 默认引擎 = RadialLayout：产出与直接调用 RadialLayout.layout 的帧数一致。
-    @Test func defaultUsesRadialLayout() {
+    @Test func radialDocument_usesRadialLayout() {
         let pipeline = LayoutPipeline()
         let doc = MindMapDocument.blank()
         let snap = pipeline.relayout(document: doc)
         let expected = RadialLayout.layout(document: doc, measure: TextMeasure())
-        #expect(snap.frames.count == expected.frames.count)
+        #expect(snap == expected)
     }
 
-    /// 注入假引擎 → 换布局不碰 Session。
-    @Test func injectedEngine_isUsed() {
-        let pipeline = LayoutPipeline(layoutEngineType: FakeLayoutEngine.self)
-        let snap = pipeline.relayout(document: MindMapDocument.blank())
-        #expect(snap.frames.isEmpty)
+    @Test func logicDocument_usesLogicLayout() {
+        var doc = MindMapDocument.blank(rootText: "根")
+        doc.layout = .logic
+        let child = Node(text: "章", children: [Node(text: "节")])
+        doc.root.children = [child]
+
+        let pipeline = LayoutPipeline()
+        let snap = pipeline.relayout(document: doc)
+        let expected = LogicLayout.layout(document: doc, measure: TextMeasure())
+        #expect(snap == expected)
+        #expect(snap.frames[child.id]!.center.x > snap.frames[doc.root.id]!.rect.maxX)
     }
 }
