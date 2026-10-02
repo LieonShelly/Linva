@@ -107,14 +107,15 @@ enum RadialLayout {
         )
         frames[document.root.id] = rootFrame
 
-        let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
+        // 此时仅根有 frame：折叠早退只需根（及后代无 frame 会被跳过）的载荷。
+        let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
         guard !document.root.collapsed else {
             return LayoutSnapshot(
                 frames: frames,
                 edges: edges,
                 branchToggles: makeBranchToggles(frames: frames, root: document.root),
-                imagePayloads: payloads
+                imagePayloads: rootPayloads
             )
         }
 
@@ -160,6 +161,8 @@ enum RadialLayout {
 
         placeSide(leftBranches, side: .left)
         placeSide(rightBranches, side: .right)
+        // 所有节点已有 frame：此时收集才覆盖全部非折叠节点的图片块。
+        let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
         return LayoutSnapshot(
             frames: frames,
             edges: edges,

@@ -28,6 +28,8 @@ enum LayoutSupport {
         )
     }
 
+    /// 把测高时的块映射到节点局部坐标（top-left 原点）：文本块撑满整行宽，
+    /// 非文本块水平居中。rect 为节点局部坐标，调用方再平移叠加节点位置。
     static func centeredBlocks(from metadata: BranchMetadata) -> [BlockLayoutFrame] {
         metadata.blocks.map { b -> BlockLayoutFrame in
             if b.text != nil {

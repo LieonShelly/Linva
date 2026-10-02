@@ -159,6 +159,22 @@ struct ImageLayoutTests {
         #expect(snapshot.imagePayloads[imageBlocks[0].blockId] != nil)
     }
 
+    @Test func childWithImage_nonCollapsedRoot_payloadIncluded() {
+        // 回归：非折叠布局需在 placeSide 后二次收集，非根子节点图片块也须有载荷。
+        var doc = MindMapDocument.blank(rootText: "根")
+        let child = Node(
+            text: "子",
+            side: .right,
+            image: Data([0x01]),
+            imagePixelSize: ImagePixelSize(width: 100, height: 50)
+        )
+        doc.root.children = [child]
+        let snapshot = RadialLayout.layout(document: doc, measure: measure())
+        let childFrame = snapshot.frames[child.id]!
+        let imageBlock = childFrame.blocks.first { $0.text == nil }!
+        #expect(snapshot.imagePayloads[imageBlock.blockId] != nil)
+    }
+
     @Test func smallImage_centered_whenTextDrivesWidth() {
         var doc = MindMapDocument.blank(rootText: "相当长的文字内容决定节点宽度")
         doc.root = Node(text: "相当长的文字内容决定节点宽度", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 50, height: 50))
