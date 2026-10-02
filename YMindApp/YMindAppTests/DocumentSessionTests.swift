@@ -288,6 +288,28 @@ struct DocumentSessionTests {
         #expect(abs(c.x - 200) < 0.001)
         #expect(abs(c.y - 150) < 0.001)
     }
+
+    @Test func setLayout_switchesSnapshot_andGatesCanSetSide() {
+        let session = DocumentSession()
+        let root = session.model.document.root.id
+        let child = session.model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        session.selectOnly(child)
+        #expect(session.canSetSide)
+
+        session.setLayout(.logic)
+        #expect(session.layout == .logic)
+        #expect(session.model.document.layout == .logic)
+        let rootFrame = session.snapshot.frames[root]!
+        let childFrame = session.snapshot.frames[child]!
+        #expect(childFrame.center.x > rootFrame.rect.maxX)
+        #expect(!session.canSetSide)
+        #expect(session.fitVersion == 1)
+
+        session.commandBus.undo()
+        #expect(session.layout == .radial)
+        #expect(session.canSetSide)
+        #expect(session.fitVersion == 2)
+    }
 }
 
 @Suite("DocumentSessionImport")

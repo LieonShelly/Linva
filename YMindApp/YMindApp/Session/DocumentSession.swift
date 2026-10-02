@@ -38,6 +38,10 @@ final class DocumentSession: ObservableObject {
     /// 启动扫描待恢复会话提示（Task 3 填充；newDocument/load 时清空）。
     @Published var recovery: RecoveryOffer?
 
+    /// 布局变化触发画布重新 fit 的信号（D1：切换/撤销均经 markDirtyAndRelayout 统一 bump）。
+    @Published private(set) var fitVersion = 0
+    private var appliedLayoutForFit: LayoutKind?
+
     private let layoutPipeline: LayoutPipeline
     private let persistence: DocumentPersistence
     private let editingController: EditingController
@@ -82,6 +86,7 @@ final class DocumentSession: ObservableObject {
         self.documentID = persistence.documentID
         wireCommandBus()
         relayout()
+        appliedLayoutForFit = model.document.layout
     }
 
     func newDocument() {
@@ -168,6 +173,11 @@ final class DocumentSession: ObservableObject {
     func markDirtyAndRelayout() {
         isDirty = persistence.noteChange(current: model.document)
         relayout()
+        // D1：布局变化（工具栏切换或 ⌘Z/⌘⇧Z 往返）统一触发再适配。
+        if model.document.layout != appliedLayoutForFit {
+            appliedLayoutForFit = model.document.layout
+            fitVersion += 1
+        }
     }
 
     func relayout() {
@@ -304,8 +314,10 @@ final class DocumentSession: ObservableObject {
         camera = cam
     }
 
+    /// 逻辑图无左右语义：⌘←/⌘→ 与侧向拖放置灰（FR-L4）；切回辐射恢复。
     var canSetSide: Bool {
-        model.selectedIds.contains { model.parentId(of: $0) == model.document.root.id }
+        model.document.layout != .logic
+            && model.selectedIds.contains { model.parentId(of: $0) == model.document.root.id }
     }
 
     func pasteToPrimary() {
@@ -321,6 +333,14 @@ final class DocumentSession: ObservableObject {
             commandBus.execute(.moveToParent(ids: alive, parentId: target))
             cancelCut()
         }
+    }
+
+    /// 当前布局（文档属性，随 .ymind 持久化）。改走 setLayout 命令入栈。
+    var layout: LayoutKind { model.document.layout }
+
+    func setLayout(_ kind: LayoutKind) {
+        commitEditingIfNeeded()
+        commandBus.execute(.setLayout(kind: kind))
     }
 
     func setFill(_ fill: NodeFill?) {
@@ -462,6 +482,7 @@ final class DocumentSession: ObservableObject {
         importPreview = nil
         errorMessage = nil
         relayout()
+        appliedLayoutForFit = model.document.layout
     }
 }
 

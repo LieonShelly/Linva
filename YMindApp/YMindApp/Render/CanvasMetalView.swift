@@ -106,6 +106,11 @@ struct CanvasMetalView: NSViewRepresentable {
         view.session = session
         view.actions = actions
         view.refreshCursorForTool()
+        // D1：布局变化（工具栏切换/⌘Z/⌘⇧Z）经 session.fitVersion 统一触发一次再适配。
+        if session.fitVersion != view.appliedFitVersion {
+            view.appliedFitVersion = session.fitVersion
+            view.markNeedsFitContent()
+        }
         // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates.
         if session.camera == Camera() {
             view.markNeedsFitContent()
@@ -119,6 +124,8 @@ struct CanvasMetalView: NSViewRepresentable {
 final class CanvasMTKView: MTKView, MTKViewDelegate {
     var session: DocumentSession
     var actions = CanvasActions()
+    /// 已消费的 fitVersion；与 session.fitVersion 不一致时由 updateNSView 触发一次再适配。
+    var appliedFitVersion = 0
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
