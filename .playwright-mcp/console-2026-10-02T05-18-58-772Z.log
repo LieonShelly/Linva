@@ -1,0 +1,16 @@
+[     540ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 0 C 130 0, 1…". @ http://localhost:8734/prototype/design/index.html:338
+[     540ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 0 C 130 0, 1…". @ http://localhost:8734/prototype/design/index.html:338
+[     540ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 0 C 130 0, 1…". @ http://localhost:8734/prototype/design/index.html:338
+[     540ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 0 C 130 0, 1…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN -120 C 380 -…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN -120 C 380 -…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN -40 C 380 -4…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN -40 C 380 -4…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 40 C 140 40,…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 40 C 140 40,…". @ http://localhost:8734/prototype/design/index.html:338
+[     541ms] [ERROR] Error: <path> attribute d: Expected number, "M NaN 120 C 140 12…". @ http://localhost:8734/prototype/design/index.html:338
+[     542ms] ReferenceError: updateSelectionUI is not defined
+    at render (http://localhost:8734/prototype/design/index.html:371:5)
+    at http://localhost:8734/prototype/design/index.html:497:3
+    at http://localhost:8734/prototype/design/index.html:499:3
+[     871ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8734/favicon.ico:0

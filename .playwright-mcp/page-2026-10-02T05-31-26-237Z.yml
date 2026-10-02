@@ -1,0 +1,53 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - banner [ref=f6e3]:
+      - generic [ref=f6e4]: YMind
+      - generic [ref=f6e7]: 阅读清单.ymind
+      - group "节点操作" [ref=f6e8]:
+        - button "＋ 子主题 Tab" [ref=f6e9] [cursor=pointer]:
+          - text: ＋ 子主题
+          - generic [ref=f6e10]: Tab
+        - button "同级主题 ↵" [ref=f6e11] [cursor=pointer]:
+          - text: 同级主题
+          - generic [ref=f6e12]: ↵
+        - button "删除" [ref=f6e13] [cursor=pointer]
+      - group "填色" [ref=f6e14]:
+        - button "填色 sage" [ref=f6e15] [cursor=pointer]
+        - button "填色 sky" [ref=f6e16] [cursor=pointer]
+        - button "填色 sand" [ref=f6e17] [cursor=pointer]
+        - button "填色 rose" [ref=f6e18] [cursor=pointer]
+        - button "填色 lilac" [ref=f6e19] [cursor=pointer]
+        - button "清除填色" [ref=f6e20] [cursor=pointer]
+      - group "画布工具" [ref=f6e21]:
+        - button "↖" [ref=f6e22] [cursor=pointer]
+        - button "✋" [ref=f6e23] [cursor=pointer]
+      - button "−" [ref=f6e24]
+      - generic [ref=f6e25]: 100%
+      - button "＋" [ref=f6e26]
+      - button "⤢" [ref=f6e27]
+      - button "⋯" [ref=f6e29] [cursor=pointer]
+    - main [ref=f6e30]:
+      - generic [ref=f6e31]:
+        - button "搜索 ⌘F" [ref=f6e32] [cursor=pointer]
+        - button "暗色模式" [ref=f6e33] [cursor=pointer]
+        - button "适应画布" [ref=f6e34] [cursor=pointer]
+      - generic [ref=f6e35]:
+        - generic:
+          - generic [ref=f6e36] [cursor=pointer]: 阅读清单
+          - generic [ref=f6e38] [cursor=pointer]: 产品设计
+          - generic [ref=f6e40] [cursor=pointer]: −
+          - generic [ref=f6e41] [cursor=pointer]: Designing for macOS
+          - generic [ref=f6e43] [cursor=pointer]: HIG 指南
+          - generic [ref=f6e45] [cursor=pointer]: 思维方法
+          - generic [ref=f6e47] [cursor=pointer]: −
+          - generic [ref=f6e48] [cursor=pointer]: 卡片笔记法
+          - generic [ref=f6e50] [cursor=pointer]: 费曼技巧
+          - generic [ref=f6e52] [cursor=pointer]: 技术栈
+          - generic [ref=f6e54] [cursor=pointer]: −
+          - generic [ref=f6e55] [cursor=pointer]: SwiftUI 壳
+          - generic [ref=f6e57] [cursor=pointer]: Metal 画布
+          - generic [ref=f6e59] [cursor=pointer]: 待读
+          - generic [ref=f6e61] [cursor=pointer]: −
+          - generic [ref=f6e62] [cursor=pointer]: 认知心理学
+      - generic: 右键节点看上下文菜单 · 点色点填色 · ⋯ 看溢出菜单 · 暗色模式试试
+  - text: ▸

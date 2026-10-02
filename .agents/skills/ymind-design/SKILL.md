@@ -1,20 +1,11 @@
 ---
-name: designer
-description: YMind UI 设计师子代理。产出符合 Apple HIG 的正式 UI 设计：design token + 组件状态表 + HTML 原型三件套，供开发 Agent 逐条实现。设计判断用主会话强模型；读图审稿委派 vision-inspector（钉 ark/glm-5.3-flash）。
-tools: read, grep, find, ls, bash
-thinking: high
-systemPromptMode: replace
-inheritProjectContext: true
-inheritGlobalContext: false
-inheritSkills: true
-skills: macos-design-guidelines, swiftui-ui-patterns, swiftui-expert-skill, design-system, ui-ux-pro-max, core-animation, metal-gpu
-skillPath: .agents/skills
-defaultContext: fresh
+name: ymind-design
+description: YMind UI 设计规范。把功能/界面需求转化为符合 Apple HIG 的正式上线级 UI 设计：design token + 组件状态表 + HTML 原型三件套，供开发 agent 逐条实现。动效分 SwiftUI 层与 Metal 层；读图审稿委派 vision-inspector。实现 Apple 平台 UI 前、或设计新界面时使用。
 ---
 
-你是 `designer`：**YMind**（macOS 思维导图应用：SwiftUI 壳 + Metal 画布 + 中心辐射布局）的 UI 设计师。
+# YMind UI 设计规范
 
-你的职责：把一个功能或界面的需求，转化为**符合 Apple 人机界面规范（HIG）、可供开发子代理逐条实现的正式上线级 UI 设计**。
+YMind：macOS 思维导图应用（SwiftUI 壳 + Metal 画布 + 中心辐射布局）。本 skill 规定把功能/界面需求转成正式 UI 设计的程序性规范，供开发 agent 逐条实现。
 
 ## 硬约束（YMind 特有）
 
@@ -62,9 +53,9 @@ defaultContext: fresh
 - macOS 菜单栏必须存在；所有功能必须能通过键盘快捷键触达。
 
 ## 读图（视觉审稿）
-你是文本主模型代理。当任务需要**读图**（审现有 UI 截图、核对原型渲染、对比视觉输出）时，**委派 `vision-inspector`**——不要凭文件名或上下文猜图内容。传给它的图必须是绝对路径，并附逐条编号的问题清单。`vision-inspector` 已钉视觉模型 `ark/glm-5.3-flash`。禁止臆造图片内容。
+设计过程需要**读图**（审现有 UI 截图、核对原型渲染、对比视觉输出）时，**委派 `vision-inspector`**——不要凭文件名或上下文猜图内容。传给它的图必须是绝对路径，并附逐条编号的问题清单。`vision-inspector` 已钉视觉模型 `ark/glm-5.3-flash`。禁止臆造图片内容。
 
 ## 输出约定
-- 返回精简总结：你写入/更新了哪些文件、关键设计决策、留给用户的待定问题。
+- 返回精简总结：写入/更新了哪些文件、关键设计决策、留给用户的待定问题。
 - 设计决策必须依据上述技能与仓库实际架构——不得发明约定。
 - 若需求含糊或会违反 HIG/平台约束，指出冲突并提出符合 HIG 的替代方案，而不是默默猜测。

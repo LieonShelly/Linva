@@ -28,6 +28,7 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 | `ymind-codec-version` | 改 `.ymind` schema、节点字段、序列化/版本升迁 |
 | `ymind-layout-snapshot` | 扩展布局算法 / NodeFrame / EdgeGeometry / Render-Layout 接缝 |
 | `ymind-render-text` | 文字纹理、TextAtlas、坐标系/Retina/缓存 |
+| `ymind-design` | 正式 UI 设计 / 视觉改版：产出 Apple HIG 合规的「design token + 组件状态表 + HTML 原型」三件套，动效分 SwiftUI/Metal 层，读图委派 vision-inspector |
 
 **第三方 skill**（`npx skills` 安装，各自 `SKILL.md` 的 `description` 自动路由）：
 - 完整路由表见 **[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)**（实现 Apple 平台代码前先查）。
@@ -37,9 +38,10 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 
 Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发现，字段如 `systemPromptMode`/`inheritSkills`/`defaultContext`）。**注意：不是 `tintinweb/pi-subagents`，那是另一个包，字段不同。**
 
+> 设计能力已提炼为 skill `ymind-design`（见上表），不另设 designer subagent——设计是迭代式工作，留在主会话上下文更契合。真正需要隔离/钉模型时才用 subagent。
+
 | Agent | 何时委派 |
 |-------|----------|
-| `designer` | 需要正式 UI 设计 / 视觉改版 / 上线级界面。产出「design token + 组件状态表 + HTML 原型」三件套，符合 Apple HIG。设计判断用主会话强模型；读图审稿委派 `vision-inspector` |
 | `vision-inspector` | 需分析图片内容（见下方「视觉委派」）。钉死视觉模型 `ark/glm-5.3-flash` |
 
 ## 基础约束
