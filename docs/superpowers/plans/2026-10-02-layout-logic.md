@@ -529,11 +529,12 @@ enum LogicLayout {
         )
         frames[document.root.id] = rootFrame
 
-        let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
+        // 根折叠早退：此时仅根有 frame，只收集根的载荷（与 RadialLayout 一致）。
+        let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
         let toggles = makeBranchToggles(frames: frames, root: document.root)
 
         guard !document.root.collapsed else {
-            return LayoutSnapshot(frames: frames, edges: edges, branchToggles: toggles, imagePayloads: payloads)
+            return LayoutSnapshot(frames: frames, edges: edges, branchToggles: toggles, imagePayloads: rootPayloads)
         }
 
         let childrenHeight = rootMetadata.children.reduce(0) { $0 + $1.height }
@@ -547,6 +548,8 @@ enum LogicLayout {
             childY += childMetadata.height + LayoutConstants.vGap
         }
 
+        // 所有节点已有 frame 后再收集全部图片载荷（避免丢非根图片；与 RadialLayout 一致）。
+        let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
         return LayoutSnapshot(frames: frames, edges: edges, branchToggles: toggles, imagePayloads: payloads)
     }
 
