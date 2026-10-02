@@ -296,3 +296,5 @@ enum RadialLayout {
         let children: [BranchMetadata]
     }
 }
+
+extension RadialLayout: LayoutEngine {}

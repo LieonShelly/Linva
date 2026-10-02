@@ -38,7 +38,7 @@ final class DocumentSession: ObservableObject {
     /// 启动扫描待恢复会话提示（Task 3 填充；newDocument/load 时清空）。
     @Published var recovery: RecoveryOffer?
 
-    private let measure: TextMeasure
+    private let layoutPipeline: LayoutPipeline
     private let persistence: DocumentPersistence
     private let editingController: EditingController
 
@@ -50,14 +50,14 @@ final class DocumentSession: ObservableObject {
 
     init(
         model: MindMapModel? = nil,
-        measure: TextMeasure = TextMeasure(),
+        layoutPipeline: LayoutPipeline = LayoutPipeline(),
         autosaveStore: AutosaveStore = AutosaveStore(),
         securityScopedAccess: SecurityScopedAccess = SecurityScopedAccess()
     ) {
         let model = model ?? MindMapModel.makeNew()
         self.model = model
         self.commandBus = CommandBus(model: model)
-        self.measure = measure
+        self.layoutPipeline = layoutPipeline
         self.persistence = DocumentPersistence(
             backend: YMindFilePersistence(),
             securityScopedAccess: securityScopedAccess,
@@ -171,7 +171,7 @@ final class DocumentSession: ObservableObject {
     }
 
     func relayout() {
-        snapshot = RadialLayout.layout(document: model.document, measure: measure)
+        snapshot = layoutPipeline.relayout(document: model.document)
     }
 
     func clearError() {
