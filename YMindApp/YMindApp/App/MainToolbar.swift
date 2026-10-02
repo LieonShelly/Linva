@@ -27,6 +27,8 @@ struct MainToolbar: ToolbarContent {
     let activeFill: NodeFill?
     let fillActive: Bool
     let setFill: (NodeFill?) -> Void
+    let layout: LayoutKind
+    let setLayout: (LayoutKind) -> Void
     let exportMarkdown: () -> Void
     let exportPNG: () -> Void
 
@@ -92,6 +94,17 @@ struct MainToolbar: ToolbarContent {
                 fillActive: fillActive,
                 setFill: setFill
             )
+
+            Divider()
+            Picker("布局", selection: Binding(
+                get: { layout },
+                set: { setLayout($0) }
+            )) {
+                Text("辐射").tag(LayoutKind.radial)
+                Text("逻辑图").tag(LayoutKind.logic)
+            }
+            .pickerStyle(.menu)
+            .help("布局（⌥L 切换）")
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {

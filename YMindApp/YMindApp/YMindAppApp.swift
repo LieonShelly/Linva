@@ -155,6 +155,14 @@ private struct DocumentCommands: Commands {
             }
             .keyboardShortcut(.rightArrow, modifiers: .command)
             .disabled(!session.canSetSide || session.editingId != nil)
+
+            Divider()
+
+            Button(session.layout == .radial ? "切换到逻辑图布局" : "切换到辐射布局") {
+                session.setLayout(session.layout == .radial ? .logic : .radial)
+            }
+            .keyboardShortcut("l", modifiers: .option)
+            .help("切换布局（⌥L）")
         }
     }
 
