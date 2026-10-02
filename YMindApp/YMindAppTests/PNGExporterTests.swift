@@ -34,6 +34,17 @@ struct PNGExporterTests {
         // 折叠态仍保持（FR-E3 验收 1：导后折叠仍在）
         #expect(d.root.children[0].collapsed == true)
     }
+
+    @Test func data_rendersLogicLayout_whenMetalAvailable() throws {
+        try #require(MTLCreateSystemDefaultDevice() != nil)
+        var d = MindMapDocument.blank(rootText: "根")
+        d.layout = .logic
+        d.root.children = [Node(text: "章", children: [Node(text: "节")])]
+        let data = PNGExporter.data(document: d)
+        #expect(data != nil)
+        let sig = data?.prefix(8)
+        #expect(sig == Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))
+    }
 }
 
 @Suite("PNG 导出含图")

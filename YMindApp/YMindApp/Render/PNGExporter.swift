@@ -13,7 +13,14 @@ enum PNGExporter {
         padding: CGFloat = 48
     ) -> Data? {
         let expanded = fullyExpanded(document)
-        let snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
+        // FR-L5：按当前布局离屏渲染（relayout 产出哪张快照就渲染哪张）。
+        let snapshot: LayoutSnapshot
+        switch expanded.layout {
+        case .radial:
+            snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
+        case .logic:
+            snapshot = LogicLayout.layout(document: expanded, measure: TextMeasure())
+        }
         let bounds = snapshot.frames.values.reduce(CGRect.null) { $0.union($1.rect) }
         guard !bounds.isNull,
               let device = MTLCreateSystemDefaultDevice() else {
