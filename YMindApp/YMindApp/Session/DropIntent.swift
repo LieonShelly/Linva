@@ -43,6 +43,12 @@ func resolveDropIntent(
     }
 
     if target.isRoot {
+        // 逻辑图无左右侧语义：侧带降级为成子（FR-L4）。
+        if model.document.layout == .logic {
+            return model.isValidDropTarget(target.id, movingIds: movingIds)
+                ? .child(targetId: target.id)
+                : nil
+        }
         let u = (world.x - target.rect.minX) / max(target.rect.width, 1)
         if u < 1.0 / 3.0 { return .sideLeft(targetId: target.id, viaEmpty: false) }
         if u > 2.0 / 3.0 { return .sideRight(targetId: target.id, viaEmpty: false) }
@@ -73,6 +79,8 @@ func resolveEmptySideIntent(
     camera: Camera,
     model: MindMapModel
 ) -> DropIntent? {
+    // 逻辑图无左右侧语义：空白改侧意图整体禁用（FR-L4）。
+    guard model.document.layout != .logic else { return nil }
     let tops = model.movableTopLevel(ids: movingIds)
     guard !tops.isEmpty else { return nil }
     for id in tops {

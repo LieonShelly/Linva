@@ -99,4 +99,28 @@ struct DropIntentTests {
         let g = model.insertChild(parentId: a, text: "G", side: nil, at: nil)
         #expect(resolveDropIntent(screenPoint: rightEmpty, movingIds: Set([g]), snapshot: snapshot, camera: camera, model: model) == nil)
     }
+
+    @Test func logicLayout_rootSideZones_degradeToChild() throws {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        model.document.layout = .logic
+        _ = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
+        let snapshot = LogicLayout.layout(document: model.document, measure: TextMeasure())
+        let rootFrame = try #require(snapshot.frames[root])
+
+        let leftPoint = CGPoint(x: rootFrame.rect.minX + rootFrame.rect.width * 0.1, y: rootFrame.rect.midY)
+        #expect(resolveDropIntent(screenPoint: leftPoint, movingIds: Set([b]), snapshot: snapshot, camera: camera, model: model) == .child(targetId: root))
+    }
+
+    @Test func logicLayout_emptySide_intentSuppressed() throws {
+        let model = MindMapModel.makeNew()
+        let root = model.document.root.id
+        model.document.layout = .logic
+        _ = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
+        let snapshot = LogicLayout.layout(document: model.document, measure: TextMeasure())
+        let moving = [model.document.root.children[0].id]
+        let point = CGPoint(x: -200, y: -200)
+        #expect(resolveDropIntent(screenPoint: point, movingIds: Set(moving), snapshot: snapshot, camera: camera, model: model) == nil)
+    }
 }
