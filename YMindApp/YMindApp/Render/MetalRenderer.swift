@@ -92,7 +92,7 @@ final class MetalRenderer {
             return
         }
 
-        let background = rgba(NodeFillStyle.canvasBackground())
+        let background = rgba(NSColor.windowBackgroundColor)
         descriptor.colorAttachments[0].clearColor = MTLClearColor(
             red: Double(background.x),
             green: Double(background.y),
@@ -736,7 +736,7 @@ final class MetalRenderer {
         visibleIds: Set<UUID>,
         camera: Camera
     ) -> [SolidVertex] {
-        let color = rgba(NodeFillStyle.line())
+        let color = rgba(.separatorColor)
         let thickness = max(1.25, min(3, 2 * camera.scale))
         // R4：任一端点可见才画该边。
         return snapshot.edges
@@ -757,18 +757,15 @@ final class MetalRenderer {
         // R4：只处理可见帧。
         frames.flatMap { frame in
             let rect = screenRect(frame.rect, camera: camera)
-            let radius = (frame.isRoot ? 10 : 8) * camera.scale
             if let fill = frame.fill {
                 if frame.isRoot {
-                    return roundedRectVertices(
+                    return rectangleQuad(
                         rect: rect,
-                        radius: radius,
                         color: rgba(NodeFillStyle.rootBackground(fill))
                     )
                 } else {
-                    var vertices = roundedRectVertices(
+                    var vertices = rectangleQuad(
                         rect: rect,
-                        radius: radius,
                         color: rgba(NodeFillStyle.background(fill))
                     )
                     vertices += strokeVertices(
@@ -781,10 +778,10 @@ final class MetalRenderer {
             } else {
                 let color = rgba(
                     frame.isRoot
-                        ? NodeFillStyle.rootDefault()
+                        ? NSColor.controlAccentColor
                         : NSColor.controlBackgroundColor
                 )
-                return roundedRectVertices(rect: rect, radius: radius, color: color)
+                return rectangleQuad(rect: rect, color: color)
             }
         }
     }
@@ -915,42 +912,6 @@ final class MetalRenderer {
                         y: center.y + sin(second) * radius,
                         color: color
                     ),
-                ]
-            }
-        }
-        return vertices
-    }
-
-    /// 圆角矩形（指定 radius，屏空间像素）。
-    private func roundedRectVertices(
-        rect: CGRect,
-        radius: CGFloat,
-        color: SIMD4<Float>
-    ) -> [SolidVertex] {
-        let r = min(radius, min(rect.width, rect.height) / 2)
-        guard r > 0.5 else { return rectangleQuad(rect: rect, color: color) }
-        var vertices = rectangleQuad(
-            rect: CGRect(x: rect.minX + r, y: rect.minY, width: max(rect.width - r * 2, 0), height: rect.height),
-            color: color
-        )
-        vertices += rectangleQuad(
-            rect: CGRect(x: rect.minX, y: rect.minY + r, width: rect.width, height: max(rect.height - r * 2, 0)),
-            color: color
-        )
-        let corners: [(CGPoint, CGFloat)] = [
-            (CGPoint(x: rect.minX + r, y: rect.minY + r), .pi),
-            (CGPoint(x: rect.maxX - r, y: rect.minY + r), -.pi / 2),
-            (CGPoint(x: rect.maxX - r, y: rect.maxY - r), 0),
-            (CGPoint(x: rect.minX + r, y: rect.maxY - r), .pi / 2),
-        ]
-        for (center, startAngle) in corners {
-            for index in 0..<4 {
-                let first = startAngle + CGFloat(index) * .pi / 8
-                let second = startAngle + CGFloat(index + 1) * .pi / 8
-                vertices += [
-                    solidVertex(x: center.x, y: center.y, color: color),
-                    solidVertex(x: center.x + cos(first) * r, y: center.y + sin(first) * r, color: color),
-                    solidVertex(x: center.x + cos(second) * r, y: center.y + sin(second) * r, color: color),
                 ]
             }
         }

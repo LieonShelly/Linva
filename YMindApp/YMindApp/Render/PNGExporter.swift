@@ -58,8 +58,8 @@ enum PNGExporter {
         return doc
     }
 
-    /// 导出底（亮系统灰 #ececec，固定不随外观）。
+    /// 纸面背景（对齐原型 #e7e4dc）。
     static var paperColor: NSColor {
-        NSColor(srgbRed: 0xEC / 255, green: 0xEC / 255, blue: 0xEC / 255, alpha: 1)
+        NSColor(srgbRed: 0xE7 / 255, green: 0xE4 / 255, blue: 0xDC / 255, alpha: 1)
     }
 }

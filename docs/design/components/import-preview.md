@@ -1,48 +1,51 @@
-# YMind — Component Spec: ImportPreview（导入预览浮层）
+# YMind 组件规格 — 导入预览（ImportPreviewView）
 
-> SwiftUI 浮层，导入 MD/OPML/FreeMind 后确认。现状：`ImportPreviewView.swift`。
-> 引用 token：`--c-popover-*`。
+> 层级：**SwiftUI 壳**。导入 MD/OPML/FreeMind 解析成功后，先展示解析出的树（缩进列表）确认/取消，再载入。色值引用 `design-tokens.md`。
 
 ---
 
 ## 1. 结构
 
-```
-┌──────────────────────────┐
-│ 导入预览                  │
-│ source.md · 24 个节点 · 3 层 │
-│ ┌──────────────────────┐ │
-│ │ ◎ 根主题             │ │
-│ │   – 子主题           │ │
-│ │   – 子主题           │ │
-│ └──────────────────────┘ │
-│              [取消] [确认导入] │
-└──────────────────────────┘
-```
-
-| 元素 | 规格 |
-|---|---|
-| 面板 | `.regularMaterial` + `--p-panel`，圆角 14，阴影 `--p-shadow-2` |
-| 标题 | headline |
-| 元信息 | subheadline 次级色 |
-| 树预览 | 缩进列表，高度上限 260pt，可滚动 |
-| 动作 | 取消 / 确认导入（borderedProminent） |
+| 属性 | 值 |
+|------|-----|
+| 位置 | 画布顶部居中浮层 |
+| 卡面 | `sem.color.surface.overlay` + `prim.radius.card` (12pt) |
+| 尺寸 | 固定 420pt 宽 |
+| 内容 | 标题 + 元信息（源名 · N 节点 · 深度）+ 缩进树滚动区 + 取消/确认 |
 
 ---
 
 ## 2. 状态表
 
-| 状态 | 行为 |
-|---|---|
-| **预览** | 展示解析树，未改磁盘 |
-| **确认** | `loadImported`（清命令栈、标记脏、重置 documentID） |
-| **取消** | 关闭，不载入 |
-| **解析失败** | 不弹浮层，画布顶显示错误横幅（现状 `errorMessage`） |
+| 元素 | 默认 | hover | active |
+|------|------|-------|--------|
+| 标题 | `font.headline` | — | — |
+| 元信息 | `subheadline` + `text.secondary` | — | — |
+| 缩进树 | 递归 `◎ / –` 前缀，层缩进 2 字符 | — | — |
+| 取消 | 默认按钮 | — | — |
+| 确认导入 | `borderedProminent`（`sem.color.accent`） | — | — |
 
 ---
 
-## 3. 行为细则
+## 3. 行为
 
-1. 导入不覆盖磁盘既有 `.ymind`（现状）。
-2. 确认/取消均不入命令栈（导入是整体替换，非可逆命令）。
-3. 大树：树预览 ScrollView，节点行懒渲染（现状 `IndentNodeView` 递归）。
+| 事件 | 行为 |
+|------|------|
+| 打开 | 解析成功后展示（不改磁盘既有 `.ymind`） |
+| 确认 | `loadImported` → 清命令栈、重置 documentID、标记 dirty、树入场 |
+| 取消 / Esc | `cancelImport`，保持当前文档 |
+| 导入失败 | 清旧预览 + 顶部错误横幅（`sem.color.danger`） |
+
+---
+
+## 4. 无障碍 / 合规
+
+- 树形缩进列表可读（非纯视觉：前缀字符区分层级）。
+- 确认/取消可键盘：Enter 确认、Esc 取消。
+
+---
+
+## 变更记录
+| 日期 | 说明 |
+|------|------|
+| 2026-10-02 | 首版：导入预览浮层 + 状态/行为，锚定 `ImportPreviewView` / `DocumentWorkflow.presentImportPanel` |
