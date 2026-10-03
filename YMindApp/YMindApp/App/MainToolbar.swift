@@ -9,7 +9,7 @@ struct MainToolbar: ToolbarContent {
     let canCopy: Bool
     let canPaste: Bool
     let canSetSide: Bool
-    let zoomPercent: Int
+    let zoomLabel: ZoomPercentLabel
     let canvasTool: CanvasTool
     let setCanvasTool: (CanvasTool) -> Void
     let addChild: () -> Void
@@ -123,10 +123,7 @@ struct MainToolbar: ToolbarContent {
             }
             .help("缩小画布")
 
-            Text("\(zoomPercent)%")
-                .monospacedDigit()
-                .frame(minWidth: 44)
-                .accessibilityLabel("缩放比例 \(zoomPercent)%")
+            zoomLabel
 
             Button(action: zoomIn) {
                 Label("放大", systemImage: "plus.magnifyingglass")

@@ -146,33 +146,35 @@ final class MetalRenderer {
             size: SIMD2(Float(viewportSize.width), Float(viewportSize.height))
         )
 
+        // R4 视口剔除：平移/缩放时逐帧工作 O(可见帧)，而非 O(全图)。
+        let drawList = FrameDrawList.make(snapshot: snapshot, camera: camera, viewportSize: viewportSize)
+
         // 绘制顺序：边 → 节点底色 → 图片 → 文字 → 分叉控件 → 多选描边。
         drawSolid(
-            edgeVertices(snapshot: snapshot, camera: camera),
+            edgeVertices(snapshot: snapshot, visibleIds: drawList.visibleIds, camera: camera),
             encoder: encoder,
             viewport: &viewport
         )
         drawSolid(
-            fillVertices(snapshot: snapshot, camera: camera),
+            fillVertices(frames: drawList.visible, camera: camera),
             encoder: encoder,
             viewport: &viewport
         )
         drawImage(
-            snapshot: snapshot, camera: camera, displayScale: displayScale,
+            snapshot: snapshot, drawList: drawList,
+            camera: camera, displayScale: displayScale,
             selectedImageBlock: selectedImageBlock,
             encoder: encoder, viewport: &viewport
         )
         drawText(
-            snapshot: snapshot,
-            camera: camera,
-            displayScale: displayScale,
+            snapshot: snapshot, drawList: drawList,
+            camera: camera, displayScale: displayScale,
             encoder: encoder,
             viewport: &viewport
         )
         drawBranchToggles(
-            snapshot: snapshot,
-            camera: camera,
-            displayScale: displayScale,
+            snapshot: snapshot, visibleIds: drawList.visibleIds,
+            camera: camera, displayScale: displayScale,
             encoder: encoder,
             viewport: &viewport
         )
@@ -250,6 +252,7 @@ final class MetalRenderer {
 
     private func drawText(
         snapshot: LayoutSnapshot,
+        drawList: FrameDrawList,
         camera: Camera,
         displayScale: CGFloat,
         encoder: MTLRenderCommandEncoder,
@@ -257,13 +260,15 @@ final class MetalRenderer {
     ) {
         // 与分叉控件一致：按相机缩放向上量化栅格倍率，放大时不糊（缩放靠 bucket 重栅格）。
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
-        encoder.setRenderPipelineState(texturedPipeline)
-        encoder.setFragmentSamplerState(sampler, index: 0)
 
-        var knownIds = Set<UUID>()
-        for frame in orderedFrames(snapshot) {
+        // 性能（R1）：可见文本 quad 合并进一个顶点数组 → 单块 buffer，按纹理分段 draw。
+        // 旧实现每文本块一次 device.makeBuffer（1921 节点 = 每帧 1921 次分配/上传）。
+        // z 序由 pass 分层决定，frames 遍历顺序不影响像素（R2：不再排序）。
+        // R4：只处理可见帧；驱逐用全量文本块 id（屏幕外节点纹理保留，平移回视不重建）。
+        var quads: [(offset: Int, count: Int, texture: MTLTexture)] = []
+        var vertices: [TexturedVertex] = []
+        for frame in drawList.visible {
             for block in frame.blocks where block.text != nil {
-                knownIds.insert(block.blockId)
                 guard let texture = textAtlas.texture(
                     for: frame,
                     block: block,
@@ -279,29 +284,38 @@ final class MetalRenderer {
                     height: block.rect.height
                 )
                 let color = rgba(frame.isRoot ? .white : .labelColor)
-                let vertices = texturedQuad(rect: screenRect(worldRect, camera: camera), color: color)
-                guard let buffer = device.makeBuffer(
-                    bytes: vertices,
-                    length: MemoryLayout<TexturedVertex>.stride * vertices.count
-                ) else {
-                    continue
-                }
-                encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-                encoder.setVertexBytes(
-                    &viewport,
-                    length: MemoryLayout<ViewportUniforms>.stride,
-                    index: 1
-                )
-                encoder.setFragmentTexture(texture, index: 0)
-                encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+                let quad = texturedQuad(rect: screenRect(worldRect, camera: camera), color: color)
+                quads.append((offset: vertices.count, count: quad.count, texture: texture))
+                vertices += quad
             }
         }
-        textAtlas.evictUnused(known: knownIds)   // 节点删除/折叠/文本编辑后清理（显存纪律三）
+        textAtlas.evictUnused(known: drawList.allTextBlockIds)   // 节点删除/折叠/文本编辑后清理（显存纪律三）
+
+        guard !vertices.isEmpty,
+              let buffer = device.makeBuffer(
+                  bytes: vertices,
+                  length: MemoryLayout<TexturedVertex>.stride * vertices.count
+              ) else {
+            return
+        }
+        encoder.setRenderPipelineState(texturedPipeline)
+        encoder.setFragmentSamplerState(sampler, index: 0)
+        encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+        encoder.setVertexBytes(
+            &viewport,
+            length: MemoryLayout<ViewportUniforms>.stride,
+            index: 1
+        )
+        for quad in quads {
+            encoder.setFragmentTexture(quad.texture, index: 0)
+            encoder.drawPrimitives(type: .triangle, vertexStart: quad.offset, vertexCount: quad.count)
+        }
     }
 
-    /// 图片 quad：视口剔除 → 缓存纹理 → texturedQuad（与文字同管线）。
+    /// 图片 quad：视口剔除（帧级）→ 缓存纹理 → texturedQuad（与文字同管线）。
     private func drawImage(
         snapshot: LayoutSnapshot,
+        drawList: FrameDrawList,
         camera: Camera,
         displayScale: CGFloat,
         selectedImageBlock: (nodeId: UUID, blockId: UUID)?,
@@ -313,31 +327,14 @@ final class MetalRenderer {
             imageTextureCache.evictUnused(known: [])
             return
         }
-        encoder.setRenderPipelineState(texturedPipeline)
-        encoder.setFragmentSamplerState(sampler, index: 0)
 
-        // 相机视口世界 AABB：视口四角 screenToWorld 反投影，得世界矩形（硬约束 #3）。
-        let viewportSize = CGSize(width: CGFloat(viewport.size.x), height: CGFloat(viewport.size.y))
-        let viewportCorners = [
-            CGPoint(x: 0, y: 0),
-            CGPoint(x: viewportSize.width, y: 0),
-            CGPoint(x: 0, y: viewportSize.height),
-            CGPoint(x: viewportSize.width, y: viewportSize.height),
-        ]
-        let world = viewportCorners.map { camera.screenToWorld($0) }
-        let xs = world.map(\.x)
-        let ys = world.map(\.y)
-        let viewportWorldRect = CGRect(
-            x: xs.min()!,
-            y: ys.min()!,
-            width: xs.max()! - xs.min()!,
-            height: ys.max()! - ys.min()!
-        )
-
-        var knownIds = Set<UUID>()
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
 
-        for frame in orderedFrames(snapshot) {
+        // 性能（R1+R4）：可见图片 quad 合并进单块 buffer，按纹理分段 draw（同 drawText）；
+        // 帧级剔除已保证只处理可见帧，块级视口检查由 FrameDrawList 的 -100pt 外扩覆盖。
+        var quads: [(offset: Int, count: Int, texture: MTLTexture)] = []
+        var vertices: [TexturedVertex] = []
+        for frame in drawList.visible {
             for block in frame.blocks where block.text == nil {
                 guard let payload = snapshot.imagePayloads[block.blockId] else { continue }
                 let worldRect = CGRect(
@@ -346,10 +343,6 @@ final class MetalRenderer {
                     width: block.rect.width,
                     height: block.rect.height
                 )
-                // 视口剔除：图片世界 rect 与相机视口不相交 → 连纹理都不建（显存纪律一）。
-                guard worldRect.intersects(viewportWorldRect) else { continue }
-                knownIds.insert(block.blockId)
-
                 guard let texture = imageTextureCache.texture(
                     id: block.blockId,
                     localRect: block.rect,
@@ -358,35 +351,47 @@ final class MetalRenderer {
                     device: device
                 ) else { continue }
 
-                let vertices = texturedQuad(
+                let quad = texturedQuad(
                     rect: screenRect(worldRect, camera: camera),
                     color: SIMD4<Float>(1, 1, 1, 1)
                 )
-                guard let buffer = device.makeBuffer(
-                    bytes: vertices,
-                    length: MemoryLayout<TexturedVertex>.stride * vertices.count
-                ) else { continue }
-                encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-                encoder.setVertexBytes(
-                    &viewport,
-                    length: MemoryLayout<ViewportUniforms>.stride,
-                    index: 1
-                )
-                encoder.setFragmentTexture(texture, index: 0)
-                encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+                quads.append((offset: vertices.count, count: quad.count, texture: texture))
+                vertices += quad
             }
         }
-        imageTextureCache.evictUnused(known: knownIds)   // 节点删除/折叠后清理（显存纪律三）
+        imageTextureCache.evictUnused(known: drawList.allImageBlockIds)   // 节点删除/折叠后清理（显存纪律三）
+
+        guard !vertices.isEmpty,
+              let buffer = device.makeBuffer(
+                  bytes: vertices,
+                  length: MemoryLayout<TexturedVertex>.stride * vertices.count
+              ) else {
+            return
+        }
+        encoder.setRenderPipelineState(texturedPipeline)
+        encoder.setFragmentSamplerState(sampler, index: 0)
+        encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+        encoder.setVertexBytes(
+            &viewport,
+            length: MemoryLayout<ViewportUniforms>.stride,
+            index: 1
+        )
+        for quad in quads {
+            encoder.setFragmentTexture(quad.texture, index: 0)
+            encoder.drawPrimitives(type: .triangle, vertexStart: quad.offset, vertexCount: quad.count)
+        }
     }
 
     private func drawBranchToggles(
         snapshot: LayoutSnapshot,
+        visibleIds: Set<UUID>,
         camera: Camera,
         displayScale: CGFloat,
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        let toggles = snapshot.branchToggles
+        // R4：只画可见节点的分叉控件。
+        let toggles = snapshot.branchToggles.filter { visibleIds.contains($0.nodeId) }
         guard !toggles.isEmpty else { return }
 
         let fill = rgba(.controlBackgroundColor)
@@ -414,8 +419,10 @@ final class MetalRenderer {
         drawSolid(solidVertices, encoder: encoder, viewport: &viewport)
 
         let rasterScale = displayScale * Self.rasterBucket(camera.scale)
-        encoder.setRenderPipelineState(texturedPipeline)
-        encoder.setFragmentSamplerState(sampler, index: 0)
+
+        // 性能（R1）：分叉图标 quad 合并进单块 buffer，按纹理分段 draw（同 drawText）。
+        var quads: [(offset: Int, count: Int, texture: MTLTexture)] = []
+        var vertices: [TexturedVertex] = []
         for (toggle, rect) in rects {
             let size = CGSize(
                 width: rect.width / max(camera.scale, 0.001),
@@ -430,21 +437,29 @@ final class MetalRenderer {
                 continue
             }
             let color = rgba(toggle.collapsed ? .white : .controlAccentColor)
-            let vertices = texturedQuad(rect: rect, color: color)
-            guard let buffer = device.makeBuffer(
-                bytes: vertices,
-                length: MemoryLayout<TexturedVertex>.stride * vertices.count
-            ) else {
-                continue
-            }
-            encoder.setVertexBuffer(buffer, offset: 0, index: 0)
-            encoder.setVertexBytes(
-                &viewport,
-                length: MemoryLayout<ViewportUniforms>.stride,
-                index: 1
-            )
-            encoder.setFragmentTexture(texture, index: 0)
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+            let quad = texturedQuad(rect: rect, color: color)
+            quads.append((offset: vertices.count, count: quad.count, texture: texture))
+            vertices += quad
+        }
+
+        guard !vertices.isEmpty,
+              let buffer = device.makeBuffer(
+                  bytes: vertices,
+                  length: MemoryLayout<TexturedVertex>.stride * vertices.count
+              ) else {
+            return
+        }
+        encoder.setRenderPipelineState(texturedPipeline)
+        encoder.setFragmentSamplerState(sampler, index: 0)
+        encoder.setVertexBuffer(buffer, offset: 0, index: 0)
+        encoder.setVertexBytes(
+            &viewport,
+            length: MemoryLayout<ViewportUniforms>.stride,
+            index: 1
+        )
+        for quad in quads {
+            encoder.setFragmentTexture(quad.texture, index: 0)
+            encoder.drawPrimitives(type: .triangle, vertexStart: quad.offset, vertexCount: quad.count)
         }
     }
 
@@ -483,6 +498,63 @@ final class MetalRenderer {
     private static func rasterBucket(_ cameraScale: CGFloat) -> CGFloat {
         let clamped = min(max(cameraScale, 1), 2)
         return (clamped * 2).rounded(.up) / 2
+    }
+
+    /// 相机视口世界 AABB：视口四角 screenToWorld 反投影（相机仅平移+等比缩放，无旋转）。
+    private static func viewportWorldRect(camera: Camera, viewportSize: CGSize) -> CGRect {
+        let corners = [
+            CGPoint(x: 0, y: 0),
+            CGPoint(x: viewportSize.width, y: 0),
+            CGPoint(x: 0, y: viewportSize.height),
+            CGPoint(x: viewportSize.width, y: viewportSize.height),
+        ]
+        let world = corners.map { camera.screenToWorld($0) }
+        let xs = world.map(\.x)
+        let ys = world.map(\.y)
+        return CGRect(
+            x: xs.min()!,
+            y: ys.min()!,
+            width: xs.max()! - xs.min()!,
+            height: ys.max()! - ys.min()!
+        )
+    }
+
+    /// 一帧的绘制列表（R4 视口剔除）：只处理可见帧，平移/缩放时开销 O(可见) 而非 O(全图)。
+    /// 剔除边界外扩 100pt，避免贴边节点的文字/图片被切。
+    private struct FrameDrawList {
+        let visible: [NodeFrame]
+        let visibleIds: Set<UUID>
+        /// 全部文本块 id（驱逐缓存用；与可见性无关，节点仍在文档即保留纹理）。
+        let allTextBlockIds: Set<UUID>
+        /// 全部图片块 id（驱逐缓存用）。
+        let allImageBlockIds: Set<UUID>
+
+        static func make(snapshot: LayoutSnapshot, camera: Camera, viewportSize: CGSize) -> FrameDrawList {
+            let viewport = viewportWorldRect(camera: camera, viewportSize: viewportSize)
+                .insetBy(dx: -100, dy: -100)
+            var visible: [NodeFrame] = []
+            var textIds = Set<UUID>()
+            var imageIds = Set<UUID>()
+            // 一次遍历同时收集可见帧 + 全部块 id，避免多遍 O(全图)。
+            for frame in snapshot.frames.values {
+                for block in frame.blocks {
+                    if block.text != nil {
+                        textIds.insert(block.blockId)
+                    } else {
+                        imageIds.insert(block.blockId)
+                    }
+                }
+                if frame.rect.intersects(viewport) {
+                    visible.append(frame)
+                }
+            }
+            return FrameDrawList(
+                visible: visible,
+                visibleIds: Set(visible.map(\.id)),
+                allTextBlockIds: textIds,
+                allImageBlockIds: imageIds
+            )
+        }
     }
 
     private func drawSelectionStrokes(
@@ -659,10 +731,17 @@ final class MetalRenderer {
 
     private enum EdgeInset { case left, right }
 
-    private func edgeVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
+    private func edgeVertices(
+        snapshot: LayoutSnapshot,
+        visibleIds: Set<UUID>,
+        camera: Camera
+    ) -> [SolidVertex] {
         let color = rgba(.separatorColor)
         let thickness = max(1.25, min(3, 2 * camera.scale))
-        return snapshot.edges.flatMap { edge in
+        // R4：任一端点可见才画该边。
+        return snapshot.edges
+            .filter { visibleIds.contains($0.fromId) || visibleIds.contains($0.toId) }
+            .flatMap { edge in
             zip(edge.points, edge.points.dropFirst()).flatMap { start, end in
                 segmentQuad(
                     from: camera.worldToScreen(start),
@@ -674,8 +753,9 @@ final class MetalRenderer {
         }
     }
 
-    private func fillVertices(snapshot: LayoutSnapshot, camera: Camera) -> [SolidVertex] {
-        orderedFrames(snapshot).flatMap { frame in
+    private func fillVertices(frames: [NodeFrame], camera: Camera) -> [SolidVertex] {
+        // R4：只处理可见帧。
+        frames.flatMap { frame in
             let rect = screenRect(frame.rect, camera: camera)
             if let fill = frame.fill {
                 if frame.isRoot {
@@ -878,10 +958,6 @@ final class MetalRenderer {
             width: rect.width * camera.scale,
             height: rect.height * camera.scale
         )
-    }
-
-    private func orderedFrames(_ snapshot: LayoutSnapshot) -> [NodeFrame] {
-        snapshot.frames.values.sorted { $0.id.uuidString < $1.id.uuidString }
     }
 
     private func rgba(_ color: NSColor) -> SIMD4<Float> {

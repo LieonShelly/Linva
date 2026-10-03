@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import MetalKit
 import SwiftUI
 
@@ -67,7 +68,12 @@ struct CanvasActions {
 }
 
 struct CanvasMetalView: NSViewRepresentable {
-    @ObservedObject var session: DocumentSession
+    // 性能（R5）：不观察 session —— camera 等高频 @Published 变化不再触发代表视图更新
+    // 与宿主视图整树重布局（实测每次相机发布 ~10ms 布局开销，热点是工具栏分段控件
+    // sizeThatFits）。画布重绘改由 CanvasMTKView 直接订阅 session.objectWillChange 命令式
+    // 触发（setNeedsDisplay，不经过 SwiftUI 布局）。updateNSView 仍在 ContentView body
+    // 因其他状态（选中/布局/编辑等）重求值时同步 actions 等。
+    let session: DocumentSession
     var focusRequest: Int = 0
     var actions = CanvasActions()
 
@@ -105,18 +111,7 @@ struct CanvasMetalView: NSViewRepresentable {
     func updateNSView(_ view: CanvasMTKView, context: Context) {
         view.session = session
         view.actions = actions
-        view.refreshCursorForTool()
-        // D1：布局变化（工具栏切换/⌘Z/⌘⇧Z）经 session.fitVersion 统一触发一次再适配。
-        if session.fitVersion != view.appliedFitVersion {
-            view.appliedFitVersion = session.fitVersion
-            view.markNeedsFitContent()
-        }
-        // 仅标记需要适应；真正改 camera 延后到 runloop，避免 Publishing changes from within view updates.
-        if session.camera == Camera() {
-            view.markNeedsFitContent()
-        }
-        view.scheduleFitContentIfNeeded()
-        view.setNeedsDisplay(view.bounds)
+        view.handleSessionChange()
         view.restoreKeyboardFocusIfNeeded(request: focusRequest)
     }
 }
@@ -146,6 +141,10 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
 
     private let renderer: MetalRenderer?
     private var gesture: CanvasPointerGesture = .none
+    private var sessionChangeCancellable: AnyCancellable?
+    private var cameraRevisionCancellable: AnyCancellable?
+    private var isScrolling = false
+    private var scrollDebounceTimer: Timer?
     private var isSpaceHeld = false
     private var appliedFocusRequest = 0
     private var appliedCanvasTool: CanvasTool?
@@ -171,6 +170,51 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         delegate = self
 
         registerForDraggedTypes([.png, .tiff, .fileURL])
+
+        // 性能（R5）：命令式订阅 session 变化做重绘/fit，不经过 SwiftUI 代表视图更新与
+        // 宿主视图布局（camera 每帧发布时那才是 ~10ms 的主线程大头）。@Published 先发
+        // willChange 后赋值，故 receive(on: main) 延到下一 runloop 再读值。
+        sessionChangeCancellable = session.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.handleSessionChange()
+            }
+
+        // 性能 R5：非手势相机提交（工具栏缩放/适应/加载/居中）→ 命令式重绘 + fit 检查。
+        // 手势路径各自直接写 session.camera（普通属性，零发布）并 setNeedsDisplay。
+        cameraRevisionCancellable = session.$cameraCommittedRevision
+            .receive(on: DispatchQueue.main)
+            .dropFirst()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.handleSessionChange()
+                self.setNeedsDisplay(self.bounds)
+            }
+    }
+
+    /// 任一 session @Published 变化后的命令式处理：fit 调度 + 重绘（替代 updateNSView 的
+    /// 全量 setNeedsDisplay；手势路径已各自直接 setNeedsDisplay，此订阅兜底非手势变化）。
+    func handleSessionChange() {
+        refreshCursorForTool()
+        // D1：布局变化（工具栏切换/⌘Z/⌘⇧Z）经 session.fitVersion 统一触发一次再适配。
+        if session.fitVersion != appliedFitVersion {
+            appliedFitVersion = session.fitVersion
+            markNeedsFitContent()
+        }
+        if session.camera == Camera() {
+            markNeedsFitContent()
+        }
+        scheduleFitContentIfNeeded()
+        setNeedsDisplay(bounds)
+        // 仅非手势中、非滚动中的相机变化（工具栏缩放/适应/加载）才刷新百分比显示，
+        // 避免每帧发布驱动 SwiftUI 工具栏重布局（性能 R5）。
+        if gesture == .none, !isScrolling {
+            session.syncZoomPercent()
+        }
+    }
+
+    deinit {
+        scrollDebounceTimer?.invalidate()
     }
 
     @available(*, unavailable)
@@ -210,7 +254,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
 
             var camera = self.session.camera
             camera.fit(contentBounds: contentBounds, viewport: viewport)
-            self.session.camera = camera
+            self.session.commitCamera(camera)
             self.didFitContent = true
             self.setNeedsDisplay(self.bounds)
         }
@@ -267,6 +311,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
 
     override func otherMouseUp(with event: NSEvent) {
         gesture = .none
+        session.syncZoomPercent()   // 性能 R5
     }
 
     private func beginPointerGesture(with event: NSEvent) {
@@ -344,8 +389,11 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         case .none:
             break
         case let .pan(origin, lastPoint):
-            session.camera.translation.x += point.x - lastPoint.x
-            session.camera.translation.y += point.y - lastPoint.y
+            // 性能（R5）：camera 是普通属性，手势写入零发布；渲染由 setNeedsDisplay 驱动。
+            var camera = session.camera
+            camera.translation.x += point.x - lastPoint.x
+            camera.translation.y += point.y - lastPoint.y
+            session.camera = camera
             gesture = .pan(origin: origin, lastPoint: point)
             setNeedsDisplay(bounds)
         case let .marquee(origin, _, additive, tracking):
@@ -365,7 +413,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
                 lastPoint: point
             )
             setNeedsDisplay(bounds)
-        case let .drag(movingIds, _, lastPoint):
+        case let .drag(movingIds, _, _):
             let intent = computeDropIntent(at: point, movingIds: movingIds)
             gesture = .drag(movingIds: movingIds, intent: intent, lastPoint: point)
             setNeedsDisplay(bounds)
@@ -416,6 +464,7 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         }
         // 手势复位（defer）后放置高亮消失，主动重绘一次，不依赖 SwiftUI 间接链路。
         setNeedsDisplay(bounds)
+        session.syncZoomPercent()   // 性能 R5：手势结束才提交缩放百分比显示
     }
 
     private func computeDropIntent(at point: CGPoint, movingIds: Set<UUID>) -> DropIntent? {
@@ -528,12 +577,24 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         let zoom = exp(-event.scrollingDeltaY * sensitivity)
         let newScale = min(max(session.camera.scale * zoom, 0.2), 4)
 
-        session.camera.scale = newScale
-        session.camera.translation = CGPoint(
+        // 性能（R5）：camera 是普通属性，滚动写入零发布。
+        var camera = session.camera
+        camera.scale = newScale
+        camera.translation = CGPoint(
             x: anchor.x - worldAnchor.x * newScale,
             y: anchor.y - worldAnchor.y * newScale
         )
+        session.camera = camera
         setNeedsDisplay(bounds)
+
+        // 性能 R5：滚动中不逐事件刷新百分比（避免工具栏重布局）；停止 150ms 后提交一次。
+        isScrolling = true
+        scrollDebounceTimer?.invalidate()
+        scrollDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            self.isScrolling = false
+            self.session.syncZoomPercent()
+        }
     }
 
     // MARK: - 图片拖入（FR-G2；独立于搬枝 DropIntent）

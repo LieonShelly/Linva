@@ -24,7 +24,9 @@ ALLOW_RULES=(
   "Layout|Foundation AppKit CoreGraphics CoreText"
   "Session|Foundation Combine CoreGraphics"
   # Render 追加 ImageIO：ImageTextureCache CGImageSource 降采样解码（2026-10-01 图片节点）。
-  "Render|Foundation AppKit CoreGraphics ImageIO Metal MetalKit SwiftUI simd"
+  # Render 追加 Combine：CanvasMTKView 命令式订阅 session.objectWillChange 触发重绘，
+  #   规避 camera 高频发布触发的 SwiftUI 整树重布局（2026-10-03 画布性能 R5）。
+  "Render|Foundation AppKit Combine CoreGraphics ImageIO Metal MetalKit SwiftUI simd"
   # App 追加 ImageIO：图片归一器 CGImageSource 解码（2026-10-01 图片节点）。
   "App|Foundation AppKit SwiftUI ImageIO"
 )

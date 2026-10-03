@@ -18,7 +18,16 @@ final class DocumentSession: ObservableObject {
     @Published var fileURL: URL?
     @Published var isDirty = false
     @Published private(set) var undoRevision = 0
-    @Published var camera = Camera()
+    /// 相机：普通属性，不 @Published —— 手势（平移/缩放）每帧写入不发布，避免 SwiftUI
+    /// 观察者（ContentView @ObservedObject）每帧重求值 body → 工具栏反复重布局（性能 R5）。
+    /// 画布渲染直接读本属性；非手势相机写入经 commitCamera() 发布一次低频已提交信号。
+    var camera = Camera()
+    /// 相机"已提交"版本号（非手势相机变化：工具栏缩放/适应/加载/居中）。CanvasMTKView
+    /// 订阅它触发重绘；commitCamera 同时同步 zoomPercent。
+    @Published private(set) var cameraCommittedRevision = 0
+    /// 工具栏缩放百分比镜像（性能 R5）：仅在相机"提交"边界由 syncZoomPercent() 更新，
+    /// 避免每帧相机发布驱动 SwiftUI 工具栏重布局。
+    @Published private(set) var zoomPercent = 100
     @Published var canvasTool: CanvasTool = .select
     @Published var snapshot: LayoutSnapshot
     @Published private(set) var selectedIds: Set<UUID> = []
@@ -311,7 +320,24 @@ final class DocumentSession: ObservableObject {
         guard let frame = snapshot.frames[id] else { return }
         var cam = camera
         cam.center(on: frame.rect, viewport: viewport)
-        camera = cam
+        commitCamera(cam)
+    }
+
+    /// 把当前相机缩放写入 zoomPercent 镜像（工具栏显示）。只在"提交"边界调用，
+    /// 不随每帧平移/缩放事件发布（性能 R5）。
+    func syncZoomPercent() {
+        let p = Int((camera.scale * 100).rounded())
+        if p != zoomPercent {
+            zoomPercent = p
+        }
+    }
+
+    /// 非手势相机写入入口（工具栏缩放/适应/加载/居中/重置）：一次赋值 + 一次低频发布
+    /// （cameraCommittedRevision 供画布重绘；zoomPercent 供工具栏显示），不随每帧事件发布。
+    func commitCamera(_ newValue: Camera) {
+        camera = newValue
+        cameraCommittedRevision += 1
+        syncZoomPercent()
     }
 
     /// 逻辑图无左右语义：⌘←/⌘→ 与侧向拖放置灰（FR-L4）；切回辐射恢复。
@@ -478,7 +504,7 @@ final class DocumentSession: ObservableObject {
         editingId = nil
         draftText = ""
         editingController.cancel()
-        camera = Camera()
+        commitCamera(Camera())
         importPreview = nil
         errorMessage = nil
         relayout()

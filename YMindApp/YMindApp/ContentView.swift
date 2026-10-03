@@ -104,7 +104,7 @@ struct ContentView: View {
                     canCopy: session.canCopy,
                     canPaste: session.canPaste,
                     canSetSide: session.canSetSide,
-                    zoomPercent: Int((session.camera.scale * 100).rounded()),
+                    zoomLabel: ZoomPercentLabel(session: session),
                     canvasTool: session.canvasTool,
                     setCanvasTool: { session.canvasTool = $0 },
                     addChild: addChild,
@@ -309,11 +309,13 @@ struct ContentView: View {
         let anchor = CGPoint(x: viewport.width / 2, y: viewport.height / 2)
         let worldAnchor = session.camera.screenToWorld(anchor)
         let newScale = min(max(session.camera.scale * factor, 0.2), 4)
-        session.camera.scale = newScale
-        session.camera.translation = CGPoint(
+        var camera = session.camera
+        camera.scale = newScale
+        camera.translation = CGPoint(
             x: anchor.x - worldAnchor.x * newScale,
             y: anchor.y - worldAnchor.y * newScale
         )
+        session.commitCamera(camera)
     }
 
     private func fit(viewport: CGSize) {
@@ -322,7 +324,7 @@ struct ContentView: View {
         }
         var camera = session.camera
         camera.fit(contentBounds: contentBounds, viewport: viewport)
-        session.camera = camera
+        session.commitCamera(camera)
     }
 
     private func screenRect(for frame: NodeFrame) -> CGRect {
@@ -334,6 +336,20 @@ struct ContentView: View {
                 height: frame.rect.height * session.camera.scale
             )
         )
+    }
+}
+
+/// 性能（R5）：缩放百分比读 session.zoomPercent 镜像（相机"提交"边界才更新）——
+/// 相机每帧 @Published 发布时标签输出不变，SwiftUI 差分判定无布局失效，工具栏不再被
+/// 反复 sizeThatFits（实测每次相机发布 ~10ms 布局开销，热点是工具栏分段控件）。
+struct ZoomPercentLabel: View {
+    @ObservedObject var session: DocumentSession
+
+    var body: some View {
+        Text("\(session.zoomPercent)%")
+            .monospacedDigit()
+            .frame(minWidth: 44)
+            .accessibilityLabel("缩放比例 \(session.zoomPercent)%")
     }
 }
 
