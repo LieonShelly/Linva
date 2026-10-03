@@ -1,59 +1,48 @@
-# YMind 组件规格 — 搜索条（SearchBar）
+# YMind — Component Spec: SearchBar（搜索浮层）
 
-> 层级：**SwiftUI 壳**。⌘F 打开，搜索树节点并逐跳高亮。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
+> SwiftUI 壳层浮层，顶部居中。现状：`SearchBar.swift`，`regularMaterial` 圆角条。
+> 引用 token：`--c-search-*`、`--s-focus-ring`、`--s-search-hit`。
 
 ---
 
 ## 1. 结构
 
-| 属性 | 值 |
-|------|-----|
-| 位置 | 画布顶部居中浮层（工具条下方） |
-| 卡面 | `sem.color.surface.overlay` + `prim.radius.card` (10pt) |
-| 内容 | 放大镜 + 文本域 + 计数 + 上/下跳 + 关闭 |
+```
+[ 🔍 搜索主题…          |  3 / 12  |  ▲  ▼  ✕ ]
+```
+
+| 元素 | 规格 |
+|---|---|
+| 输入框 | 宽 240pt，pill 圆角，聚焦 ring |
+| 计数 | `3 / 12`，等宽数字，次级色 |
+| 上一项 ▲ / 下一项 ▼ | 无匹配禁用 |
+| 关闭 ✕ | Esc |
 
 ---
 
 ## 2. 状态表
 
-| 状态 | 文本域 | 按钮 | 说明 |
-|------|--------|------|------|
-| 默认 | `prim.radius.input` 圆角底，`node.border` | 可点 | |
-| 聚焦 | `sem.color.accent` 边框 + `accent.soft` 3pt | — | 出现即获焦 |
-| 无匹配 | 同聚焦 | 上/下禁用 | 计数 `0 / 0` |
-| 有匹配 | 同聚焦 | 可点 | 计数 `n / N`，`monospacedDigit` |
+| 状态 | 行为 |
+|---|---|
+| **默认** | 聚焦输入框，光标就位 |
+| **无匹配** | 计数 `0 / 0`，上下箭头禁用；画布无高亮 |
+| **有命中** | 计数高亮，当前命中节点画布**居中**（`centerCamera`，Metal 层 `--m-spring-gentle` 补间），命中节点琥珀高亮 `--s-search-hit` |
+| **切换 ▲▼** | Enter/Shift+Enter / 按钮，命中循环 |
+| **关闭** | Esc / ✕ / 失焦，清搜索态 |
 
 ---
 
-## 3. 行为
+## 3. 行为细则
 
-| 事件 | 行为 |
-|------|------|
-| 打开 | ⌘F；文本域获焦；当前节点保留匹配优先回落 |
-| 输入 | 查询变化优先留在仍匹配节点，否则回落首个匹配 |
-| Enter / ↓ | 下一跳；⇧Enter / ↑ 上一跳；Esc 关闭 |
-| 跳转 | `centerCamera` 居中命中节点（`motion.duration.medium`） |
-| 命中高亮 | 画布节点 `sem.color.search` 3pt 描边（Metal 层，叠于选中之上） |
+1. 打开：⌘F / 菜单「搜索…」，`onAppear` 聚焦。
+2. 查询变化：优先留在仍匹配的当前节点，否则回落第一个匹配（现状逻辑，保持）。
+3. 命中节点居中动画在 **Metal 相机**层做补间（`motion-tokens.md §4.6`），SwiftUI 只改 `session.search` 状态。
+4. 关闭后：高亮清除，画布回到原视图位置。
 
 ---
 
-## 4. 动效
+## 4. 无障碍
 
-| 事件 | token |
-|------|-------|
-| 出现/关闭 | `motion.duration.fast` 自顶滑入/淡入（`motion.easing.out`） |
-| 计数变化 | `.animation(.snappy, value:)` 轻微过渡（可省略） |
-
----
-
-## 5. 无障碍 / 合规
-
-- 文本域有 `.accessibilityLabel`；上/下按钮有 `.help`（上一项 ⇧Enter / 下一项 Enter）。
-- 全键盘：Enter/Esc/方向键导航。
-
----
-
-## 变更记录
-| 日期 | 说明 |
-|------|------|
-| 2026-10-02 | 首版：顶部浮层搜索条 + 状态/行为/动效，锚定 `SearchBar` |
+- 输入框有 label「搜索主题」。
+- 计数有 `accessibilityLabel`（现状已有）。
+- 上下箭头有 label 与快捷键提示（⇧Enter / Enter）。

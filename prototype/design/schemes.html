@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-scheme="A" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>YMind — 配色方案对比</title>
+<style>
+  /* =====================================================================
+     4 套色系方案（都保留原生 macOS 外壳：红绿灯 + 标准工具栏 + SF Pro）。
+     差异只在画布 / 节点 / 根节点 / 连线 / accent 的配色体系。
+     开发参考：最终值映射到 design-tokens.md 的 primitive/semantic 层。
+     ===================================================================== */
+  :root{
+    /* 方案 A「系统原生 System」— 画布=系统灰，节点=系统白/灰，accent=系统蓝，无网格 */
+    --canvas:#ececec; --node:#ffffff; --node-border:#d1d1d6;
+    --root:#3a3a3c; --root-text:#ffffff;
+    --ink:#1d1d1f; --ink-muted:#6e6e73;
+    --line:#c7c7cc; --line-hover:#0a84ff;
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.14);
+    --danger:#d70015; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.05);
+    --fill-bg-sage:#eef4ed; --fill-bd-sage:#9db8a0;
+    --fill-bg-sky:#eef4fa; --fill-bd-sky:#8fb0cc;
+    --fill-bg-sand:#faf4e6; --fill-bd-sand:#cdb279;
+    --fill-bg-rose:#faf0ee; --fill-bd-rose:#cf9d97;
+    --fill-bg-lilac:#f3eff9; --fill-bd-lilac:#a99bc3;
+    --fill-root-sage:#3f5d47; --fill-root-sky:#35506e; --fill-root-sand:#6d5a26;
+    --fill-root-rose:#6e3d39; --fill-root-lilac:#4e4365;
+  }
+  :root[data-scheme="A"][data-theme="dark"]{
+    --canvas:#1e1e1e; --node:#2c2c2e; --node-border:#48484a;
+    --root:#3a3a3c; --root-text:#ffffff;
+    --ink:#f5f5f7; --ink-muted:#98989d;
+    --line:#3a3a3c; --line-hover:#0a84ff;
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.22);
+    --danger:#ff453a; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.35);
+    --fill-bg-sage:#24352a; --fill-bd-sage:#47614e;
+    --fill-bg-sky:#1f2b3a; --fill-bd-sky:#3f5a75;
+    --fill-bg-sand:#33301f; --fill-bd-sand:#6b5c30;
+    --fill-bg-rose:#36211f; --fill-bd-rose:#6b413d;
+    --fill-bg-lilac:#2c2740; --fill-bd-lilac:#554a6e;
+    --fill-root-sage:#47614e; --fill-root-sky:#3f5a75; --fill-root-sand:#6b5c30;
+    --fill-root-rose:#6b413d; --fill-root-lilac:#554a6e;
+  }
+
+  /* 方案 B「冷调素雅 Cool」— 近白画布，白卡轻阴影，根节点深中性，MindNode 默认风 */
+  :root[data-scheme="B"]{
+    --canvas:#f5f5f7; --node:#ffffff; --node-border:#d8d8dc;
+    --root:#1d1d1f; --root-text:#ffffff;
+    --ink:#1d1d1f; --ink-muted:#86868b;
+    --line:#c9c9ce; --line-hover:#0071e3;
+    --accent:#0071e3; --accent-soft:rgba(0,113,227,.14);
+    --danger:#d70015; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.05),0 3px 10px rgba(0,0,0,.06);
+    --fill-bg-sage:#eaf3ea; --fill-bd-sage:#8fb39a;
+    --fill-bg-sky:#e9f1f8; --fill-bd-sky:#7fa7c9;
+    --fill-bg-sand:#f8f1e0; --fill-bd-sand:#c6ac71;
+    --fill-bg-rose:#f8ecea; --fill-bd-rose:#c99890;
+    --fill-bg-lilac:#f0ebf7; --fill-bd-lilac:#a393bf;
+    --fill-root-sage:#33503d; --fill-root-sky:#2c4a66; --fill-root-sand:#5e4f20;
+    --fill-root-rose:#623630; --fill-root-lilac:#453b5c;
+  }
+  :root[data-scheme="B"][data-theme="dark"]{
+    --canvas:#1c1c1e; --node:#2a2a2c; --node-border:#3f3f41;
+    --root:#f5f5f7; --root-text:#1d1d1f;
+    --ink:#f5f5f7; --ink-muted:#98989d;
+    --line:#3f3f41; --line-hover:#0a84ff;
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.22);
+    --danger:#ff453a; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 3px 10px rgba(0,0,0,.4);
+    --fill-bg-sage:#213026; --fill-bd-sage:#3f5a49;
+    --fill-bg-sky:#1e2934; --fill-bd-sky:#3a546b;
+    --fill-bg-sand:#2e2c1e; --fill-bd-sand:#5c5330;
+    --fill-bg-rose:#322020; --fill-bd-rose:#5e3d39;
+    --fill-bg-lilac:#292538; --fill-bd-lilac:#4d4462;
+    --fill-root-sage:#3f5a49; --fill-root-sky:#3a546b; --fill-root-sand:#5c5330;
+    --fill-root-rose:#5e3d39; --fill-root-lilac:#4d4462;
+  }
+
+  /* 方案 C「暖调中性 Warm Neutral」— 极浅暖白，深暖灰根节点，保留一点温度但不纸感 */
+  :root[data-scheme="C"]{
+    --canvas:#f6f5f1; --node:#ffffff; --node-border:#ddd9cf;
+    --root:#2f2c26; --root-text:#f7f5ef;
+    --ink:#2b2822; --ink-muted:#7d786b;
+    --line:#cbc7bb; --line-hover:#8a5b2e;
+    --accent:#8a5b2e; --accent-soft:rgba(138,91,46,.14);
+    --danger:#c0451f; --search-hit:#c96f1a;
+    --shadow:0 1px 2px rgba(40,35,20,.06),0 3px 10px rgba(40,35,20,.07);
+    --fill-bg-sage:#edf2ea; --fill-bd-sage:#94a98d;
+    --fill-bg-sky:#eaf0f4; --fill-bd-sky:#82a2b6;
+    --fill-bg-sand:#f7efdc; --fill-bd-sand:#c2a368;
+    --fill-bg-rose:#f6ebe6; --fill-bd-rose:#c48f82;
+    --fill-bg-lilac:#efeaf3; --fill-bd-lilac:#9f90b2;
+    --fill-root-sage:#40543f; --fill-root-sky:#3b4e5e; --fill-root-sand:#66531f;
+    --fill-root-rose:#613b31; --fill-root-lilac:#4c405c;
+  }
+  :root[data-scheme="C"][data-theme="dark"]{
+    --canvas:#20201d; --node:#2b2b27; --node-border:#43423b;
+    --root:#f0ede3; --root-text:#2b2822;
+    --ink:#efece2; --ink-muted:#9a9487;
+    --line:#43423b; --line-hover:#c98d55;
+    --accent:#c98d55; --accent-soft:rgba(201,141,85,.22);
+    --danger:#e06a45; --search-hit:#e08a2e;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 3px 10px rgba(0,0,0,.4);
+    --fill-bg-sage:#263028; --fill-bd-sage:#47614a;
+    --fill-bg-sky:#222c34; --fill-bd-sky:#41607a;
+    --fill-bg-sand:#34301f; --fill-bd-sand:#6b5a2f;
+    --fill-bg-rose:#392520; --fill-bd-rose:#6b463c;
+    --fill-bg-lilac:#2e293c; --fill-bd-lilac:#554a6c;
+    --fill-root-sage:#47614a; --fill-root-sky:#41607a; --fill-root-sand:#6b5a2f;
+    --fill-root-rose:#6b463c; --fill-root-lilac:#554a6c;
+  }
+
+  /* 方案 D「深色沉浸 Dark」— 暗色优先，画布近黑，根节点用 accent 点亮 */
+  :root[data-scheme="D"]{
+    --canvas:#171719; --node:#262628; --node-border:#3c3c3f;
+    --root:#0a84ff; --root-text:#ffffff;
+    --ink:#f2f2f4; --ink-muted:#9a9aa0;
+    --line:#3a3a3e; --line-hover:#64a8ff;
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.26);
+    --danger:#ff453a; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 4px 14px rgba(0,0,0,.5);
+    --fill-bg-sage:#1d2b23; --fill-bd-sage:#3d5d4a;
+    --fill-bg-sky:#1b2737; --fill-bd-sky:#37608a;
+    --fill-bg-sand:#2c2a1c; --fill-bd-sand:#6a5a2b;
+    --fill-bg-rose:#331f1c; --fill-bd-rose:#6b4038;
+    --fill-bg-lilac:#2a2438; --fill-bd-lilac:#55476e;
+    --fill-root-sage:#3d5d4a; --fill-root-sky:#37608a; --fill-root-sand:#6a5a2b;
+    --fill-root-rose:#6b4038; --fill-root-lilac:#55476e;
+  }
+  :root[data-scheme="D"][data-theme="light"]{
+    --canvas:#e8e8ea; --node:#ffffff; --node-border:#d4d4d7;
+    --root:#0a84ff; --root-text:#ffffff;
+    --ink:#1d1d1f; --ink-muted:#76767c;
+    --line:#c6c6ca; --line-hover:#0a84ff;
+    --accent:#0a84ff; --accent-soft:rgba(10,132,255,.16);
+    --danger:#d70015; --search-hit:#ff9f0a;
+    --shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.05);
+    --fill-bg-sage:#ecf2ec; --fill-bd-sage:#93ae99;
+    --fill-bg-sky:#eaf1f7; --fill-bd-sky:#7ea5c5;
+    --fill-bg-sand:#f7f0e2; --fill-bd-sand:#c3a872;
+    --fill-bg-rose:#f5ebe9; --fill-bd-rose:#c4968e;
+    --fill-bg-lilac:#eeeaF5; --fill-bd-lilac:#a092ba;
+    --fill-root-sage:#405e49; --fill-root-sky:#365570; --fill-root-sand:#6b5826;
+    --fill-root-rose:#6d3f39; --fill-root-lilac:#4f4467;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{font-family:-apple-system,"SF Pro Text","PingFang SC",system-ui,sans-serif;
+    color:var(--ink);background:#d9d9dc;overflow:hidden;-webkit-font-smoothing:antialiased;
+    transition:background .25s}
+  :root[data-theme="dark"] body{background:#101012}
+
+  /* ===== 方案选择条 ===== */
+  .pickbar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,255,255,.7);
+    border-bottom:1px solid rgba(0,0,0,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    position:relative;z-index:30}
+  :root[data-theme="dark"] .pickbar{background:rgba(28,28,30,.75);border-color:rgba(255,255,255,.12)}
+  .pickbar .ttl{font-weight:700;font-size:.85rem;margin-right:4px;white-space:nowrap}
+  .pick{appearance:none;border:1px solid rgba(0,0,0,.18);background:transparent;color:inherit;font:inherit;
+    font-size:.8rem;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:8px}
+  :root[data-theme="dark"] .pick{border-color:rgba(255,255,255,.22)}
+  .pick:hover{background:rgba(0,0,0,.05)}
+  :root[data-theme="dark"] .pick:hover{background:rgba(255,255,255,.08)}
+  .pick.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pick .dots{display:inline-flex;gap:3px}
+  .pick .d{width:10px;height:10px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+  .pickbar .sp{flex:1}
+  .themetoggle{appearance:none;border:1px solid rgba(0,0,0,.18);background:transparent;color:inherit;font:inherit;
+    font-size:.8rem;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer}
+  :root[data-theme="dark"] .themetoggle{border-color:rgba(255,255,255,.22)}
+  .themetoggle:hover{background:rgba(0,0,0,.05)}
+  :root[data-theme="dark"] .themetoggle:hover{background:rgba(255,255,255,.08)}
+
+  /* ===== 窗口 ===== */
+  .wrap{display:flex;height:calc(100vh - 49px)}
+  .win{flex:1;display:flex;flex-direction:column;min-width:0;margin:14px;
+    border-radius:12px;overflow:hidden;background:var(--canvas);
+    box-shadow:0 4px 20px rgba(0,0,0,.2),0 12px 48px rgba(0,0,0,.18);
+    border:1px solid rgba(0,0,0,.15)}
+  :root[data-theme="dark"] .win{border-color:rgba(255,255,255,.14)}
+
+  /* ===== unified titlebar + 标准工具栏 ===== */
+  .titlebar{display:flex;align-items:center;gap:2px;height:52px;padding:0 12px;
+    background:var(--canvas);border-bottom:1px solid rgba(0,0,0,.09);flex:none}
+  :root[data-theme="dark"] .titlebar{border-color:rgba(255,255,255,.1)}
+  .traffic{display:flex;gap:8px;margin-right:10px;align-items:center}
+  .tl{width:12px;height:12px;border-radius:50%}
+  .tl-r{background:#ff5f57}.tl-y{background:#febc2e}.tl-g{background:#28c840}
+  .brand{display:flex;align-items:center;gap:.45rem;min-width:0;margin-right:4px}
+  .brand-name{font-weight:700;font-size:.88rem;letter-spacing:-.01em;white-space:nowrap}
+  .docname{color:var(--ink-muted);font-size:.74rem;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+  .titlebar .sep{width:1px;height:18px;background:rgba(0,0,0,.14);flex:none;margin:0 4px}
+  :root[data-theme="dark"] .titlebar .sep{background:rgba(255,255,255,.16)}
+  .tb{appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;
+    display:inline-flex;align-items:center;gap:.4rem;padding:4px 8px;border-radius:6px;cursor:pointer;
+    font-size:.78rem;font-weight:500;height:28px;transition:background .12s ease}
+  .tb:hover:not(:disabled){background:rgba(0,0,0,.06)}
+  :root[data-theme="dark"] .tb:hover:not(:disabled){background:rgba(255,255,255,.09)}
+  .tb:disabled{opacity:.35;cursor:default}
+  .tb.danger:hover:not(:disabled){background:rgba(215,0,21,.12);color:var(--danger)}
+  .tb .ic{width:14px;height:14px;flex:none}
+  .tb.iconly{padding:4px 6px}
+  .spacer{flex:1}
+
+  /* ===== canvas ===== */
+  .stage{position:relative;flex:1;overflow:hidden;background-color:var(--canvas);transition:background .25s}
+  .world{position:absolute;left:50%;top:50%;width:0;height:0}
+  .edge{position:absolute;left:50%;top:50%;width:2000px;height:1200px;margin-left:-1000px;margin-top:-600px;
+    overflow:visible;pointer-events:none;stroke:var(--line);stroke-width:1.6;stroke-linecap:round;opacity:.8;fill:none}
+  .node{position:absolute;transform:translate(-50%,-50%);padding:9px 16px;
+    background:var(--node);border:1px solid var(--node-border);border-radius:8px;
+    box-shadow:var(--shadow);cursor:pointer;user-select:none;white-space:pre-wrap;max-width:188px;
+    width:max-content;min-width:24px;font-size:.84rem;font-weight:500;line-height:1.35;color:var(--ink);
+    transition:box-shadow .2s ease,border-color .2s ease}
+  .node.selected{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),var(--shadow)}
+  .node.root{background:var(--root);border-color:var(--root);color:var(--root-text);
+    padding:13px 20px;border-radius:10px;max-width:230px;box-shadow:var(--shadow);
+    font-weight:700;font-size:1.02rem;letter-spacing:-.01em}
+  .node.root.selected{box-shadow:0 0 0 3px var(--accent-soft),var(--shadow)}
+  .node.fill-sage{background:var(--fill-bg-sage);border-color:var(--fill-bd-sage)}
+  .node.fill-sky{background:var(--fill-bg-sky);border-color:var(--fill-bd-sky)}
+  .node.fill-sand{background:var(--fill-bg-sand);border-color:var(--fill-bd-sand)}
+  .node.fill-rose{background:var(--fill-bg-rose);border-color:var(--fill-bd-rose)}
+  .node.fill-lilac{background:var(--fill-bg-lilac);border-color:var(--fill-bd-lilac)}
+  .node.root.fill-sage{background:var(--fill-root-sage);border-color:var(--fill-root-sage);color:var(--root-text)}
+  .node.root.fill-sky{background:var(--fill-root-sky);border-color:var(--fill-root-sky);color:var(--root-text)}
+  .node.root.fill-sand{background:var(--fill-root-sand);border-color:var(--fill-root-sand);color:var(--root-text)}
+  .node.root.fill-rose{background:var(--fill-root-rose);border-color:var(--fill-root-rose);color:var(--root-text)}
+  .node.root.fill-lilac{background:var(--fill-root-lilac);border-color:var(--fill-root-lilac);color:var(--root-text)}
+  .node .ntext{pointer-events:none}
+  /* 折叠钮 */
+  .btoggle{position:absolute;transform:translate(-50%,-50%);min-width:20px;height:20px;padding:0 4px;
+    border:1px solid var(--node-border);border-radius:999px;background:var(--node);color:var(--accent);
+    font-size:.68rem;font-weight:600;line-height:1;display:grid;place-items:center;cursor:pointer;
+    box-shadow:var(--shadow);z-index:4}
+  .btoggle.collapsed{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* ===== 说明面板 ===== */
+  .side{width:250px;flex:none;background:var(--canvas);margin:14px 14px 14px 0;border-radius:12px;
+    padding:16px;border:1px solid rgba(0,0,0,.15);overflow:auto}
+  :root[data-theme="dark"] .side{border-color:rgba(255,255,255,.14)}
+  .side h2{margin:0 0 4px;font-size:.92rem}
+  .side .tag{font-size:.7rem;color:var(--ink-muted);margin-bottom:10px}
+  .side p{margin:0 0 10px;font-size:.76rem;line-height:1.6;color:var(--ink-muted)}
+  .side .row{display:flex;align-items:center;gap:8px;font-size:.72rem;margin-bottom:6px;color:var(--ink)}
+  .side .sw{width:34px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.12);flex:none}
+  .side .sw.round{border-radius:11px}
+  .side h3{margin:12px 0 6px;font-size:.76rem;letter-spacing:.02em;color:var(--ink)}
+  .side .pros{margin:0;padding-left:16px}
+  .side .pros li{font-size:.74rem;line-height:1.55;color:var(--ink-muted);margin-bottom:3px}
+</style>
+</head>
+<body>
+  <!-- ===== 方案选择条 ===== -->
+  <div class="pickbar">
+    <span class="ttl">YMind 配色方案</span>
+    <button class="pick on" data-scheme="A"><span class="dots"><span class="d" style="background:#ececec"></span><span class="d" style="background:#3a3a3c"></span><span class="d" style="background:#0a84ff"></span></span>A · 系统原生 <em style="font-style:normal;opacity:.75">（亮色·已选）</em></button>
+    <button class="pick" data-scheme="B"><span class="dots"><span class="d" style="background:#f5f5f7"></span><span class="d" style="background:#1d1d1f"></span><span class="d" style="background:#0071e3"></span></span>B · 冷调素雅</button>
+    <button class="pick" data-scheme="C"><span class="dots"><span class="d" style="background:#f6f5f1"></span><span class="d" style="background:#2f2c26"></span><span class="d" style="background:#8a5b2e"></span></span>C · 暖调中性</button>
+    <button class="pick" data-scheme="D"><span class="dots"><span class="d" style="background:#171719"></span><span class="d" style="background:#0a84ff"></span></span>D · 深色沉浸 <em style="font-style:normal;opacity:.75">（暗色·已选）</em></button>
+    <span class="sp"></span>
+    <button class="themetoggle" id="themeBtn">切换到暗色</button>
+  </div>
+
+  <div class="wrap">
+    <!-- ===== 窗口 mock ===== -->
+    <div class="win">
+      <div class="titlebar">
+        <div class="traffic"><span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span></div>
+        <div class="brand"><span class="brand-name">YMind</span><span class="docname">阅读清单.ymind</span></div>
+        <div class="tb" style="cursor:default"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7l3-3 3 3M6 4v10"/><path d="M3 17h6M5 19l1 1 3-3"/></svg>子主题</div>
+        <div class="tb" style="cursor:default"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/><path d="M17 5v6M14 8h6"/></svg>同级主题</div>
+        <div class="tb danger" style="cursor:default"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M6 7l1 13h10l1-13"/></svg>删除</div>
+        <div class="sep"></div>
+        <div class="tb" style="cursor:default">色点</div>
+        <div class="sep"></div>
+        <div class="tb iconly" style="cursor:default" title="移到左侧"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M9 6l-4 6 4 6"/></svg></div>
+        <div class="tb iconly" style="cursor:default" title="移到右侧"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M15 6l4 6-4 6"/></svg></div>
+        <div class="spacer"></div>
+        <div class="tb iconly" style="cursor:default" title="缩小"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M8 11h6"/></svg></div>
+        <div class="tb" style="cursor:default">100%</div>
+        <div class="tb iconly" style="cursor:default" title="放大"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M11 8v6M8 11h6"/></svg></div>
+        <div class="tb iconly" style="cursor:default" title="适应画布"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3H4v5M15 3h5v5M9 21H4v-5M15 21h5v-5"/></svg></div>
+        <div class="tb iconly" style="cursor:default" title="更多"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="world" id="world">
+          <svg class="edge" id="edgeL"></svg>
+          <div id="nodes"></div>
+          <div id="toggles"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 说明面板 ===== -->
+    <div class="side" id="side"></div>
+  </div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const rootEl = document.documentElement;
+
+  const ROOT = { id:'root', text:'阅读清单', root:true, children:[
+    {id:'a',text:'产品设计',fill:'sage',children:[{id:'a1',text:'Designing for macOS',fill:'sky'},{id:'a2',text:'HIG 指南'}]},
+    {id:'b',text:'思维方法',side:'right',fill:'sand',children:[{id:'b1',text:'卡片笔记法'},{id:'b2',text:'费曼技巧'}]},
+    {id:'c',text:'技术栈',side:'left',fill:'lilac',collapsed:true,children:[{id:'c1',text:'SwiftUI 壳'},{id:'c2',text:'Metal 画布',fill:'rose'}]},
+    {id:'d',text:'待读',side:'left',children:[{id:'d1',text:'认知心理学'}]},
+  ]};
+  let flat = all(ROOT);
+  function all(n,o=[]){o.push(n);(n.children||[]).forEach(c=>all(c,o));return o}
+  function parentOf(n){return flat.find(p=>(p.children||[]).includes(n))}
+  function isHidden(n){let p=parentOf(n);while(p){if(p.collapsed)return true;p=parentOf(p)}return false}
+  function visible(){return flat.filter(n=>n.root||!isHidden(n))}
+
+  let pos = {}, nw = {};
+  function subH(n,isRoot){const kids=n.children||[];const myH=isRoot?60:40;
+    if(!kids.length)return{h:myH};const cH=kids.reduce((s,k)=>s+subH(k,false).h,0)+(kids.length-1)*16;
+    return{h:Math.max(myH,cH)}}
+  function measure(){nw={};document.querySelectorAll('#nodes .node').forEach(el=>{nw[el.dataset.id]=el.offsetWidth})}
+  function relayout(){
+    pos={};pos[ROOT.id]={x:0,y:0};
+    const rights=ROOT.children.filter(b=>b.side!=='left');
+    const lefts=ROOT.children.filter(b=>b.side==='left');
+    const hGap=96;
+    function place(list,dir){
+      if(!list.length)return;
+      const total=list.reduce((s,b)=>s+subH(b,false).h,0)+(list.length-1)*16;
+      let y=-total/2;
+      list.forEach(b=>{
+        const bh=subH(b,false).h;
+        const parentEdge=pos[ROOT.id].x+dir*((nw[ROOT.id]||150)/2);
+        pos[b.id]={x:parentEdge+dir*(hGap+(nw[b.id]||80)/2),y:y+bh/2};
+        const kids=b.children||[];
+        if(kids.length){
+          const ct=kids.reduce((s,k)=>s+subH(k,false).h,0)+(kids.length-1)*16;
+          let cy=pos[b.id].y-ct/2;
+          kids.forEach(k=>{const kh=subH(k,false).h;
+            const kEdge=pos[b.id].x+dir*((nw[b.id]||80)/2);
+            pos[k.id]={x:kEdge+dir*(72+(nw[k.id]||60)/2),y:cy+kh/2};cy+=kh+16;});
+        }
+        y+=bh+16;
+      });
+    }
+    place(rights,1);place(lefts,-1);
+  }
+  function countDesc(n){return(n.children||[]).reduce((s,c)=>s+1+countDesc(c),0)}
+
+  function render(){
+    const nEl=$('#nodes');nEl.innerHTML='';
+    visible().forEach(n=>{
+      const el=document.createElement('div');
+      el.className='node'+(n.root?' root':'');
+      if(n.fill)el.classList.add('fill-'+n.fill);
+      if(n.id==='a1')el.classList.add('selected');
+      el.dataset.id=n.id;
+      el.innerHTML='<span class="ntext"></span>';
+      el.querySelector('.ntext').textContent=n.text;
+      const p=pos[n.id];
+      if(p){el.style.left=p.x+'px';el.style.top=p.y+'px';}
+      nEl.appendChild(el);
+    });
+    renderToggles();renderEdges();
+  }
+  function renderToggles(){
+    const tEl=$('#toggles');tEl.innerHTML='';
+    visible().filter(n=>(n.children||[]).length).forEach(n=>{
+      const p=pos[n.id]; if(!p) return;
+      const dir=n.side==='left'?-1:1;
+      const half=(nw[n.id]||80)/2;
+      const b=document.createElement('div');
+      b.className='btoggle'+(n.collapsed?' collapsed':'');
+      b.style.left=(p.x+dir*(half+20))+'px';b.style.top=p.y+'px';
+      b.textContent=n.collapsed?('＋'+(countDesc(n)||'')):'−';
+      tEl.appendChild(b);
+    });
+  }
+  function renderEdges(){
+    const el=$('#edgeL');el.setAttribute('viewBox','-1000 -600 2000 1200');
+    let path=el.querySelector('path');
+    if(!path){path=document.createElementNS('http://www.w3.org/2000/svg','path');el.appendChild(path)}
+    let d='';
+    visible().filter(n=>!n.root).forEach(n=>{
+      const p=parentOf(n),pp=pos[p.id],cp=pos[n.id];
+      if(!pp||!cp) return;
+      const dir=n.side==='left'?-1:1;
+      const sx=pp.x+dir*((nw[p.id]||80)/2),sy=pp.y;
+      const ex=cp.x-dir*((nw[n.id]||80)/2),ey=cp.y,mx=(sx+ex)/2;
+      d+=`M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey} `;
+    });
+    path.setAttribute('d',d);
+    path.setAttribute('stroke','var(--line)');
+    path.setAttribute('stroke-width','1.7');
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke-linecap','round');
+  }
+
+  // 方案说明数据
+  const SCHEMES = {
+    A:{ name:'系统原生', tag:'System · 跟系统走，零品牌色', desc:'画布即系统 windowBackgroundColor，节点用系统白/深灰卡 + 细分隔线描边，accent 取系统蓝。整体就是"系统设置 / 备忘录"的质感，最稳妥、最不抢戏。',
+      colors:[['--canvas','画布'],['--node','节点'],['--root','根节点'],['--line','连线'],['--accent','强调色']],
+      pros:['最接近原生 macOS，和 Finder/备忘录同一语言','代码改动最小：画布 clearColor 已是系统灰，几乎只需对齐边框与圆角','暗色模式天然适配'] },
+    B:{ name:'冷调素雅', tag:'Cool · MindNode 默认风', desc:'近白画布（#f5f5f7）+ 白卡轻阴影 + 深中性根节点，唯一彩色是系统蓝 accent。干净、专注、留白多，是"高级感"最标准的一档。',
+      colors:[['--canvas','画布'],['--node','节点'],['--root','根节点'],['--line','连线'],['--accent','强调色']],
+      pros:['公认的脑图"默认好看"范式（MindNode 主视觉）','留白大，长时间看图不累','填色 5 色保留，作为分类工具不喧宾夺主'] },
+    C:{ name:'暖调中性', tag:'Warm · 保留温度但不纸感', desc:'极浅暖白画布 + 深暖灰根节点 + 琥珀 accent。把旧设计的"温度"留下来，但去掉米黄纸感、衬线与点阵，外壳仍是原生工具栏。',
+      colors:[['--canvas','画布'],['--node','节点'],['--root','根节点'],['--line','连线'],['--accent','强调色']],
+      pros:['温和耐看，适合长期阅读场景','与"纸感"划清界限但保留个人辨识度','accent 琥珀在亮暗两态都成立'] },
+    D:{ name:'深色沉浸', tag:'Dark · 暗色优先，accent 点亮', desc:'画布近黑 + 深灰卡 + 系统蓝根节点。暗色模式是主形态，亮色也提供。观感现代、专注，类似 XMind/Apple 系统级深色工具。',
+      colors:[['--canvas','画布'],['--node','节点'],['--root','根节点'],['--line','连线'],['--accent','强调色']],
+      pros:['深色用户第一选择，护眼且沉浸','根节点用 accent 蓝点亮，层级清楚','与 macOS 深色系统环境融为一体'] },
+  };
+
+  function paintSide(scheme){
+    const s=SCHEMES[scheme];
+    const css=getComputedStyle(document.documentElement);
+    let h=`<h2>${scheme} · ${s.name}</h2><div class="tag">${s.tag}</div><p>${s.desc}</p>`;
+    h+=`<h3>关键色</h3>`;
+    s.colors.forEach(([prop,label])=>{
+      const val=css.getPropertyValue(prop).trim();
+      h+=`<div class="row"><span class="sw" style="background:${val}"></span><span>${label} <code style="color:var(--ink-muted)">${val}</code></span></div>`;
+    });
+    h+=`<h3>亮点</h3><ul class="pros">${s.pros.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+    $('#side').innerHTML=h;
+  }
+
+  function applyScheme(s){rootEl.setAttribute('data-scheme',s);
+    document.querySelectorAll('.pick').forEach(b=>b.classList.toggle('on',b.dataset.scheme===s));
+    paintSide(s);
+  }
+
+  document.querySelectorAll('.pick').forEach(b=>{
+    b.addEventListener('click',()=>applyScheme(b.dataset.scheme));
+  });
+
+  $('#themeBtn').addEventListener('click',()=>{
+    const dark=rootEl.getAttribute('data-theme')==='dark';
+    rootEl.setAttribute('data-theme',dark?'light':'dark');
+    $('#themeBtn').textContent=dark?'切换到暗色':'切换到亮色';
+    paintSide(rootEl.getAttribute('data-scheme')||'A');
+  });
+
+  // 两遍布局
+  render();measure();relayout();render();
+  applyScheme('A');
+})();
+</script>
+</body>
+</html>
