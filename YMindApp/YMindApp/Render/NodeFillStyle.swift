@@ -31,6 +31,36 @@ enum NodeFillStyle {
         appearanceAware(hue: hue[fill]!, light: (0.42, 0.30), dark: (0.38, 0.36))
     }
 
+    /// 无填色根节点底（A/D token）：亮 = 深中性 #3a3a3c，暗 = accent 蓝 #0a84ff。
+    static func rootDefault() -> NSColor {
+        NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            return isDark
+                ? NSColor(srgbRed: 0x0A/255, green: 0x84/255, blue: 0xFF/255, alpha: 1)
+                : NSColor(srgbRed: 0x3A/255, green: 0x3A/255, blue: 0x3C/255, alpha: 1)
+        }
+    }
+
+    /// 连线（A/D token）：亮 #c7c7cc，暗 #3a3a3e。
+    static func line() -> NSColor {
+        NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            return isDark
+                ? NSColor(srgbRed: 0x3A/255, green: 0x3A/255, blue: 0x3E/255, alpha: 1)
+                : NSColor(srgbRed: 0xC7/255, green: 0xC7/255, blue: 0xCC/255, alpha: 1)
+        }
+    }
+
+    /// 画布底（A/D token）：亮 = 系统 windowBackgroundColor，暗 = #171719。
+    static func canvasBackground() -> NSColor {
+        NSColor(name: nil) { appearance in
+            let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            return isDark
+                ? NSColor(srgbRed: 0x17/255, green: 0x17/255, blue: 0x19/255, alpha: 1)
+                : NSColor.windowBackgroundColor
+        }
+    }
+
     /// 由 token 色相 + 明度档（s, b）构造随外观解析的动态 NSColor。
     private static func appearanceAware(
         hue: CGFloat,
