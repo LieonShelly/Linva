@@ -24,7 +24,7 @@
 |---|---|---|---|
 | 1.1 | Apple Developer 账号注册 | ☐ | $99/年。**阻塞一切签名/上传** |
 | 1.2 | App Store Connect 创建 App 记录 | ☐ | 需要 Bundle ID、显示名、类目（生产力/效率） |
-| 1.3 | 隐私政策页 | ☐ | App Store Connect 必填链接，即使不收集数据。可 GitHub Pages 放一页 |
+| 1.3 | 隐私政策页 | 🔄 | 已写 `docs/privacy-policy.md`（无数据收集/无网络/无第三方 SDK，如实声明）。**待用户**：GitHub 仓库 Settings → Pages → 从 `docs/` 发布，得到可访问 URL（App Store Connect 必填链接） |
 | 1.4 | 隐私营养标签（App Store Connect 问卷） | ☐ | 不收集数据→选「不收集」即可，与 0.3 清单一致 |
 
 ## 阶段 2 — 体验补全（影响过审与首用）
