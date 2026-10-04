@@ -442,21 +442,21 @@ static func sampleCubic(_ p0: CGPoint, _ c1: CGPoint, _ c2: CGPoint, _ p1: CGPoi
 }
 ```
 
-- [ ] **Step 5: 引擎拆 placeFrames**（RadialLayout / LogicLayout）
+- [ ] **Step 5: 引擎拆 place**（RadialLayout / LogicLayout；签名统一，见 ledger Ruling）
 
 ```swift
-// RadialLayout：把 layout() 拆出 placeFrames，返回纯 frames；删产边逻辑。
-static func placeFrames(document: MindMapDocument, measure: TextMeasure) -> [UUID: NodeFrame] {
+// RadialLayout：把 layout() 拆为 place(document:measure:)，返回排布元组；删产边逻辑。
+static func place(document: MindMapDocument, measure: TextMeasure)
+    -> (frames: [UUID: NodeFrame], branchToggles: [BranchToggle], imagePayloads: [UUID: ImagePayload]) {
     var frames: [UUID: NodeFrame] = [:]
     var toggles: [BranchToggle] = []
     // ……复用现有 placeBranch 排布逻辑，只填充 frames 与 toggles；不再产 edge/connector。
-    // 返回 frames（toggles 由调用方另行收集，或返回 (frames, toggles) 元组）。
-    return frames
+    let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
+    return (frames, toggles, payloads)
 }
-// 保留 layout()（兼容旧测试）＝ placeFrames + 默认 elbow connectors，或直接删除 layout() 由 Pipeline 用 placeFrames。
 // LogicLayout 同理。
 ```
-> 说明：`placeFrames` 也可返回 `(frames: [UUID: NodeFrame], branchToggles: [BranchToggle], imagePayloads: [UUID: ImagePayload])`，由 Pipeline 组合。实现时按现有 `layout()` 结构拆解，确保 frames/toggles/imagePayloads 与现状一致（旧 `layout()` 测试改调用新结构）。
+> 说明：`place(document:measure:)` 返回排布元组（frames/toggles/payloads），LayoutPipeline 与 PNGExporter 共用。旧 `layout()` 删除（由 Pipeline / PNGExporter 改用 `place`）。
 
 - [ ] **Step 6: 实现三个 Provider**（EdgeStyleProviders.swift）
 
@@ -532,11 +532,20 @@ func relayout(document: MindMapDocument) -> LayoutSnapshot {
 ```
 > 说明：`place(document:measure:)` 返回 `(frames, toggles, payloads)` 元组（`placeFrames` 的扩展）。旧 `layout()` 删除或保留为测试便利。
 
-- [ ] **Step 8: 跑测试确认通过**（registry + pipeline + radial/logic + 新 Provider）
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/EdgeStyleRegistryTests -only-testing:YMindAppTests/LayoutPipelineTests -only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/LogicLayoutTests`
-Expected: PASS（且 brace 产 Connector、elbow/curve 产每边 Connector）。
+- [ ] **Step 8: PNGExporter 走 Pipeline（ledger Ruling — 非零改动）**
 
-- [ ] **Step 9: 更新 DocumentSession fit 用 Provider**（替换 Task 2 的临时 `effectiveArrangement`）
+`PNGExporter.data(...)` 里 `expanded` 后改为：
+```swift
+// 删掉直连引擎的 switch（RadialLayout/LogicLayout.layout 已删）；走 Pipeline（有效排布 + Provider）。
+let snapshot = LayoutPipeline().relayout(document: expanded)
+```
+（`LayoutPipeline` 在 `Session/`，同模块可直接用；删除 `case .radial/.logic` switch，消除对 `layout()` 的依赖。）
+
+- [ ] **Step 9: 跑测试确认通过**（registry + pipeline + radial/logic + 新 Provider + 导出）
+Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/EdgeStyleRegistryTests -only-testing:YMindAppTests/LayoutPipelineTests -only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/LogicLayoutTests -only-testing:YMindAppTests/PNGExporterTests`
+Expected: PASS（且 brace 产 Connector、elbow/curve 产每边 Connector、PNG 导出按当前样式）。
+
+- [ ] **Step 10: 更新 DocumentSession fit 用 Provider**（替换 Task 2 的临时 `effectiveArrangement`）
 ```swift
 private func effectiveArrangement() -> LayoutKind {
     EdgeStyleRegistry.provider(for: model.document.edgeStyle).requiresLogicArrangement
@@ -545,10 +554,10 @@ private func effectiveArrangement() -> LayoutKind {
 ```
 Run 相关 DocumentSessionTests。Expected: PASS。
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 11: Commit**
 ```bash
-git add YMindApp/YMindApp/Layout/EdgeStyleProvider.swift YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift YMindApp/YMindApp/Layout/EdgeStyleProviders.swift YMindApp/YMindApp/Layout/LayoutSupport.swift YMindApp/YMindApp/Layout/RadialLayout.swift YMindApp/YMindApp/Layout/LogicLayout.swift YMindApp/YMindApp/Session/LayoutPipeline.swift YMindApp/YMindApp/Session/DocumentSession.swift YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift YMindApp/YMindAppTests/LayoutPipelineTests.swift YMindApp/YMindAppTests/RadialLayoutTests.swift YMindApp/YMindAppTests/LogicLayoutTests.swift
-git commit -m "feat(edge-style): EdgeStyleProvider abstraction + placeFrames split + Elbow/Curve/Brace providers"
+git add YMindApp/YMindApp/Layout/EdgeStyleProvider.swift YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift YMindApp/YMindApp/Layout/EdgeStyleProviders.swift YMindApp/YMindApp/Layout/LayoutSupport.swift YMindApp/YMindApp/Layout/RadialLayout.swift YMindApp/YMindApp/Layout/LogicLayout.swift YMindApp/YMindApp/Session/LayoutPipeline.swift YMindApp/YMindApp/Session/DocumentSession.swift YMindApp/YMindApp/Render/PNGExporter.swift YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift YMindApp/YMindAppTests/LayoutPipelineTests.swift YMindApp/YMindAppTests/RadialLayoutTests.swift YMindApp/YMindAppTests/LogicLayoutTests.swift YMindApp/YMindAppTests/PNGExporterTests.swift
+git commit -m "feat(edge-style): EdgeStyleProvider abstraction + place split + Elbow/Curve/Brace providers"
 ```
 
 ---
