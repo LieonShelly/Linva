@@ -87,7 +87,7 @@ final class DocumentSession: ObservableObject {
             clearRecovery: false
         )
         self.editingController = EditingController(model: model, commandBus: commandBus)
-        self.snapshot = LayoutSnapshot(frames: [:], edges: [])
+        self.snapshot = LayoutSnapshot(frames: [:])
         self.selectedIds = model.selectedIds
         self.selectionAnchorId = model.selectionAnchorId
         self.fileURL = nil

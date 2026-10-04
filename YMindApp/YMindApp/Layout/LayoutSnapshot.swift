@@ -54,11 +54,21 @@ struct NodeFrame: Equatable {
     }
 }
 
-struct EdgeGeometry: Equatable {
-    let fromId: UUID
-    let toId: UUID
-    let side: Side
-    let points: [CGPoint]
+/// 连接器标记：在连接器某处绘制的小符号（如起点圆点）。
+struct ConnectorMarker: Equatable {
+    enum Kind: Equatable {
+        case circle
+    }
+    let kind: Kind
+    let center: CGPoint
+    let radius: CGFloat
+}
+
+/// 统一连线契约：任何样式产一个可描边的连接器（path 折线 + 可选 marker）。
+struct ConnectorGeometry: Equatable {
+    let id: UUID
+    let path: [CGPoint]
+    let marker: ConnectorMarker?
 }
 
 struct BranchToggle: Equatable {
@@ -71,18 +81,18 @@ struct BranchToggle: Equatable {
 
 struct LayoutSnapshot: Equatable {
     let frames: [UUID: NodeFrame]
-    let edges: [EdgeGeometry]
+    let connectors: [ConnectorGeometry]
     let branchToggles: [BranchToggle]
     let imagePayloads: [UUID: ImagePayload]
 
     init(
         frames: [UUID: NodeFrame],
-        edges: [EdgeGeometry],
+        connectors: [ConnectorGeometry] = [],
         branchToggles: [BranchToggle] = [],
         imagePayloads: [UUID: ImagePayload] = [:]
     ) {
         self.frames = frames
-        self.edges = edges
+        self.connectors = connectors
         self.branchToggles = branchToggles
         self.imagePayloads = imagePayloads
     }

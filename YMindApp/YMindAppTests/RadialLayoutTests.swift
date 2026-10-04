@@ -10,7 +10,27 @@ struct RadialLayoutTests {
         let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
         let root = snap.frames[doc.root.id]!
         #expect(root.center == .zero)
-        #expect(snap.edges.isEmpty)
+        #expect(snap.connectors.isEmpty)
+    }
+
+    @Test func singleRoot_producesNoConnectors() {
+        let doc = MindMapDocument.blank()
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        #expect(snap.connectors.isEmpty)
+    }
+
+    @Test func radialProducesConnectors() {
+        var doc = MindMapDocument.blank()
+        let child = Node(text: "子", side: .right)
+        doc.root.children = [child]
+
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        #expect(!snap.connectors.isEmpty)
+        for c in snap.connectors {
+            #expect(c.path.count >= 2)
+            #expect(c.id == child.id)
+            #expect(c.marker == nil)
+        }
     }
 
     @Test func leftAndRight_childrenOppositeX() {
@@ -23,7 +43,7 @@ struct RadialLayoutTests {
         let rf = snap.frames[right.id]!
         #expect(lf.center.x < 0)
         #expect(rf.center.x > 0)
-        #expect(snap.edges.count == 2)
+        #expect(snap.connectors.count == 2)
     }
 
     @Test func collapsed_hidesDescendants() {
@@ -112,13 +132,14 @@ struct RadialLayoutTests {
         let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
         let childFrame = try #require(snap.frames[child.id])
         let grandchildFrame = try #require(snap.frames[grandchild.id])
-        let edge = try #require(snap.edges.last)
+        let connector = try #require(snap.connectors.last)
 
         #expect(grandchildFrame.side == .left)
         #expect(grandchildFrame.center.x < childFrame.center.x)
-        #expect(edge.points.count == 4)
-        #expect(edge.points.first?.x == childFrame.rect.minX)
-        #expect(edge.points.last?.x == grandchildFrame.rect.maxX)
+        #expect(connector.id == grandchild.id)
+        #expect(connector.path.count == 4)
+        #expect(connector.path.first?.x == childFrame.rect.minX)
+        #expect(connector.path.last?.x == grandchildFrame.rect.maxX)
     }
 
     @Test func textMeasure_preservesExplicitEmptyLines() {

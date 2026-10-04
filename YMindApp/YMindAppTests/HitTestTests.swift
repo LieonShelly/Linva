@@ -17,7 +17,7 @@ struct HitTestTests {
             collapsed: false,
             hiddenCount: 0
         )
-        let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
+        let snapshot = LayoutSnapshot(frames: [id: frame], connectors: [])
         let camera = Camera(
             translation: CGPoint(x: 100, y: 80),
             scale: 2
@@ -45,8 +45,7 @@ struct HitTestTests {
         let large = makeFrame(id: largeId, size: NodeSize(width: 100, height: 100))
         let small = makeFrame(id: smallId, size: NodeSize(width: 20, height: 20))
         let snapshot = LayoutSnapshot(
-            frames: [largeId: large, smallId: small],
-            edges: []
+            frames: [largeId: large, smallId: small]
         )
 
         #expect(
@@ -61,7 +60,7 @@ struct HitTestTests {
     @Test func hitTestCanvas_returnsNodeAndEmpty() {
         let id = UUID()
         let frame = makeFrame(id: id, size: NodeSize(width: 40, height: 20))
-        let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
+        let snapshot = LayoutSnapshot(frames: [id: frame], connectors: [])
 
         #expect(
             hitTestCanvas(screenPoint: .zero, snapshot: snapshot, camera: Camera())
@@ -90,7 +89,7 @@ struct HitTestTests {
             collapsed: false,
             hiddenCount: 0
         )
-        let snapshot = LayoutSnapshot(frames: [a: fa, b: fb], edges: [])
+        let snapshot = LayoutSnapshot(frames: [a: fa, b: fb], connectors: [])
 
         #expect(
             marqueeIntersectingIds(
@@ -120,7 +119,7 @@ struct HitTestTests {
             collapsed: false, hiddenCount: 0
         )
         let snapshot = LayoutSnapshot(
-            frames: [nodeId: frame], edges: [], branchToggles: [toggle]
+            frames: [nodeId: frame], connectors: [], branchToggles: [toggle]
         )
         let hit = hitTestCanvas(
             screenPoint: CGPoint(x: 58, y: 0),
@@ -149,10 +148,10 @@ struct HitTestTests {
             collapsed: false, hiddenCount: 0
         )
         let collapsedSnapshot = LayoutSnapshot(
-            frames: [nodeId: frame], edges: [], branchToggles: [collapsedToggle]
+            frames: [nodeId: frame], connectors: [], branchToggles: [collapsedToggle]
         )
         let expandedSnapshot = LayoutSnapshot(
-            frames: [nodeId: frame], edges: [], branchToggles: [expandedToggle]
+            frames: [nodeId: frame], connectors: [], branchToggles: [expandedToggle]
         )
 
         // 「−12」把胶囊加宽到 15，其末端必须仍可命中。
@@ -192,7 +191,7 @@ struct HitTestTests {
             hiddenCount: 0
         )
         let snapshot = LayoutSnapshot(
-            frames: [nodeId: frame], edges: [], branchToggles: [overlapping]
+            frames: [nodeId: frame], connectors: [], branchToggles: [overlapping]
         )
 
         #expect(
@@ -251,7 +250,7 @@ struct ImageHitTests {
                 ),
             ]
         )
-        let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
+        let snapshot = LayoutSnapshot(frames: [id: frame], connectors: [])
         let camera = Camera()
         // 块 rect top-left 原点：世界 rect = frame.rect.min + local 偏移
         let worldRect = CGRect(
@@ -278,7 +277,7 @@ struct ImageHitTests {
                 ),
             ]
         )
-        let snapshot = LayoutSnapshot(frames: [id: frame], edges: [])
+        let snapshot = LayoutSnapshot(frames: [id: frame], connectors: [])
         #expect(hitTestImageBlock(screenPoint: CGPoint(x: 500, y: 500), snapshot: snapshot, camera: Camera()) == nil)
     }
 }

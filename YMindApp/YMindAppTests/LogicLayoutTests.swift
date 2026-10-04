@@ -47,16 +47,15 @@ struct LogicLayoutTests {
         let snap = LogicLayout.layout(document: doc, measure: TextMeasure())
         let root = try #require(snap.frames[doc.root.id])
         let af = try #require(snap.frames[a.id])
-        let edge = try #require(snap.edges.first)
+        let connector = try #require(snap.connectors.first)
 
-        #expect(edge.fromId == doc.root.id)
-        #expect(edge.toId == a.id)
-        #expect(edge.side == .right)
-        #expect(edge.points.count == 4)
-        #expect(edge.points[0] == CGPoint(x: root.rect.maxX, y: root.center.y))
-        #expect(edge.points[3] == CGPoint(x: af.rect.minX, y: af.center.y))
-        #expect(edge.points[1].x == edge.points[3].x)
-        #expect(edge.points[2].x == edge.points[3].x)
+        #expect(connector.id == a.id)
+        #expect(connector.marker == nil)
+        #expect(connector.path.count == 4)
+        #expect(connector.path[0] == CGPoint(x: root.rect.maxX, y: root.center.y))
+        #expect(connector.path[3] == CGPoint(x: af.rect.minX, y: af.center.y))
+        #expect(connector.path[1].x == connector.path[3].x)
+        #expect(connector.path[2].x == connector.path[3].x)
     }
 
     @Test func descendants_moveFurtherRight() throws {
@@ -98,7 +97,7 @@ struct LogicLayoutTests {
 
         let snap = LogicLayout.layout(document: doc, measure: TextMeasure())
         #expect(snap.frames.count == 1)
-        #expect(snap.edges.isEmpty)
+        #expect(snap.connectors.isEmpty)
         let toggles = snap.branchToggles.filter { $0.nodeId == doc.root.id }
         #expect(toggles.count == 1)
         #expect(toggles[0].side == .right)

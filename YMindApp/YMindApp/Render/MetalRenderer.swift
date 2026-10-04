@@ -741,11 +741,11 @@ final class MetalRenderer {
     ) -> [SolidVertex] {
         let color = rgba(.separatorColor)
         let thickness = max(1.25, min(3, 2 * camera.scale))
-        // R4：任一端点可见才画该边。
-        return snapshot.edges
-            .filter { visibleIds.contains($0.fromId) || visibleIds.contains($0.toId) }
-            .flatMap { edge in
-            zip(edge.points, edge.points.dropFirst()).flatMap { start, end in
+        // R4：连接器 id 为子节点 id；子节点已放置（可见）才画该连接器。
+        return snapshot.connectors
+            .filter { visibleIds.contains($0.id) }
+            .flatMap { connector in
+            zip(connector.path, connector.path.dropFirst()).flatMap { start, end in
                 segmentQuad(
                     from: camera.worldToScreen(start),
                     to: camera.worldToScreen(end),
@@ -1031,7 +1031,7 @@ final class MetalRenderer {
         // imagePayloads 必须随行：否则 drawImage 见不到图，导出缺图。
         let exportSnapshot = LayoutSnapshot(
             frames: snapshot.frames,
-            edges: snapshot.edges,
+            connectors: snapshot.connectors,
             imagePayloads: snapshot.imagePayloads
         )
 

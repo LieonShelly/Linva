@@ -7,13 +7,13 @@ enum RadialLayout {
         measure: TextMeasure
     ) -> LayoutSnapshot {
         var frames: [UUID: NodeFrame] = [:]
-        var edges: [EdgeGeometry] = []
+        var connectors: [ConnectorGeometry] = []
 
-        func edge(
+        func connector(
             from parent: NodeFrame,
             to child: NodeFrame,
             side: Side
-        ) -> EdgeGeometry {
+        ) -> ConnectorGeometry {
             let direction: CGFloat = side == .left ? -1 : 1
             let start = CGPoint(
                 x: parent.center.x + direction * parent.size.width / 2,
@@ -25,16 +25,15 @@ enum RadialLayout {
             )
             let controlX = (start.x + end.x) / 2
 
-            return EdgeGeometry(
-                fromId: parent.id,
-                toId: child.id,
-                side: side,
-                points: [
+            return ConnectorGeometry(
+                id: child.id,
+                path: [
                     start,
                     CGPoint(x: controlX, y: start.y),
                     CGPoint(x: controlX, y: end.y),
                     end,
-                ]
+                ],
+                marker: nil
             )
         }
 
@@ -59,7 +58,7 @@ enum RadialLayout {
                 blocks: LayoutSupport.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
-            edges.append(edge(from: parent, to: frame, side: side))
+            connectors.append(connector(from: parent, to: frame, side: side))
 
             guard !node.collapsed, !metadata.children.isEmpty else {
                 return
@@ -123,7 +122,7 @@ enum RadialLayout {
         guard !rootCollapsed else {
             return LayoutSnapshot(
                 frames: frames,
-                edges: edges,
+                connectors: connectors,
                 branchToggles: makeBranchToggles(frames: frames, root: document.root),
                 imagePayloads: rootPayloads
             )
@@ -175,7 +174,7 @@ enum RadialLayout {
         let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
         return LayoutSnapshot(
             frames: frames,
-            edges: edges,
+            connectors: connectors,
             branchToggles: makeBranchToggles(frames: frames, root: document.root),
             imagePayloads: payloads
         )

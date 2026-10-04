@@ -6,16 +6,15 @@ import Foundation
 enum LogicLayout {
     static func layout(document: MindMapDocument, measure: TextMeasure) -> LayoutSnapshot {
         var frames: [UUID: NodeFrame] = [:]
-        var edges: [EdgeGeometry] = []
+        var connectors: [ConnectorGeometry] = []
 
-        func edge(from parent: NodeFrame, to child: NodeFrame) -> EdgeGeometry {
+        func connector(from parent: NodeFrame, to child: NodeFrame) -> ConnectorGeometry {
             let start = CGPoint(x: parent.rect.maxX, y: parent.center.y)
             let end = CGPoint(x: child.rect.minX, y: child.center.y)
-            return EdgeGeometry(
-                fromId: parent.id,
-                toId: child.id,
-                side: .right,
-                points: [start, CGPoint(x: end.x, y: start.y), CGPoint(x: end.x, y: end.y), end]
+            return ConnectorGeometry(
+                id: child.id,
+                path: [start, CGPoint(x: end.x, y: start.y), CGPoint(x: end.x, y: end.y), end],
+                marker: nil
             )
         }
 
@@ -39,7 +38,7 @@ enum LogicLayout {
                 blocks: LayoutSupport.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
-            edges.append(edge(from: parent, to: frame))
+            connectors.append(connector(from: parent, to: frame))
 
             guard !node.collapsed, !metadata.children.isEmpty else { return }
 
@@ -82,7 +81,7 @@ enum LogicLayout {
         guard !rootCollapsed else {
             return LayoutSnapshot(
                 frames: frames,
-                edges: edges,
+                connectors: connectors,
                 branchToggles: makeBranchToggles(frames: frames, root: document.root),
                 imagePayloads: rootPayloads
             )
@@ -103,7 +102,7 @@ enum LogicLayout {
         let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
         return LayoutSnapshot(
             frames: frames,
-            edges: edges,
+            connectors: connectors,
             branchToggles: makeBranchToggles(frames: frames, root: document.root),
             imagePayloads: payloads
         )
