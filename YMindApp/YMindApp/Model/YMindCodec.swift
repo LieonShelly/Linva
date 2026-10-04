@@ -56,6 +56,10 @@ enum YMindCodec {
             doc.root.collapsed = false
             doc.version = 6
         }
+        // 迁移：v6 → v7（edgeStyle 缺省 .elbow；MindMapDocument 解码器对缺失字段天然容错）。
+        if doc.version == 6 {
+            doc.version = 7
+        }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
         }
@@ -79,8 +83,8 @@ enum YMindCodec {
             c.children = stripSide(c.children, warnings: &warnings)
             return c
         }
-        // layout 是文档属性：sanitize 重建时须保留，否则逻辑图文档消毒后被重置为辐射。
-        return MindMapDocument(version: document.version, root: root, layout: document.layout)
+        // layout/edgeStyle 是文档属性：sanitize 重建时须保留，否则逻辑图/曲线文档消毒后被重置。
+        return MindMapDocument(version: document.version, root: root, layout: document.layout, edgeStyle: document.edgeStyle)
     }
 
     private static func stripSide(_ nodes: [Node], warnings: inout [String]?) -> [Node] {

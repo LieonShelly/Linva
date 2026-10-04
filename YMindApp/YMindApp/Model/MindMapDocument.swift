@@ -8,17 +8,30 @@ enum LayoutKind: String, Codable, Sendable, Equatable, Hashable {
     case logic
 }
 
+/// 连线样式：同父节点的分支连线绘制方式（随 `.ymind` 持久化，v7）。
+enum EdgeStyle: String, Codable, CaseIterable, Sendable, Hashable {
+    /// 折线（肘形），默认。
+    case elbow
+    /// 平滑曲线。
+    case curve
+    /// 大括号（树形括号）。
+    case brace
+}
+
 struct MindMapDocument: Equatable, Codable, Sendable {
-    static let currentVersion = 6
+    static let currentVersion = 7
     var version: Int
     var root: Node
     /// 布局（文档属性，v5 起持久化；v4 及以下缺省 .radial，零拒绝迁移）。
     var layout: LayoutKind = .radial
+    /// 连线样式（文档属性，v7 起持久化；v6 及以下缺省 .elbow，零拒绝迁移）。
+    var edgeStyle: EdgeStyle = .elbow
 
-    init(version: Int, root: Node, layout: LayoutKind = .radial) {
+    init(version: Int, root: Node, layout: LayoutKind = .radial, edgeStyle: EdgeStyle = .elbow) {
         self.version = version
         self.root = root
         self.layout = layout
+        self.edgeStyle = edgeStyle
     }
 
     static func blank(rootText: String = "中心主题") -> MindMapDocument {
@@ -26,7 +39,7 @@ struct MindMapDocument: Equatable, Codable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, root, layout
+        case version, root, layout, edgeStyle
     }
 
     init(from decoder: Decoder) throws {
@@ -35,5 +48,7 @@ struct MindMapDocument: Equatable, Codable, Sendable {
         root = try c.decode(Node.self, forKey: .root)
         // v4 及以下无 layout 字段 → 缺省 .radial（同 fill/image/blocks 缺省容错模式）。
         layout = try c.decodeIfPresent(LayoutKind.self, forKey: .layout) ?? .radial
+        // v6 及以下无 edgeStyle 字段 → 缺省 .elbow（同 layout 缺省容错模式）。
+        edgeStyle = try c.decodeIfPresent(EdgeStyle.self, forKey: .edgeStyle) ?? .elbow
     }
 }
