@@ -24,7 +24,7 @@
 |---|---|---|---|
 | 1.1 | Apple Developer 账号注册 | ☐ | $99/年。**阻塞一切签名/上传** |
 | 1.2 | App Store Connect 创建 App 记录 | ☐ | 需要 Bundle ID、显示名、类目（生产力/效率） |
-| 1.3 | 隐私政策页 | 🔄 | 已写 `docs/privacy-policy.md`（无数据收集/无网络/无第三方 SDK，如实声明）。**待用户**：GitHub 仓库 Settings → Pages → 从 `docs/` 发布，得到可访问 URL（App Store Connect 必填链接） |
+| 1.3 | 隐私政策页 | ✅ | 已部署到 GitHub Pages：**正式 URL `https://lieonshelly.github.io/YMind/`**（HTTP 200，浅/深色自适应）。用 `gh-pages` 孤儿分支隔离发布，只含 `index.html`，`/docs` 内部文档不公开。内容 `docs/privacy-policy.md` 同步。提交 `d21e38f` |
 | 1.4 | 隐私营养标签（App Store Connect 问卷） | ☐ | 不收集数据→选「不收集」即可，与 0.3 清单一致 |
 
 ## 阶段 2 — 体验补全（影响过审与首用）
@@ -66,6 +66,7 @@
 - 2026-10-04: 阶段0 0.2-0.4（entitlements/隐私清单/版权）commit 6b12fb2
 - 2026-10-04: 阶段0 0.5 Bundle ID → com.linva.app（commit 170a65a）
 - 2026-10-04: 阶段1 1.3 隐私政策初稿（commit f72d558）
+- 2026-10-04: 阶段1 1.3 隐私政策部署到 GitHub Pages（gh-pages 分支 d21e38f，URL https://lieonshelly.github.io/YMind/）
 - 2026-10-04: 阶段2 2.2 About 面板修复（commit 5abd9ab）
 - 2026-10-04: 阶段2 2.3 千节点性能自测（基准测试 + 真实渲染验证）
 - 2026-10-04: 阶段3 3.2 元数据文档 + 截图流程打通（示例素材，最终截图待 2.1 设计稿）
