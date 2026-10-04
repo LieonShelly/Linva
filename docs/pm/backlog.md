@@ -14,6 +14,7 @@
 | **就绪** | 节点内嵌图片（图 + 文共存） | [opportunities/2026-09-30-节点图片功能.md](opportunities/2026-09-30-节点图片功能.md) | 做（I9 C9 E7 → 11.6） | 竞品成熟度基线；**排期已定 A（进 1.0，与迁移闭环并行）**。PRD 已交付：[prd-ymind-image-node-2026-09-30](../../prds/prd-ymind-image-node-2026-09-30/prd.md)（含并行接缝 FR-G6）。下一步：开发 Agent 开工 |
 | **就绪** | 上架就绪（App Store 提交） | [launch-checklist-2026-09-30.md](launch-checklist-2026-09-30.md) | —（工程合规，非需求课题） | P0：AppIcon 填充 + 隐私清单 + 元数据；P1：崩溃实测 / 部署目标 / entitlements 确认。开发终端逐项销项 |
 | **就绪** | 新增布局类型：逻辑图（总分树）+ 布局切换器 | [opportunities/2026-10-02-新增布局类型.md](opportunities/2026-10-02-新增布局类型.md) | 做（I8 C8 E5 → 12.8） | 产品本人拍板场景「总分归纳」（读书笔记/知识体系）；Codec v5 + LogicLayout + 工具栏切换器；**排期待拍板（推荐紧随 1.0）**。PRD 已交付：[prd-ymind-layout-2026-10-02](../../prds/prd-ymind-layout-2026-10-02/prd.md) |
+| **就绪** | Node 连线样式：曲线 / 大括号 / 正交折线（全局一键切换） | [opportunities/2026-10-04-连线样式.md](opportunities/2026-10-04-连线样式.md) | 做（I7 C8 E7 → 8.0） | 竞品连线样式 = 成熟度基线；全局一种、一键切换、无损重绘、**随文档持久化 + 入命令栈**（产品本人拍板）。原型 `prototype/edge-style.html`。**PRD 已交付**：[prd-ymind-edge-style-2026-10-04](../../prds/prd-ymind-edge-style-2026-10-04/prd.md)。排期待拍板 |
 
 ## 变更记录
 
@@ -27,6 +28,9 @@
 | 2026-09-30 | 图片功能**排期定 A（进 1.0，与迁移闭环并行）**；PRD 已交付 `docs/prds/prd-ymind-image-node-2026-09-30/`（含并行接缝 FR-G6） |
 | 2026-10-02 | 新探索「新增布局类型」：调研（XMind 11 结构清单 + 适用场景 [EVIDENCE]）+ 内部访谈（产品本人选「总分归纳」场景）+ 机会卡片 + ICE 决策**做**（12.8，逻辑图）；原型 `prototype/layout-switcher.html`；**排期待拍板（推荐紧随 1.0）** |
 | 2026-10-02 | **PRD 已交付**：`docs/prds/prd-ymind-layout-2026-10-02/`（prd.md + addendum.md，bmad-prd Fast path），FR-L1…L5 + 验收要点；排期决策点仍开放（§9.1，推荐 A 紧随 1.0） |
+| 2026-10-04 | 新探索「Node 连线样式」：外部调研（MindNode/Miro/SimpleMind/XMind/MindNoodle 连线样式均为全局一种 [EVIDENCE]）+ 内部访谈（动机=视觉+语义两者都要、作用域=全局、样式集=曲线+大括号+正交折线、成功=一键切换无损）+ 机会卡片 + ICE 决策**做**（9.3，连线样式）；原型 `prototype/edge-style.html`（浏览器验证三样式渲染 + 切换交互）；排期待拍板 |
+| 2026-10-04 | **PRD 已交付**：`docs/prds/prd-ymind-edge-style-2026-10-04/`（prd.md + addendum.md，bmad-prd Fast path），FR-E1…E5 + 验收要点 + 原型对照；排期决策点仍开放（§9.1，推荐紧随 1.0） |
+| 2026-10-04 | **PRD 修订**：产品本人拍板**连线样式持久化 + 入命令栈**（推翻原「会话态、不持久化」）；FR-E1 改文档字段 + Codec 迁移；新增 Codec 版本号与布局 PRD 协调点（§9.4）；ICE E 6→7（9.3→8.0）仍「做」 |
 
 ---
 

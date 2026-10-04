@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YMind — 连线样式 · 正交折线 / 曲线 / 大括号（逻辑树）</title>
+  <style>
+    :root {
+      --paper: #e7e4dc; --ink: #26221b; --accent: #b85c3a; --line: #c9c4b8;
+      --panel: #f6f3ec; --ok: #2f6f4f; --warn: #9a5b1f; --muted: #6e685c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--paper); color: var(--ink); font-size: 14px; }
+    header { display: flex; align-items: center; gap: 18px; padding: 10px 18px;
+      background: #26221b; color: #f6f3ec; }
+    header .brand { font-weight: 700; letter-spacing: .5px; }
+    header .brand small { opacity: .6; font-weight: 400; margin-left: 8px; }
+    main { display: grid; grid-template-columns: 1fr 360px; height: calc(100vh - 52px); }
+    .stage { position: relative; overflow: hidden; background: #fbf9f3; }
+    .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .style-badge { position: absolute; top: 12px; left: 12px; background: rgba(38,34,27,.82);
+      color: #f6f3ec; padding: 5px 12px; border-radius: 20px; font-size: 12px; letter-spacing: .5px; }
+    .node rect { fill: #fff; stroke: var(--ink); stroke-width: 1.2; rx: 8; }
+    .node.root rect { fill: var(--ink); }
+    .node.root text { fill: #fff; }
+    .node text { fill: var(--ink); font-size: 12px; }
+    .edge { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .panel { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; }
+    .panel h2 { margin: 0 0 4px; font-size: 16px; }
+    .panel .sub { color: var(--muted); margin: 0 0 14px; font-size: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+      background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+    .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .style-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .style-card { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; cursor: pointer;
+      background: #fff; text-align: center; }
+    .style-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .style-card svg { width: 100%; height: 62px; display: block; }
+    .style-card .name { font-weight: 600; margin-top: 6px; font-size: 13px; }
+    .style-card .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+    .toast { margin-top: 12px; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+    .toast.ok { background: #e2efe6; border: 1px solid #b8d6c2; color: var(--ok); }
+    ul { padding-left: 18px; margin: 8px 0; }
+    li { margin: 4px 0; }
+    .xref { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 10px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">YMind<small>连线样式线框 · 逻辑树</small></div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <div class="style-badge" id="style-badge">正交折线（默认）</div>
+      <svg id="map" viewBox="0 0 940 560"></svg>
+    </div>
+
+    <div class="panel">
+      <h2>连线样式</h2>
+      <p class="sub">逻辑树（父左子右）下三种连线形态，一键切换。</p>
+
+      <div class="style-picker">
+        <div class="style-card active" id="card-elbow" data-style="elbow">
+          <svg viewBox="0 0 120 62"><g fill="#fff" stroke="#26221b" stroke-width="1">
+            <rect x="4" y="24" width="22" height="14" rx="4"/><rect x="94" y="8" width="22" height="14" rx="4"/><rect x="94" y="40" width="22" height="14" rx="4"/></g>
+            <g stroke="#26221b" stroke-width="1.6" fill="none"><path d="M26 31 H60 V15 H94"/><path d="M26 31 H60 V47 H94"/></g></svg>
+          <div class="name">正交折线</div><div class="desc">现状默认 · 横出竖落横进</div>
+        </div>
+        <div class="style-card" id="card-curve" data-style="curve">
+          <svg viewBox="0 0 120 62"><g fill="#fff" stroke="#26221b" stroke-width="1">
+            <rect x="4" y="24" width="22" height="14" rx="4"/><rect x="94" y="8" width="22" height="14" rx="4"/><rect x="94" y="40" width="22" height="14" rx="4"/></g>
+            <g stroke="#26221b" stroke-width="1.6" fill="none"><path d="M26 31 C44 31, 76 15, 94 15"/><path d="M26 31 C44 31, 76 47, 94 47"/></g></svg>
+          <div class="name">曲线</div><div class="desc">水平切向 S 曲线（对齐 XMind）</div>
+        </div>
+        <div class="style-card" id="card-brace" data-style="brace">
+          <svg viewBox="0 0 120 62"><g fill="#fff" stroke="#b85c3a" stroke-width="1">
+            <rect x="4" y="24" width="22" height="14" rx="4"/><rect x="94" y="8" width="22" height="14" rx="4"/><rect x="94" y="40" width="22" height="14" rx="4"/></g>
+            <g stroke="#b85c3a" stroke-width="1.8" fill="none" stroke-linecap="round">
+            <path d="M40 12 Q28 12 28 20 L28 31 Q28 34 20 34 M20 34 Q28 34 28 37 L28 48 Q28 50 40 50 M26 34 H30"/></g></svg>
+          <div class="name">大括号</div><div class="desc">父→嘴→一组 `}` · 子不连边</div>
+        </div>
+      </div>
+
+      <div class="row"><button class="btn" id="btn-cycle">循环切换（⇧E）</button></div>
+      <p class="note">切换即时重绘、无损；样式随文档持久化 + ⌘Z 可撤销。<b>大括号</b>在任意布局下按总分树（父左子右竖排）显示，子节点不连边、靠括号分组。</p>
+
+      <div class="toast ok" id="toast" hidden>已切换为 <span id="toast-name">正交折线</span></div>
+
+      <h2 style="margin-top:18px">大括号几何</h2>
+      <p class="sub">按参考 HTML 公式（spec D2/D3）：</p>
+      <ul>
+        <li>父 → 短横线 → 括号<b>中点（嘴）</b>，嘴朝父。</li>
+        <li>括号 <code>xTip</code>（嘴）→ <code>xStem</code>（竖直直线）→ <code>xRight</code>；顶部/底部小圆弧（Q）+ 中段竖直直线（L）+ 折入/折出嘴。</li>
+        <li><code>yTop/yBottom</code> = 首/末子中心；单子按节点高·0.85 张开（最小 28）。</li>
+        <li><code>r = min(16, 跨度/4, xRight−xStem, xStem−xTip)</code>。</li>
+        <li>父<b>垂直对齐中间子</b>；子竖排右、<b>不连边</b>；可选嘴旁小圆圈（折叠标记）。</li>
+      </ul>
+
+      <div class="xref">spec docs/superpowers/specs/2026-10-04-ymind-edge-style-design.md · 视觉伴侣 brace-xmind.html</div>
+    </div>
+  </main>
+
+  <script>
+    // ================= 数据：总分树 =================
+    const TREE = { id:'root', text:'产品规划', children:[
+      { id:'a', text:'需求', children:[ {id:'a1',text:'痛点'}, {id:'a2',text:'场景'}, {id:'a3',text:'优先级'} ] },
+      { id:'b', text:'设计', children:[ {id:'b1',text:'交互'}, {id:'b2',text:'视觉'} ] },
+      { id:'c', text:'工程', children:[ {id:'c1',text:'架构'}, {id:'c2',text:'性能'}, {id:'c3',text:'测试'}, {id:'c4',text:'发布'} ] },
+    ] };
+
+    const STYLES = ['elbow','curve','brace'];
+    const STYLE_NAME = { elbow:'正交折线（默认）', curve:'曲线', brace:'大括号' };
+    let current = 'elbow';
+
+    // ================= 逻辑树布局（父左子右竖排；父=首末子中点） =================
+    const nodeH = 34, vGap = 22, hGap = 88, rootW = 96, nodeW = 110;
+    function subtreeH(n) {
+      if (!n.children || !n.children.length) return nodeH;
+      let s = 0;
+      for (const c of n.children) s += subtreeH(c);
+      return s + (n.children.length - 1) * vGap;
+    }
+    function layoutTree() {
+      const byId = {};
+      function place(node, x, slotTop) {
+        const id = node.id;
+        if (!node.children || !node.children.length) {
+          // 叶子：中心在槽中间
+          byId[id] = { id, x, y: slotTop + nodeH / 2, w: nodeW, h: nodeH, leaf: true };
+          return;
+        }
+        let y = slotTop;
+        for (const c of node.children) { place(c, x + nodeW + hGap, y); y += subtreeH(c) + vGap; }
+        // 父 = 首/末子节点中心的垂直中点 → 保证括号嘴对准父
+        const fc = byId[node.children[0].id], lc = byId[node.children[node.children.length - 1].id];
+        byId[id] = { id, x, y: (fc.y + lc.y) / 2, w: rootW, h: nodeH, leaf: false };
+      }
+      place(TREE, 30, 36);
+      return byId;
+    }
+
+    // ================= 连线样式 =================
+    function edgePath(L, pid, cid) {
+      const p = L[pid], c = L[cid];
+      const sx = p.x + p.w/2, sy = p.y;          // 父右缘
+      const ex = c.x - c.w/2, ey = c.y;          // 子左缘
+      if (current === 'elbow') {
+        const mx = (sx+ex)/2;
+        return `M${sx} ${sy} H${mx} V${ey} H${ex}`;
+      }
+      // curve：水平切向 S 曲线
+      const dir = ex >= sx ? 1 : -1;
+      const k = Math.max(18, Math.min(56, Math.abs(ex-sx)*0.4));
+      return `M${sx} ${sy} C${sx+dir*k} ${sy}, ${ex-dir*k} ${ey}, ${ex} ${ey}`;
+    }
+
+    // 大括号几何（按参考 HTML 公式）
+    function bracePath(L, parentId, childIds, isMain) {
+      const p = L[parentId];
+      const first = L[childIds[0]], last = L[childIds[childIds.length-1]];
+      let yTop = first.y, yBottom = last.y;
+      if (childIds.length === 1) {
+        const span = Math.max(nodeH*0.85, 28);
+        yTop = first.y - span/2; yBottom = first.y + span/2;
+      }
+      const yMid = (yTop+yBottom)/2;
+      const w = isMain ? 56 : 34;
+      const hasCircle = false;
+      const xTip = p.x + p.w/2 + (hasCircle?15:10);
+      const xStem = p.x + p.w/2 + w*0.54;
+      const xRight = p.x + p.w/2 + w - 8;
+      const r = Math.min(16, (yBottom-yTop)/4, xRight-xStem, xStem-xTip);
+      const top = `M${xRight} ${yTop} Q${xStem} ${yTop}, ${xStem} ${yTop+r} L${xStem} ${yMid-r} Q${xStem} ${yMid}, ${xTip} ${yMid}`;
+      const bot = `M${xTip} ${yMid} Q${xStem} ${yMid}, ${xStem} ${yMid+r} L${xStem} ${yBottom-r} Q${xStem} ${yBottom}, ${xRight} ${yBottom}`;
+      return { top, bot, mouth:{x:xTip, y:yMid} };
+    }
+
+    // ================= 渲染 =================
+    function render() {
+      const L = layoutTree();
+      const svg = document.getElementById('map');
+      // 画布高度自适应树高（垂直居中）
+      const totalH = subtreeH(TREE);
+      svg.setAttribute('viewBox', `0 0 940 ${Math.max(560, totalH + 60)}`);
+      let out = '';
+      const braceCls = current==='brace' ? ' edge' : ' edge';
+      // 边 / 括号
+      if (current === 'brace') {
+        // 每父一组括号（子不连边）
+        function bracesFor(node, isMain) {
+          if (!node.children || node.children.length===0) return;
+          const ids = node.children.map(c=>c.id);
+          const g = bracePath(L, node.id, ids, isMain);
+          out += `<path class="edge" d="${g.top} ${g.bot}"/>`;
+          out += `<path class="edge" d="M${L[node.id].x+L[node.id].w/2} ${g.mouth.y} H${g.mouth.x}"/>`;
+          for (const c of node.children) if (c.children) bracesFor(c, false);
+        }
+        bracesFor(TREE, true);
+      } else {
+        for (const b of TREE.children) {
+          out += `<path class="${braceCls}" d="${edgePath(L,'root',b.id)}"/>`;
+          if (b.children) for (const g of b.children) out += `<path class="${braceCls}" d="${edgePath(L,b.id,g.id)}"/>`;
+        }
+      }
+      // 节点
+      for (const id in L) {
+        const n = L[id];
+        const cls = id==='root' ? 'node root' : 'node';
+        out += `<g class="${cls}"><rect x="${n.x-n.w/2}" y="${n.y-n.h/2}" width="${n.w}" height="${n.h}" rx="8"/>` +
+          `<text x="${n.x}" y="${n.y+4}" text-anchor="middle">${id==='root'?TREE.text:(L[id]&&byText[id]||id)}</text></g>`;
+      }
+      svg.innerHTML = out;
+      document.getElementById('style-badge').textContent = STYLE_NAME[current];
+      document.querySelectorAll('.style-card').forEach(c=>c.classList.toggle('active', c.dataset.style===current));
+    }
+
+    // 节点文本映射
+    const byText = {};
+    (function walk(n){ if(n.text) byText[n.id]=n.text; (n.children||[]).forEach(walk); })(TREE);
+
+    function setStyle(s){ current=s; render(); const t=document.getElementById('toast'); document.getElementById('toast-name').textContent=STYLE_NAME[s]; t.hidden=false; }
+
+    document.querySelectorAll('.style-card').forEach(card=>card.addEventListener('click',()=>setStyle(card.dataset.style)));
+    document.getElementById('btn-cycle').addEventListener('click',()=>setStyle(STYLES[(STYLES.indexOf(current)+1)%STYLES.length]));
+    document.addEventListener('keydown',e=>{ if(e.shiftKey&&(e.key==='E'||e.key==='e')){ e.preventDefault(); document.getElementById('btn-cycle').click(); } });
+
+    render();
+  </script>
+</body>
+</html>
