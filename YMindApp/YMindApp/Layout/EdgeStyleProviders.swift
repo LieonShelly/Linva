@@ -26,7 +26,9 @@ func perEdgeConnectors(
                 out.append(ConnectorGeometry(
                     id: child.id,
                     path: LayoutSupport.edgePoints(from: start, to: end, style: style),
-                    marker: nil
+                    marker: nil,
+                    fromId: node.id,
+                    toId: child.id
                 ))
             }
             walk(child)
@@ -157,7 +159,7 @@ struct BraceProvider: EdgeStyleProvider {
         let marker: ConnectorMarker? = hasCircle
             ? ConnectorMarker(kind: .circle, center: CGPoint(x: xTip - 4.5 - 1, y: yMid), radius: 4.5)
             : nil
-        return ConnectorGeometry(id: id, path: pts, marker: marker)
+        return ConnectorGeometry(id: id, path: pts, marker: marker, fromId: parent.id, toId: parent.id)
     }
 
     /// 二次贝塞尔采样（Bernstein），含终点（起点由调用方已入列）；每弧 10 段。

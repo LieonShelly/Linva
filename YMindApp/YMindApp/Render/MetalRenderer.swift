@@ -746,7 +746,8 @@ final class MetalRenderer {
         let color = rgba(.separatorColor)
         let thickness = max(1.25, min(3, 2 * camera.scale))
         var out: [SolidVertex] = []
-        for connector in snapshot.connectors where visibleIds.contains(connector.id) {
+        for connector in snapshot.connectors
+        where visibleIds.contains(connector.fromId) || visibleIds.contains(connector.toId) {
             out += zip(connector.path, connector.path.dropFirst()).flatMap { start, end in
                 segmentQuad(
                     from: camera.worldToScreen(start),

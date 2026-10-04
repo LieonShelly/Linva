@@ -65,10 +65,28 @@ struct ConnectorMarker: Equatable {
 }
 
 /// 统一连线契约：任何样式产一个可描边的连接器（path 折线 + 可选 marker）。
+/// `id` 为主标识（brace=父节点，per-edge=子节点）；`fromId`/`toId` 是可见性过滤用
+/// 端点 id（任一端点可见即绘制）。未显式提供时两者均回落为 `id`。
 struct ConnectorGeometry: Equatable {
     let id: UUID
     let path: [CGPoint]
     let marker: ConnectorMarker?
+    let fromId: UUID
+    let toId: UUID
+
+    init(
+        id: UUID,
+        path: [CGPoint],
+        marker: ConnectorMarker?,
+        fromId: UUID? = nil,
+        toId: UUID? = nil
+    ) {
+        self.id = id
+        self.path = path
+        self.marker = marker
+        self.fromId = fromId ?? id
+        self.toId = toId ?? id
+    }
 }
 
 struct BranchToggle: Equatable {

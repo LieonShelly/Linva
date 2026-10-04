@@ -39,6 +39,47 @@ struct MetalRendererTests {
         #expect(hidden.isEmpty)
     }
 
+    /// R4 可见性语义：per-edge 连接器任一端点（父或子）可见即绘制；
+    /// 两端都不可见才丢弃。brace 用 fromId==toId==parent 等价于「父可见」。
+    @Test func connectorVertices_eitherEndpointVisible() throws {
+        try #require(MTLCreateSystemDefaultDevice() != nil)
+        let renderer = try MetalRenderer(device: MTLCreateSystemDefaultDevice()!)
+
+        let parent = UUID()
+        let child = UUID()
+        let snapshot = LayoutSnapshot(
+            frames: [:],
+            connectors: [
+                ConnectorGeometry(
+                    id: child,
+                    path: [.zero, CGPoint(x: 100, y: 0)],
+                    marker: nil,
+                    fromId: parent,
+                    toId: child
+                )
+            ]
+        )
+        let oneSegment = 6  // 1 段 = 1 个 segmentQuad = 6 顶点
+
+        // 父可见 + 子被裁剪 → 仍绘制。
+        let parentVisible = renderer.connectorVertices(
+            snapshot: snapshot, visibleIds: [parent], camera: Camera()
+        )
+        #expect(parentVisible.count == oneSegment)
+
+        // 子可见 + 父被裁剪 → 仍绘制。
+        let childVisible = renderer.connectorVertices(
+            snapshot: snapshot, visibleIds: [child], camera: Camera()
+        )
+        #expect(childVisible.count == oneSegment)
+
+        // 两端都不可见 → 丢弃。
+        let none = renderer.connectorVertices(
+            snapshot: snapshot, visibleIds: Set(), camera: Camera()
+        )
+        #expect(none.isEmpty)
+    }
+
     /// 像素级冒烟：真实 brace 根括号（BraceProvider.buildBrace, isMain+hasCircle）
     /// 的嘴口圆圈必须真的画进离屏渲染（renderImage = PNG 导出同一路径）。
     @Test func renderImage_drawsBraceMouthMarkerCircle() throws {
