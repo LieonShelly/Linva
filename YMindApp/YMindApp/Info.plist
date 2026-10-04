@@ -28,7 +28,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>Linva</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 lieoncx</string>
 	<key>CFBundlePackageType</key>
