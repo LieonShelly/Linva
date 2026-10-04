@@ -8,7 +8,7 @@ enum MindMapCommand: Equatable {
     case appendImageBlock(id: UUID, image: Data, pixelSize: ImagePixelSize)
     case replaceImageBlock(id: UUID, blockId: UUID, image: Data, pixelSize: ImagePixelSize)
     case removeImageBlock(id: UUID, blockId: UUID)
-    case toggleCollapse(id: UUID)
+    case toggleCollapse(id: UUID, side: Side?)
     case setCollapsed(ids: [UUID], collapsed: Bool)
     case moveToParent(ids: [UUID], parentId: UUID)
     case insertSiblings(ids: [UUID], anchorId: UUID, position: BeforeAfter)

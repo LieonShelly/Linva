@@ -99,16 +99,16 @@ final class CommandBus {
                 redo: { _ = self.model.setBlocks(id: id, old: old, new: new) }
             )
 
-        case let .toggleCollapse(id):
+        case let .toggleCollapse(id, side):
             // 折叠方向要求有子节点；展开方向不受限（修复「已折叠但无子」的叶子，见 F1）。
             guard let node = model.node(id: id),
-                  !node.children.isEmpty || node.collapsed else {
+                  !node.children.isEmpty || model.isCollapsed(id) else {
                 return nil
             }
-            model.toggleCollapse(id: id)
+            model.toggleCollapse(id: id, side: side)
             return Entry(
-                undo: { self.model.toggleCollapse(id: id) },
-                redo: { self.model.toggleCollapse(id: id) }
+                undo: { self.model.toggleCollapse(id: id, side: side) },
+                redo: { self.model.toggleCollapse(id: id, side: side) }
             )
 
         case let .setCollapsed(ids, collapsed):
@@ -118,11 +118,11 @@ final class CommandBus {
                 .filter { seen.insert($0).inserted }
                 .filter { model.node(id: $0)?.children.isEmpty == false }
                 .sorted { $0.uuidString < $1.uuidString }
-            guard targets.contains(where: { model.node(id: $0)?.collapsed != collapsed }) else {
+            guard targets.contains(where: { model.isCollapsed($0) != collapsed }) else {
                 return nil
             }
             let previousValues = targets.map { id in
-                (id: id, collapsed: model.node(id: id)?.collapsed ?? false)
+                (id: id, collapsed: model.isCollapsed(id))
             }
             for id in targets {
                 model.setCollapsed(id: id, to: collapsed)

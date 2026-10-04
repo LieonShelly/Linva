@@ -128,7 +128,7 @@ struct CommandBusTests {
         let leaf = model.insertChild(parentId: model.document.root.id, text: "叶", side: .right, at: nil)
         bus.clearHistory()
 
-        bus.execute(.toggleCollapse(id: leaf))
+        bus.execute(.toggleCollapse(id: leaf, side: nil))
 
         #expect(!bus.canUndo)
         #expect(model.node(id: leaf)?.collapsed == false)
@@ -143,12 +143,35 @@ struct CommandBusTests {
         model.setCollapsed(id: leaf, to: true)
         bus.clearHistory()
 
-        bus.execute(.toggleCollapse(id: leaf))
+        bus.execute(.toggleCollapse(id: leaf, side: nil))
 
         #expect(bus.canUndo)
         #expect(model.node(id: leaf)?.collapsed == false)
         bus.undo()
         #expect(model.node(id: leaf)?.collapsed == true)
+    }
+
+    @Test func toggleCollapse_rootSide_collapsesOnlyThatSide_andUndoRestores() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        let root = model.document.root.id
+        _ = model.insertChild(parentId: root, text: "L", side: .left, at: nil)
+        _ = model.insertChild(parentId: root, text: "R", side: .right, at: nil)
+        bus.clearHistory()
+
+        bus.execute(.toggleCollapse(id: root, side: .left))
+
+        #expect(bus.canUndo)
+        #expect(model.document.root.collapsedLeft == true)
+        #expect(model.document.root.collapsedRight == false)
+
+        bus.undo()
+        #expect(model.document.root.collapsedLeft == false)
+        #expect(model.document.root.collapsedRight == false)
+
+        bus.redo()
+        #expect(model.document.root.collapsedLeft == true)
+        #expect(model.document.root.collapsedRight == false)
     }
 
     @Test func moveToParent_undoRestoresPosition_andSelection() {

@@ -93,7 +93,8 @@ struct LogicLayoutTests {
         var doc = MindMapDocument.blank(rootText: "根")
         doc.layout = .logic
         doc.root.children = [Node(text: "章")]
-        doc.root.collapsed = true
+        doc.root.collapsedLeft = true
+        doc.root.collapsedRight = true
 
         let snap = LogicLayout.layout(document: doc, measure: TextMeasure())
         #expect(snap.frames.count == 1)

@@ -52,7 +52,7 @@ struct CodecTests {
         {"version":1,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[{"id":"00000000-0000-0000-0000-000000000002","text":"子","collapsed":false,"children":[]}]}}
         """.data(using: .utf8)!
         let doc = try YMindCodec.decode(json)
-        #expect(doc.version == 5)
+        #expect(doc.version == 6)
         #expect(doc.root.fill == nil)
         #expect(doc.root.children[0].fill == nil)
     }
@@ -62,7 +62,7 @@ struct CodecTests {
         {"version":2,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"fill":"neon","children":[]}}
         """.data(using: .utf8)!
         let doc = try YMindCodec.decode(json)
-        #expect(doc.version == 5)
+        #expect(doc.version == 6)
         #expect(doc.root.fill == nil)
     }
 
@@ -82,8 +82,32 @@ struct CodecTests {
         {"version":4,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[]}}
         """.data(using: .utf8)!
         let back = try YMindCodec.decode(json)
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         #expect(back.layout == .radial)
+    }
+
+    @Test func v5CollapsedRoot_migratesToBothSideFlags() throws {
+        // v5 老文件：根 collapsed=true（左右全折）→ v6 迁为两侧独立 true，清遗留 collapsed。
+        let json = """
+        {"version":5,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":true,"children":[{"id":"00000000-0000-0000-0000-000000000002","text":"左","collapsed":false,"side":"left","children":[]}]}}
+        """.data(using: .utf8)!
+        let doc = try YMindCodec.decode(json)
+        #expect(doc.version == 6)
+        #expect(doc.root.collapsed == false)
+        #expect(doc.root.collapsedLeft == true)
+        #expect(doc.root.collapsedRight == true)
+    }
+
+    @Test func sanitize_clearsRootSideFlagsOnNonRoot() throws {
+        // v6：非根节点的 collapsedLeft/Right 被消毒清 false（与 side 同层级约束）；根保留。
+        let json = """
+        {"version":6,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"collapsedLeft":true,"collapsedRight":true,"children":[{"id":"00000000-0000-0000-0000-000000000002","text":"子","collapsed":false,"collapsedLeft":true,"children":[]}]}}
+        """.data(using: .utf8)!
+        let doc = try YMindCodec.decode(json)
+        #expect(doc.root.collapsed == false)
+        #expect(doc.root.collapsedLeft == true)
+        #expect(doc.root.collapsedRight == true)
+        #expect(doc.root.children[0].collapsedLeft == false)
     }
 }
 
@@ -101,7 +125,7 @@ struct CodecImageTests {
     @Test func imageRoundTrip() throws {
         let data = try YMindCodec.encode(documentWithImage())
         let back = try YMindCodec.decode(data)
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         #expect(back.root.children[0].image == Data([0x89, 0x50]))
         #expect(back.root.children[0].imagePixelSize == ImagePixelSize(width: 1024, height: 512))
         #expect(back.root.children[1].image == nil)
@@ -113,7 +137,7 @@ struct CodecImageTests {
         {"version":2,"root":{"id":"\(UUID())","text":"老文件","collapsed":false,"children":[]}}
         """
         let back = try YMindCodec.decode(Data(json.utf8))
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         #expect(back.root.image == nil)
     }
 
@@ -122,7 +146,7 @@ struct CodecImageTests {
         {"version":1,"root":{"id":"\(UUID())","text":"v1","collapsed":false,"children":[]}}
         """
         let back = try YMindCodec.decode(Data(json.utf8))
-        #expect(back.version == 5)
+        #expect(back.version == 6)
     }
 
     @Test func invalidImagePixelSize_decodesAsNil() throws {
@@ -131,7 +155,7 @@ struct CodecImageTests {
         {"version":3,"root":{"id":"\(UUID())","text":"根","collapsed":false,"image":"iVBORw0KGgo=","imagePixelSize":{"width":0,"height":100},"children":[]}}
         """
         let back = try YMindCodec.decode(Data(json.utf8))
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         #expect(back.root.image == nil)
         #expect(back.root.text == "根")
     }
@@ -142,7 +166,7 @@ struct CodecImageTests {
         {"version":3,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"标题","collapsed":false,"image":"iVBORw0KGgo=","imagePixelSize":{"width":100,"height":50},"children":[]}}
         """.data(using: .utf8)!
         let back = try YMindCodec.decode(json)
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         let root = back.root
         #expect(root.blocks.count == 2)
         if case .image = root.blocks[0].kind {} else { Issue.record("第 0 块应为图片") }
@@ -161,7 +185,7 @@ struct CodecImageTests {
         )
         let data = try YMindCodec.encode(model.document)
         let back = try YMindCodec.decode(data)
-        #expect(back.version == 5)
+        #expect(back.version == 6)
         #expect(back.root.blocks.count == 2)
         #expect(back.root.blocks[1].id == blockId)
         if case .image(let img) = back.root.blocks[1].kind {

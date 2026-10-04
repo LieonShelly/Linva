@@ -56,7 +56,31 @@ enum LayoutSupport {
         node.children.reduce(0) { $0 + 1 + countDescendants($1) }
     }
 
+    /// 根某一侧的后代数：只统计该侧子节点子树（用于根左右独立折叠的 hiddenCount）。
+    static func countDescendants(_ node: Node, side: Side) -> Int {
+        node.children
+            .filter { side == .left ? $0.side == .left : $0.side != .left }
+            .reduce(0) { $0 + 1 + countDescendants($1) }
+    }
+
     static func makeToggle(node: Node, frame: NodeFrame, side: Side) -> BranchToggle {
+        makeToggle(
+            node: node,
+            frame: frame,
+            side: side,
+            collapsed: node.collapsed,
+            hiddenCount: node.collapsed ? countDescendants(node) : 0
+        )
+    }
+
+    /// 显式折叠态版本：供根左右独立折叠 toggle 使用（每侧各自 collapsed/hiddenCount）。
+    static func makeToggle(
+        node: Node,
+        frame: NodeFrame,
+        side: Side,
+        collapsed: Bool,
+        hiddenCount: Int
+    ) -> BranchToggle {
         let dir: CGFloat = side == .left ? -1 : 1
         return BranchToggle(
             nodeId: node.id,
@@ -65,8 +89,8 @@ enum LayoutSupport {
                 x: frame.center.x + dir * (frame.size.width / 2 + LayoutConstants.branchToggleGap),
                 y: frame.center.y
             ),
-            collapsed: node.collapsed,
-            hiddenCount: node.collapsed ? countDescendants(node) : 0
+            collapsed: collapsed,
+            hiddenCount: hiddenCount
         )
     }
 

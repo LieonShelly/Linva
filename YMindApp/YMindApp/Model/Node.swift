@@ -4,6 +4,9 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
     var id: UUID
     var blocks: [ContentBlock]
     var collapsed: Bool
+    /// 根节点左右两侧的独立折叠态（仅根使用；非根恒为 false，sanitize 强制）。
+    var collapsedLeft: Bool
+    var collapsedRight: Bool
     var side: Side?
     var fill: NodeFill?
     var children: [Node]
@@ -12,6 +15,8 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
         id: UUID = UUID(),
         text: String,
         collapsed: Bool = false,
+        collapsedLeft: Bool = false,
+        collapsedRight: Bool = false,
         side: Side? = nil,
         fill: NodeFill? = nil,
         image: Data? = nil,
@@ -29,6 +34,8 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
             self.blocks = [ContentBlock(id: UUID(), kind: .text(text))]
         }
         self.collapsed = collapsed
+        self.collapsedLeft = collapsedLeft
+        self.collapsedRight = collapsedRight
         self.side = side
         self.fill = fill
         self.children = children
@@ -56,7 +63,7 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, text, collapsed, side, fill, image, imagePixelSize, blocks, children
+        case id, text, collapsed, collapsedLeft, collapsedRight, side, fill, image, imagePixelSize, blocks, children
     }
 
     func encode(to encoder: Encoder) throws {
@@ -65,6 +72,8 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
         try c.encode(id, forKey: .id)
         try c.encode(blocks, forKey: .blocks)
         try c.encode(collapsed, forKey: .collapsed)
+        try c.encode(collapsedLeft, forKey: .collapsedLeft)
+        try c.encode(collapsedRight, forKey: .collapsedRight)
         try c.encodeIfPresent(side, forKey: .side)
         try c.encodeIfPresent(fill, forKey: .fill)
         try c.encode(children, forKey: .children)
@@ -74,6 +83,8 @@ struct Node: Identifiable, Equatable, Codable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(UUID.self, forKey: .id)
         collapsed = try c.decodeIfPresent(Bool.self, forKey: .collapsed) ?? false
+        collapsedLeft = try c.decodeIfPresent(Bool.self, forKey: .collapsedLeft) ?? false
+        collapsedRight = try c.decodeIfPresent(Bool.self, forKey: .collapsedRight) ?? false
         side = try c.decodeIfPresent(Side.self, forKey: .side)
         if let raw = try c.decodeIfPresent(String.self, forKey: .fill),
            let fill = NodeFill(rawValue: raw) {

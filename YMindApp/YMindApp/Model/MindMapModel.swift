@@ -252,11 +252,39 @@ final class MindMapModel {
         return (block, index)
     }
 
-    func toggleCollapse(id: UUID) {
+    /// 单一折叠态（非根用 collapsed；根用左右两侧同时折叠的聚合态）。
+    func isCollapsed(_ id: UUID) -> Bool {
+        if id == document.root.id {
+            return document.root.collapsedLeft && document.root.collapsedRight
+        }
+        return node(id: id)?.collapsed ?? false
+    }
+
+    /// 切换折叠。根节点支持按侧独立折叠（`side` 指定只折该侧；nil 折两侧——逻辑图/整体语义）；
+    /// 非根节点忽略 side，折其自身 collapsed。
+    func toggleCollapse(id: UUID, side: Side? = nil) {
+        if id == document.root.id {
+            if let side {
+                if side == .left {
+                    document.root.collapsedLeft.toggle()
+                } else {
+                    document.root.collapsedRight.toggle()
+                }
+            } else {
+                document.root.collapsedLeft.toggle()
+                document.root.collapsedRight.toggle()
+            }
+            return
+        }
         _ = mutate(id: id) { $0.collapsed.toggle() }
     }
 
     func setCollapsed(id: UUID, to collapsed: Bool) {
+        if id == document.root.id {
+            document.root.collapsedLeft = collapsed
+            document.root.collapsedRight = collapsed
+            return
+        }
         _ = mutate(id: id) { $0.collapsed = collapsed }
     }
 
@@ -310,6 +338,11 @@ final class MindMapModel {
             attachChild(node, to: targetId)
         }
         _ = mutate(id: targetId) { $0.collapsed = false }
+        // 目标为根时折叠态由左右侧独立字段承载：清两侧（reparent 落根即展开）。
+        if targetId == document.root.id {
+            document.root.collapsedLeft = false
+            document.root.collapsedRight = false
+        }
         return records
     }
 
@@ -460,6 +493,11 @@ final class MindMapModel {
             if parent.children.isEmpty {
                 // 维持「collapsed ⇒ 有子节点」不变量。
                 parent.collapsed = false
+                if parent.id == document.root.id {
+                    // 根折叠态由左右侧独立字段承载：清两侧。
+                    parent.collapsedLeft = false
+                    parent.collapsedRight = false
+                }
             }
         }
         guard let removed else { return nil }

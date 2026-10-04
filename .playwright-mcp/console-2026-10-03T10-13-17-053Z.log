@@ -1,0 +1,7 @@
+[      10ms] TypeError: Cannot read properties of undefined (reading 'x')
+    at http://127.0.0.1:8971/schemes.html:389:19
+    at Array.forEach (<anonymous>)
+    at renderEdges (http://127.0.0.1:8971/schemes.html:387:34)
+    at render (http://127.0.0.1:8971/schemes.html:367:21)
+    at http://127.0.0.1:8971/schemes.html:446:3
+    at http://127.0.0.1:8971/schemes.html:448:3

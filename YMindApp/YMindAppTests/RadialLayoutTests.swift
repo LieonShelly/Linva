@@ -58,11 +58,32 @@ struct RadialLayoutTests {
             Node(text: "L", side: .left),
             Node(text: "R", side: .right),
         ]
-        doc.root.collapsed = true
+        doc.root.collapsedLeft = true
+        doc.root.collapsedRight = true
         let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
         let sides = Set(snap.branchToggles.filter { $0.nodeId == doc.root.id }.map(\.side))
         #expect(sides == [.left, .right])
         #expect(snap.frames.count == 1)
+    }
+
+    @Test func rootLeftCollapsed_hidesOnlyLeftSide() {
+        var doc = MindMapDocument.blank()
+        let l = Node(text: "L", side: .left, children: [Node(text: "L1")])
+        let r = Node(text: "R", side: .right, children: [Node(text: "R1")])
+        doc.root.children = [l, r]
+        doc.root.collapsedLeft = true
+        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        // 只隐藏左侧：左子树无 frame，右子树保留。
+        #expect(snap.frames[l.id] == nil)
+        #expect(snap.frames[l.children[0].id] == nil)
+        #expect(snap.frames[r.id] != nil)
+        #expect(snap.frames[r.children[0].id] != nil)
+        // 根左右 toggle 折叠态各自独立。
+        let leftToggle = snap.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .left }
+        #expect(leftToggle?.collapsed == true)
+        #expect(leftToggle?.hiddenCount == 2)
+        let rightToggle = snap.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .right }
+        #expect(rightToggle?.collapsed == false)
     }
 
     @Test func siblingsOnSameSide_areVerticallyCenteredWithGap() throws {
@@ -217,7 +238,8 @@ struct ImageLayoutTests {
         var doc = MindMapDocument.blank(rootText: "根")
         let child = Node(text: "折叠", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 10, height: 10))
         doc.root.children = [child]
-        doc.root.collapsed = true
+        doc.root.collapsedLeft = true
+        doc.root.collapsedRight = true
         let snapshot = RadialLayout.layout(document: doc, measure: measure())
         #expect(snapshot.frames[child.id] == nil)
         #expect(snapshot.imagePayloads[child.id] == nil)

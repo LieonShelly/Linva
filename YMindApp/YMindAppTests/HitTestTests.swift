@@ -127,7 +127,7 @@ struct HitTestTests {
             snapshot: snapshot,
             camera: Camera()
         )
-        #expect(hit == .branchToggle(nodeId: nodeId))
+        #expect(hit == .branchToggle(nodeId: nodeId, side: .right))
     }
 
     @Test func hitTestCanvas_coversWidenedCollapsedPillButKeepsNodeClickable() {
@@ -161,7 +161,7 @@ struct HitTestTests {
                 screenPoint: CGPoint(x: 43.5, y: 0),
                 snapshot: collapsedSnapshot,
                 camera: Camera()
-            ) == .branchToggle(nodeId: nodeId)
+            ) == .branchToggle(nodeId: nodeId, side: .right)
         )
         // 同一位置在未加宽（＋）时属于空白。
         #expect(
@@ -197,7 +197,7 @@ struct HitTestTests {
 
         #expect(
             hitTestCanvas(screenPoint: .zero, snapshot: snapshot, camera: Camera())
-                == .branchToggle(nodeId: nodeId)
+                == .branchToggle(nodeId: nodeId, side: .right)
         )
     }
 

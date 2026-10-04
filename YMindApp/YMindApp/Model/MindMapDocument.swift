@@ -9,7 +9,7 @@ enum LayoutKind: String, Codable, Sendable, Equatable, Hashable {
 }
 
 struct MindMapDocument: Equatable, Codable, Sendable {
-    static let currentVersion = 5
+    static let currentVersion = 6
     var version: Int
     var root: Node
     /// 布局（文档属性，v5 起持久化；v4 及以下缺省 .radial，零拒绝迁移）。

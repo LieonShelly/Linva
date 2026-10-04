@@ -1,0 +1,7 @@
+[      14ms] TypeError: Cannot read properties of undefined (reading 'x')
+    at http://127.0.0.1:8971/schemes.html:363:41
+    at Array.forEach (<anonymous>)
+    at render (http://127.0.0.1:8971/schemes.html:355:15)
+    at http://127.0.0.1:8971/schemes.html:444:3
+    at http://127.0.0.1:8971/schemes.html:446:3
+[      25ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://127.0.0.1:8971/favicon.ico:0

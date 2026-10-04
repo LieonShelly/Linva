@@ -32,9 +32,10 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 
 - **side 只存根下第一层**：根的直接子节点存 `left`/`right`；更深节点继承所在侧（`side` 为 `nil`）。布局时用 `frame.side` 推导。
 - **折叠**：折叠子树高度视为 0（只留节点自身），布局自然收缩。`NodeFrame.hiddenCount` 表示折叠隐藏的后代数。
+- **根左右独立折叠（v6）**：根折叠态由 `collapsedLeft`/`collapsedRight` 独立承载（非根仍用单值 `collapsed`）。布局时折叠侧的子节点不参与测高与排布（`RadialLayout` 过滤 `visibleRootChildren` 并保持 `rootMetadata.children` index 对齐）；全折叠（两侧皆折）早退只画根。toggle 的 `collapsed`/`hiddenCount` 按各自侧独立（`makeToggle` 显式重载 + `countDescendants(node, side:)`）。
 - **BranchToggle 生成规则**（`makeBranchToggles`）：
   - 非根节点：有子节点且 `frame.side` 非空 → 生成一个 toggle；
-  - 根节点：分别对左、右两侧，`collapsed || 该侧有子` 才生成对应 toggle（根可左右各一个折叠按钮）。
+  - 根节点：分别对左、右两侧，`collapsedLeft/collapsedRight || 该侧有子` 才生成对应 toggle（根可左右各一个折叠按钮，各自独立折叠态）。
 - 布局输入：`document + TextMeasure`；输出 `LayoutSnapshot`。
 
 ## LogicLayout 不变量（逻辑图 / 总分树）
@@ -42,6 +43,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 - **根在最左、层级向右层层展开**；所有节点统一 `.right` side（无左右分组语义）。
 - **L 形边**：`EdgeGeometry.points` 为「水平出 → 垂直拐 → 水平入」四点折线。
 - **BranchToggle 一律在右侧**（`LayoutSupport.makeToggle(..., side: .right)`）；折叠子树高度视为 0、不占空间。
+- **根折叠（v6）**：逻辑图无左右侧语义，根折叠 = 左右两侧独立折叠的**聚合态**（`collapsedLeft && collapsedRight` 视为整树折叠，早退只画根；部分折叠时仍显示全部子节点）。根 toggle 的 `collapsed`/`hiddenCount` 按聚合态。
 - **side 降级（FR-L4）**：逻辑图下 `DocumentSession.canSetSide == false`（⌘←/⌘→ 置灰、`DropIntent` 侧向放置禁用），切回辐射恢复。
 
 ## 扩展布局的步骤

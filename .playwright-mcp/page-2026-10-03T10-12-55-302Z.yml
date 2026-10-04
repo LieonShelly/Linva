@@ -1,0 +1,37 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]: YMind 配色方案
+    - button [ref=f1e4] [cursor=pointer]
+    - button [ref=f1e9] [cursor=pointer]
+    - button [ref=f1e14] [cursor=pointer]
+    - button [ref=f1e19] [cursor=pointer]
+    - button "切换到暗色" [ref=f1e23] [cursor=pointer]
+  - generic [ref=f1e25]:
+    - generic [ref=f1e26]:
+      - generic [ref=f1e31]:
+        - generic [ref=f1e32]: YMind
+        - generic [ref=f1e33]: 阅读清单.ymind
+      - generic [ref=f1e34]: 子主题
+      - generic [ref=f1e38]: 同级主题
+      - generic [ref=f1e43]: 删除
+      - generic [ref=f1e47]: 色点
+      - generic "移到左侧" [ref=f1e49]
+      - generic "移到右侧" [ref=f1e52]
+      - generic "缩小" [ref=f1e55]
+      - generic [ref=f1e59]: 100%
+      - generic "放大" [ref=f1e60]
+      - generic "适应画布" [ref=f1e64]
+      - generic "更多" [ref=f1e67]
+    - generic [ref=f1e72]:
+      - generic:
+        - generic:
+          - generic [ref=f1e73] [cursor=pointer]: 阅读清单
+          - generic [ref=f1e74] [cursor=pointer]: 产品设计
+          - generic [ref=f1e75] [cursor=pointer]: Designing for macOS
+          - generic [ref=f1e76] [cursor=pointer]: HIG 指南
+          - generic [ref=f1e77] [cursor=pointer]: 思维方法
+          - generic [ref=f1e78] [cursor=pointer]: 卡片笔记法
+          - generic [ref=f1e79] [cursor=pointer]: 费曼技巧
+          - generic [ref=f1e80] [cursor=pointer]: 技术栈
+          - generic [ref=f1e81] [cursor=pointer]: 待读
+          - generic [ref=f1e82] [cursor=pointer]: 认知心理学

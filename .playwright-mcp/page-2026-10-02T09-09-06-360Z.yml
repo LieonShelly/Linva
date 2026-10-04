@@ -1,0 +1,27 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]: YMind
+      - generic [ref=e7]: 设计预览
+    - generic [ref=e8]:
+      - button "子主题" [ref=e9] [cursor=pointer]
+      - button "同级" [ref=e13] [cursor=pointer]
+      - button "删除" [ref=e17] [cursor=pointer]
+    - generic [ref=e21]:
+      - button "填色 sage" [ref=e22] [cursor=pointer]
+      - button "填色 sky" [ref=e23] [cursor=pointer]
+      - button "填色 sand" [ref=e24] [cursor=pointer]
+      - button "填色 rose" [ref=e25] [cursor=pointer]
+      - button "填色 lilac" [ref=e26] [cursor=pointer]
+      - button "清除填色" [ref=e27] [cursor=pointer]
+    - generic [ref=e28]:
+      - button [ref=e29] [cursor=pointer]
+      - button [ref=e33] [cursor=pointer]
+      - generic [ref=e37]: 100%
+      - button [ref=e38] [cursor=pointer]
+      - button [ref=e43] [cursor=pointer]
+  - main:
+    - generic: 拖拽搬枝 · 双击编辑 · 右键菜单 · 滚轮缩放
+    - generic [ref=e46]:
+      - button "🌙 暗色" [ref=e47] [cursor=pointer]
+      - button "♿ 减弱动效" [ref=e48] [cursor=pointer]

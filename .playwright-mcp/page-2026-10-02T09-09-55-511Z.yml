@@ -1,0 +1,43 @@
+- generic [ref=f2e2]:
+  - banner [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - generic [ref=f2e6]: YMind
+      - generic [ref=f2e7]: 设计预览
+    - generic [ref=f2e8]:
+      - button "子主题" [ref=f2e9] [cursor=pointer]
+      - button "同级" [ref=f2e13] [cursor=pointer]
+      - button "删除" [ref=f2e17] [cursor=pointer]
+    - generic [ref=f2e21]:
+      - button "填色 sage" [ref=f2e22] [cursor=pointer]
+      - button "填色 sky" [ref=f2e23] [cursor=pointer]
+      - button "填色 sand" [ref=f2e24] [cursor=pointer]
+      - button "填色 rose" [ref=f2e25] [cursor=pointer]
+      - button "填色 lilac" [ref=f2e26] [cursor=pointer]
+      - button "清除填色" [ref=f2e27] [cursor=pointer]
+    - generic [ref=f2e28]:
+      - button [ref=f2e29] [cursor=pointer]
+      - button [ref=f2e33] [cursor=pointer]
+      - generic [ref=f2e37]: 100%
+      - button [ref=f2e38] [cursor=pointer]
+      - button [ref=f2e43] [cursor=pointer]
+  - main:
+    - generic:
+      - generic:
+        - generic [ref=f2e46] [cursor=pointer]: YMind 设计原型
+        - generic [ref=f2e47] [cursor=pointer]: 编辑
+        - generic [ref=f2e48] [cursor=pointer]: 就地编辑浮层
+        - generic [ref=f2e49] [cursor=pointer]: 删空即删节点
+        - generic [ref=f2e50] [cursor=pointer]: 填色分类
+        - generic [ref=f2e51] [cursor=pointer]: 5 色 token
+        - generic [ref=f2e52] [cursor=pointer]: 搜索
+        - generic [ref=f2e53] [cursor=pointer]: 命中居中
+        - generic [ref=f2e54] [cursor=pointer]: 搬枝
+      - generic:
+        - button "−" [ref=f2e55] [cursor=pointer]
+        - button "−" [ref=f2e56] [cursor=pointer]
+        - button "−" [ref=f2e57] [cursor=pointer]
+        - button "−" [ref=f2e58] [cursor=pointer]
+    - generic: 拖拽搬枝 · 双击编辑 · 右键菜单 · 滚轮缩放
+    - generic [ref=f2e59]:
+      - button "🌙 暗色" [ref=f2e60] [cursor=pointer]
+      - button "♿ 减弱动效" [ref=f2e61] [cursor=pointer]

@@ -50,7 +50,7 @@ struct CanvasActions {
     var marqueeSelect: (Set<UUID>, Bool) -> Void = { _, _ in }
     var edit: (UUID) -> Void = { _ in }
     var commitEditing: () -> Void = {}
-    var toggleCollapse: (UUID) -> Void = { _ in }
+    var toggleCollapse: (UUID, Side?) -> Void = { _, _ in }
     var toggleCollapseSelection: () -> Void = {}
     var selectAll: () -> Void = {}
     var addChild: () -> Void = {}
@@ -332,8 +332,11 @@ final class CanvasMTKView: MTKView, MTKViewDelegate {
         }
 
         switch hit {
-        case let .branchToggle(nodeId):
-            actions.toggleCollapse(nodeId)
+        case let .branchToggle(nodeId, side):
+            // 根在辐射图按侧独立折叠：传 toggle 侧；逻辑图/非根无左右侧语义 → nil（整树/自身折叠）。
+            let isRadialRoot = nodeId == session.model.document.root.id
+                && session.model.document.layout == .radial
+            actions.toggleCollapse(nodeId, isRadialRoot ? side : nil)
             gesture = .none
         case let .node(id):
             let intent = wasEditing ? .replace : selectIntent(for: event)

@@ -195,7 +195,7 @@ struct ContentView: View {
             .filter { session.model.node(id: $0)?.children.isEmpty == false }
             .sorted { $0.uuidString < $1.uuidString }
         guard !targets.isEmpty else { return }
-        let anyExpanded = targets.contains { session.model.node(id: $0)?.collapsed == false }
+        let anyExpanded = targets.contains { !session.model.isCollapsed($0) }
         session.commandBus.execute(.setCollapsed(ids: targets, collapsed: anyExpanded))
     }
 
@@ -203,11 +203,11 @@ struct ContentView: View {
         session.startEditing(id)
     }
 
-    private func toggleCollapse(_ id: UUID) {
+    private func toggleCollapse(_ id: UUID, _ side: Side?) {
         if session.editingId != nil {
             commitEditing()
         }
-        session.commandBus.execute(.toggleCollapse(id: id))
+        session.commandBus.execute(.toggleCollapse(id: id, side: side))
     }
 
     private func commitEditing() {
@@ -230,8 +230,8 @@ struct ContentView: View {
             commitEditing()
         }
         guard !isMulti, let selectedId = session.primarySelectedId else { return }
-        if session.model.node(id: selectedId)?.collapsed == true {
-            session.commandBus.execute(.toggleCollapse(id: selectedId))
+        if session.model.isCollapsed(selectedId) {
+            session.commandBus.execute(.toggleCollapse(id: selectedId, side: nil))
         }
         session.commandBus.execute(.addChild(parentId: selectedId, text: "新主题"))
         if let newId = session.primarySelectedId {

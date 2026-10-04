@@ -1,0 +1,10 @@
+[       9ms] TypeError: Cannot read properties of undefined (reading 'includes')
+    at http://127.0.0.1:8931/index.html:308:36
+    at Array.find (<anonymous>)
+    at parentOf (http://127.0.0.1:8931/index.html:308:17)
+    at http://127.0.0.1:8931/index.html:300:20
+    at Array.forEach (<anonymous>)
+    at renderEdges (http://127.0.0.1:8931/index.html:299:29)
+    at render (http://127.0.0.1:8931/index.html:282:5)
+    at http://127.0.0.1:8931/index.html:404:3
+    at http://127.0.0.1:8931/index.html:405:3

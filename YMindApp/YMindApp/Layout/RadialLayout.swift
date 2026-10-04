@@ -90,7 +90,17 @@ enum RadialLayout {
             }
         }
 
-        let rootMetadata = LayoutSupport.subtreeHeight(document.root, isRoot: true, measure: measure)
+        let leftCollapsed = document.root.collapsedLeft
+        let rightCollapsed = document.root.collapsedRight
+        let rootCollapsed = leftCollapsed && rightCollapsed
+
+        // 根折叠侧的子节点不参与测高（保持下方 rootMetadata.children 与排布 index 对齐）。
+        let visibleRootChildren = document.root.children.filter { child in
+            child.side == .left ? !leftCollapsed : !rightCollapsed
+        }
+        var layoutRoot = document.root
+        layoutRoot.children = visibleRootChildren
+        let rootMetadata = LayoutSupport.subtreeHeight(layoutRoot, isRoot: true, measure: measure)
         let rootFrame = NodeFrame(
             id: document.root.id,
             text: document.root.text,
@@ -98,8 +108,8 @@ enum RadialLayout {
             size: rootMetadata.size,
             isRoot: true,
             side: nil,
-            collapsed: document.root.collapsed,
-            hiddenCount: document.root.collapsed
+            collapsed: rootCollapsed,
+            hiddenCount: rootCollapsed
                 ? LayoutSupport.countDescendants(document.root)
                 : 0,
             fill: document.root.fill,
@@ -110,7 +120,7 @@ enum RadialLayout {
         // 此时仅根有 frame：折叠早退只需根（及后代无 frame 会被跳过）的载荷。
         let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
-        guard !document.root.collapsed else {
+        guard !rootCollapsed else {
             return LayoutSnapshot(
                 frames: frames,
                 edges: edges,
@@ -121,7 +131,7 @@ enum RadialLayout {
 
         var leftBranches: [(Node, BranchMetadata)] = []
         var rightBranches: [(Node, BranchMetadata)] = []
-        for (index, child) in document.root.children.enumerated() {
+        for (index, child) in visibleRootChildren.enumerated() {
             let item = (child, rootMetadata.children[index])
             if child.side == .left {
                 leftBranches.append(item)
@@ -203,11 +213,27 @@ enum RadialLayout {
         if frame.isRoot {
             let hasLeft = node.children.contains { $0.side == .left }
             let hasRight = node.children.contains { $0.side != .left }
-            if node.collapsed || hasLeft {
-                toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .left))
+            if node.collapsedLeft || hasLeft {
+                toggles.append(LayoutSupport.makeToggle(
+                    node: node,
+                    frame: frame,
+                    side: .left,
+                    collapsed: node.collapsedLeft,
+                    hiddenCount: node.collapsedLeft
+                        ? LayoutSupport.countDescendants(node, side: .left)
+                        : 0
+                ))
             }
-            if node.collapsed || hasRight {
-                toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .right))
+            if node.collapsedRight || hasRight {
+                toggles.append(LayoutSupport.makeToggle(
+                    node: node,
+                    frame: frame,
+                    side: .right,
+                    collapsed: node.collapsedRight,
+                    hiddenCount: node.collapsedRight
+                        ? LayoutSupport.countDescendants(node, side: .right)
+                        : 0
+                ))
             }
         } else if let side = frame.side {
             toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: side))

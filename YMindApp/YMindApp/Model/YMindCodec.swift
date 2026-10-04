@@ -46,6 +46,16 @@ enum YMindCodec {
         if doc.version == 4 {
             doc.version = 5
         }
+        // 迁移：v5 → v6（根折叠由单值 collapsed 改为左右侧独立 collapsedLeft/collapsedRight）。
+        // v5 根 collapsed=true 语义 = 左右都折；折叠根后迁为两侧独立 true，清空遗留 collapsed。
+        if doc.version == 5 {
+            if doc.root.collapsed {
+                doc.root.collapsedLeft = true
+                doc.root.collapsedRight = true
+            }
+            doc.root.collapsed = false
+            doc.version = 6
+        }
         guard doc.version == MindMapDocument.currentVersion else {
             throw YMindCodecError.unsupportedVersion(doc.version)
         }
@@ -60,8 +70,12 @@ enum YMindCodec {
     private static func sanitize(_ document: MindMapDocument, warnings: inout [String]?) -> MindMapDocument {
         var root = document.root
         root.side = nil
+        // v6：根折叠态只由 collapsedLeft/collapsedRight 承载；遗留单值 collapsed 恒为 false。
+        root.collapsed = false
         root.children = root.children.map { child in
             var c = child
+            c.collapsedLeft = false
+            c.collapsedRight = false
             c.children = stripSide(c.children, warnings: &warnings)
             return c
         }
@@ -78,6 +92,9 @@ enum YMindCodec {
                 )
                 x.side = nil
             }
+            // v6：左右侧折叠态仅根有效；非根强制 false（与 side 同层级约束）。
+            x.collapsedLeft = false
+            x.collapsedRight = false
             x.children = stripSide(x.children, warnings: &warnings)
             return x
         }

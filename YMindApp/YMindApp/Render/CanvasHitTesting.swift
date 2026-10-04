@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 enum CanvasHit: Equatable {
-    case branchToggle(nodeId: UUID)
+    case branchToggle(nodeId: UUID, side: Side)
     case node(UUID)
     case empty
 }
@@ -41,7 +41,7 @@ func hitTestCanvas(
     if let toggle = snapshot.branchToggles.first(where: {
         branchToggleHitContains($0, worldPoint: world)
     }) {
-        return .branchToggle(nodeId: toggle.nodeId)
+        return .branchToggle(nodeId: toggle.nodeId, side: toggle.side)
     }
     if let id = hitTestNode(screenPoint: screenPoint, snapshot: snapshot, camera: camera) {
         return .node(id)

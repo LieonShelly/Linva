@@ -390,8 +390,11 @@ final class MetalRenderer {
         encoder: MTLRenderCommandEncoder,
         viewport: inout ViewportUniforms
     ) {
-        // R4：只画可见节点的分叉控件。
-        let toggles = snapshot.branchToggles.filter { visibleIds.contains($0.nodeId) }
+        // R4：只画可见节点的分叉控件；展开态不渲染（仅折叠态显示），
+        // 但 snapshot.branchToggles 保留全部，命中测试（CanvasHitTesting）仍可点折叠。
+        let toggles = snapshot.branchToggles.filter {
+            visibleIds.contains($0.nodeId) && $0.collapsed
+        }
         guard !toggles.isEmpty else { return }
 
         let fill = rgba(.controlBackgroundColor)

@@ -50,6 +50,8 @@ enum PNGExporter {
         var doc = document
         func expand(_ node: inout Node) {
             node.collapsed = false
+            node.collapsedLeft = false
+            node.collapsedRight = false
             for index in node.children.indices {
                 expand(&node.children[index])
             }

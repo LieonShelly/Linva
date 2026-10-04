@@ -1,0 +1,11 @@
+[       9ms] TypeError: Cannot read properties of undefined (reading 'forEach')
+    at all (http://127.0.0.1:8931/index.html:236:49)
+    at http://127.0.0.1:8931/index.html:236:60
+    at Array.forEach (<anonymous>)
+    at all (http://127.0.0.1:8931/index.html:236:49)
+    at http://127.0.0.1:8931/index.html:236:60
+    at Array.forEach (<anonymous>)
+    at all (http://127.0.0.1:8931/index.html:236:49)
+    at http://127.0.0.1:8931/index.html:237:14
+    at http://127.0.0.1:8931/index.html:404:3
+[      26ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://127.0.0.1:8931/favicon.ico:0

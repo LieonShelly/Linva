@@ -1,0 +1,5 @@
+[      24ms] ReferenceError: el is not defined
+    at renderEdges (http://127.0.0.1:8931/index.html:1777:5)
+    at render (http://127.0.0.1:8931/index.html:1763:22)
+    at http://127.0.0.1:8931/index.html:1887:3
+    at http://127.0.0.1:8931/index.html:1888:3

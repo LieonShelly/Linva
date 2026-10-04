@@ -1,0 +1,58 @@
+- generic [ref=f13e2]:
+  - banner [ref=f13e3]:
+    - generic [ref=f13e8]:
+      - generic [ref=f13e9]: YMind
+      - generic [ref=f13e10]: 阅读清单.ymind
+    - generic [ref=f13e11]:
+      - button "子主题 Tab" [disabled] [ref=f13e12]:
+        - text: 子主题
+        - generic [ref=f13e15]: Tab
+      - button "同级主题 ⏎" [disabled] [ref=f13e16]:
+        - text: 同级主题
+        - generic [ref=f13e19]: ⏎
+      - button "删除" [disabled] [ref=f13e20]
+    - generic [ref=f13e24]:
+      - button "sage" [ref=f13e25] [cursor=pointer]
+      - button "sky" [ref=f13e26] [cursor=pointer]
+      - button "sand" [ref=f13e27] [cursor=pointer]
+      - button "rose" [ref=f13e28] [cursor=pointer]
+      - button "lilac" [ref=f13e29] [cursor=pointer]
+      - button "清除" [ref=f13e30] [cursor=pointer]
+    - generic [ref=f13e32]:
+      - button "移到左侧 ⌘←" [disabled] [ref=f13e33]
+      - button "移到右侧 ⌘→" [disabled] [ref=f13e36]
+    - generic [ref=f13e39]:
+      - button "缩小" [ref=f13e40] [cursor=pointer]
+      - generic [ref=f13e43]: 100%
+      - button "放大" [ref=f13e44] [cursor=pointer]
+      - button "适应画布" [ref=f13e47] [cursor=pointer]
+      - button "更多" [ref=f13e50] [cursor=pointer]
+  - main [ref=f13e53]:
+    - generic:
+      - generic:
+        - generic [ref=f13e54] [cursor=pointer]: 阅读清单
+        - generic [ref=f13e55] [cursor=pointer]: 产品设计
+        - generic [ref=f13e56] [cursor=pointer]: Designing for macOS
+        - generic [ref=f13e57] [cursor=pointer]: HIG 指南
+        - generic [ref=f13e58] [cursor=pointer]: 思维方法
+        - generic [ref=f13e59] [cursor=pointer]: 卡片笔记法
+        - generic [ref=f13e60] [cursor=pointer]: 费曼技巧
+        - generic [ref=f13e61] [cursor=pointer]: 技术栈
+        - generic [ref=f13e62] [cursor=pointer]: 待读
+        - generic [ref=f13e63] [cursor=pointer]: 认知心理学
+      - generic:
+        - button "−" [ref=f13e64] [cursor=pointer]
+        - button "−" [ref=f13e65] [cursor=pointer]
+        - button "−" [ref=f13e66] [cursor=pointer]
+        - button "＋2" [ref=f13e67] [cursor=pointer]
+        - button "−" [ref=f13e68] [cursor=pointer]
+    - generic [ref=f13e69]:
+      - button "搜索 ⌘F" [ref=f13e70] [cursor=pointer]:
+        - text: 搜索
+        - generic [ref=f13e73]: ⌘F
+      - button "暗色模式" [ref=f13e74] [cursor=pointer]
+      - button "适应画布" [ref=f13e77] [cursor=pointer]
+    - generic:
+      - generic: 右键节点看菜单
+      - generic: 点色点填色
+      - generic: 拖动搬枝

@@ -55,7 +55,11 @@ enum LogicLayout {
             }
         }
 
-        let rootMetadata = LayoutSupport.subtreeHeight(document.root, isRoot: true, measure: measure)
+        let rootCollapsed = document.root.collapsedLeft && document.root.collapsedRight
+        // 全折叠时只测根自身（早退只画根，避免根框被整树高撑大）。
+        var layoutRoot = document.root
+        if rootCollapsed { layoutRoot.children = [] }
+        let rootMetadata = LayoutSupport.subtreeHeight(layoutRoot, isRoot: true, measure: measure)
         let rootFrame = NodeFrame(
             id: document.root.id,
             text: document.root.text,
@@ -63,8 +67,8 @@ enum LogicLayout {
             size: rootMetadata.size,
             isRoot: true,
             side: nil,
-            collapsed: document.root.collapsed,
-            hiddenCount: document.root.collapsed
+            collapsed: rootCollapsed,
+            hiddenCount: rootCollapsed
                 ? LayoutSupport.countDescendants(document.root)
                 : 0,
             fill: document.root.fill,
@@ -75,7 +79,7 @@ enum LogicLayout {
         // 根折叠早退：此时仅根有 frame，只收集根的载荷（与 RadialLayout 一致）。
         let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
-        guard !document.root.collapsed else {
+        guard !rootCollapsed else {
             return LayoutSnapshot(
                 frames: frames,
                 edges: edges,
@@ -115,7 +119,19 @@ enum LogicLayout {
         index(root)
         for (id, frame) in frames {
             guard let node = nodesById[id], !node.children.isEmpty else { continue }
-            toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .right))
+            if frame.isRoot {
+                // 逻辑图根无左右侧折叠概念：根折叠 = 左右两侧同时折叠的聚合态。
+                let rootCollapsed = node.collapsedLeft && node.collapsedRight
+                toggles.append(LayoutSupport.makeToggle(
+                    node: node,
+                    frame: frame,
+                    side: .right,
+                    collapsed: rootCollapsed,
+                    hiddenCount: rootCollapsed ? LayoutSupport.countDescendants(node) : 0
+                ))
+            } else {
+                toggles.append(LayoutSupport.makeToggle(node: node, frame: frame, side: .right))
+            }
         }
         // 按 nodeId 确定性排序：frames 字典遍历序随机，须保证 LayoutSnapshot Equatable 确定（仿 MetalRenderer.orderedFrames）。
         return toggles.sorted { $0.nodeId.uuidString < $1.nodeId.uuidString }
