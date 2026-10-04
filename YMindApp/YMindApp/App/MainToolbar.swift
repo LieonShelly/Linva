@@ -29,6 +29,8 @@ struct MainToolbar: ToolbarContent {
     let setFill: (NodeFill?) -> Void
     let layout: LayoutKind
     let setLayout: (LayoutKind) -> Void
+    let edgeStyle: EdgeStyle
+    let setEdgeStyle: (EdgeStyle) -> Void
     let exportMarkdown: () -> Void
     let exportPNG: () -> Void
 
@@ -105,6 +107,18 @@ struct MainToolbar: ToolbarContent {
             }
             .pickerStyle(.menu)
             .help("布局（⌥L 切换）")
+
+            Divider()
+            Picker("连线样式", selection: Binding(
+                get: { edgeStyle },
+                set: { setEdgeStyle($0) }
+            )) {
+                Text("折线").tag(EdgeStyle.elbow)
+                Text("曲线").tag(EdgeStyle.curve)
+                Text("大括号").tag(EdgeStyle.brace)
+            }
+            .pickerStyle(.menu)
+            .help("连线样式（⌥E 切换）")
         }
 
         ToolbarItemGroup(placement: .secondaryAction) {

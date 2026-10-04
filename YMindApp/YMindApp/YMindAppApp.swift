@@ -163,6 +163,17 @@ private struct DocumentCommands: Commands {
             }
             .keyboardShortcut("l", modifiers: .option)
             .help("切换布局（⌥L）")
+
+            Divider()
+
+            // 连线样式循环（随 CaseIterable 自动扩展，Task 7 加 straight 无需改这里）。
+            Button("切换到下一个连线样式") {
+                let all = EdgeStyle.allCases
+                let idx = all.firstIndex(of: session.edgeStyle) ?? 0
+                session.setEdgeStyle(all[(idx + 1) % all.count])
+            }
+            .keyboardShortcut("e", modifiers: .option)
+            .help("切换连线样式（⌥E）")
         }
     }
 

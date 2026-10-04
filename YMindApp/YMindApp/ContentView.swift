@@ -124,6 +124,8 @@ struct ContentView: View {
                     setFill: { fill in session.setFill(fill) },
                     layout: session.layout,
                     setLayout: { session.setLayout($0) },
+                    edgeStyle: session.edgeStyle,
+                    setEdgeStyle: { session.setEdgeStyle($0) },
                     exportMarkdown: { DocumentWorkflow.exportMarkdown(session) },
                     exportPNG: { DocumentWorkflow.exportPNG(session) }
                 )
