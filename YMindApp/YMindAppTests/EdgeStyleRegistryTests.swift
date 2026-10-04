@@ -13,11 +13,76 @@ struct EdgeStyleRegistryTests {
         }
     }
 
-    /// 有效排布判定：brace 强制逻辑树（true），elbow/curve 沿用文档布局（false）。
+    /// 有效排布判定：brace 强制逻辑树（true），elbow/curve/straight 沿用文档布局（false）。
     @Test func requiresLogicArrangement_elbowAndCurveFalse_braceTrue() {
         #expect(EdgeStyleRegistry.provider(for: .elbow).requiresLogicArrangement == false)
         #expect(EdgeStyleRegistry.provider(for: .curve).requiresLogicArrangement == false)
         #expect(EdgeStyleRegistry.provider(for: .brace).requiresLogicArrangement == true)
+        // straight（回归验证）：per-edge 样式，沿用文档布局。
+        #expect(EdgeStyleRegistry.provider(for: .straight).requiresLogicArrangement == false)
+    }
+}
+
+@Suite("StraightProvider")
+struct StraightProviderTests {
+    private func connectors(_ doc: MindMapDocument) -> [ConnectorGeometry] {
+        // 排布按文档布局取（logic 测试用 LogicLayout，其余 radial）。
+        let frames: [UUID: NodeFrame] = doc.layout == .logic
+            ? LogicLayout.place(document: doc, measure: TextMeasure()).frames
+            : RadialLayout.place(document: doc, measure: TextMeasure()).frames
+        return StraightStyleProvider().connectors(document: doc, frames: frames, root: doc.root, measure: TextMeasure())
+    }
+
+    /// 单根无子 → 无连线。
+    @Test func singleRoot_producesNoConnectors() {
+        #expect(connectors(MindMapDocument.blank()).isEmpty)
+    }
+
+    /// 右子：父右缘出 → 子左缘进，两点直线 connector。
+    @Test func rightChild_producesTwoPointStraightLine() throws {
+        var doc = MindMapDocument.blank()
+        let child = Node(text: "子", side: .right)
+        doc.root.children = [child]
+        let frames = RadialLayout.place(document: doc, measure: TextMeasure()).frames
+        let root = try #require(frames[doc.root.id])
+        let cf = try #require(frames[child.id])
+
+        let connector = try #require(connectors(doc).first)
+        #expect(connector.id == child.id)
+        #expect(connector.marker == nil)
+        #expect(connector.path.count == 2)
+        #expect(connector.path[0] == CGPoint(x: root.rect.maxX, y: root.center.y))
+        #expect(connector.path[1] == CGPoint(x: cf.rect.minX, y: cf.center.y))
+    }
+
+    /// 两级：每对父子产一条直线 connector；左子方向相反。
+    @Test func twoLevels_oneStraightConnectorPerPair() throws {
+        var doc = MindMapDocument.blank()
+        let grandchild = Node(text: "孙")
+        let child = Node(text: "子", side: .left, children: [grandchild])
+        doc.root.children = [child]
+        let frames = RadialLayout.place(document: doc, measure: TextMeasure()).frames
+        let childFrame = try #require(frames[child.id])
+        let grandFrame = try #require(frames[grandchild.id])
+
+        let all = connectors(doc)
+        #expect(all.count == 2)
+        let grandConnector = try #require(all.last)
+        #expect(grandConnector.id == grandchild.id)
+        #expect(grandConnector.path.count == 2)
+        // 左子：父左缘出 → 孙右缘进。
+        #expect(grandConnector.path[0] == CGPoint(x: childFrame.rect.minX, y: childFrame.center.y))
+        #expect(grandConnector.path[1] == CGPoint(x: grandFrame.rect.maxX, y: grandFrame.center.y))
+    }
+}
+
+@Suite("EdgePoints")
+struct EdgePointsStraightTests {
+    /// straight 几何基元：两点直线 [from, to]（与 Provider 一致的最小连接）。
+    @Test func straight_returnsTwoPointLine() {
+        let from = CGPoint(x: 100, y: 50)
+        let to = CGPoint(x: 300, y: 200)
+        #expect(LayoutSupport.edgePoints(from: from, to: to, style: .straight) == [from, to])
     }
 }
 

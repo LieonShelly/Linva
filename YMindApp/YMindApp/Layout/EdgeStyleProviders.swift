@@ -6,10 +6,11 @@ private func sideDir(_ side: Side?) -> CGFloat {
     side == .left ? -1 : 1
 }
 
-/// per-edge 样式（elbow/curve）共用的父子遍历：每对有 frame 的父子产一个 Connector，
+/// per-edge 样式（elbow/curve/straight）共用的父子遍历：每对有 frame 的父子产一个 Connector，
 /// 边几何按 `style` 走 LayoutSupport.edgePoints 基元。方向取子 frame.side
 /// （排布侧，孙继承父 side；模型节点 side 可为 nil）。
-private func perEdgeConnectors(
+/// internal：跨 Provider 文件共享（新 per-edge 样式直接复用，勿复制遍历）。
+func perEdgeConnectors(
     style: EdgeStyle,
     frames: [UUID: NodeFrame],
     root: Node

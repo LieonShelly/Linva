@@ -8,6 +8,7 @@ enum EdgeStyleRegistry {
         case .elbow: return ElbowProvider()
         case .curve: return CurveProvider()
         case .brace: return BraceProvider()
+        case .straight: return StraightStyleProvider()
         }
     }
 }

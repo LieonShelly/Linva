@@ -109,7 +109,7 @@ enum LayoutSupport {
     }
 
     /// 每边样式的折线几何基元（spec §4.1，D1）：elbow 正交折线；curve 三次贝塞尔
-    /// 切向 S 曲线采样。brace 是组样式，不走此基元（返回 []）。
+    /// 切向 S 曲线采样；straight 两点直线。brace 是组样式，不走此基元（返回 []）。
     static func edgePoints(from: CGPoint, to: CGPoint, style: EdgeStyle) -> [CGPoint] {
         switch style {
         case .elbow:
@@ -143,6 +143,8 @@ enum LayoutSupport {
             }
         case .brace:
             return []
+        case .straight:
+            return [from, to]
         }
     }
 

@@ -16,6 +16,8 @@ enum EdgeStyle: String, Codable, CaseIterable, Sendable, Hashable {
     case curve
     /// 大括号（树形括号）。
     case brace
+    /// 直线（回归验证 D7 扩展性：加样式 = enum case + Provider + registry 注册；不暴露于最终 UI 三选一）。
+    case straight
 }
 
 struct MindMapDocument: Equatable, Codable, Sendable {
