@@ -12,7 +12,8 @@ final class MetalRenderer {
         let size: SIMD2<Float>
     }
 
-    private struct SolidVertex {
+    /// 纯色三角形顶点（渲染顶点；internal 供连接器顶点冒烟测试计数）。
+    struct SolidVertex {
         let position: SIMD2<Float>
         let color: SIMD4<Float>
     }
@@ -151,7 +152,7 @@ final class MetalRenderer {
 
         // 绘制顺序：边 → 节点底色 → 图片 → 文字 → 分叉控件 → 多选描边。
         drawSolid(
-            edgeVertices(snapshot: snapshot, visibleIds: drawList.visibleIds, camera: camera),
+            connectorVertices(snapshot: snapshot, visibleIds: drawList.visibleIds, camera: camera),
             encoder: encoder,
             viewport: &viewport
         )
@@ -734,18 +735,19 @@ final class MetalRenderer {
 
     private enum EdgeInset { case left, right }
 
-    private func edgeVertices(
+    /// 连接器顶点：折线描边（逐段 segmentQuad）+ 可选 marker（圆圈，16 段多边形近似）。
+    /// 可见性：连接器 id 为子节点 id（brace 为父 id）；统一按 id 可见过滤。
+    /// 精化：brace 应随父可见（父折叠时子不可见但括号仍画），后续按样式细分可见规则。
+    func connectorVertices(
         snapshot: LayoutSnapshot,
         visibleIds: Set<UUID>,
         camera: Camera
     ) -> [SolidVertex] {
         let color = rgba(.separatorColor)
         let thickness = max(1.25, min(3, 2 * camera.scale))
-        // R4：连接器 id 为子节点 id；子节点已放置（可见）才画该连接器。
-        return snapshot.connectors
-            .filter { visibleIds.contains($0.id) }
-            .flatMap { connector in
-            zip(connector.path, connector.path.dropFirst()).flatMap { start, end in
+        var out: [SolidVertex] = []
+        for connector in snapshot.connectors where visibleIds.contains(connector.id) {
+            out += zip(connector.path, connector.path.dropFirst()).flatMap { start, end in
                 segmentQuad(
                     from: camera.worldToScreen(start),
                     to: camera.worldToScreen(end),
@@ -753,7 +755,15 @@ final class MetalRenderer {
                     color: color
                 )
             }
+            if let marker = connector.marker {
+                out += circleVertices(
+                    center: camera.worldToScreen(marker.center),
+                    radius: marker.radius * camera.scale,
+                    color: color
+                )
+            }
         }
+        return out
     }
 
     private func fillVertices(frames: [NodeFrame], camera: Camera) -> [SolidVertex] {
@@ -947,6 +957,36 @@ final class MetalRenderer {
         let c = solidVertex(x: end.x + offset.x, y: end.y + offset.y, color: color)
         let d = solidVertex(x: end.x - offset.x, y: end.y - offset.y, color: color)
         return [a, b, c, c, b, d]
+    }
+
+    /// 实心圆近似：以 center 为圆心、radius 为半径的多边形三角扇（16 段），按现有 SolidVertex 样式铺。
+    private func circleVertices(
+        center: CGPoint,
+        radius: CGFloat,
+        color: SIMD4<Float>
+    ) -> [SolidVertex] {
+        guard radius > 0.1 else { return [] }
+        let segments = 16
+        var vertices: [SolidVertex] = []
+        vertices.reserveCapacity(segments * 3)
+        for index in 0..<segments {
+            let first = CGFloat(index) * 2 * .pi / CGFloat(segments)
+            let second = CGFloat(index + 1) * 2 * .pi / CGFloat(segments)
+            vertices += [
+                solidVertex(x: center.x, y: center.y, color: color),
+                solidVertex(
+                    x: center.x + cos(first) * radius,
+                    y: center.y + sin(first) * radius,
+                    color: color
+                ),
+                solidVertex(
+                    x: center.x + cos(second) * radius,
+                    y: center.y + sin(second) * radius,
+                    color: color
+                ),
+            ]
+        }
+        return vertices
     }
 
     private func solidVertex(x: CGFloat, y: CGFloat, color: SIMD4<Float>) -> SolidVertex {
