@@ -310,6 +310,32 @@ struct DocumentSessionTests {
         #expect(session.canSetSide)
         #expect(session.fitVersion == 2)
     }
+
+    /// D8：brace 连线样式强制逻辑树 → 有效排布变化触发再适配；切回/撤消恢复。
+    @Test func setEdgeStyle_braceRefits_whenEffectiveArrangementChanges() {
+        let session = DocumentSession()
+        #expect(session.edgeStyle == .elbow)
+        let baseFit = session.fitVersion
+
+        // elbow → brace：有效排布 radial → logic，触发再适配。
+        session.setEdgeStyle(.brace)
+        #expect(session.edgeStyle == .brace)
+        #expect(session.fitVersion == baseFit + 1)
+
+        // brace → elbow：有效排布 logic → radial，再次触发再适配。
+        session.setEdgeStyle(.elbow)
+        #expect(session.edgeStyle == .elbow)
+        #expect(session.fitVersion == baseFit + 2)
+    }
+
+    /// 非 brace 样式族内部切换（elbow ↔ curve）不改变有效排布，不应触发再适配。
+    @Test func setEdgeStyle_curveKeepsEffectiveArrangement_noRefit() {
+        let session = DocumentSession()
+        let baseFit = session.fitVersion
+        session.setEdgeStyle(.curve)
+        #expect(session.edgeStyle == .curve)
+        #expect(session.fitVersion == baseFit)
+    }
 }
 
 @Suite("DocumentSessionImport")

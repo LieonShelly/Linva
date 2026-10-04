@@ -310,6 +310,15 @@ final class MindMapModel {
         return old
     }
 
+    /// 设置文档连线样式（文档属性，与选中无关）；返回旧值供 Undo；无变化返回 nil（no-op 不入栈）。
+    @discardableResult
+    func setEdgeStyle(_ kind: EdgeStyle) -> EdgeStyle? {
+        guard document.edgeStyle != kind else { return nil }
+        let old = document.edgeStyle
+        document.edgeStyle = kind
+        return old
+    }
+
     func restoreChild(parentId: UUID, index: Int, node: Node) {
         _ = mutate(id: parentId) { parent in
             parent.children.insert(node, at: min(index, parent.children.count))

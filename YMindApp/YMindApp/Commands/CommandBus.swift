@@ -254,6 +254,13 @@ final class CommandBus {
                 redo: { _ = self.model.setLayout(kind) }
             )
 
+        case let .setEdgeStyle(kind):
+            guard let old = model.setEdgeStyle(kind) else { return nil }
+            return Entry(
+                undo: { _ = self.model.setEdgeStyle(old) },
+                redo: { _ = self.model.setEdgeStyle(kind) }
+            )
+
         case let .appendImageBlock(id, image, pixelSize):
             let blockId = model.appendImageBlock(id: id, image: image, pixelSize: pixelSize)
             return Entry(

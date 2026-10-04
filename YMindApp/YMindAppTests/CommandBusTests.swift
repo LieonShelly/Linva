@@ -429,6 +429,29 @@ struct CommandBusTests {
         #expect(!bus.canUndo)
         #expect(model.document.layout == .radial)
     }
+
+    @Test func setEdgeStyle_undoRedo_roundTrips() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        #expect(model.document.edgeStyle == .elbow)
+
+        bus.execute(.setEdgeStyle(kind: .curve))
+        #expect(model.document.edgeStyle == .curve)
+
+        bus.undo()
+        #expect(model.document.edgeStyle == .elbow)
+
+        bus.redo()
+        #expect(model.document.edgeStyle == .curve)
+    }
+
+    @Test func setEdgeStyle_sameKind_isNoOp() {
+        let model = MindMapModel.makeNew()
+        let bus = CommandBus(model: model)
+        bus.execute(.setEdgeStyle(kind: .elbow))
+        #expect(!bus.canUndo)
+        #expect(model.document.edgeStyle == .elbow)
+    }
 }
 
 @Suite("块命令")

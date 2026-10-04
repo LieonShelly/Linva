@@ -17,4 +17,5 @@ enum MindMapCommand: Equatable {
     case pasteAsChild(payload: [Node], parentId: UUID)
     case setFill(ids: [UUID], fill: NodeFill?)
     case setLayout(kind: LayoutKind)
+    case setEdgeStyle(kind: EdgeStyle)
 }
