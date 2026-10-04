@@ -166,11 +166,12 @@ private struct DocumentCommands: Commands {
 
             Divider()
 
-            // 连线样式循环（随 CaseIterable 自动扩展，Task 7 加 straight 无需改这里）。
+            // 连线样式循环：仅循环 UI 暴露的三样式（straight 为扩展性回归验证，
+            // 不入 Picker 三选一，快捷键不得落进 Picker 无法显示的样式）。
             Button("切换到下一个连线样式") {
-                let all = EdgeStyle.allCases
-                let idx = all.firstIndex(of: session.edgeStyle) ?? 0
-                session.setEdgeStyle(all[(idx + 1) % all.count])
+                let visible = EdgeStyle.allCases.filter { $0 != .straight }
+                let idx = visible.firstIndex(of: session.edgeStyle) ?? 0
+                session.setEdgeStyle(visible[(idx + 1) % visible.count])
             }
             .keyboardShortcut("e", modifiers: .option)
             .help("切换连线样式（⌥E）")
