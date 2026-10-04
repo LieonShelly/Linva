@@ -107,4 +107,63 @@ enum LayoutSupport {
         collect(root)
         return payloads
     }
+
+    /// 每边样式的折线几何基元（spec §4.1，D1）：elbow 正交折线；curve 三次贝塞尔
+    /// 切向 S 曲线采样。brace 是组样式，不走此基元（返回 []）。
+    static func edgePoints(from: CGPoint, to: CGPoint, style: EdgeStyle) -> [CGPoint] {
+        switch style {
+        case .elbow:
+            let mx = (from.x + to.x) / 2
+            return [from, CGPoint(x: mx, y: from.y), CGPoint(x: mx, y: to.y), to]
+        case .curve:
+            let dx = to.x - from.x
+            let dy = to.y - from.y
+            if abs(dx) >= abs(dy) {
+                // 水平主导：水平切向，k = clamp(|dx|·0.4, 18, 56)。
+                let dir: CGFloat = dx >= 0 ? 1 : -1
+                let k = max(18, min(56, abs(dx) * 0.4))
+                return sampleCubic(
+                    from,
+                    CGPoint(x: from.x + dir * k, y: from.y),
+                    CGPoint(x: to.x - dir * k, y: to.y),
+                    to,
+                    segments: 20
+                )
+            } else {
+                // 垂直主导：垂直切向。
+                let dir: CGFloat = dy >= 0 ? 1 : -1
+                let k = max(18, min(56, abs(dy) * 0.4))
+                return sampleCubic(
+                    from,
+                    CGPoint(x: from.x, y: from.y + dir * k),
+                    CGPoint(x: to.x, y: to.y - dir * k),
+                    to,
+                    segments: 20
+                )
+            }
+        case .brace:
+            return []
+        }
+    }
+
+    /// 三次贝塞尔采样（Bernstein），含两端点，共 segments+1 点。
+    static func sampleCubic(
+        _ p0: CGPoint,
+        _ c1: CGPoint,
+        _ c2: CGPoint,
+        _ p1: CGPoint,
+        segments: Int
+    ) -> [CGPoint] {
+        var pts: [CGPoint] = []
+        pts.reserveCapacity(segments + 1)
+        for i in 0...segments {
+            let t = CGFloat(i) / CGFloat(segments)
+            let u = 1 - t
+            pts.append(CGPoint(
+                x: u*u*u*p0.x + 3*u*u*t*c1.x + 3*u*t*t*c2.x + t*t*t*p1.x,
+                y: u*u*u*p0.y + 3*u*u*t*c1.y + 3*u*t*t*c2.y + t*t*t*p1.y
+            ))
+        }
+        return pts
+    }
 }

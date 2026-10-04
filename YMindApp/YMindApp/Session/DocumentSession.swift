@@ -47,7 +47,8 @@ final class DocumentSession: ObservableObject {
     /// 启动扫描待恢复会话提示（Task 3 填充；newDocument/load 时清空）。
     @Published var recovery: RecoveryOffer?
 
-    /// 布局变化触发画布重新 fit 的信号（D1：切换/撤销均经 markDirtyAndRelayout 统一 bump）。
+    /// 有效排布变化（布局切换，或 brace 连线样式强制逻辑树 D8）触发画布重新 fit 的信号：
+    /// 切换/撤销均经 markDirtyAndRelayout 统一 bump。
     @Published private(set) var fitVersion = 0
     private var appliedArrangementForFit: LayoutKind?
 
@@ -182,7 +183,7 @@ final class DocumentSession: ObservableObject {
     func markDirtyAndRelayout() {
         isDirty = persistence.noteChange(current: model.document)
         relayout()
-        // D8：有效排布变化（brace 强制逻辑树）触发再适配。Task 4 换 provider.requiresLogicArrangement。
+        // D8：有效排布变化（布局切换或 brace 强制逻辑树）触发再适配。
         let eff = effectiveArrangement(model.document)
         if eff != appliedArrangementForFit {
             appliedArrangementForFit = eff
@@ -190,9 +191,10 @@ final class DocumentSession: ObservableObject {
         }
     }
 
-    /// 有效排布：brace 连线样式强制逻辑树，其余沿用文档布局。临时占位，Task 4 由 Provider 判定。
+    /// 有效排布：连线样式 Provider 判定（brace 强制逻辑树，其余沿用文档布局）。
     private func effectiveArrangement(_ doc: MindMapDocument) -> LayoutKind {
-        doc.edgeStyle == .brace ? .logic : doc.layout
+        EdgeStyleRegistry.provider(for: doc.edgeStyle).requiresLogicArrangement
+            ? .logic : doc.layout
     }
 
     func relayout() {

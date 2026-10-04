@@ -15,9 +15,18 @@ struct DropIntentTests {
     /// 屏幕点 = 世界点（camera 恒等）：scale=1、translation=0。
     private let camera = Camera()
 
+    /// 引擎只产排布（连线几何由 Provider 产，此处仅用 frames 解析放置意图）。
+    private func snapshot(for model: MindMapModel) -> LayoutSnapshot {
+        LayoutSnapshot(frames: RadialLayout.place(document: model.document, measure: TextMeasure()).frames)
+    }
+
+    private func logicSnapshot(for model: MindMapModel) -> LayoutSnapshot {
+        LayoutSnapshot(frames: LogicLayout.place(document: model.document, measure: TextMeasure()).frames)
+    }
+
     @Test func beforeZone_top28Percent() throws {
         let model = makeModel()
-        let snapshot = RadialLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = snapshot(for: model)
         let a = try #require(model.node(id: model.document.root.children[0].id))
         let frame = try #require(snapshot.frames[a.id])
         let y = frame.rect.minY + frame.rect.height * 0.1  // 上 28% 内
@@ -34,7 +43,7 @@ struct DropIntentTests {
 
     @Test func childZone_middle() throws {
         let model = makeModel()
-        let snapshot = RadialLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = snapshot(for: model)
         let a = try #require(model.node(id: model.document.root.children[0].id))
         let frame = try #require(snapshot.frames[a.id])
         let point = CGPoint(x: frame.rect.midX, y: frame.rect.midY)
@@ -45,7 +54,7 @@ struct DropIntentTests {
 
     @Test func afterZone_bottom28Percent() throws {
         let model = makeModel()
-        let snapshot = RadialLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = snapshot(for: model)
         let a = try #require(model.node(id: model.document.root.children[0].id))
         let frame = try #require(snapshot.frames[a.id])
         let y = frame.rect.maxY - frame.rect.height * 0.1
@@ -72,7 +81,7 @@ struct DropIntentTests {
 
     @Test func root_sideZonesAndChild() throws {
         let model = makeModel()
-        let snapshot = RadialLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = snapshot(for: model)
         let rootFrame = try #require(snapshot.frames[model.document.root.id])
         let moving = [model.document.root.children[0].id]
 
@@ -85,7 +94,7 @@ struct DropIntentTests {
 
     @Test func emptySide_onlyAllRootChildren_andSplitsByWorldX() throws {
         let model = makeModel()
-        let snapshot = RadialLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = snapshot(for: model)
         let moving = [model.document.root.children[0].id]
 
         // 空白 + 世界 x<0 → left
@@ -106,7 +115,7 @@ struct DropIntentTests {
         model.document.layout = .logic
         _ = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
         let b = model.insertChild(parentId: root, text: "B", side: .left, at: nil)
-        let snapshot = LogicLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = logicSnapshot(for: model)
         let rootFrame = try #require(snapshot.frames[root])
 
         let leftPoint = CGPoint(x: rootFrame.rect.minX + rootFrame.rect.width * 0.1, y: rootFrame.rect.midY)
@@ -118,7 +127,7 @@ struct DropIntentTests {
         let root = model.document.root.id
         model.document.layout = .logic
         _ = model.insertChild(parentId: root, text: "A", side: .right, at: nil)
-        let snapshot = LogicLayout.layout(document: model.document, measure: TextMeasure())
+        let snapshot = logicSnapshot(for: model)
         let moving = [model.document.root.children[0].id]
         let point = CGPoint(x: -200, y: -200)
         #expect(resolveDropIntent(screenPoint: point, movingIds: Set(moving), snapshot: snapshot, camera: camera, model: model) == nil)

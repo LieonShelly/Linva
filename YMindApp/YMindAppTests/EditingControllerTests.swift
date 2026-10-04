@@ -5,7 +5,7 @@ import Testing
 @Suite("EditingController")
 struct EditingControllerTests {
     private func frames(for model: MindMapModel) -> [UUID: NodeFrame] {
-        RadialLayout.layout(document: model.document, measure: TextMeasure()).frames
+        RadialLayout.place(document: model.document, measure: TextMeasure()).frames
     }
 
     /// begin → commit 提交聚拢后的 blocks，editingId 回落。

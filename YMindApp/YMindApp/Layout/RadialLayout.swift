@@ -2,40 +2,13 @@ import CoreGraphics
 import Foundation
 
 enum RadialLayout {
-    static func layout(
+    /// 排布引擎：只产 frames/toggles/imagePayloads（连线几何由 EdgeStyleProvider 负责，D7）。
+    /// 返回元组由 LayoutPipeline 与 PNGExporter 共用。
+    static func place(
         document: MindMapDocument,
         measure: TextMeasure
-    ) -> LayoutSnapshot {
+    ) -> (frames: [UUID: NodeFrame], branchToggles: [BranchToggle], imagePayloads: [UUID: ImagePayload]) {
         var frames: [UUID: NodeFrame] = [:]
-        var connectors: [ConnectorGeometry] = []
-
-        func connector(
-            from parent: NodeFrame,
-            to child: NodeFrame,
-            side: Side
-        ) -> ConnectorGeometry {
-            let direction: CGFloat = side == .left ? -1 : 1
-            let start = CGPoint(
-                x: parent.center.x + direction * parent.size.width / 2,
-                y: parent.center.y
-            )
-            let end = CGPoint(
-                x: child.center.x - direction * child.size.width / 2,
-                y: child.center.y
-            )
-            let controlX = (start.x + end.x) / 2
-
-            return ConnectorGeometry(
-                id: child.id,
-                path: [
-                    start,
-                    CGPoint(x: controlX, y: start.y),
-                    CGPoint(x: controlX, y: end.y),
-                    end,
-                ],
-                marker: nil
-            )
-        }
 
         func placeBranch(
             _ node: Node,
@@ -58,7 +31,6 @@ enum RadialLayout {
                 blocks: LayoutSupport.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
-            connectors.append(connector(from: parent, to: frame, side: side))
 
             guard !node.collapsed, !metadata.children.isEmpty else {
                 return
@@ -120,11 +92,10 @@ enum RadialLayout {
         let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
         guard !rootCollapsed else {
-            return LayoutSnapshot(
-                frames: frames,
-                connectors: connectors,
-                branchToggles: makeBranchToggles(frames: frames, root: document.root),
-                imagePayloads: rootPayloads
+            return (
+                frames,
+                makeBranchToggles(frames: frames, root: document.root),
+                rootPayloads
             )
         }
 
@@ -172,11 +143,10 @@ enum RadialLayout {
         placeSide(rightBranches, side: .right)
         // 所有节点已有 frame：此时收集才覆盖全部非折叠节点的图片块。
         let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
-        return LayoutSnapshot(
-            frames: frames,
-            connectors: connectors,
-            branchToggles: makeBranchToggles(frames: frames, root: document.root),
-            imagePayloads: payloads
+        return (
+            frames,
+            makeBranchToggles(frames: frames, root: document.root),
+            payloads
         )
     }
 

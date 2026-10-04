@@ -70,7 +70,7 @@ struct PNGWithImageTests {
 
         // 找根节点在导出快照中的图片区中心像素 → 应为红色（导出视口含全图）
         let expanded = PNGExporter.fullyExpanded(doc)
-        let snapshot = RadialLayout.layout(document: expanded, measure: TextMeasure())
+        let snapshot = LayoutPipeline().relayout(document: expanded)
         let frame = try #require(snapshot.frames[doc.root.id])
         let imageBlock = try #require(frame.blocks.first { $0.text == nil })
         let local = imageBlock.rect

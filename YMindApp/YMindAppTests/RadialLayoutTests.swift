@@ -7,30 +7,12 @@ import CoreGraphics
 struct RadialLayoutTests {
     @Test func singleRoot_centeredAtOrigin() {
         let doc = MindMapDocument.blank()
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let root = snap.frames[doc.root.id]!
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let root = placed.frames[doc.root.id]!
         #expect(root.center == .zero)
-        #expect(snap.connectors.isEmpty)
-    }
-
-    @Test func singleRoot_producesNoConnectors() {
-        let doc = MindMapDocument.blank()
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        #expect(snap.connectors.isEmpty)
-    }
-
-    @Test func radialProducesConnectors() {
-        var doc = MindMapDocument.blank()
-        let child = Node(text: "子", side: .right)
-        doc.root.children = [child]
-
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        #expect(!snap.connectors.isEmpty)
-        for c in snap.connectors {
-            #expect(c.path.count >= 2)
-            #expect(c.id == child.id)
-            #expect(c.marker == nil)
-        }
+        // 单根无子 → 无 toggle、无载荷。
+        #expect(placed.branchToggles.isEmpty)
+        #expect(placed.imagePayloads.isEmpty)
     }
 
     @Test func leftAndRight_childrenOppositeX() {
@@ -38,12 +20,12 @@ struct RadialLayoutTests {
         let left = Node(text: "L", side: .left)
         let right = Node(text: "R", side: .right)
         doc.root.children = [left, right]
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let lf = snap.frames[left.id]!
-        let rf = snap.frames[right.id]!
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let lf = placed.frames[left.id]!
+        let rf = placed.frames[right.id]!
         #expect(lf.center.x < 0)
         #expect(rf.center.x > 0)
-        #expect(snap.connectors.count == 2)
+        #expect(placed.frames.count == 3)
     }
 
     @Test func collapsed_hidesDescendants() {
@@ -51,10 +33,10 @@ struct RadialLayoutTests {
         let grand = Node(text: "孙")
         let child = Node(text: "子", collapsed: true, side: .right, children: [grand])
         doc.root.children = [child]
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        #expect(snap.frames[grand.id] == nil)
-        #expect(snap.frames[child.id]?.hiddenCount == 1)
-        let toggle = snap.branchToggles.first { $0.nodeId == child.id }
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        #expect(placed.frames[grand.id] == nil)
+        #expect(placed.frames[child.id]?.hiddenCount == 1)
+        let toggle = placed.branchToggles.first { $0.nodeId == child.id }
         #expect(toggle?.collapsed == true)
         #expect(toggle?.hiddenCount == 1)
         #expect(toggle?.side == .right)
@@ -64,12 +46,12 @@ struct RadialLayoutTests {
         var doc = MindMapDocument.blank()
         let child = Node(text: "子", side: .right, children: [Node(text: "孙")])
         doc.root.children = [child]
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let toggles = snap.branchToggles.filter { $0.nodeId == child.id }
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let toggles = placed.branchToggles.filter { $0.nodeId == child.id }
         #expect(toggles.count == 1)
         #expect(toggles[0].collapsed == false)
         #expect(toggles[0].side == .right)
-        #expect(toggles[0].center.x > snap.frames[child.id]!.rect.maxX)
+        #expect(toggles[0].center.x > placed.frames[child.id]!.rect.maxX)
     }
 
     @Test func root_collapsed_stillHasLeftAndRightToggles() {
@@ -80,10 +62,10 @@ struct RadialLayoutTests {
         ]
         doc.root.collapsedLeft = true
         doc.root.collapsedRight = true
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let sides = Set(snap.branchToggles.filter { $0.nodeId == doc.root.id }.map(\.side))
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let sides = Set(placed.branchToggles.filter { $0.nodeId == doc.root.id }.map(\.side))
         #expect(sides == [.left, .right])
-        #expect(snap.frames.count == 1)
+        #expect(placed.frames.count == 1)
     }
 
     @Test func rootLeftCollapsed_hidesOnlyLeftSide() {
@@ -92,17 +74,17 @@ struct RadialLayoutTests {
         let r = Node(text: "R", side: .right, children: [Node(text: "R1")])
         doc.root.children = [l, r]
         doc.root.collapsedLeft = true
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
         // 只隐藏左侧：左子树无 frame，右子树保留。
-        #expect(snap.frames[l.id] == nil)
-        #expect(snap.frames[l.children[0].id] == nil)
-        #expect(snap.frames[r.id] != nil)
-        #expect(snap.frames[r.children[0].id] != nil)
+        #expect(placed.frames[l.id] == nil)
+        #expect(placed.frames[l.children[0].id] == nil)
+        #expect(placed.frames[r.id] != nil)
+        #expect(placed.frames[r.children[0].id] != nil)
         // 根左右 toggle 折叠态各自独立。
-        let leftToggle = snap.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .left }
+        let leftToggle = placed.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .left }
         #expect(leftToggle?.collapsed == true)
         #expect(leftToggle?.hiddenCount == 2)
-        let rightToggle = snap.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .right }
+        let rightToggle = placed.branchToggles.first { $0.nodeId == doc.root.id && $0.side == .right }
         #expect(rightToggle?.collapsed == false)
     }
 
@@ -112,9 +94,9 @@ struct RadialLayoutTests {
         let second = Node(text: "B", side: .right)
         doc.root.children = [first, second]
 
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let firstFrame = try #require(snap.frames[first.id])
-        let secondFrame = try #require(snap.frames[second.id])
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let firstFrame = try #require(placed.frames[first.id])
+        let secondFrame = try #require(placed.frames[second.id])
 
         #expect(firstFrame.center.y == -secondFrame.center.y)
         #expect(
@@ -129,17 +111,12 @@ struct RadialLayoutTests {
         let child = Node(text: "子", side: .left, children: [grandchild])
         doc.root.children = [child]
 
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        let childFrame = try #require(snap.frames[child.id])
-        let grandchildFrame = try #require(snap.frames[grandchild.id])
-        let connector = try #require(snap.connectors.last)
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        let childFrame = try #require(placed.frames[child.id])
+        let grandchildFrame = try #require(placed.frames[grandchild.id])
 
         #expect(grandchildFrame.side == .left)
         #expect(grandchildFrame.center.x < childFrame.center.x)
-        #expect(connector.id == grandchild.id)
-        #expect(connector.path.count == 4)
-        #expect(connector.path.first?.x == childFrame.rect.minX)
-        #expect(connector.path.last?.x == grandchildFrame.rect.maxX)
     }
 
     @Test func textMeasure_preservesExplicitEmptyLines() {
@@ -169,9 +146,9 @@ struct RadialLayoutTests {
         doc.root.fill = .sage
         let child = Node(text: "子", side: .right, fill: .sky)
         doc.root.children = [child]
-        let snap = RadialLayout.layout(document: doc, measure: TextMeasure())
-        #expect(snap.frames[doc.root.id]?.fill == .sage)
-        #expect(snap.frames[child.id]?.fill == .sky)
+        let placed = RadialLayout.place(document: doc, measure: TextMeasure())
+        #expect(placed.frames[doc.root.id]?.fill == .sage)
+        #expect(placed.frames[child.id]?.fill == .sky)
     }
 }
 
@@ -183,11 +160,11 @@ struct ImageLayoutTests {
         var doc = MindMapDocument.blank(rootText: "根")
         // 图片 600×300pt 请求 → 上限 300 → 显示 300×150
         doc.root = Node(text: "根", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 600, height: 300))
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        let frame = snapshot.frames[doc.root.id]!
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        let frame = placed.frames[doc.root.id]!
 
         let bare = MindMapDocument.blank(rootText: "根")
-        let bareFrame = RadialLayout.layout(document: bare, measure: measure()).frames[bare.root.id]!
+        let bareFrame = RadialLayout.place(document: bare, measure: measure()).frames[bare.root.id]!
 
         #expect(frame.size.height == bareFrame.size.height + LayoutConstants.imageTextGap + 150)
         let imageBlocks = frame.blocks.filter { $0.text == nil }
@@ -198,7 +175,7 @@ struct ImageLayoutTests {
         // 水平居中于节点
         #expect(abs(rect.midX - frame.size.width / 2) < 0.001)
         // payload 按块 id 索引
-        #expect(snapshot.imagePayloads[imageBlocks[0].blockId] != nil)
+        #expect(placed.imagePayloads[imageBlocks[0].blockId] != nil)
     }
 
     @Test func childWithImage_nonCollapsedRoot_payloadIncluded() {
@@ -211,17 +188,17 @@ struct ImageLayoutTests {
             imagePixelSize: ImagePixelSize(width: 100, height: 50)
         )
         doc.root.children = [child]
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        let childFrame = snapshot.frames[child.id]!
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        let childFrame = placed.frames[child.id]!
         let imageBlock = childFrame.blocks.first { $0.text == nil }!
-        #expect(snapshot.imagePayloads[imageBlock.blockId] != nil)
+        #expect(placed.imagePayloads[imageBlock.blockId] != nil)
     }
 
     @Test func smallImage_centered_whenTextDrivesWidth() {
         var doc = MindMapDocument.blank(rootText: "相当长的文字内容决定节点宽度")
         doc.root = Node(text: "相当长的文字内容决定节点宽度", image: Data([0x01]), imagePixelSize: ImagePixelSize(width: 50, height: 50))
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        let frame = snapshot.frames[doc.root.id]!
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        let frame = placed.frames[doc.root.id]!
         let imageBlocks = frame.blocks.filter { $0.text == nil }
         #expect(imageBlocks.count == 1)
         let rect = imageBlocks[0].rect
@@ -237,8 +214,8 @@ struct ImageLayoutTests {
             image: Data([0x01]),
             imagePixelSize: ImagePixelSize(width: 100, height: 50)
         )
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        let frame = snapshot.frames[doc.root.id]!
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        let frame = placed.frames[doc.root.id]!
         #expect(frame.blocks.count == 2)
         #expect(frame.blocks[0].text == nil)
         #expect(frame.blocks[0].rect.minY == 0)
@@ -250,9 +227,9 @@ struct ImageLayoutTests {
 
     @Test func imagelessNode_hasNoImageBlocksOrPayload() {
         let doc = MindMapDocument.blank(rootText: "根")
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        #expect(snapshot.frames[doc.root.id]!.blocks.allSatisfy { $0.text != nil })
-        #expect(snapshot.imagePayloads.isEmpty)
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        #expect(placed.frames[doc.root.id]!.blocks.allSatisfy { $0.text != nil })
+        #expect(placed.imagePayloads.isEmpty)
     }
 
     @Test func collapsedDescendantWithImage_isAbsentFromFramesAndPayloads() {
@@ -261,9 +238,9 @@ struct ImageLayoutTests {
         doc.root.children = [child]
         doc.root.collapsedLeft = true
         doc.root.collapsedRight = true
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        #expect(snapshot.frames[child.id] == nil)
-        #expect(snapshot.imagePayloads[child.id] == nil)
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        #expect(placed.frames[child.id] == nil)
+        #expect(placed.imagePayloads[child.id] == nil)
     }
 
     @Test func multipleBlocks_stackVerticallyInOrder() {
@@ -277,8 +254,8 @@ struct ImageLayoutTests {
         ]
         node.id = root
         doc.root = node
-        let snapshot = RadialLayout.layout(document: doc, measure: measure())
-        let frame = snapshot.frames[root]!
+        let placed = RadialLayout.place(document: doc, measure: measure())
+        let frame = placed.frames[root]!
         let blocks = frame.blocks
         #expect(blocks.count == 3)
         #expect(blocks[0].text == "文")

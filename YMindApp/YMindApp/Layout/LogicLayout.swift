@@ -4,19 +4,12 @@ import Foundation
 /// 逻辑图（总分树）布局：根在最左、每一层子节点垂直排列在父节点右侧、递归向右展开。
 /// 与 `RadialLayout` 结构同构（LayoutSupport.subtreeHeight 测高 → 递归排布）。
 enum LogicLayout {
-    static func layout(document: MindMapDocument, measure: TextMeasure) -> LayoutSnapshot {
+    /// 排布引擎：只产 frames/toggles/imagePayloads（连线几何由 EdgeStyleProvider 负责，D7）。
+    static func place(
+        document: MindMapDocument,
+        measure: TextMeasure
+    ) -> (frames: [UUID: NodeFrame], branchToggles: [BranchToggle], imagePayloads: [UUID: ImagePayload]) {
         var frames: [UUID: NodeFrame] = [:]
-        var connectors: [ConnectorGeometry] = []
-
-        func connector(from parent: NodeFrame, to child: NodeFrame) -> ConnectorGeometry {
-            let start = CGPoint(x: parent.rect.maxX, y: parent.center.y)
-            let end = CGPoint(x: child.rect.minX, y: child.center.y)
-            return ConnectorGeometry(
-                id: child.id,
-                path: [start, CGPoint(x: end.x, y: start.y), CGPoint(x: end.x, y: end.y), end],
-                marker: nil
-            )
-        }
 
         func placeBranch(
             _ node: Node,
@@ -38,7 +31,6 @@ enum LogicLayout {
                 blocks: LayoutSupport.centeredBlocks(from: metadata)
             )
             frames[node.id] = frame
-            connectors.append(connector(from: parent, to: frame))
 
             guard !node.collapsed, !metadata.children.isEmpty else { return }
 
@@ -79,11 +71,10 @@ enum LogicLayout {
         let rootPayloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
 
         guard !rootCollapsed else {
-            return LayoutSnapshot(
-                frames: frames,
-                connectors: connectors,
-                branchToggles: makeBranchToggles(frames: frames, root: document.root),
-                imagePayloads: rootPayloads
+            return (
+                frames,
+                makeBranchToggles(frames: frames, root: document.root),
+                rootPayloads
             )
         }
 
@@ -100,11 +91,10 @@ enum LogicLayout {
 
         // 所有节点已有 frame 后再收集全部图片载荷（避免丢非根图片；与 RadialLayout 一致）。
         let payloads = LayoutSupport.collectImagePayloads(root: document.root, frames: frames)
-        return LayoutSnapshot(
-            frames: frames,
-            connectors: connectors,
-            branchToggles: makeBranchToggles(frames: frames, root: document.root),
-            imagePayloads: payloads
+        return (
+            frames,
+            makeBranchToggles(frames: frames, root: document.root),
+            payloads
         )
     }
 
