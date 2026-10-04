@@ -33,7 +33,7 @@
 |---|---|---|---|
 | 2.1 | 首次启动欢迎（欢迎窗口） | ⏸ | 方案已拍板（欢迎窗口）。**用户要求搁置**：后续单独做设计稿后再实现 |
 | 2.2 | About / 关于窗口 | ✅ | SwiftUI 默认 App 菜单自带「About Linva」系统标准面板。发现 `CFBundleName=$(PRODUCT_NAME)=YMindApp` 导致面板显示旧名 → Info.plist 改 `CFBundleName=Linva`（不影响可执行文件名，由 CFBundleExecutable 决定）。运行验证：菜单栏全变 Linva，面板显示 Linva + Version 1.0 (1) + © 2026 lieoncx + 图标 |
-| 2.3 | 千节点级性能自测 | ☐ | Metal 画布大文档卡顿审核员会实测。生成 1000+ 节点文档实测流畅度 |
+| 2.3 | 千节点级性能自测 | ✅ | 新增基准测试 `LargeDocumentPerformanceTests`（radial+logic 各 1 用例，1011 节点，阈值 <2s）。Release(-O) 实测：radial 0.556s / logic 0.572s 全量布局。真实加载 1011 节点 `.ymind`（578KB）验证：窗口标题正确、蓝色根节点居中 + 左右各 5 主干×100 子节点、垂直堆叠无重叠、连线清晰；滚动/平移/缩放后无崩溃/残影，进程稳定 0% CPU 空闲 |
 
 ## 阶段 3 — 构建与提交
 
@@ -64,4 +64,7 @@
 
 - 2026-10-04: 图标 10 尺寸写入 AppIcon.appiconset 并构建验证（commit 83526d8）
 - 2026-10-04: 阶段0 0.2-0.4（entitlements/隐私清单/版权）commit 6b12fb2
-- 2026-10-04: 阶段0 0.5 Bundle ID → com.linva.app（commit 待 0.5 验证后提交）
+- 2026-10-04: 阶段0 0.5 Bundle ID → com.linva.app（commit 170a65a）
+- 2026-10-04: 阶段1 1.3 隐私政策初稿（commit f72d558）
+- 2026-10-04: 阶段2 2.2 About 面板修复（commit 5abd9ab）
+- 2026-10-04: 阶段2 2.3 千节点性能自测（基准测试 + 真实渲染验证）
