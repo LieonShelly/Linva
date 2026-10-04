@@ -4,7 +4,7 @@
 > 状态图例：☐ 待办 / 🔄 进行中 / ✅ 完成 / ⏸ 阻塞（含原因）
 >
 > 当前分支：`main`。上次提交：`83526d8`（图标 + 命名文档）。
-> 工程名：`YMindApp`；对外显示名：`Linva`（待修空格）；Bundle ID：`com.YMindApp`（待定）。
+> 工程名：`YMindApp`；对外显示名：`Linva`；Bundle ID：`com.linva.app`（已改）。
 
 ---
 
@@ -16,7 +16,7 @@
 | 0.2 | 补 .entitlements 文件 + 引用 | ✅ | App Sandbox=YES 但无 entitlements 文件/CODE_SIGN_ENTITLEMENTS，App Store 分发必须显式。建 `YMindApp/YMindApp.entitlements`（App Sandbox + 用户选定文件读写），pbxproj 两配置引用。codesign 验证三个 entitlement 均进签名 |
 | 0.3 | 隐私清单 PrivacyInfo.xcprivacy | ✅ | 2024.5 起强制。代码检查：无 UserDefaults/@AppStorage/@SceneStorage，FileManager 仅目录枚举/创建（非时间戳/磁盘空间 API），Date() 仅存元数据 → 无 required-reason API。建 `YMindApp/YMindApp/PrivacyInfo.xcprivacy`（Tracking=false + 三个空数组，fileSystemSynchronizedGroups 自动入 bundle），构建验证清单在 Resources |
 | 0.4 | 补 NSHumanReadableCopyright | ✅ | Info.plist 原无此键。补 `© 2026 lieoncx`（暂用 git 作者名，可在 0.5 一起定） |
-| 0.5 | Bundle ID 规范化 | ☐ | 现 `com.YMindApp`。建议 `com.linva.app`（改名成本现在最低）。**需用户拍板**：改动影响签名/文件关联 |
+| 0.5 | Bundle ID 规范化 | ✅ | `com.YMindApp` → `com.linva.app`（主 target 两配置），测试 target 跟随 `com.linva.app.Tests`/`.UITests`。代码零硬编码（Info.plist 用变量），文档与决策清单同步更新。**用户已拍板** |
 
 ## 阶段 1 — 账号与元数据（用户操作，代码帮不了）
 
@@ -55,11 +55,13 @@
 
 ## 决策待定
 
-- [ ] 0.5 Bundle ID：`com.YMindApp` 保持 or `com.linva.app`？
-- [ ] 0.4 版权署名：谁 / 哪年 / 公司名？
+- [x] 0.5 Bundle ID：`com.linva.app`（已拍板并实施）
+- [x] 0.4 版权署名：`© 2026 lieoncx`（已拍板）
 - [ ] 2.1 欢迎方式：欢迎窗口 or 自动建示例导图 or 两者？
 - [ ] 1.1 开发者账号是否已注册？（决定阶段 1 是否可开始）
 
 ## 已完成记录
 
 - 2026-10-04: 图标 10 尺寸写入 AppIcon.appiconset 并构建验证（commit 83526d8）
+- 2026-10-04: 阶段0 0.2-0.4（entitlements/隐私清单/版权）commit 6b12fb2
+- 2026-10-04: 阶段0 0.5 Bundle ID → com.linva.app（commit 待 0.5 验证后提交）
