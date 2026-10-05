@@ -101,8 +101,8 @@ YMind 是一款 **macOS 原生**的思维导图应用：用 **SwiftUI** 做窗�
 ```mermaid
 flowchart TD
     UI["交互<br/>手势 · 快捷键 · 选中 · Undo"] -->|MindMapCommand / CommandBus 入栈| MODEL["Model<br/>单根主题树 · 文档属性"]
-    MODEL -->|DocumentSession.relayout()| LAYOUT["Layout（CPU）<br/>树 → NodeFrame · 连线路径"]
-    LAYOUT -->|LayoutSnapshot 稳定接缝| RENDER["Render（Metal）<br/>只消费 LayoutSnapshot + Camera<br/>描边 · 填充 · 贴文字"]
+    MODEL -->|DocumentSession.relayout| LAYOUT["Layout · CPU<br/>树 → NodeFrame · 连线路径"]
+    LAYOUT -->|LayoutSnapshot 稳定接缝| RENDER["Render · Metal<br/>只消费 LayoutSnapshot + Camera<br/>描边 · 填充 · 贴文字"]
 ```
 
 **四条纪律**
@@ -117,7 +117,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     ROOT["YMindApp/ 源码"] --> APP["App/<br/>SwiftUI 壳：窗口 · 工具条 · 浮层编辑 · 导入预览 · 恢复横幅"]
-    ROOT --> CMD["Commands/<br/>MindMapCommand 枚举 · CommandBus（Undo/Redo）"]
+    ROOT --> CMD["Commands/<br/>MindMapCommand 枚举 · CommandBus · Undo/Redo"]
     ROOT --> MODEL["Model/<br/>Node 树 · MindMapDocument · YMindCodec · 导入器"]
     ROOT --> LAYOUT["Layout/<br/>RadialLayout · LogicLayout · LayoutSupport · LayoutSnapshot · 连线 Provider"]
     ROOT --> SESS["Session/<br/>DocumentSession · LayoutPipeline · Persistence · Clipboard · Search"]
@@ -154,7 +154,7 @@ flowchart LR
     ELBOW --> CG["ConnectorGeometry<br/>id + path + marker?"]
     CURVE --> CG
     BRACE --> CG
-    CG --> R["Render（Metal）<br/>描边 path + 画 marker<br/>对样式零感知"]
+    CG --> R["Render · Metal<br/>描边 path + 画 marker<br/>对样式零感知"]
 ```
 
 **新增一种连线样式**：`EdgeStyle` 加一个枚举值 + 新建一个 Provider 文件 + 注册表登记一行。**引擎 / 渲染 / 编解码零改动**（已用 `straight` 直线样式做了回归验证）。
@@ -204,13 +204,13 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    ROOT["/"] --> APP["YMindApp/ 主工程<br/>（Xcode project · scheme YMindApp）"]
+    ROOT["/"] --> APP["YMindApp/ 主工程<br/>Xcode project · scheme YMindApp"]
     APP --> SRC["YMindApp/ 源码<br/>App · Commands · Layout · Model · Render · Session"]
-    APP --> TESTS["YMindAppTests/ 单元测试<br/>（Swift Testing）"]
-    ROOT --> PROTO["prototype/<br/>HTML 原型（交互 · 布局 · 连线样式）"]
+    APP --> TESTS["YMindAppTests/ 单元测试 · Swift Testing"]
+    ROOT --> PROTO["prototype/<br/>HTML 原型 · 交互 · 布局 · 连线样式"]
     ROOT --> DOCS["docs/<br/>架构文档 · PRD · 设计稿 · 屏幕截图"]
     ROOT --> AGENTS[".agents/ Agent 配置<br/>skills · MCP · rules"]
-    ROOT --> SCRIPTS["scripts/<br/>check-boundaries.sh（分层依赖边界检查）"]
+    ROOT --> SCRIPTS["scripts/<br/>check-boundaries.sh · 分层依赖边界检查"]
 ```
 
 ## 构建与运行
