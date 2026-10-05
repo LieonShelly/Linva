@@ -106,7 +106,9 @@ struct ContentView: View {
                     canSetSide: session.canSetSide,
                     zoomLabel: ZoomPercentLabel(session: session),
                     canvasTool: session.canvasTool,
-                    setCanvasTool: { session.canvasTool = $0 },
+                    // Picker binding setter 在 SwiftUI 更新事务内执行，直接写 @Published 会触发
+                    // "Publishing changes from within view updates"；延到下一 runloop 再写。
+                    setCanvasTool: { tool in DispatchQueue.main.async { session.canvasTool = tool } },
                     addChild: addChild,
                     addSibling: addSibling,
                     delete: deleteSelected,
@@ -123,9 +125,10 @@ struct ContentView: View {
                     fillActive: fillSelection.active,
                     setFill: { fill in session.setFill(fill) },
                     layout: session.layout,
-                    setLayout: { session.setLayout($0) },
+                    // 同 canvasTool：命令执行→relayout 会同步发布 @Published，须离开 Picker 更新事务。
+                    setLayout: { kind in DispatchQueue.main.async { session.setLayout(kind) } },
                     edgeStyle: session.edgeStyle,
-                    setEdgeStyle: { session.setEdgeStyle($0) },
+                    setEdgeStyle: { kind in DispatchQueue.main.async { session.setEdgeStyle(kind) } },
                     exportMarkdown: { DocumentWorkflow.exportMarkdown(session) },
                     exportPNG: { DocumentWorkflow.exportPNG(session) }
                 )
