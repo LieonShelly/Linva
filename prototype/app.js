@@ -1,5 +1,5 @@
 /**
- * YMind HTML Prototype
+ * Linva HTML Prototype
  * Model → Radial Layout → DOM/SVG View
  * v1 核心 + 整理 + 搬枝/排序 + 搜索 + 改侧 + 填色 + 导出
  */
@@ -1255,12 +1255,12 @@
   };
 
   function safeFilename(base, ext) {
-    const name = String(base || "ymind")
+    const name = String(base || "linva")
       .replace(/[\\/:*?"<>|]/g, "_")
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 48);
-    return `${name || "ymind"}.${ext}`;
+    return `${name || "linva"}.${ext}`;
   }
 
   function downloadBlob(filename, blob) {
@@ -2037,7 +2037,7 @@
   centerCameraOnContent(false);
   window.addEventListener("resize", () => centerCameraOnContent(false));
 
-  window.YMind = {
+  window.Linva = {
     doc,
     render,
     layoutTree,

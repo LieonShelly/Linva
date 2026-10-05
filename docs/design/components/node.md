@@ -1,4 +1,4 @@
-# YMind 组件规格 — 节点（Node）
+# Linva 组件规格 — 节点（Node）
 
 > 层级：**Metal 层**（画布上绘制；文字编辑浮层归 SwiftUI，见 `node-editor-overlay.md`）。节点是树的视觉单元，分「普通节点」与「中心主题」两种形态。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 

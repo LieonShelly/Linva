@@ -1,6 +1,6 @@
 - generic [active] [ref=e1]:
   - banner [ref=e2]:
-    - generic [ref=e3]: YMind连线样式线框 · 逻辑树
+    - generic [ref=e3]: Linva连线样式线框 · 逻辑树
   - main [ref=e4]:
     - generic [ref=e5]:
       - generic [ref=e6]: 正交折线（默认）
@@ -52,4 +52,4 @@
           - code [ref=e109]: r = min(16, 跨度/4, xRight−xStem, xStem−xTip)
           - text: 。
         - listitem [ref=e110]: 父垂直对齐中间子；子竖排右、不连边；可选嘴旁小圆圈（折叠标记）。
-      - generic [ref=e111]: spec docs/superpowers/specs/2026-10-04-ymind-edge-style-design.md · 视觉伴侣 brace-xmind.html
+      - generic [ref=e111]: spec docs/superpowers/specs/2026-10-04-linva-edge-style-design.md · 视觉伴侣 brace-xmind.html

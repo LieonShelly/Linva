@@ -1,4 +1,4 @@
-# YMind 组件规格 — 导入预览（ImportPreviewView）
+# Linva 组件规格 — 导入预览（ImportPreviewView）
 
 > 层级：**SwiftUI 壳**。导入 MD/OPML/FreeMind 解析成功后，先展示解析出的树（缩进列表）确认/取消，再载入。色值引用 `design-tokens.md`。
 
@@ -31,7 +31,7 @@
 
 | 事件 | 行为 |
 |------|------|
-| 打开 | 解析成功后展示（不改磁盘既有 `.ymind`） |
+| 打开 | 解析成功后展示（不改磁盘既有 `.linva`） |
 | 确认 | `loadImported` → 清命令栈、重置 documentID、标记 dirty、树入场 |
 | 取消 / Esc | `cancelImport`，保持当前文档 |
 | 导入失败 | 清旧预览 + 顶部错误横幅（`sem.color.danger`） |

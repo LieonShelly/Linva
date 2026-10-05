@@ -13,7 +13,7 @@
     "codegraph": {
       "type": "stdio",
       "command": "codegraph",
-      "args": ["serve", "--mcp", "--path", "YMindApp"]
+      "args": ["serve", "--mcp", "--path", "LinvaApp"]
     }
   }
 }

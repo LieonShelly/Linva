@@ -1,4 +1,4 @@
-# YMind — Agent 说明
+# Linva — Agent 说明
 
 macOS 思维导图应用：**Swift + SwiftUI（壳）+ Metal（画布）**，单窗口 + 中心辐射布局。HTML 原型在 `prototype/`。
 
@@ -19,26 +19,26 @@ Agent 配置统一在 **`.agents/`**（skills、MCP、rules），不绑定 IDE�
 
 ## Skills
 
-**YMind 专属技能（本仓库自建，不在 lockfile 管理）—— 改核心代码前优先读：**
+**Linva 专属技能（本仓库自建，不在 lockfile 管理）—— 改核心代码前优先读：**
 
 | Skill | 何时使用 |
 |-------|----------|
-| `ymind-pm` | 需求探索 / 痛点分析 / 外部调研（Google·X·竞品）/ 找下一个 idea / 写 PRD 之前的思考。产出需求文档 + HTML 原型图，正式 PRD 交 bmad-prd |
-| `ymind-command` | 新增/修改改变树结构的命令（CommandBus + Undo） |
-| `ymind-codec-version` | 改 `.ymind` schema、节点字段、序列化/版本升迁 |
-| `ymind-layout-snapshot` | 扩展布局算法 / NodeFrame / EdgeGeometry / Render-Layout 接缝 |
-| `ymind-render-text` | 文字纹理、TextAtlas、坐标系/Retina/缓存 |
-| `ymind-design` | 正式 UI 设计 / 视觉改版：产出 Apple HIG 合规的「design token + 组件状态表 + HTML 原型」三件套，动效分 SwiftUI/Metal 层，读图委派 vision-inspector |
+| `linva-pm` | 需求探索 / 痛点分析 / 外部调研（Google·X·竞品）/ 找下一个 idea / 写 PRD 之前的思考。产出需求文档 + HTML 原型图，正式 PRD 交 bmad-prd |
+| `linva-command` | 新增/修改改变树结构的命令（CommandBus + Undo） |
+| `linva-codec-version` | 改 `.linva` schema、节点字段、序列化/版本升迁 |
+| `linva-layout-snapshot` | 扩展布局算法 / NodeFrame / EdgeGeometry / Render-Layout 接缝 |
+| `linva-render-text` | 文字纹理、TextAtlas、坐标系/Retina/缓存 |
+| `linva-design` | 正式 UI 设计 / 视觉改版：产出 Apple HIG 合规的「design token + 组件状态表 + HTML 原型」三件套，动效分 SwiftUI/Metal 层，读图委派 vision-inspector |
 
 **第三方 skill**（`npx skills` 安装，各自 `SKILL.md` 的 `description` 自动路由）：
-- 完整路由表见 **[`.agents/rules/ymind-apple-stack.md`](rules/ymind-apple-stack.md)**（实现 Apple 平台代码前先查）。
+- 完整路由表见 **[`.agents/rules/linva-apple-stack.md`](rules/linva-apple-stack.md)**（实现 Apple 平台代码前先查）。
 - 画布优先序：`metal-gpu` → `metal-shader-expert` → `axiom-graphics`（`resizable-rendering.md` / `display-performance.md`）。
 
 ## 子代理（pi-subagents，nicobailon 版）
 
 Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发现，字段如 `systemPromptMode`/`inheritSkills`/`defaultContext`）。**注意：不是 `tintinweb/pi-subagents`，那是另一个包，字段不同。**
 
-> 设计能力已提炼为 skill `ymind-design`（见上表），不另设 designer subagent——设计是迭代式工作，留在主会话上下文更契合。真正需要隔离/钉模型时才用 subagent。
+> 设计能力已提炼为 skill `linva-design`（见上表），不另设 designer subagent——设计是迭代式工作，留在主会话上下文更契合。真正需要隔离/钉模型时才用 subagent。
 
 | Agent | 何时委派 |
 |-------|----------|
@@ -50,15 +50,15 @@ Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发�
 
 **代码检索一律用 CodeGraph MCP（`codegraph_explore`），不得用文本方式（grep / Glob / Read 逐文件）人工翻代码兜底。**
 
-- 索引位于 **`YMindApp/.codegraph`**（SQLite：`codegraph.db`）。
-- 因仓库根不在索引根，**每次调用必须显式传 `projectPath: "YMindApp"`**（或 `YMindApp/.codegraph` 往上可达的路径），否则服务器无默认项目、答不了。
+- 索引位于 **`LinvaApp/.codegraph`**（SQLite：`codegraph.db`）。
+- 因仓库根不在索引根，**每次调用必须显式传 `projectPath: "LinvaApp"`**（或 `LinvaApp/.codegraph` 往上可达的路径），否则服务器无默认项目、答不了。
 - 一次 `codegraph_explore` 返回符号源 + 调用路径 + 波及面，替代「grep + Read 循环」。
 
 **必须用**：问符号/功能怎么工作、定位 bug/找字段/定义与调用方、改动前定波及范围、调查代码区/架构。
 
 **例外（可用常规工具）**：查目录结构/文件名/待检索清单（`glob`/`read` 目录）、纯文本层级匹配/Mermaid/文档内容、项目无索引或索引缺失时用内置工具（Read/Grep/Glob）完成——**不要擅自跑索引**，索引属用户决策。
 
-> 详细：`.agents/rules/ymind-code-retrieval.md`
+> 详细：`.agents/rules/linva-code-retrieval.md`
 
 ### 视觉委派（触发条件）— vision delegate
 
@@ -74,7 +74,7 @@ Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发�
 
 **证据红线**：视觉结论必须来自子代理真实读图，不得从路径/文件名/会话上下文推断。
 
-> 详细与验证记录：`.agents/rules/ymind-vision-delegate.md`
+> 详细与验证记录：`.agents/rules/linva-vision-delegate.md`
 
 ### 图形
 
@@ -82,11 +82,11 @@ Agent 定义文件在 `.agents/agents/*.md`（nicobailon/pi-subagents 自动发�
 
 ## Claude 常犯的错误（犯两次就写进这里）
 
-- **改树绕过命令栈** → Undo 失真。改树必走 `commandBus.execute(...)`；相机/选中/搜索态不入栈。见 `ymind-command`。
-- **改 `.ymind` schema 不递增 `currentVersion`、不写迁移** → 老文件打不开。见 `ymind-codec-version`。
-- **深层节点带 `side`** → side 只存根下一层，`sanitize` 会强制清掉。见 `ymind-codec-version`。
-- **改文字渲染删掉行翻转** → 文字颠倒/错位。保留 `TextTextureRasterizer.flipVertically`。见 `ymind-render-text`。
-- **Render 层去读 Model** → Metal 只消费 `LayoutSnapshot`，不懂树。见 `ymind-layout-snapshot`。
+- **改树绕过命令栈** → Undo 失真。改树必走 `commandBus.execute(...)`；相机/选中/搜索态不入栈。见 `linva-command`。
+- **改 `.linva` schema 不递增 `currentVersion`、不写迁移** → 老文件打不开。见 `linva-codec-version`。
+- **深层节点带 `side`** → side 只存根下一层，`sanitize` 会强制清掉。见 `linva-codec-version`。
+- **改文字渲染删掉行翻转** → 文字颠倒/错位。保留 `TextTextureRasterizer.flipVertically`。见 `linva-render-text`。
+- **Render 层去读 Model** → Metal 只消费 `LayoutSnapshot`，不懂树。见 `linva-layout-snapshot`。
 - **新增依赖没进 `scripts/check-boundaries.sh` 白名单** → 构建即红。新依赖同步更新白名单与 `docs/架构现状.md` §5。
 
 ## 更新 Skills

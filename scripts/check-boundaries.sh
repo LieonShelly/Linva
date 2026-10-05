@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# YMind 依赖边界校验 —— AI 原生 SDLC 现状治理清单 A（方案二）
+# Linva 依赖边界校验 —— AI 原生 SDLC 现状治理清单 A（方案二）
 #
 # 依据: docs/现状治理-AI原生SDLC.md §3-A、docs/架构现状.md §5 依赖规则
 # 作用: 扫描各层源码的 import，凡不在该层"允许白名单"内的模块 → 报错退出 1。
@@ -8,8 +8,8 @@
 #
 # 用法:
 #   scripts/check-boundaries.sh [源码根目录]
-#     - 缺省参数: 取本脚本所在目录的上一级（仓库根）下的 YMindApp/YMindApp
-#     - 在 Xcode build phase 中调用时传 ${SRCROOT}/YMindApp
+#     - 缺省参数: 取本脚本所在目录的上一级（仓库根）下的 LinvaApp/LinvaApp
+#     - 在 Xcode build phase 中调用时传 ${SRCROOT}/LinvaApp
 #
 # 退出码: 0 = 全部通过; 1 = 存在违规（Xcode build phase 会因此让构建失败）
 
@@ -31,10 +31,10 @@ ALLOW_RULES=(
   "App|Foundation AppKit SwiftUI ImageIO"
 )
 
-# 源码根: 缺省推导仓库根下的 YMindApp/YMindApp
+# 源码根: 缺省推导仓库根下的 LinvaApp/LinvaApp
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SRC_ROOT="${1:-$REPO_ROOT/YMindApp/YMindApp}"
+SRC_ROOT="${1:-$REPO_ROOT/LinvaApp/LinvaApp}"
 
 if [ ! -d "$SRC_ROOT" ]; then
   echo "错误: 源码目录不存在: $SRC_ROOT" >&2

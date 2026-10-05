@@ -1,4 +1,4 @@
-# YMind 连线样式实现计划（正交折线 / 曲线 / 大括号 + 可扩展抽象）
+# Linva 连线样式实现计划（正交折线 / 曲线 / 大括号 + 可扩展抽象）
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -8,9 +8,9 @@
 
 **Tech Stack:** Swift, SwiftUI 壳, Metal 渲染, CoreGraphics/Foundation 几何, XCTest.
 
-**Spec:** `docs/superpowers/specs/2026-10-04-ymind-edge-style-design.md`（D1–D8，本文从之）
-**实现细则:** `docs/prds/prd-ymind-edge-style-2026-10-04/addendum.md`
-**PRD:** `docs/prds/prd-ymind-edge-style-2026-10-04/prd.md`（FR-E1…E5）
+**Spec:** `docs/superpowers/specs/2026-10-04-linva-edge-style-design.md`（D1–D8，本文从之）
+**实现细则:** `docs/prds/prd-linva-edge-style-2026-10-04/addendum.md`
+**PRD:** `docs/prds/prd-linva-edge-style-2026-10-04/prd.md`（FR-E1…E5）
 **体验真源:** `prototype/edge-style.html`（三样式 + 组括号几何，已验证）
 
 ## Global Constraints
@@ -27,9 +27,9 @@
 ### Task 1: EdgeStyle 枚举 + MindMapDocument.edgeStyle + Codec v7
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Model/MindMapDocument.swift`
-- Modify: `YMindApp/YMindApp/Model/YMindCodec.swift`
-- Test: `YMindApp/YMindAppTests/CodecTests.swift`
+- Modify: `LinvaApp/LinvaApp/Model/MindMapDocument.swift`
+- Modify: `LinvaApp/LinvaApp/Model/LinvaCodec.swift`
+- Test: `LinvaApp/LinvaAppTests/CodecTests.swift`
 
 **Interfaces:**
 - Produces: `enum EdgeStyle: String, Codable, CaseIterable, Sendable, Hashable { case elbow, curve, brace }`；`MindMapDocument.edgeStyle: EdgeStyle`；`currentVersion == 7`。
@@ -42,8 +42,8 @@ func testEdgeStyleRoundTrip() throws {
     for style in EdgeStyle.allCases {
         var d = doc
         d.edgeStyle = style
-        let data = try YMindCodec.encode(d)
-        let back = try YMindCodec.decode(data)
+        let data = try LinvaCodec.encode(d)
+        let back = try LinvaCodec.decode(data)
         XCTAssertEqual(back.edgeStyle, style)
         XCTAssertEqual(back.version, MindMapDocument.currentVersion)
     }
@@ -54,14 +54,14 @@ func testEdgeStyleDefaultsToElbow() throws {
     let v6JSON = """
     {"version":6,"root":{"text":"根","children":[]}}
     """
-    let doc = try YMindCodec.decode(Data(v6JSON.utf8))
+    let doc = try LinvaCodec.decode(Data(v6JSON.utf8))
     XCTAssertEqual(doc.edgeStyle, .elbow)
     XCTAssertEqual(doc.version, 7)
 }
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/CodecTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/CodecTests`
 Expected: FAIL（`edgeStyle` 不存在）。
 
 - [ ] **Step 3: 实现**（MindMapDocument.swift，`LayoutKind` 后加 `EdgeStyle`；struct 加字段）
@@ -100,7 +100,7 @@ struct MindMapDocument: Equatable, Codable, Sendable {
 }
 ```
 
-- [ ] **Step 4: Codec 迁移**（YMindCodec.decode，迁移链末尾，`v5→v6` 块后加）
+- [ ] **Step 4: Codec 迁移**（LinvaCodec.decode，迁移链末尾，`v5→v6` 块后加）
 
 ```swift
 // 迁移：v6 → v7（edgeStyle 缺省 .elbow；MindMapDocument 解码器对缺失字段天然容错）。
@@ -110,12 +110,12 @@ if doc.version == 6 {
 ```
 
 - [ ] **Step 5: 跑测试确认通过**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/CodecTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/CodecTests`
 Expected: PASS。
 
 - [ ] **Step 6: Commit**
 ```bash
-git add YMindApp/YMindApp/Model/MindMapDocument.swift YMindApp/YMindApp/Model/YMindCodec.swift YMindApp/YMindAppTests/CodecTests.swift
+git add LinvaApp/LinvaApp/Model/MindMapDocument.swift LinvaApp/LinvaApp/Model/LinvaCodec.swift LinvaApp/LinvaAppTests/CodecTests.swift
 git commit -m "feat(edge-style): add EdgeStyle enum + edgeStyle field + Codec v7"
 ```
 
@@ -124,11 +124,11 @@ git commit -m "feat(edge-style): add EdgeStyle enum + edgeStyle field + Codec v7
 ### Task 2: setEdgeStyle 命令 + 会话 + 有效排布 fit
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Commands/MindMapCommand.swift`
-- Modify: `YMindApp/YMindApp/Model/MindMapModel.swift`
-- Modify: `YMindApp/YMindApp/Commands/CommandBus.swift`
-- Modify: `YMindApp/YMindApp/Session/DocumentSession.swift`
-- Test: `YMindApp/YMindAppTests/CommandBusTests.swift`, `YMindApp/YMindAppTests/DocumentSessionTests.swift`
+- Modify: `LinvaApp/LinvaApp/Commands/MindMapCommand.swift`
+- Modify: `LinvaApp/LinvaApp/Model/MindMapModel.swift`
+- Modify: `LinvaApp/LinvaApp/Commands/CommandBus.swift`
+- Modify: `LinvaApp/LinvaApp/Session/DocumentSession.swift`
+- Test: `LinvaApp/LinvaAppTests/CommandBusTests.swift`, `LinvaApp/LinvaAppTests/DocumentSessionTests.swift`
 
 **Interfaces:**
 - Produces: `MindMapCommand.setEdgeStyle(kind: EdgeStyle)`；`MindMapModel.setEdgeStyle(_:) -> EdgeStyle?`；`DocumentSession.edgeStyle` / `setEdgeStyle(_:)`；`markDirtyAndRelayout()` 有效排布变化时 `fitVersion += 1`。
@@ -150,7 +150,7 @@ func testSetEdgeStyleCommandUndoRedo() {
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/CommandBusTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/CommandBusTests`
 Expected: FAIL。
 
 - [ ] **Step 3: 实现**（MindMapCommand 加 case；MindMapModel 加方法，仿 setLayout）
@@ -185,7 +185,7 @@ case let .setEdgeStyle(kind):
 - [ ] **Step 4: 会话层**（DocumentSession，仿 setLayout；有效排布 fit 用临时占位——Task 4 才引入 Provider，此处 fit 条件先按 `kind == .brace`）
 
 ```swift
-/// 当前连线样式（文档属性，随 .ymind 持久化）。改走 setEdgeStyle 命令入栈。
+/// 当前连线样式（文档属性，随 .linva 持久化）。改走 setEdgeStyle 命令入栈。
 var edgeStyle: EdgeStyle { model.document.edgeStyle }
 
 func setEdgeStyle(_ kind: EdgeStyle) {
@@ -211,12 +211,12 @@ if eff != appliedArrangementForFit {
 （新增 `private var appliedArrangementForFit: LayoutKind?`，与现有 `appliedLayoutForFit` 并存或替换——替换为按有效排布。）
 
 - [ ] **Step 6: 跑测试确认通过**（CommandBusTests + DocumentSessionTests 全绿）
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/CommandBusTests -only-testing:YMindAppTests/DocumentSessionTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/CommandBusTests -only-testing:LinvaAppTests/DocumentSessionTests`
 Expected: PASS。
 
 - [ ] **Step 7: Commit**
 ```bash
-git add YMindApp/YMindApp/Commands/MindMapCommand.swift YMindApp/YMindApp/Model/MindMapModel.swift YMindApp/YMindApp/Commands/CommandBus.swift YMindApp/YMindApp/Session/DocumentSession.swift YMindApp/YMindAppTests/CommandBusTests.swift YMindApp/YMindAppTests/DocumentSessionTests.swift
+git add LinvaApp/LinvaApp/Commands/MindMapCommand.swift LinvaApp/LinvaApp/Model/MindMapModel.swift LinvaApp/LinvaApp/Commands/CommandBus.swift LinvaApp/LinvaApp/Session/DocumentSession.swift LinvaApp/LinvaAppTests/CommandBusTests.swift LinvaApp/LinvaAppTests/DocumentSessionTests.swift
 git commit -m "feat(edge-style): setEdgeStyle command + session + effective-arrangement fit"
 ```
 
@@ -225,11 +225,11 @@ git commit -m "feat(edge-style): setEdgeStyle command + session + effective-arra
 ### Task 3: 统一 ConnectorGeometry — LayoutSnapshot 用 connectors（机械重构）
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Layout/LayoutSnapshot.swift`
-- Modify: `YMindApp/YMindApp/Layout/RadialLayout.swift`
-- Modify: `YMindApp/YMindApp/Layout/LogicLayout.swift`
-- Modify: `YMindApp/YMindApp/Render/MetalRenderer.swift`
-- Test: `YMindApp/YMindAppTests/RadialLayoutTests.swift`, `YMindApp/YMindAppTests/LogicLayoutTests.swift`, `YMindApp/YMindAppTests/LayoutPipelineTests.swift`
+- Modify: `LinvaApp/LinvaApp/Layout/LayoutSnapshot.swift`
+- Modify: `LinvaApp/LinvaApp/Layout/RadialLayout.swift`
+- Modify: `LinvaApp/LinvaApp/Layout/LogicLayout.swift`
+- Modify: `LinvaApp/LinvaApp/Render/MetalRenderer.swift`
+- Test: `LinvaApp/LinvaAppTests/RadialLayoutTests.swift`, `LinvaApp/LinvaAppTests/LogicLayoutTests.swift`, `LinvaApp/LinvaAppTests/LayoutPipelineTests.swift`
 
 **Interfaces:**
 - Produces: `ConnectorMarker`、`ConnectorGeometry`；`LayoutSnapshot.connectors: [ConnectorGeometry]`（删 `edges`）。引擎暂时仍按「elbow 正交折线」产 Connector（style 尚未进几何，Task 4 接入 Provider）。
@@ -252,7 +252,7 @@ func testRadialProducesConnectors() {
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/RadialLayoutTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/RadialLayoutTests`
 Expected: FAIL（`snap.connectors` 不存在）。
 
 - [ ] **Step 3: 实现 ConnectorGeometry**（LayoutSnapshot.swift，替换 EdgeGeometry）
@@ -327,16 +327,16 @@ return snapshot.connectors
 （注：`EdgeGeometry.fromId/toId` 用于可见性过滤；Connector 只有 `id`（父或子）。Task 5 精化过滤语义——per-edge 用父/子任一可见，brace 用父可见。）
 
 - [ ] **Step 6: 更新全部引用**（PNGExporter 无直接引用；LayoutPipeline 不变；测试改 `snap.connectors`）
-Run: `xcodebuild build -project YMindApp/YMindApp.xcodeproj -scheme YMindApp`
+Run: `xcodebuild build -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp`
 Expected: 编译通过。
 
 - [ ] **Step 7: 跑测试确认通过**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/LogicLayoutTests -only-testing:YMindAppTests/LayoutPipelineTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/RadialLayoutTests -only-testing:LinvaAppTests/LogicLayoutTests -only-testing:LinvaAppTests/LayoutPipelineTests`
 Expected: PASS。
 
 - [ ] **Step 8: Commit**
 ```bash
-git add YMindApp/YMindApp/Layout/LayoutSnapshot.swift YMindApp/YMindApp/Layout/RadialLayout.swift YMindApp/YMindApp/Layout/LogicLayout.swift YMindApp/YMindApp/Render/MetalRenderer.swift YMindApp/YMindAppTests/RadialLayoutTests.swift YMindApp/YMindAppTests/LogicLayoutTests.swift YMindApp/YMindAppTests/LayoutPipelineTests.swift
+git add LinvaApp/LinvaApp/Layout/LayoutSnapshot.swift LinvaApp/LinvaApp/Layout/RadialLayout.swift LinvaApp/LinvaApp/Layout/LogicLayout.swift LinvaApp/LinvaApp/Render/MetalRenderer.swift LinvaApp/LinvaAppTests/RadialLayoutTests.swift LinvaApp/LinvaAppTests/LogicLayoutTests.swift LinvaApp/LinvaAppTests/LayoutPipelineTests.swift
 git commit -m "refactor(edge-style): unify EdgeGeometry into ConnectorGeometry; LayoutSnapshot.connectors"
 ```
 
@@ -345,9 +345,9 @@ git commit -m "refactor(edge-style): unify EdgeGeometry into ConnectorGeometry; 
 ### Task 4: EdgeStyleProvider 抽象 + 引擎拆 placeFrames + Elbow/Curve/Brace Provider
 
 **Files:**
-- Create: `YMindApp/YMindApp/Layout/EdgeStyleProvider.swift`, `YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift`, `YMindApp/YMindApp/Layout/EdgeStyleProviders.swift`（含 Elbow/Curve/Brace Provider）
-- Modify: `YMindApp/YMindApp/Layout/LayoutSupport.swift`, `YMindApp/YMindApp/Layout/RadialLayout.swift`, `YMindApp/YMindApp/Layout/LogicLayout.swift`, `YMindApp/YMindApp/Session/LayoutPipeline.swift`
-- Test: `YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift`（新建）, `YMindApp/YMindAppTests/LayoutPipelineTests.swift`, `YMindApp/YMindAppTests/RadialLayoutTests.swift`, `YMindApp/YMindAppTests/LogicLayoutTests.swift`
+- Create: `LinvaApp/LinvaApp/Layout/EdgeStyleProvider.swift`, `LinvaApp/LinvaApp/Layout/EdgeStyleRegistry.swift`, `LinvaApp/LinvaApp/Layout/EdgeStyleProviders.swift`（含 Elbow/Curve/Brace Provider）
+- Modify: `LinvaApp/LinvaApp/Layout/LayoutSupport.swift`, `LinvaApp/LinvaApp/Layout/RadialLayout.swift`, `LinvaApp/LinvaApp/Layout/LogicLayout.swift`, `LinvaApp/LinvaApp/Session/LayoutPipeline.swift`
+- Test: `LinvaApp/LinvaAppTests/EdgeStyleRegistryTests.swift`（新建）, `LinvaApp/LinvaAppTests/LayoutPipelineTests.swift`, `LinvaApp/LinvaAppTests/RadialLayoutTests.swift`, `LinvaApp/LinvaAppTests/LogicLayoutTests.swift`
 
 **Interfaces:**
 - Produces: `EdgeStyleProvider` protocol、`EdgeStyleRegistry.provider(for:)`、`LayoutSupport.edgePoints(from:to:style:)`、`LayoutSupport.sampleCubic(...)`、`RadialLayout.placeFrames(document:measure:) -> [UUID: NodeFrame]`、`LogicLayout.placeFrames(...)`、`BraceProvider`。
@@ -367,7 +367,7 @@ func testRegistryResolvesAllStyles() {
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/EdgeStyleRegistryTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/EdgeStyleRegistryTests`
 Expected: FAIL（类型不存在）。
 
 - [ ] **Step 3: 实现 Provider 抽象 + registry**（EdgeStyleProvider.swift / EdgeStyleRegistry.swift）
@@ -542,7 +542,7 @@ let snapshot = LayoutPipeline().relayout(document: expanded)
 （`LayoutPipeline` 在 `Session/`，同模块可直接用；删除 `case .radial/.logic` switch，消除对 `layout()` 的依赖。）
 
 - [ ] **Step 9: 跑测试确认通过**（registry + pipeline + radial/logic + 新 Provider + 导出）
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/EdgeStyleRegistryTests -only-testing:YMindAppTests/LayoutPipelineTests -only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/LogicLayoutTests -only-testing:YMindAppTests/PNGExporterTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/EdgeStyleRegistryTests -only-testing:LinvaAppTests/LayoutPipelineTests -only-testing:LinvaAppTests/RadialLayoutTests -only-testing:LinvaAppTests/LogicLayoutTests -only-testing:LinvaAppTests/PNGExporterTests`
 Expected: PASS（且 brace 产 Connector、elbow/curve 产每边 Connector、PNG 导出按当前样式）。
 
 - [ ] **Step 10: 更新 DocumentSession fit 用 Provider**（替换 Task 2 的临时 `effectiveArrangement`）
@@ -556,7 +556,7 @@ Run 相关 DocumentSessionTests。Expected: PASS。
 
 - [ ] **Step 11: Commit**
 ```bash
-git add YMindApp/YMindApp/Layout/EdgeStyleProvider.swift YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift YMindApp/YMindApp/Layout/EdgeStyleProviders.swift YMindApp/YMindApp/Layout/LayoutSupport.swift YMindApp/YMindApp/Layout/RadialLayout.swift YMindApp/YMindApp/Layout/LogicLayout.swift YMindApp/YMindApp/Session/LayoutPipeline.swift YMindApp/YMindApp/Session/DocumentSession.swift YMindApp/YMindApp/Render/PNGExporter.swift YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift YMindApp/YMindAppTests/LayoutPipelineTests.swift YMindApp/YMindAppTests/RadialLayoutTests.swift YMindApp/YMindAppTests/LogicLayoutTests.swift YMindApp/YMindAppTests/PNGExporterTests.swift
+git add LinvaApp/LinvaApp/Layout/EdgeStyleProvider.swift LinvaApp/LinvaApp/Layout/EdgeStyleRegistry.swift LinvaApp/LinvaApp/Layout/EdgeStyleProviders.swift LinvaApp/LinvaApp/Layout/LayoutSupport.swift LinvaApp/LinvaApp/Layout/RadialLayout.swift LinvaApp/LinvaApp/Layout/LogicLayout.swift LinvaApp/LinvaApp/Session/LayoutPipeline.swift LinvaApp/LinvaApp/Session/DocumentSession.swift LinvaApp/LinvaApp/Render/PNGExporter.swift LinvaApp/LinvaAppTests/EdgeStyleRegistryTests.swift LinvaApp/LinvaAppTests/LayoutPipelineTests.swift LinvaApp/LinvaAppTests/RadialLayoutTests.swift LinvaApp/LinvaAppTests/LogicLayoutTests.swift LinvaApp/LinvaAppTests/PNGExporterTests.swift
 git commit -m "feat(edge-style): EdgeStyleProvider abstraction + place split + Elbow/Curve/Brace providers"
 ```
 
@@ -565,8 +565,8 @@ git commit -m "feat(edge-style): EdgeStyleProvider abstraction + place split + E
 ### Task 5: 渲染 connectorVertices（path 描边 + marker 圆圈）
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Render/MetalRenderer.swift`
-- Test: `YMindApp/YMindAppTests/*`（冒烟：真 Metal 渲染不崩、输出含预期段数）
+- Modify: `LinvaApp/LinvaApp/Render/MetalRenderer.swift`
+- Test: `LinvaApp/LinvaAppTests/*`（冒烟：真 Metal 渲染不崩、输出含预期段数）
 
 **Interfaces:**
 - Consumes: `ConnectorGeometry` / `ConnectorMarker`（Task 3）、Provider 产出的 connectors（Task 4）。
@@ -617,12 +617,12 @@ private func connectorVertices(snapshot: LayoutSnapshot, visibleIds: Set<UUID>,
 （删除 `edgeVertices` / `braceVertices`；`draw(...)` 调用点改 `connectorVertices`。）
 
 - [ ] **Step 4: 跑测试确认通过** + 全量编译
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp`
 Expected: PASS，编译通过。
 
 - [ ] **Step 5: Commit**
 ```bash
-git add YMindApp/YMindApp/Render/MetalRenderer.swift
+git add LinvaApp/LinvaApp/Render/MetalRenderer.swift
 git commit -m "feat(edge-style): connectorVertices render (path stroke + marker circle)"
 ```
 
@@ -631,7 +631,7 @@ git commit -m "feat(edge-style): connectorVertices render (path stroke + marker 
 ### Task 6: 工具栏连线样式 Picker（CaseIterable）
 
 **Files:**
-- Modify: `YMindApp/YMindApp/App/MainToolbar.swift`
+- Modify: `LinvaApp/LinvaApp/App/MainToolbar.swift`
 - Test: 冒烟（构建 + UI 冒烟，见全局验证）。
 
 **Interfaces:**
@@ -659,11 +659,11 @@ Picker("连线样式", selection: Binding(
 （ContentView 传 `edgeStyle: session.edgeStyle`、`setEdgeStyle: { session.setEdgeStyle($0) }`。）
 
 - [ ] **Step 3: 构建 + 冒烟验证**
-Run: `xcodebuild build -project YMindApp/YMindApp.xcodeproj -scheme YMindApp`
+Run: `xcodebuild build -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp`
 Expected: 编译通过；`check-boundaries.sh` 绿。
 - [ ] **Step 4: Commit**
 ```bash
-git add YMindApp/YMindApp/App/MainToolbar.swift YMindApp/YMindApp/ContentView.swift
+git add LinvaApp/LinvaApp/App/MainToolbar.swift LinvaApp/LinvaApp/ContentView.swift
 git commit -m "feat(edge-style): toolbar edge-style picker (CaseIterable)"
 ```
 
@@ -672,9 +672,9 @@ git commit -m "feat(edge-style): toolbar edge-style picker (CaseIterable)"
 ### Task 7: 扩展性回归 — 加 straight 样式验证 D7
 
 **Files:**
-- Create: `YMindApp/YMindApp/Layout/StraightStyleProvider.swift`
-- Modify: `YMindApp/YMindApp/Model/MindMapDocument.swift`, `YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift`
-- Test: `YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift`
+- Create: `LinvaApp/LinvaApp/Layout/StraightStyleProvider.swift`
+- Modify: `LinvaApp/LinvaApp/Model/MindMapDocument.swift`, `LinvaApp/LinvaApp/Layout/EdgeStyleRegistry.swift`
+- Test: `LinvaApp/LinvaAppTests/EdgeStyleRegistryTests.swift`
 
 **Interfaces:**
 - Consumes: `EdgeStyle`、`EdgeStyleRegistry`、`LayoutSupport.edgePoints`。
@@ -706,11 +706,11 @@ struct StraightStyleProvider: EdgeStyleProvider {
 }
 ```
 - [ ] **Step 4: 跑测试确认通过**（确认只动 enum + Provider + registry）
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests/EdgeStyleRegistryTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests/EdgeStyleRegistryTests`
 Expected: PASS。
 - [ ] **Step 5: Commit**
 ```bash
-git add YMindApp/YMindApp/Layout/StraightStyleProvider.swift YMindApp/YMindApp/Model/MindMapDocument.swift YMindApp/YMindApp/Layout/EdgeStyleRegistry.swift YMindApp/YMindAppTests/EdgeStyleRegistryTests.swift
+git add LinvaApp/LinvaApp/Layout/StraightStyleProvider.swift LinvaApp/LinvaApp/Model/MindMapDocument.swift LinvaApp/LinvaApp/Layout/EdgeStyleRegistry.swift LinvaApp/LinvaAppTests/EdgeStyleRegistryTests.swift
 git commit -m "test(edge-style): straight style proves D7 extensibility (enum+provider+registry)"
 ```
 

@@ -1,12 +1,12 @@
 <div align="center">
 
-# YMind
+# Linva
 
 **原生 macOS 思维导图 · Swift + SwiftUI 壳 + Metal 画布**
 
 单窗口工具，中心辐射 / 逻辑树两种布局，正交折线 / 曲线 / 大括号三种连线样式，可扩展。无第三方依赖。
 
-<img src="docs/screenshots/radial_elbow.png" width="760" alt="YMind 中心辐射布局（正交折线）"/>
+<img src="docs/screenshots/radial_elbow.png" width="760" alt="Linva 中心辐射布局（正交折线）"/>
 
 </div>
 
@@ -20,7 +20,7 @@
 - [技术栈](#技术栈)
 - [架构](#架构)
 - [关键技术实现](#关键技术实现)
-- [文件格式 `.ymind`](#文件格式-ymind)
+- [文件格式 `.linva`](#文件格式-linva)
 - [项目结构](#项目结构)
 - [构建与运行](#构建与运行)
 - [测试](#测试)
@@ -31,7 +31,7 @@
 
 ## 简介
 
-YMind 是一款 **macOS 原生**的思维导图应用：用 **SwiftUI** 做窗口 / 工具条 / 浮层编辑等 UI 壳，用 **Metal** 绘制整张画布（节点、连线、文字），把「几何与业务放在 CPU、像素放在 GPU」。单窗口、单文档、命令栈 Undo，专注把一棵主题树画得快、画得干净、改得顺。
+Linva 是一款 **macOS 原生**的思维导图应用：用 **SwiftUI** 做窗口 / 工具条 / 浮层编辑等 UI 壳，用 **Metal** 绘制整张画布（节点、连线、文字），把「几何与业务放在 CPU、像素放在 GPU」。单窗口、单文档、命令栈 Undo，专注把一棵主题树画得快、画得干净、改得顺。
 
 它诞生于对同类型商业产品的技术好奇：不追求功能大而全，而是把「树 → 布局 → 渲染」这条主链路做扎实，并留出干净的扩展点（新增一种连线样式，只需加一个枚举值 + 一个 Provider 文件，引擎 / 渲染 / 编解码零改动）。
 
@@ -116,9 +116,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    ROOT["YMindApp/ 源码"] --> APP["App/<br/>SwiftUI 壳：窗口 · 工具条 · 浮层编辑 · 导入预览 · 恢复横幅"]
+    ROOT["LinvaApp/ 源码"] --> APP["App/<br/>SwiftUI 壳：窗口 · 工具条 · 浮层编辑 · 导入预览 · 恢复横幅"]
     ROOT --> CMD["Commands/<br/>MindMapCommand 枚举 · CommandBus · Undo/Redo"]
-    ROOT --> MODEL["Model/<br/>Node 树 · MindMapDocument · YMindCodec · 导入器"]
+    ROOT --> MODEL["Model/<br/>Node 树 · MindMapDocument · LinvaCodec · 导入器"]
     ROOT --> LAYOUT["Layout/<br/>RadialLayout · LogicLayout · LayoutSupport · LayoutSnapshot · 连线 Provider"]
     ROOT --> SESS["Session/<br/>DocumentSession · LayoutPipeline · Persistence · Clipboard · Search"]
     ROOT --> RENDER["Render/<br/>MetalRenderer · TextAtlas · ImageTextureCache · 命中测试 · PNGExporter"]
@@ -164,8 +164,8 @@ flowchart LR
 **命令总线 + Undo**
 `MindMapCommand` 是枚举（`addChild` / `delete` / `moveToParent` / `setLayout` / `setEdgeStyle` / …，共 17 个）。`CommandBus.execute` 先求前向副作用并捕获旧值，生成 undo / redo 闭包入栈；no-op（目标同当前）不入栈。
 
-**编解码 `.ymind`（versioned JSON，当前 v7）**
-`YMindCodec` 维护 v1→v2→…→v7 迁移链。老文件缺字段一律 `decodeIfPresent` 兜底缺省，**零拒绝打开**（例如 `layout` 缺省 `.radial`、`edgeStyle` 缺省 `.elbow`、未知未来样式 token 容错为 `.elbow`）。`sanitize` 强制深层约束（如 `side` 只存根下一层）。
+**编解码 `.linva`（versioned JSON，当前 v7）**
+`LinvaCodec` 维护 v1→v2→…→v7 迁移链。老文件缺字段一律 `decodeIfPresent` 兜底缺省，**零拒绝打开**（例如 `layout` 缺省 `.radial`、`edgeStyle` 缺省 `.elbow`、未知未来样式 token 容错为 `.elbow`）。`sanitize` 强制深层约束（如 `side` 只存根下一层）。
 
 **布局引擎**
 `RadialLayout` / `LogicLayout` 共享 `LayoutSupport`（测高、块居中、toggle、图片载荷）。引擎拆为 `place(document:measure:)`（只产排布 `frames` / toggles / 图片载荷）＋ 连线由 `EdgeStyleProvider` 产 `ConnectorGeometry`——排布与连线解耦。
@@ -179,9 +179,9 @@ flowchart LR
 **自动保存 / 崩溃恢复**
 `AutosaveStore` 把文档写进 `Application Support/Unsaved/`（2s 防抖），启动扫描最新副本弹出恢复横幅，可恢复或忽略。
 
-## 文件格式 `.ymind`
+## 文件格式 `.linva`
 
-`.ymind` 是 **versioned JSON**：`MindMapDocument.currentVersion == 7`。核心结构：
+`.linva` 是 **versioned JSON**：`MindMapDocument.currentVersion == 7`。核心结构：
 
 ```jsonc
 {
@@ -204,9 +204,9 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    ROOT["/"] --> APP["YMindApp/ 主工程<br/>Xcode project · scheme YMindApp"]
-    APP --> SRC["YMindApp/ 源码<br/>App · Commands · Layout · Model · Render · Session"]
-    APP --> TESTS["YMindAppTests/ 单元测试 · Swift Testing"]
+    ROOT["/"] --> APP["LinvaApp/ 主工程<br/>Xcode project · scheme LinvaApp"]
+    APP --> SRC["LinvaApp/ 源码<br/>App · Commands · Layout · Model · Render · Session"]
+    APP --> TESTS["LinvaAppTests/ 单元测试 · Swift Testing"]
     ROOT --> PROTO["prototype/<br/>HTML 原型 · 交互 · 布局 · 连线样式"]
     ROOT --> DOCS["docs/<br/>架构文档 · PRD · 设计稿 · 屏幕截图"]
     ROOT --> AGENTS[".agents/ Agent 配置<br/>skills · MCP · rules"]
@@ -218,11 +218,11 @@ flowchart TD
 环境：macOS 26.4+、Xcode（Swift 5）。
 
 ```bash
-# 用 Xcode 打开工程，选 scheme「YMindApp」，⌘R 运行
-open YMindApp/YMindApp.xcodeproj
+# 用 Xcode 打开工程，选 scheme「LinvaApp」，⌘R 运行
+open LinvaApp/LinvaApp.xcodeproj
 
 # 或命令行构建
-xcodebuild build -project YMindApp/YMindApp.xcodeproj -scheme YMindApp
+xcodebuild build -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp
 
 # 分层依赖边界检查（新增 import 须在白名单内）
 scripts/check-boundaries.sh
@@ -231,7 +231,7 @@ scripts/check-boundaries.sh
 ## 测试
 
 ```bash
-xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-testing:YMindAppTests
+xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -only-testing:LinvaAppTests
 ```
 
 测试覆盖：编解码（含迁移链 / 零拒绝）、命令栈 Undo/Redo、布局引擎、连线 Provider 几何、`LayoutSnapshot` 契约、渲染（真 Metal 冒烟 + 像素级断言）、PNG 导出、自动保存 / 崩溃恢复、导入器。
@@ -249,4 +249,4 @@ xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-test
 
 ---
 
-<sub>YMind 是个人学习与产品实验项目：macOS 原生思维导图，把「树 → 布局 → 渲染」主链路做到极致并保持可扩展。如侵权，请联系删除。</sub>
+<sub>Linva 是个人学习与产品实验项目：macOS 原生思维导图，把「树 → 布局 → 渲染」主链路做到极致并保持可扩展。如侵权，请联系删除。</sub>

@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 让同一棵树能在「辐射」与「逻辑图（总分树）」间无损、瞬时切换，布局随 `.ymind` 持久化，逻辑图下 side 操作降级置灰，PNG 按当前布局导出。
+**Goal:** 让同一棵树能在「辐射」与「逻辑图（总分树）」间无损、瞬时切换，布局随 `.linva` 持久化，逻辑图下 side 操作降级置灰，PNG 按当前布局导出。
 
 **Architecture:** 新增 `LogicLayout`（总分树，根左、层向右、L 形边），与 `RadialLayout` 共享 `LayoutSupport` 辅助；`LayoutPipeline.relayout` 按 `document.layout` 分派引擎（删引擎注入）。`MindMapDocument` 增 `layout: LayoutKind`（Codec v5），`setLayout` 命令入命令栈，`DocumentSession` 暴露 `layout` 并在布局变化时经 `markDirtyAndRelayout` 统一触发自动 fit。Render/命中/选中/折叠零改动（只消费 `LayoutSnapshot`）。
 
 **Tech Stack:** Swift 6, SwiftUI, Metal, `swift-testing`（`Testing`/`#expect`）。
 
-**Spec:** `docs/superpowers/specs/2026-10-02-ymind-layout-logic-design.md`（决策 D1–D5，实现以 spec 为准）。
+**Spec:** `docs/superpowers/specs/2026-10-02-linva-layout-logic-design.md`（决策 D1–D5，实现以 spec 为准）。
 
 ## Global Constraints
 
@@ -27,25 +27,25 @@
 
 ## File Structure
 
-- **Create** `YMindApp/YMindApp/Layout/LayoutSupport.swift` — 共享测高/块/toggle/载荷辅助 + `BranchMetadata`。
-- **Create** `YMindApp/YMindApp/Layout/LogicLayout.swift` — 总分树引擎（`extension LogicLayout: LayoutEngine {}`）。
-- **Create** `YMindAppTests/LogicLayoutTests.swift` — LogicLayout 单测。
-- **Modify** `YMindApp/YMindApp/Model/MindMapDocument.swift` — `LayoutKind` + `layout` 字段 + `currentVersion = 5` + 自定义 `init(from:)`。
-- **Modify** `YMindApp/YMindApp/Model/YMindCodec.swift` — v4→v5 迁移 + sanitize 保留 layout。
-- **Modify** `YMindApp/YMindApp/Layout/RadialLayout.swift` — 改用 `LayoutSupport` 共享辅助（行为不变）。
-- **Modify** `YMindApp/YMindApp/Session/LayoutPipeline.swift` — 按 `document.layout` 分派，删引擎注入。
-- **Modify** `YMindApp/YMindApp/Commands/MindMapCommand.swift` — 增 `setLayout(kind:)`。
-- **Modify** `YMindApp/YMindApp/Model/MindMapModel.swift` — 增 `setLayout(_:) -> LayoutKind?`。
-- **Modify** `YMindApp/YMindApp/Commands/CommandBus.swift` — `applyForward` 增 `.setLayout` 分支。
-- **Modify** `YMindApp/YMindApp/Session/DocumentSession.swift` — `layout` 属性、`setLayout(_:)`、`canSetSide` 降级、`fitVersion`/`appliedLayoutForFit`。
-- **Modify** `YMindApp/YMindApp/Render/CanvasMetalView.swift` — `CanvasMTKView.appliedFitVersion` + `updateNSView` 观察 `fitVersion`。
-- **Modify** `YMindApp/YMindApp/Session/DropIntent.swift` — 逻辑图下侧向意图禁用。
-- **Modify** `YMindApp/YMindApp/App/MainToolbar.swift` — 布局 `Picker(.menu)`。
-- **Modify** `YMindApp/YMindApp/ContentView.swift` — 传 `layout`/`setLayout` 给 MainToolbar。
-- **Modify** `YMindApp/YMindApp/YMindAppApp.swift` — `DocumentCommands` 增 ⌥L 切换。
-- **Modify** `YMindApp/YMindApp/Render/PNGExporter.swift` — 按 `layout` 分派产快照。
-- **Modify** `YMindAppTests/CodecTests.swift`、`LayoutPipelineTests.swift`、`CommandBusTests.swift`、`DocumentSessionTests.swift`、`DropIntentTests.swift`、`PNGExporterTests.swift`。
-- **Modify** `docs/架构现状.md`；`.agents/skills/ymind-codec-version/SKILL.md`、`ymind-layout-snapshot/SKILL.md`、`ymind-command/SKILL.md`。
+- **Create** `LinvaApp/LinvaApp/Layout/LayoutSupport.swift` — 共享测高/块/toggle/载荷辅助 + `BranchMetadata`。
+- **Create** `LinvaApp/LinvaApp/Layout/LogicLayout.swift` — 总分树引擎（`extension LogicLayout: LayoutEngine {}`）。
+- **Create** `LinvaAppTests/LogicLayoutTests.swift` — LogicLayout 单测。
+- **Modify** `LinvaApp/LinvaApp/Model/MindMapDocument.swift` — `LayoutKind` + `layout` 字段 + `currentVersion = 5` + 自定义 `init(from:)`。
+- **Modify** `LinvaApp/LinvaApp/Model/LinvaCodec.swift` — v4→v5 迁移 + sanitize 保留 layout。
+- **Modify** `LinvaApp/LinvaApp/Layout/RadialLayout.swift` — 改用 `LayoutSupport` 共享辅助（行为不变）。
+- **Modify** `LinvaApp/LinvaApp/Session/LayoutPipeline.swift` — 按 `document.layout` 分派，删引擎注入。
+- **Modify** `LinvaApp/LinvaApp/Commands/MindMapCommand.swift` — 增 `setLayout(kind:)`。
+- **Modify** `LinvaApp/LinvaApp/Model/MindMapModel.swift` — 增 `setLayout(_:) -> LayoutKind?`。
+- **Modify** `LinvaApp/LinvaApp/Commands/CommandBus.swift` — `applyForward` 增 `.setLayout` 分支。
+- **Modify** `LinvaApp/LinvaApp/Session/DocumentSession.swift` — `layout` 属性、`setLayout(_:)`、`canSetSide` 降级、`fitVersion`/`appliedLayoutForFit`。
+- **Modify** `LinvaApp/LinvaApp/Render/CanvasMetalView.swift` — `CanvasMTKView.appliedFitVersion` + `updateNSView` 观察 `fitVersion`。
+- **Modify** `LinvaApp/LinvaApp/Session/DropIntent.swift` — 逻辑图下侧向意图禁用。
+- **Modify** `LinvaApp/LinvaApp/App/MainToolbar.swift` — 布局 `Picker(.menu)`。
+- **Modify** `LinvaApp/LinvaApp/ContentView.swift` — 传 `layout`/`setLayout` 给 MainToolbar。
+- **Modify** `LinvaApp/LinvaApp/LinvaAppApp.swift` — `DocumentCommands` 增 ⌥L 切换。
+- **Modify** `LinvaApp/LinvaApp/Render/PNGExporter.swift` — 按 `layout` 分派产快照。
+- **Modify** `LinvaAppTests/CodecTests.swift`、`LayoutPipelineTests.swift`、`CommandBusTests.swift`、`DocumentSessionTests.swift`、`DropIntentTests.swift`、`PNGExporterTests.swift`。
+- **Modify** `docs/架构现状.md`；`.agents/skills/linva-codec-version/SKILL.md`、`linva-layout-snapshot/SKILL.md`、`linva-command/SKILL.md`。
 
 任务顺序（强依赖链）：1 Codec → 2 LayoutSupport → 3 LogicLayout → 4 Pipeline 分派 → 5 命令 → 6 Session/Canvas → 7 DropIntent → 8 UI → 9 PNG → 10 文档/验证。
 
@@ -54,9 +54,9 @@
 ## Task 1: Codec v5 — LayoutKind + layout 字段 + 迁移 + sanitize 保留
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Model/MindMapDocument.swift`
-- Modify: `YMindApp/YMindApp/Model/YMindCodec.swift`
-- Test: `YMindAppTests/CodecTests.swift`
+- Modify: `LinvaApp/LinvaApp/Model/MindMapDocument.swift`
+- Modify: `LinvaApp/LinvaApp/Model/LinvaCodec.swift`
+- Test: `LinvaAppTests/CodecTests.swift`
 
 **Interfaces:**
 - Consumes: 既有 `MindMapDocument`/`Node` Codable。
@@ -64,17 +64,17 @@
 
 - [ ] **Step 1: 先把既有断言升到 5，再写失败测试**
 
-`YMindAppTests/CodecTests.swift` 里 8 处 `#expect(...version == 4)`（`migratesV1ToV2`、`unknownFillToken_decodesAsNil`、`imageRoundTrip`、`v2FileWithoutImage_opensWithoutReject`、`v1File_chainMigrates`、`invalidImagePixelSize_decodesAsNil`、`v3FileWithImage_migratesToBlocks_imageAboveText`、`v4RoundTrip_blocksPreserved`）全部改为 `== 5`。然后在 `CodecTests` suite 末尾加：
+`LinvaAppTests/CodecTests.swift` 里 8 处 `#expect(...version == 4)`（`migratesV1ToV2`、`unknownFillToken_decodesAsNil`、`imageRoundTrip`、`v2FileWithoutImage_opensWithoutReject`、`v1File_chainMigrates`、`invalidImagePixelSize_decodesAsNil`、`v3FileWithImage_migratesToBlocks_imageAboveText`、`v4RoundTrip_blocksPreserved`）全部改为 `== 5`。然后在 `CodecTests` suite 末尾加：
 
 ```swift
     @Test func layoutRoundTrip_preservesLogicAndRadial() throws {
         var logic = MindMapDocument.blank(rootText: "根")
         logic.layout = .logic
-        let logicBack = try YMindCodec.decode(try YMindCodec.encode(logic))
+        let logicBack = try LinvaCodec.decode(try LinvaCodec.encode(logic))
         #expect(logicBack.layout == .logic)
 
         let radial = MindMapDocument.blank(rootText: "根")
-        let radialBack = try YMindCodec.decode(try YMindCodec.encode(radial))
+        let radialBack = try LinvaCodec.decode(try LinvaCodec.encode(radial))
         #expect(radialBack.layout == .radial)
     }
 
@@ -82,7 +82,7 @@
         let json = """
         {"version":4,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[]}}
         """.data(using: .utf8)!
-        let back = try YMindCodec.decode(json)
+        let back = try LinvaCodec.decode(json)
         #expect(back.version == 5)
         #expect(back.layout == .radial)
     }
@@ -90,17 +90,17 @@
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -destination 'platform=macOS' -only-testing:YMindAppTests/CodecTests`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -destination 'platform=macOS' -only-testing:LinvaAppTests/CodecTests`
 Expected: FAIL（编译失败：`LayoutKind`/`layout` 未定义；v4 用例编译过了但断言 5 vs 实际 4）。
 
 - [ ] **Step 3: 实现**
 
-`YMindApp/YMindApp/Model/MindMapDocument.swift` 整体替换为：
+`LinvaApp/LinvaApp/Model/MindMapDocument.swift` 整体替换为：
 
 ```swift
 import Foundation
 
-/// 文档布局类型：同一棵树的画布排布方式（随 `.ymind` 持久化，v5）。
+/// 文档布局类型：同一棵树的画布排布方式（随 `.linva` 持久化，v5）。
 enum LayoutKind: String, Codable, Sendable, Equatable, Hashable {
     /// 中心辐射：根在中心、左右对称展开（v1 起默认）。
     case radial
@@ -139,7 +139,7 @@ struct MindMapDocument: Equatable, Codable, Sendable {
 }
 ```
 
-`YMindApp/YMindApp/Model/YMindCodec.swift` 两处编辑：
+`LinvaApp/LinvaApp/Model/LinvaCodec.swift` 两处编辑：
 
 ① 迁移：在 v3→v4 块后、`guard doc.version == MindMapDocument.currentVersion` 前插入：
 
@@ -159,13 +159,13 @@ struct MindMapDocument: Equatable, Codable, Sendable {
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: 同上 `-only-testing:YMindAppTests/CodecTests`
+Run: 同上 `-only-testing:LinvaAppTests/CodecTests`
 Expected: PASS（含新增 2 例）。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Model/MindMapDocument.swift YMindApp/YMindApp/Model/YMindCodec.swift YMindAppTests/CodecTests.swift
+git add LinvaApp/LinvaApp/Model/MindMapDocument.swift LinvaApp/LinvaApp/Model/LinvaCodec.swift LinvaAppTests/CodecTests.swift
 git commit -m "feat: 文档布局字段 LayoutKind + Codec v5 迁移（layout 缺省 radial）"
 ```
 
@@ -174,9 +174,9 @@ git commit -m "feat: 文档布局字段 LayoutKind + Codec v5 迁移（layout �
 ## Task 2: 提取 LayoutSupport 共享辅助 + RadialLayout 瘦身
 
 **Files:**
-- Create: `YMindApp/YMindApp/Layout/LayoutSupport.swift`
-- Modify: `YMindApp/YMindApp/Layout/RadialLayout.swift`
-- Test: `YMindAppTests/RadialLayoutTests.swift`（既有，作回归守卫）
+- Create: `LinvaApp/LinvaApp/Layout/LayoutSupport.swift`
+- Modify: `LinvaApp/LinvaApp/Layout/RadialLayout.swift`
+- Test: `LinvaAppTests/RadialLayoutTests.swift`（既有，作回归守卫）
 
 **Interfaces:**
 - Consumes: `NodeFrame`/`BranchToggle`/`BlockLayoutFrame`/`ImagePayload`/`NodeSize`/`LayoutConstants`（均已有）。
@@ -273,12 +273,12 @@ enum LayoutSupport {
 
 - [ ] **Step 2: 跑既有测试确认基线绿**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/ImageLayoutTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/RadialLayoutTests -only-testing:LinvaAppTests/ImageLayoutTests`
 Expected: PASS（重构前基线）。
 
 - [ ] **Step 3: RadialLayout 改用共享辅助**
 
-`YMindApp/YMindApp/Layout/RadialLayout.swift` 精确替换（保持 `layout`/`edge`/`placeBranch`/`makeBranchToggles`/`appendToggles` 逻辑不变）：
+`LinvaApp/LinvaApp/Layout/RadialLayout.swift` 精确替换（保持 `layout`/`edge`/`placeBranch`/`makeBranchToggles`/`appendToggles` 逻辑不变）：
 - 删除本地 `subtreeHeight` 函数体，根调用 `subtreeHeight(document.root, isRoot: true)` 改为 `LayoutSupport.subtreeHeight(document.root, isRoot: true, measure: measure)`。
 - `placeBranch` 内 `countDescendants(node)` → `LayoutSupport.countDescendants(node)`；`Self.centeredBlocks(from: metadata)` → `LayoutSupport.centeredBlocks(from: metadata)`。
 - 根 frame 构造内 `countDescendants(document.root)` → `LayoutSupport.countDescendants(document.root)`；`Self.centeredBlocks(from: rootMetadata)` → `LayoutSupport.centeredBlocks(from: rootMetadata)`。
@@ -289,13 +289,13 @@ Expected: PASS（重构前基线）。
 
 - [ ] **Step 4: 跑测试确认行为不变**
 
-Run: `-only-testing:YMindAppTests/RadialLayoutTests -only-testing:YMindAppTests/ImageLayoutTests`
+Run: `-only-testing:LinvaAppTests/RadialLayoutTests -only-testing:LinvaAppTests/ImageLayoutTests`
 Expected: PASS（与基线一致）。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Layout/LayoutSupport.swift YMindApp/YMindApp/Layout/RadialLayout.swift
+git add LinvaApp/LinvaApp/Layout/LayoutSupport.swift LinvaApp/LinvaApp/Layout/RadialLayout.swift
 git commit -m "refactor: 提取 LayoutSupport 共享辅助，RadialLayout 改用（行为不变）"
 ```
 
@@ -304,8 +304,8 @@ git commit -m "refactor: 提取 LayoutSupport 共享辅助，RadialLayout 改用
 ## Task 3: LogicLayout 总分树引擎
 
 **Files:**
-- Create: `YMindApp/YMindApp/Layout/LogicLayout.swift`
-- Test: `YMindAppTests/LogicLayoutTests.swift`
+- Create: `LinvaApp/LinvaApp/Layout/LogicLayout.swift`
+- Test: `LinvaAppTests/LogicLayoutTests.swift`
 
 **Interfaces:**
 - Consumes: `LayoutSupport`（Task 2）、`LayoutConstants`、`NodeFrame`/`EdgeGeometry`/`BranchToggle`/`LayoutSnapshot`、`TextMeasure`。
@@ -317,7 +317,7 @@ git commit -m "refactor: 提取 LayoutSupport 共享辅助，RadialLayout 改用
 import CoreGraphics
 import Foundation
 import Testing
-@testable import YMindApp
+@testable import LinvaApp
 
 @Suite("LogicLayout 总分树")
 struct LogicLayoutTests {
@@ -449,7 +449,7 @@ struct LogicLayoutTests {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/LogicLayoutTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/LogicLayoutTests`
 Expected: FAIL（编译失败：`LogicLayout` 未定义）。
 
 - [ ] **Step 3: 实现 LogicLayout.swift**
@@ -574,13 +574,13 @@ extension LogicLayout: LayoutEngine {}
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/LogicLayoutTests`
+Run: `-only-testing:LinvaAppTests/LogicLayoutTests`
 Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Layout/LogicLayout.swift YMindAppTests/LogicLayoutTests.swift
+git add LinvaApp/LinvaApp/Layout/LogicLayout.swift LinvaAppTests/LogicLayoutTests.swift
 git commit -m "feat: LogicLayout 总分树布局引擎（根左/层右/L 形边/右侧 toggle）"
 ```
 
@@ -589,8 +589,8 @@ git commit -m "feat: LogicLayout 总分树布局引擎（根左/层右/L 形边/
 ## Task 4: LayoutPipeline 按 layout 分派
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Session/LayoutPipeline.swift`
-- Test: `YMindAppTests/LayoutPipelineTests.swift`
+- Modify: `LinvaApp/LinvaApp/Session/LayoutPipeline.swift`
+- Test: `LinvaAppTests/LayoutPipelineTests.swift`
 
 **Interfaces:**
 - Consumes: `LayoutKind`（Task 1）、`RadialLayout`/`LogicLayout`（Task 3）。
@@ -601,7 +601,7 @@ git commit -m "feat: LogicLayout 总分树布局引擎（根左/层右/L 形边/
 ```swift
 import Foundation
 import Testing
-@testable import YMindApp
+@testable import LinvaApp
 
 @Suite("LayoutPipeline")
 struct LayoutPipelineTests {
@@ -630,7 +630,7 @@ struct LayoutPipelineTests {
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/LayoutPipelineTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/LayoutPipelineTests`
 Expected: FAIL（编译错误：`LayoutPipeline` 已无 `layoutEngineType` 注入、`FakeLayoutEngine` 引用删掉后剩余调用不匹配）。
 
 - [ ] **Step 3: 实现 LayoutPipeline.swift**
@@ -660,13 +660,13 @@ final class LayoutPipeline {
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/LayoutPipelineTests`
+Run: `-only-testing:LinvaAppTests/LayoutPipelineTests`
 Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Session/LayoutPipeline.swift YMindAppTests/LayoutPipelineTests.swift
+git add LinvaApp/LinvaApp/Session/LayoutPipeline.swift LinvaAppTests/LayoutPipelineTests.swift
 git commit -m "feat: LayoutPipeline 按 document.layout 分派引擎（删引擎类型注入）"
 ```
 
@@ -675,10 +675,10 @@ git commit -m "feat: LayoutPipeline 按 document.layout 分派引擎（删引擎
 ## Task 5: setLayout 命令
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Commands/MindMapCommand.swift`
-- Modify: `YMindApp/YMindApp/Model/MindMapModel.swift`
-- Modify: `YMindApp/YMindApp/Commands/CommandBus.swift`
-- Test: `YMindAppTests/CommandBusTests.swift`
+- Modify: `LinvaApp/LinvaApp/Commands/MindMapCommand.swift`
+- Modify: `LinvaApp/LinvaApp/Model/MindMapModel.swift`
+- Modify: `LinvaApp/LinvaApp/Commands/CommandBus.swift`
+- Test: `LinvaAppTests/CommandBusTests.swift`
 
 **Interfaces:**
 - Consumes: `LayoutKind`（Task 1）。
@@ -713,7 +713,7 @@ git commit -m "feat: LayoutPipeline 按 document.layout 分派引擎（删引擎
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/CommandBusTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/CommandBusTests`
 Expected: FAIL（编译失败：`.setLayout` case 不存在）。
 
 - [ ] **Step 3: 实现**
@@ -750,13 +750,13 @@ Expected: FAIL（编译失败：`.setLayout` case 不存在）。
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/CommandBusTests`
+Run: `-only-testing:LinvaAppTests/CommandBusTests`
 Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Commands/MindMapCommand.swift YMindApp/YMindApp/Model/MindMapModel.swift YMindApp/YMindApp/Commands/CommandBus.swift YMindAppTests/CommandBusTests.swift
+git add LinvaApp/LinvaApp/Commands/MindMapCommand.swift LinvaApp/LinvaApp/Model/MindMapModel.swift LinvaApp/LinvaApp/Commands/CommandBus.swift LinvaAppTests/CommandBusTests.swift
 git commit -m "feat: setLayout 命令入栈（no-op 不入栈，undo/redo 往返）"
 ```
 
@@ -765,9 +765,9 @@ git commit -m "feat: setLayout 命令入栈（no-op 不入栈，undo/redo 往返
 ## Task 6: DocumentSession（layout / setLayout / canSetSide / 自动 fit） + Canvas fitVersion
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Session/DocumentSession.swift`
-- Modify: `YMindApp/YMindApp/Render/CanvasMetalView.swift`
-- Test: `YMindAppTests/DocumentSessionTests.swift`
+- Modify: `LinvaApp/LinvaApp/Session/DocumentSession.swift`
+- Modify: `LinvaApp/LinvaApp/Render/CanvasMetalView.swift`
+- Test: `LinvaAppTests/DocumentSessionTests.swift`
 
 **Interfaces:**
 - Consumes: `setLayout` 命令（Task 5）、`LayoutPipeline` 分派（Task 4）、`LayoutKind`。
@@ -801,7 +801,7 @@ git commit -m "feat: setLayout 命令入栈（no-op 不入栈，undo/redo 往返
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/DocumentSessionTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/DocumentSessionTests`
 Expected: FAIL（`session.layout`/`setLayout`/`fitVersion` 未定义；且 `canSetSide` 在 logic 下仍 true）。
 
 - [ ] **Step 3: 实现**
@@ -844,7 +844,7 @@ Expected: FAIL（`session.layout`/`setLayout`/`fitVersion` 未定义；且 `canS
 ⑤ 在 `setFill(_:)` 前加：
 
 ```swift
-    /// 当前布局（文档属性，随 .ymind 持久化）。改走 setLayout 命令入栈。
+    /// 当前布局（文档属性，随 .linva 持久化）。改走 setLayout 命令入栈。
     var layout: LayoutKind { model.document.layout }
 
     func setLayout(_ kind: LayoutKind) {
@@ -868,13 +868,13 @@ Expected: FAIL（`session.layout`/`setLayout`/`fitVersion` 未定义；且 `canS
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/DocumentSessionTests`
+Run: `-only-testing:LinvaAppTests/DocumentSessionTests`
 Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Session/DocumentSession.swift YMindApp/YMindApp/Render/CanvasMetalView.swift YMindAppTests/DocumentSessionTests.swift
+git add LinvaApp/LinvaApp/Session/DocumentSession.swift LinvaApp/LinvaApp/Render/CanvasMetalView.swift LinvaAppTests/DocumentSessionTests.swift
 git commit -m "feat: DocumentSession 暴露 layout/setLayout；布局变化自动 fit；logic 下 canSetSide 置灰"
 ```
 
@@ -883,8 +883,8 @@ git commit -m "feat: DocumentSession 暴露 layout/setLayout；布局变化自�
 ## Task 7: DropIntent 逻辑图下侧向意图禁用
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Session/DropIntent.swift`
-- Test: `YMindAppTests/DropIntentTests.swift`
+- Modify: `LinvaApp/LinvaApp/Session/DropIntent.swift`
+- Test: `LinvaAppTests/DropIntentTests.swift`
 
 **Interfaces:**
 - Consumes: `LayoutKind`、`LogicLayout`（Task 3，测试用）、`resolveDropIntent`/`resolveEmptySideIntent`。
@@ -920,7 +920,7 @@ git commit -m "feat: DocumentSession 暴露 layout/setLayout；布局变化自�
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/DropIntentTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/DropIntentTests`
 Expected: FAIL（`.logic` 文档下仍产出 `.sideLeft`/`.sideRight`）。
 
 - [ ] **Step 3: 实现**
@@ -953,13 +953,13 @@ Expected: FAIL（`.logic` 文档下仍产出 `.sideLeft`/`.sideRight`）。
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/DropIntentTests`
+Run: `-only-testing:LinvaAppTests/DropIntentTests`
 Expected: PASS。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Session/DropIntent.swift YMindAppTests/DropIntentTests.swift
+git add LinvaApp/LinvaApp/Session/DropIntent.swift LinvaAppTests/DropIntentTests.swift
 git commit -m "feat: 逻辑图下侧向拖放意图禁用（根侧带降级成子，空白改侧置 nil）"
 ```
 
@@ -968,9 +968,9 @@ git commit -m "feat: 逻辑图下侧向拖放意图禁用（根侧带降级成�
 ## Task 8: 工具栏布局菜单 + ⌥L 切换
 
 **Files:**
-- Modify: `YMindApp/YMindApp/App/MainToolbar.swift`
-- Modify: `YMindApp/YMindApp/ContentView.swift`
-- Modify: `YMindApp/YMindApp/YMindAppApp.swift`
+- Modify: `LinvaApp/LinvaApp/App/MainToolbar.swift`
+- Modify: `LinvaApp/LinvaApp/ContentView.swift`
+- Modify: `LinvaApp/LinvaApp/LinvaAppApp.swift`
 - Test: 无单测（SwiftUI 壳层），手动冒烟（Task 10）。
 
 **Interfaces:**
@@ -1012,7 +1012,7 @@ automatic 组 `FillSwatchesView(...)` 之后、`}` 前加：
 
 - [ ] **Step 3: 实现 DocumentCommands ⌥L**
 
-`YMindAppApp.swift` `DocumentCommands` 的 `after: .undoRedo` 组末尾（`移到右侧` Button 后）加：
+`LinvaAppApp.swift` `DocumentCommands` 的 `after: .undoRedo` 组末尾（`移到右侧` Button 后）加：
 
 ```swift
             Divider()
@@ -1026,13 +1026,13 @@ automatic 组 `FillSwatchesView(...)` 之后、`}` 前加：
 
 - [ ] **Step 4: 构建验证（编译 + 手动冒烟见 Task 10）**
 
-Run: `xcodebuild build -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -destination 'platform=macOS'`
+Run: `xcodebuild build -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -destination 'platform=macOS'`
 Expected: BUILD SUCCEEDED。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/App/MainToolbar.swift YMindApp/YMindApp/ContentView.swift YMindApp/YMindApp/YMindAppApp.swift
+git add LinvaApp/LinvaApp/App/MainToolbar.swift LinvaApp/LinvaApp/ContentView.swift LinvaApp/LinvaApp/LinvaAppApp.swift
 git commit -m "feat: 工具栏布局菜单（Picker）+ 菜单栏 ⌥L 循环切换"
 ```
 
@@ -1041,8 +1041,8 @@ git commit -m "feat: 工具栏布局菜单（Picker）+ 菜单栏 ⌥L 循环切
 ## Task 9: PNG 导出按当前布局
 
 **Files:**
-- Modify: `YMindApp/YMindApp/Render/PNGExporter.swift`
-- Test: `YMindAppTests/PNGExporterTests.swift`
+- Modify: `LinvaApp/LinvaApp/Render/PNGExporter.swift`
+- Test: `LinvaAppTests/PNGExporterTests.swift`
 
 **Interfaces:**
 - Consumes: `RadialLayout`/`LogicLayout`（Task 3）。
@@ -1065,7 +1065,7 @@ git commit -m "feat: 工具栏布局菜单（Picker）+ 菜单栏 ⌥L 循环切
 
 - [ ] **Step 2: 跑测试确认失败**
 
-Run: `xcodebuild test ... -only-testing:YMindAppTests/PNGExporterTests`
+Run: `xcodebuild test ... -only-testing:LinvaAppTests/PNGExporterTests`
 Expected: 当前实现硬编码 `RadialLayout`，logic 文档仍按辐射导出——测试期望非空 PNG，现有实现其实也非空（只是布局错），此测试作为「logic 下可导出」守卫；断言 PNG 魔数即可。若在无 Metal 宿主则 `#require` 跳过。
 
 - [ ] **Step 3: 实现**
@@ -1085,13 +1085,13 @@ Expected: 当前实现硬编码 `RadialLayout`，logic 文档仍按辐射导出�
 
 - [ ] **Step 4: 跑测试确认通过**
 
-Run: `-only-testing:YMindAppTests/PNGExporterTests`
+Run: `-only-testing:LinvaAppTests/PNGExporterTests`
 Expected: PASS（含既有 radial 用例与新增 logic 用例）。
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add YMindApp/YMindApp/Render/PNGExporter.swift YMindAppTests/PNGExporterTests.swift
+git add LinvaApp/LinvaApp/Render/PNGExporter.swift LinvaAppTests/PNGExporterTests.swift
 git commit -m "feat: PNG 导出按当前布局分派渲染"
 ```
 
@@ -1101,17 +1101,17 @@ git commit -m "feat: PNG 导出按当前布局分派渲染"
 
 **Files:**
 - Modify: `docs/架构现状.md`
-- Modify: `.agents/skills/ymind-codec-version/SKILL.md`、`.agents/skills/ymind-layout-snapshot/SKILL.md`、`.agents/skills/ymind-command/SKILL.md`
+- Modify: `.agents/skills/linva-codec-version/SKILL.md`、`.agents/skills/linva-layout-snapshot/SKILL.md`、`.agents/skills/linva-command/SKILL.md`
 
 - [ ] **Step 1: 更新文档与技能**
 
 `docs/架构现状.md`：新增一节「布局类型：辐射 / 逻辑图」（新引擎 `LogicLayout`、共享 `LayoutSupport`、`LayoutPipeline` 分派、`document.layout` v5 持久化、setLayout 命令、side 降级、PNG 分派），并在「修订记录」加一行（日期、说明「新增布局类型」）。
 
-`.agents/skills/ymind-codec-version/SKILL.md`：把「现状 `currentVersion == 3`（v2 fill；v3 image）」更新为「现状 `currentVersion == 5`（v4 blocks 图文流；v5 layout 布局字段，v4→v5 迁移：`layout` 缺省 `.radial`）」；补充 checklist 提示 `sanitize` 重建文档须保留 `layout`。
+`.agents/skills/linva-codec-version/SKILL.md`：把「现状 `currentVersion == 3`（v2 fill；v3 image）」更新为「现状 `currentVersion == 5`（v4 blocks 图文流；v5 layout 布局字段，v4→v5 迁移：`layout` 缺省 `.radial`）」；补充 checklist 提示 `sanitize` 重建文档须保留 `layout`。
 
-`.agents/skills/ymind-layout-snapshot/SKILL.md`：注明已存在 `LayoutEngine` 协议 + `LayoutPipeline` 按 `document.layout` 分派（`RadialLayout`/`LogicLayout`）；共享辅助在 `LayoutSupport`；逻辑图 L 形边、统一 `.right` side、右侧 toggle。
+`.agents/skills/linva-layout-snapshot/SKILL.md`：注明已存在 `LayoutEngine` 协议 + `LayoutPipeline` 按 `document.layout` 分派（`RadialLayout`/`LogicLayout`）；共享辅助在 `LayoutSupport`；逻辑图 L 形边、统一 `.right` side、右侧 toggle。
 
-`.agents/skills/ymind-command/SKILL.md`：命令清单末尾补 `setLayout(kind: LayoutKind)`（文档属性命令，no-op 不入栈，仿 `setFill`）。
+`.agents/skills/linva-command/SKILL.md`：命令清单末尾补 `setLayout(kind: LayoutKind)`（文档属性命令，no-op 不入栈，仿 `setFill`）。
 
 - [ ] **Step 2: 边界校验**
 
@@ -1120,7 +1120,7 @@ Expected: 输出「依赖边界检查通过」退出 0（新文件仅 `import Fo
 
 - [ ] **Step 3: 全量单测**
 
-Run: `xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -destination 'platform=macOS'`
+Run: `xcodebuild test -project LinvaApp/LinvaApp.xcodeproj -scheme LinvaApp -destination 'platform=macOS'`
 Expected: 全绿。
 
 - [ ] **Step 4: 手动冒烟（PRD §6 验收表 1–9）**
@@ -1130,7 +1130,7 @@ Expected: 全绿。
 - [ ] **Step 5: Commit**
 
 ```bash
-git add docs/架构现状.md .agents/skills/ymind-codec-version/SKILL.md .agents/skills/ymind-layout-snapshot/SKILL.md .agents/skills/ymind-command/SKILL.md
+git add docs/架构现状.md .agents/skills/linva-codec-version/SKILL.md .agents/skills/linva-layout-snapshot/SKILL.md .agents/skills/linva-command/SKILL.md
 git commit -m "docs: 布局类型文档与技能更新；边界/单测/冒烟验证通过"
 ```
 

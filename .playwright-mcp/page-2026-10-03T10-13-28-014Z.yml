@@ -1,6 +1,6 @@
 - generic [active] [ref=f4e1]:
   - generic [ref=f4e2]:
-    - generic [ref=f4e3]: YMind 配色方案
+    - generic [ref=f4e3]: Linva 配色方案
     - button [ref=f4e4] [cursor=pointer]
     - button [ref=f4e9] [cursor=pointer]
     - button [ref=f4e14] [cursor=pointer]
@@ -10,8 +10,8 @@
     - generic [ref=f4e25]:
       - generic [ref=f4e26]:
         - generic [ref=f4e31]:
-          - generic [ref=f4e32]: YMind
-          - generic [ref=f4e33]: 阅读清单.ymind
+          - generic [ref=f4e32]: Linva
+          - generic [ref=f4e33]: 阅读清单.linva
         - generic [ref=f4e34]: 子主题
         - generic [ref=f4e38]: 同级主题
         - generic [ref=f4e43]: 删除

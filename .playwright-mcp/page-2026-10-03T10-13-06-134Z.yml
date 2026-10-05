@@ -1,6 +1,6 @@
 - generic [active] [ref=f2e1]:
   - generic [ref=f2e2]:
-    - generic [ref=f2e3]: YMind 配色方案
+    - generic [ref=f2e3]: Linva 配色方案
     - button [ref=f2e4] [cursor=pointer]
     - button [ref=f2e9] [cursor=pointer]
     - button [ref=f2e14] [cursor=pointer]
@@ -8,8 +8,8 @@
     - button "切换到暗色" [ref=f2e23] [cursor=pointer]
   - generic [ref=f2e26]:
     - generic [ref=f2e31]:
-      - generic [ref=f2e32]: YMind
-      - generic [ref=f2e33]: 阅读清单.ymind
+      - generic [ref=f2e32]: Linva
+      - generic [ref=f2e33]: 阅读清单.linva
     - generic [ref=f2e34]: 子主题
     - generic [ref=f2e38]: 同级主题
     - generic [ref=f2e43]: 删除

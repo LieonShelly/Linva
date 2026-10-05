@@ -1,6 +1,6 @@
-# YMind 组件规格 — 画布（Canvas）
+# Linva 组件规格 — 画布（Canvas）
 
-> 层级：**Metal 层**。画布是 YMind 的核心交互面：纸感底 + 中心辐射树 + 拖放/框选/折叠。只消费 `LayoutSnapshot` + `Camera`，不懂树（`ymind-layout-snapshot` 硬约束）。所有色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
+> 层级：**Metal 层**。画布是 Linva 的核心交互面：纸感底 + 中心辐射树 + 拖放/框选/折叠。只消费 `LayoutSnapshot` + `Camera`，不懂树（`linva-layout-snapshot` 硬约束）。所有色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 
 ---
 

@@ -1,8 +1,8 @@
-# XcodeBuildMCP project config for YMind (macOS mind-map app).
+# XcodeBuildMCP project config for Linva (macOS mind-map app).
 # Docs: https://www.xcodebuildmcp.com/docs/configuration
 schemaVersion: 1
 
-# Default MCP only enables "simulator". YMind is a Mac app — enable macOS + related workflows.
+# Default MCP only enables "simulator". Linva is a Mac app — enable macOS + related workflows.
 enabledWorkflows:
   - macos
   - swift-package
@@ -15,8 +15,8 @@ enabledWorkflows:
 
 # Fill these in once the Xcode / SwiftPM app target exists.
 # sessionDefaults:
-#   projectPath: ./YMind.xcodeproj   # or workspacePath: ./YMind.xcworkspace
-#   scheme: YMind
+#   projectPath: ./LinvaApp/LinvaApp.xcodeproj
+#   scheme: LinvaApp
 #   platform: macOS
 #   configuration: Debug
 #   arch: arm64

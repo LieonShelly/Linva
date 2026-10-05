@@ -1,4 +1,4 @@
-# YMind
+# Linva
 
 Agent 配置见 [`.agents/`](.agents/)，请从 [`.agents/AGENTS.md`](.agents/AGENTS.md) 开始。
 

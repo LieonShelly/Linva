@@ -1,4 +1,4 @@
-# YMind 组件规格 — 工具条（Toolbar）
+# Linva 组件规格 — 工具条（Toolbar）
 
 > 层级：**SwiftUI 壳**。工具条是画布的次要命令面（主命令在菜单栏，`macos-design-guidelines`）。已拍板：**收敛常用 + 溢出其余**——只留高频操作，剪贴板/改侧/导出移入菜单与右键菜单。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 
@@ -17,7 +17,7 @@
 | **secondaryAction** | 溢出菜单（`ToolbarOverflowMenu`） | 低频命令收纳 |
 | 状态 | 选中计数（`已选 N`） | 多选时显示 |
 
-> **已收敛出工具条**（仍可从菜单栏/右键触达）：剪切/复制/粘贴、移到左/右侧、导出 Markdown/PNG。这些在 `YMindAppApp` 的 `DocumentCommands` 与右键菜单中保留快捷键（⌘X/C/V、⌘←/⌘→、导出菜单项）。
+> **已收敛出工具条**（仍可从菜单栏/右键触达）：剪切/复制/粘贴、移到左/右侧、导出 Markdown/PNG。这些在 `LinvaAppApp` 的 `DocumentCommands` 与右键菜单中保留快捷键（⌘X/C/V、⌘←/⌘→、导出菜单项）。
 
 ---
 

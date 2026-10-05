@@ -1,4 +1,4 @@
-# YMind 组件规格 — 搜索条（SearchBar）
+# Linva 组件规格 — 搜索条（SearchBar）
 
 > 层级：**SwiftUI 壳**。⌘F 打开，搜索树节点并逐跳高亮。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 

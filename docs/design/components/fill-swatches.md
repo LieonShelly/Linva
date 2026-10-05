@@ -1,4 +1,4 @@
-# YMind 组件规格 — 填色色点（FillSwatches）
+# Linva 组件规格 — 填色色点（FillSwatches）
 
 > 层级：**SwiftUI 壳**（工具条内）。为选中节点套用/清除 5 色预设填色。规格即现有实现（`FillSwatchesView`），本文件确认视觉 token 对齐。色值引用 `design-tokens.md`。
 

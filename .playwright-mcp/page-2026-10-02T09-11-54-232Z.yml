@@ -1,7 +1,7 @@
 - generic [ref=f4e2]:
   - banner [ref=f4e3]:
     - generic [ref=f4e4]:
-      - generic [ref=f4e6]: YMind
+      - generic [ref=f4e6]: Linva
       - generic [ref=f4e7]: 设计预览
     - generic [ref=f4e8]:
       - button "子主题" [ref=f4e9] [cursor=pointer]
@@ -23,7 +23,7 @@
   - main [ref=f4e46]:
     - generic:
       - generic:
-        - generic [ref=f4e47] [cursor=pointer]: YMind 设计原型
+        - generic [ref=f4e47] [cursor=pointer]: Linva 设计原型
         - generic [ref=f4e48] [cursor=pointer]: 编辑
         - generic [ref=f4e49] [cursor=pointer]: 就地编辑浮层
         - generic [ref=f4e50] [cursor=pointer]: 删空即删节点

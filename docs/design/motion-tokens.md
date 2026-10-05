@@ -1,6 +1,6 @@
-# YMind Motion Tokens
+# Linva Motion Tokens
 
-> 状态：正式 UI/UX 设计基线（2026-10-02）。定义 YMind 的动效 token：时长、缓动、spring、stagger。**硬性拆分 SwiftUI 层（浮层/菜单/对话框/工具条）与 Metal 层（节点增删/选中/边过渡/折叠）**——实现层不同，约束不同，动效必须分层设计（ymind-design 硬约束）。
+> 状态：正式 UI/UX 设计基线（2026-10-02）。定义 Linva 的动效 token：时长、缓动、spring、stagger。**硬性拆分 SwiftUI 层（浮层/菜单/对话框/工具条）与 Metal 层（节点增删/选中/边过渡/折叠）**——实现层不同，约束不同，动效必须分层设计（linva-design 硬约束）。
 >
 > 顶层原则：**丝滑 = 尊重系统节奏 + 一致的运动语言 + reduced-motion 降级**。所有动效服务于「空间连续性」与「因果反馈」，不为炫技。
 
@@ -64,7 +64,7 @@
 
 ## 2. Metal 层动效规格（画布内容）
 
-> 实现提示：`MetalRenderer.encodeContent` 每帧重绘，动效 = 在 **Snapshot 之间做顶点插值**。当前架构「Layout 产 Snapshot → Render 消费」已支持每帧重算；建议在 Render 维护「当前/目标」两套顶点，`draw(in:)` 用 `motion.duration.medium` + `motion.easing.out` 插值。详见 `components/canvas.md` 与 `ymind-layout-snapshot`。
+> 实现提示：`MetalRenderer.encodeContent` 每帧重绘，动效 = 在 **Snapshot 之间做顶点插值**。当前架构「Layout 产 Snapshot → Render 消费」已支持每帧重算；建议在 Render 维护「当前/目标」两套顶点，`draw(in:)` 用 `motion.duration.medium` + `motion.easing.out` 插值。详见 `components/canvas.md` 与 `linva-layout-snapshot`。
 
 ### 2.1 节点出现（新增节点）
 

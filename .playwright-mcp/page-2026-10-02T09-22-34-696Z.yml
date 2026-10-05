@@ -1,8 +1,8 @@
 - generic [ref=f7e2]:
   - banner [ref=f7e3]:
     - generic [ref=f7e8]:
-      - generic [ref=f7e9]: YMind
-      - generic [ref=f7e10]: 阅读清单.ymind
+      - generic [ref=f7e9]: Linva
+      - generic [ref=f7e10]: 阅读清单.linva
     - generic [ref=f7e11]:
       - button "子主题 Tab" [disabled] [ref=f7e12]:
         - text: 子主题

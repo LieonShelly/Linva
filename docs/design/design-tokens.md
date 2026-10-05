@@ -1,4 +1,4 @@
-# YMind Design Tokens
+# Linva Design Tokens
 
 > 状态：正式 UI/UX 设计基线（2026-10-02）。本文件为**唯一真源**：开发者只消费语义/组件 token，绝不直接写裸 hex/px。亮色 + 暗色双外观。
 >
@@ -43,7 +43,7 @@ Component（组件专用）── 具体到某组件某状态的最终取值
 | `prim.color.root.text` | `#F4F1EA` | `#E7E4DC` | 中心主题字（原 `--root-text`） |
 | `prim.color.line` | `#6D7568` | `#8A8E86` | 边线/连线（原 `--line`） |
 
-**强调轴**（YMind 品牌绿）：
+**强调轴**（Linva 品牌绿）：
 
 | token | light | dark | 用途 |
 |------|-------|------|------|
@@ -85,7 +85,7 @@ Component（组件专用）── 具体到某组件某状态的最终取值
 
 ### 1.3 尺寸 / 间距 primitives
 
-> 直接锚定 `Layout/LayoutConstants.swift`（改布局常量走 `ymind-layout-snapshot`）。
+> 直接锚定 `Layout/LayoutConstants.swift`（改布局常量走 `linva-layout-snapshot`）。
 
 | token | 值 | 映射 |
 |------|-----|------|
@@ -232,7 +232,7 @@ Component（组件专用）── 具体到某组件某状态的最终取值
 - **填色 5 token**：`NodeFillStyle` 现有算法即本文件 `prim.color.fill.*` 的来源，**不改**。
 - **PNG 导出底色**：`MetalRenderer.renderImage` 用 `paper #e7e4dc` 固定浅色 → 锚 `prim.color.paper.1.light`（`sem.color.canvas.bg.light`）。后续若做「暗色导出」另案。
 - **Metal clearColor**：`MetalRenderer.swift:95` 已从 `NSColor.windowBackgroundColor` 取 → 替换为 `sem.color.canvas.bg` 的系统语义解析即可（随外观，纸感底由 `encodeContent` 画纸面渐变，见 `components/canvas.md`）。
-- **布局常量**：尺寸 token 全部映射 `LayoutConstants`，改布局走 `ymind-layout-snapshot` skill。
+- **布局常量**：尺寸 token 全部映射 `LayoutConstants`，改布局走 `linva-layout-snapshot` skill。
 
 ## 6. 变更记录
 

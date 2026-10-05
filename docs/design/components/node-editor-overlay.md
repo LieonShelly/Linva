@@ -1,4 +1,4 @@
-# YMind 组件规格 — 编辑浮层（NodeEditorOverlay）
+# Linva 组件规格 — 编辑浮层（NodeEditorOverlay）
 
 > 层级：**SwiftUI 壳**（`NodeTextEditor` = `NSViewRepresentable` 包 `NSTextView`）。画布上双击/Return 进入节点文字编辑，浮层贴合节点原位。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 

@@ -1,7 +1,7 @@
 - generic [ref=e2]:
   - banner [ref=e3]:
     - generic [ref=e4]:
-      - generic [ref=e6]: YMind
+      - generic [ref=e6]: Linva
       - generic [ref=e7]: 设计预览
     - generic [ref=e8]:
       - button "子主题" [ref=e9] [cursor=pointer]

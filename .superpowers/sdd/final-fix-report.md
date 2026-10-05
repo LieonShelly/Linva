@@ -1,7 +1,7 @@
-# YMind v1 合并前最终修复报告
+# Linva v1 合并前最终修复报告
 
 日期：2026-09-24  
-分支：`feat/ymind-v1`
+分支：`feat/linva-v1`
 
 ## 状态
 
@@ -32,7 +32,7 @@
 ## 验证
 
 - Debug 构建：通过。
-- `xcodebuild test ... -only-testing:YMindAppTests`：通过。
+- `xcodebuild test ... -only-testing:LinvaAppTests`：通过。
 - 单元测试：35 项全部通过。
 - IDE linter：本次修改文件无诊断。
 

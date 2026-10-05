@@ -1,4 +1,4 @@
-# YMind 组件规格 — 恢复横幅（RecoveryBannerView）
+# Linva 组件规格 — 恢复横幅（RecoveryBannerView）
 
 > 层级：**SwiftUI 壳**。启动扫描到上次未保存草稿时，顶部横幅提示恢复/忽略。色值引用 `design-tokens.md`，动效引用 `motion-tokens.md`。
 

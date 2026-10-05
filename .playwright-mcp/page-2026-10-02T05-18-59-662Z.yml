@@ -1,8 +1,8 @@
 - generic [active] [ref=e1]:
   - generic [ref=e2]:
     - banner [ref=e3]:
-      - generic [ref=e4]: YMind
-      - generic [ref=e7]: 阅读清单.ymind
+      - generic [ref=e4]: Linva
+      - generic [ref=e7]: 阅读清单.linva
       - group "节点操作" [ref=e8]:
         - button "＋ 子主题 Tab" [ref=e9] [cursor=pointer]:
           - text: ＋ 子主题

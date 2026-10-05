@@ -1,4 +1,4 @@
-# YMind 组件规格 — 右键菜单（Context Menu）
+# Linva 组件规格 — 右键菜单（Context Menu）
 
 > 层级：**SwiftUI 壳**（`.contextMenu`）。现状工具条收敛后，剪切/复制/粘贴/改侧/导出等低频命令移入菜单栏 + 右键菜单。右键菜单是 Mac 交互的核心（HIG 6.2：**每个可交互元素都必须响应右键**）。本组件为**新增**（当前 Shell 无 `.contextMenu`，只有 `MainToolbar` 与 `DocumentCommands` 菜单栏）。
 

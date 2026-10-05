@@ -1,4 +1,4 @@
-# YMind 上线就绪清单（App Store 1.0 提交）
+# Linva 上线就绪清单（App Store 1.0 提交）
 
 **日期：** 2026-09-30
 **范围：** 迁移闭环（导入/自动保存恢复落地；PDF 导出已移除）后，以「App Store 公开上架 v1.0」为目标的上线就绪评估。
@@ -11,13 +11,13 @@
 | 项 | 状态 | 证据 |
 |----|------|------|
 | 沙盒 | ✅ | `project.pbxproj`：`ENABLE_APP_SANDBOX = YES` + `ENABLE_USER_SELECTED_FILES = readwrite` |
-| 文件类型关联（双击 `.ymind` 打开） | ✅ | `Info.plist`：`CFBundleDocumentTypes`（Editor/Owner）+ `UTExportedTypeDeclarations`（com.ymind.document / ymind 扩展名） |
+| 文件类型关联（双击 `.linva` 打开） | ✅ | `Info.plist`：`CFBundleDocumentTypes`（Editor/Owner）+ `UTExportedTypeDeclarations`（com.linva.document / linva 扩展名） |
 | 安全作用域文件访问 | ✅ | `DocumentSessionTests.securityScopedAccess_startsBeforeOperation_andBalancesOwnedScopes` |
 | 数据容错（损坏文件不崩） | ✅ | Codec 版本校验 + v1→v2 迁移；`bad version` 单测 |
 | 无账号 / 无网络 | ✅ 优势 | 纯本地单文档工具，审核面最小；无数据收集项 |
 | 版本号 | ✅ | `MARKETING_VERSION = 1.0` / `CURRENT_PROJECT_VERSION = 1` |
 | 首启体验 | ✅ | 默认「中心主题」文档，评审员打开即可操作，无空状态 |
-| 自动化测试 | ✅ | 12 单测文件 + UI 测试（`YMindAppTests/`、`YMindAppUITests/`） |
+| 自动化测试 | ✅ | 12 单测文件 + UI 测试（`LinvaAppTests/`、`LinvaAppUITests/`） |
 | 撤销/重做 | ✅ | 12 个可逆命令走 `CommandBus` |
 
 ## B. P0 — 会被拒 / 无法提交（必须做）
