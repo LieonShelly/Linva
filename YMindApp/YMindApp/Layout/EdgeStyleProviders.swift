@@ -99,7 +99,8 @@ struct BraceProvider: EdgeStyleProvider {
                   let fc = frames[kids[0].id],
                   let lc = frames[kids[kids.count - 1].id] else { return }
             let isMain = node.id == root.id
-            // hasCircle 保守默认：仅根节点（选中/折叠语义的占位），其余恒 false。
+            // 根/子括号嘴均不带圆圈标记（用户要求）；hasCircle 保留为 addendum §3
+            // 未来「折叠/选中圆圈」的预留钩子，当前恒 false。
             out.append(Self.buildBrace(
                 id: node.id,
                 parent: pf,
@@ -107,7 +108,7 @@ struct BraceProvider: EdgeStyleProvider {
                 last: lc,
                 childCount: kids.count,
                 isMain: isMain,
-                hasCircle: isMain
+                hasCircle: false
             ))
             for k in kids { brace(k) }
         }

@@ -120,7 +120,7 @@ top:    M xRight yTop  Q xStem yTop, xStem yTop+r  L xStem yMid−r  Q xStem yMi
 bottom: M xTip yMid    Q xStem yMid, xStem yMid+r  L xStem yBottom−r  Q xStem yBottom, xRight yBottom
 ```
 - **开口 "}"，不封闭**：单条连续折线 = `top` 后接 `bottom`（两弧在嘴处相接），起点右上端点 `(xRight,yTop)`、终点右下端点 `(xRight,yBottom)`——xRight 两端开口，**无右缘竖线、无父→嘴短直线**（参考 HTML 同）。
-- `hasCircle` → `ConnectorMarker(.circle, center: (xTip−r_c−1, yMid), radius: 4.5)`（折叠标记）。
+- **嘴无圆圈**：根/子括号均不画嘴旁圆圈标记（用户要求；`hasCircle` 保留为 addendum §3 未来「折叠/选中圆圈」预留钩子，当前恒 false，`ConnectorMarker` 契约为后续样式留位）。
 - 颜色：YMind 单一边色（edge separator），不用参考双色（那是 XMind 主题）。
 
 ### 4.3 扩展新样式（D7，单一扩展点）

@@ -66,10 +66,10 @@ func relayout(document: MindMapDocument) -> LayoutSnapshot {
 
 ## 3. brace 强制逻辑树 + 组 Connector（spec D2/D3）
 
-- `BraceProvider.connectors(...)`：对有子的父节点递归产 Connector。父 = 首末子中心中点（原型已验证，嘴对准父）。
-- 几何按参考 HTML 公式（`brace-xmind.html`，spec §4.2）：`xTip/xStem/xRight`、`Q/L` 路径、`r = min(16, 跨度/4, xRight−xStem, xStem−xTip)`、单子最小跨度 `max(子高·0.85, 28)`、`hasCircle → ConnectorMarker(.circle)`。
+- `BraceProvider.connectors(...)`：对有子的父节点递归产 Connector。开口 "}"（不封闭），嘴 yMid = 父 center.y（头对齐父）。
+- 几何按参考 HTML 公式（`gemini-code-1791128458700.html`，spec §4.2）：`xTip/xStem/xRight`、`Q/L` 路径、`r = min(16, 跨度/4, xRight−xStem, xStem−xTip)`、单子最小跨度 `max(子高·0.85, 28)`。
 - 颜色：YMind 单一边色（edge separator），不用双色。
-- 折叠标记（嘴旁圆圈）关联：`hasCircle` 暂定 = 该父有折叠后代或根选中态（实现时定，先恒 false 或根 true，见 PRD §9 开放问题）。
+- 折叠标记（嘴旁圆圈）：**用户要求不画**，当前恒 false、无 marker；`hasCircle`/`ConnectorMarker` 保留为未来「折叠/选中圆圈」预留钩子（见 PRD §9 开放问题）。
 
 ## 4. Codec v7（FR-E1）
 

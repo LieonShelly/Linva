@@ -289,7 +289,7 @@ struct BraceProviderTests {
 
     /// 多子：yTop=首子 center.y、yBottom=末子 center.y；嘴 yMid = 父 center.y（头对齐父）。
     /// 开口 "}"：path 首点=(xRight,yTop)、末点=(xRight,yBottom)，无右缘竖线、无父→嘴短直线。
-    /// 根括号带圆圈 → xTip=mouthX+15。
+    /// 根/子括号嘴均不带圆圈标记 → xTip=mouthX+10。
     @Test func multiChild_mouthAlignsToParentCenter() throws {
         let (doc, frames) = multiChildDoc()
         let root = try #require(frames[doc.root.id])
@@ -308,7 +308,7 @@ struct BraceProviderTests {
 
         let mouthX = root.rect.maxX
         let w: CGFloat = 56  // 主括号
-        let xTip = mouthX + 15  // 根带圆圈
+        let xTip = mouthX + 10  // 无圆圈
         let xStem = mouthX + w * 0.54
         let xRight = mouthX + w - 8
         let r = min(16, (yBottom - yTop) / 4, xRight - xStem, xStem - xTip)
@@ -320,11 +320,8 @@ struct BraceProviderTests {
         #expect(c.path.contains(CGPoint(x: xTip, y: yMid)))
         #expect(c.path.contains(CGPoint(x: xStem, y: yMid - r)))
         #expect(c.path.contains(CGPoint(x: xStem, y: yMid + r)))
-        // 根带圆圈标记。
-        let marker = try #require(c.marker)
-        #expect(marker.kind == .circle)
-        #expect(marker.radius == 4.5)
-        #expect(marker.center == CGPoint(x: xTip - 4.5 - 1, y: yMid))
+        // 根/子括号嘴均无圆圈标记。
+        #expect(c.marker == nil)
     }
 
     /// 头对齐父：嘴 yMid 直接 = 父 center.y，即使父中心 ≠ 首末子中点（不等高子树）。
@@ -373,8 +370,8 @@ struct BraceProviderTests {
         let yBottom = cf.center.y + span / 2
         let yMid = (yTop + yBottom) / 2
         #expect(yMid == root.center.y)
-        // 根带圆圈 → xTip=mouthX+15。
-        #expect(c.path.contains(CGPoint(x: root.rect.maxX + 15, y: yMid)))
+        // 嘴无圆圈 → xTip=mouthX+10。
+        #expect(c.path.contains(CGPoint(x: root.rect.maxX + 10, y: yMid)))
         #expect(c.path.contains(CGPoint(x: root.rect.maxX + 56 - 8, y: yTop)))
         #expect(c.path.contains(CGPoint(x: root.rect.maxX + 56 - 8, y: yBottom)))
     }
@@ -391,11 +388,9 @@ struct BraceProviderTests {
 
         let connectors = braceConnectors(doc, frames: frames)
         #expect(connectors.count == 2)  // 根→[章]、章→[节]
-        // 根括号：主宽度 56 + 根圆圈标记。
+        // 根括号：主宽度 56、嘴无圆圈。
         let rootBrace = try #require(connectors.first { $0.id == doc.root.id })
-        let marker = try #require(rootBrace.marker)
-        #expect(marker.kind == .circle)
-        #expect(marker.radius == 4.5)
+        #expect(rootBrace.marker == nil)
         // 子括号：宽度 34、无圆圈；单子按最小跨度张开。
         let childBrace = try #require(connectors.first { $0.id == chapter.id })
         #expect(childBrace.marker == nil)
