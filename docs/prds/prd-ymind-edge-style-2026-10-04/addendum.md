@@ -6,7 +6,7 @@
 **读者：** 开发 Agent / 方案设计（specs → plans）；先读 PRD §4 FR-E1…E5、spec D1–D8、§6 验收要点。
 
 > 涉及技能：`ymind-codec-version`（Codec v7）、`ymind-layout-snapshot`（Connector 契约 / Render-Layout 接缝）、`ymind-command`（setEdgeStyle 命令）。开发前读对应 skill。
-> **扩展性铁律**：加新样式只允许动 `EdgeStyle` 枚举 + 新建 Provider 文件 + registry 注册，**不得改引擎/Render/Codec**（spec D7）。
+> **扩展性铁律**：加新样式只允许动 `EdgeStyle` 枚举 + 新建 Provider 文件 + registry 注册 +（per-edge 样式）`LayoutSupport.edgePoints` 一个 case，**不得改引擎/Render/Codec**（spec D7）。
 
 ---
 
@@ -113,6 +113,6 @@ func relayout(document: MindMapDocument) -> LayoutSnapshot {
 | Model / Codec | `MindMapDocument.edgeStyle` + v7；引擎/Render 不读 Model 树 |
 | Layout | `placeFrames`（排布）+ `EdgeStyleProvider.connectors`（几何）；`LayoutSnapshot.connectors` 统一契约 |
 | Render | `connectorVertices` 合并描边 + marker；无新 shader |
-| 扩展 | 加样式 = enum case + Provider 文件 + registry 注册；`CaseIterable` 自动进 UI |
+| 扩展 | 加样式 = enum case + Provider 文件 + registry 注册 +（per-edge）`edgePoints` case；UI 默认显式三选一，需暴露时改 `ForEach(EdgeStyle.allCases)` |
 | `check-boundaries.sh` | 不新增 import；几何用 CoreGraphics/Foundation，白名单覆盖 |
 | 与 1.0 并行 | 接缝 = `LayoutSnapshot.connectors` + Codec v7 独占 |

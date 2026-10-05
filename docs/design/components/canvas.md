@@ -25,7 +25,7 @@
 | 默认 | 描边 | `sem.color.edge`，`prim.stroke.edge` (1.75pt)，`linecap: round`，opacity 0.75 |
 | 过渡 | 控制点插值 | `motion.duration.medium` + `motion.easing.inOut`（搬枝/折叠时平滑） |
 
-**几何**：`EdgeGeometry.points`（父边起点 → 水平中点 ×2 → 子边终点），Render 逐点插值。不与节点矩形重叠。
+**几何**：`ConnectorGeometry.path`（父边起点 → 水平拐点 ×2 → 子边终点），Render 逐点描边。不与节点矩形重叠。
 
 ---
 

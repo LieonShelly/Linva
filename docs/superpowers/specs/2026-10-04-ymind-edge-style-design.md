@@ -83,7 +83,7 @@
       static func provider(for style: EdgeStyle) -> EdgeStyleProvider
   }
   ```
-  `EdgeStyle` 是闭枚举（Codable 兼容），新增样式 = 加 case + 注册 Provider；`switch` 仅存在于 registry 一处。
+  `EdgeStyle` 是闭枚举（Codable 兼容），新增样式 = 加 case + 注册 Provider。`EdgeStyleRegistry` 是唯一 **Provider 分派** switch；`LayoutSupport.edgePoints` 是**几何分派** switch（per-edge 样式共享基元，加 per-edge 样式需在此增一个 case）。引擎 / Render / Codec 零改动。
 - **LayoutPipeline**：按 `document.edgeStyle` 取 Provider；`provider.requiresLogicArrangement` 决定有效排布：
   ```swift
   let arrangement: LayoutKind = provider.requiresLogicArrangement ? .logic : document.layout
@@ -128,8 +128,9 @@ bottom: M xTip yMid    Q xStem yMid, xStem yMid+r  L xStem yBottom−r  Q xStem 
 加一个 per-edge 样式（如 straight / rounded）：
 1. `EdgeStyle` 加 `case straight`。
 2. 新建 `StraightStyleProvider.swift`：实现 `connectors(...)`（可复用 `LayoutSupport.edgePoints` 基元）+ `requiresLogicArrangement = false`。
-3. `EdgeStyleRegistry` 注册。
-4. 工具栏 Picker 因 `CaseIterable` 自动出现。
+3. `EdgeStyleRegistry` 注册（唯一 Provider 分派 switch）。
+4. `LayoutSupport.edgePoints` 增一个 `case`（per-edge 几何分派基元；若 Provider 自建 path 可省略）。
+5. 工具栏 Picker 为显式三选一（折线/曲线/大括号，FR-E4），新样式默认不暴露；如需暴露，改 `ForEach(EdgeStyle.allCases)` 即自动出现。
 **引擎 / Render / Codec 零改动。** 组样式同理（`requiresLogicArrangement = true` + 组 Connector 逻辑）。
 
 ---

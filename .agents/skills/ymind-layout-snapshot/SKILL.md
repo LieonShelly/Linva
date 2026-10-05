@@ -1,6 +1,6 @@
 ---
 name: ymind-layout-snapshot
-description: YMind 的布局与渲染契约（LayoutSnapshot / NodeFrame / EdgeGeometry / RadialLayout）。当扩展布局算法、修改节点 frame/边几何、或改动 Render 与 Layout 的接缝时使用。
+description: YMind 的布局与渲染契约（LayoutSnapshot / NodeFrame / ConnectorGeometry / RadialLayout）。当扩展布局算法、修改节点 frame/边几何、或改动 Render 与 Layout 的接缝时使用。
 license: proprietary
 ---
 
@@ -10,7 +10,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 
 ## 关键文件
 
-- `Layout/LayoutSnapshot.swift` —— `NodeFrame` / `EdgeGeometry` / `BranchToggle` / `LayoutSnapshot`（含 `imagePayloads: [UUID: ImagePayload]`：有图节点的图片载荷，Layout 从 Model 拷出，Render 只消费 Snapshot）
+- `Layout/LayoutSnapshot.swift` —— `NodeFrame` / `ConnectorGeometry` / `BranchToggle` / `LayoutSnapshot`（含 `imagePayloads: [UUID: ImagePayload]`：有图节点的图片载荷，Layout 从 Model 拷出，Render 只消费 Snapshot）
 - `Layout/RadialLayout.swift` —— 中心辐射布局算法（`.radial`）
 - `Layout/LogicLayout.swift` —— 逻辑图（总分树）布局算法（`.logic`）：根最左、层级向右、L 形边
 - `Layout/LayoutSupport.swift` —— 两引擎共享辅助（测高 / 块居中 / 图片载荷收集 / toggle 生成）
@@ -26,7 +26,7 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 2. **数据流单向**：`Model 变更 → Session.relayout() → LayoutPipeline 按 document.layout 分派引擎（RadialLayout / LogicLayout）→ snapshot → Render.draw()`。Layout 只读 Model，Render 只读 Snapshot。
 3. **`LayoutSnapshot` 是稳定接缝**：换布局算法（中心辐射 → 组织图等）或换渲染后端时，只要 Snapshot 契约不变，Render 无需改动。扩展字段时，要**同时**保证 Layout 产出、Render 消费两端一致。
 4. **`NodeFrame` 携带渲染所需的一切**：`id / text / center / size / isRoot / side / collapsed / hiddenCount / imageRect`。新增渲染特性（如样式色、图标）应加字段进 `NodeFrame`（以及 Layout 产出它），而不是给 Render 开访问 Model 的口子。
-5. **`EdgeGeometry` 是布局专用几何**：含 `fromId / toId / side / points`。若新布局需要不同的边几何，扩 `EdgeGeometry`，而非让 Metal 懂业务。
+5. **`ConnectorGeometry` 是统一连线契约**：含 `id / path / marker?`（可选 `fromId/toId` 供可见性过滤）。所有连线样式（折线/曲线/大括号）都由 `EdgeStyleProvider` 产出 `[ConnectorGeometry]`，Render 只描边 path + 画 marker，对样式零感知。加新样式不动引擎/Render/Codec（见 `ymind-design` 连线样式）。
 
 ## RadialLayout 不变量
 
@@ -41,15 +41,15 @@ YMind 的核心分层：**CPU 算几何（Layout）→ 产出 `LayoutSnapshot` �
 ## LogicLayout 不变量（逻辑图 / 总分树）
 
 - **根在最左、层级向右层层展开**；所有节点统一 `.right` side（无左右分组语义）。
-- **L 形边**：`EdgeGeometry.points` 为「水平出 → 垂直拐 → 水平入」四点折线。
+- **L 形边**：折线样式下 `ConnectorGeometry.path` 为「水平出 → 垂直拐 → 水平入」四点折线（辐射折中点、逻辑折子节点左缘）。
 - **BranchToggle 一律在右侧**（`LayoutSupport.makeToggle(..., side: .right)`）；折叠子树高度视为 0、不占空间。
 - **根折叠（v6）**：逻辑图无左右侧语义，根折叠 = 左右两侧独立折叠的**聚合态**（`collapsedLeft && collapsedRight` 视为整树折叠，早退只画根；部分折叠时仍显示全部子节点）。根 toggle 的 `collapsed`/`hiddenCount` 按聚合态。
 - **side 降级（FR-L4）**：逻辑图下 `DocumentSession.canSetSide == false`（⌘←/⌘→ 置灰、`DropIntent` 侧向放置禁用），切回辐射恢复。
 
 ## 扩展布局的步骤
 
-1. **双引擎已落地**：`LayoutEngine` 协议（`static func layout(document:measure:) -> LayoutSnapshot`）+ `LayoutPipeline` 按 `document.layout` 分派（`.radial → RadialLayout`、`.logic → LogicLayout`，见 `docs/架构现状.md` §7.10）。加第三种布局：`LayoutKind` 增 case → 新类型实现 `LayoutEngine`（共享辅助优先复用 `LayoutSupport`）→ `LayoutPipeline` switch 加分派，Session / Render 零改动。
-2. 扩 `NodeFrame`/`EdgeGeometry`/`BranchToggle` 字段：先定 Layout 如何产出，再定 Render 如何消费。
+1. **双引擎已落地**：`LayoutEngine` 协议（`static func place(document:measure:) -> (frames, branchToggles, imagePayloads)`）+ `LayoutPipeline` 按有效排布分派（`.radial → RadialLayout`、`.logic → LogicLayout`），连线由 `EdgeStyleProvider` 产 `ConnectorGeometry`。加第三种布局：`LayoutKind` 增 case → 新类型实现 `LayoutEngine`（共享辅助优先复用 `LayoutSupport`）→ `LayoutPipeline` switch 加分派，Session / Render 零改动。
+2. 扩 `NodeFrame`/`ConnectorGeometry`/`BranchToggle` 字段：先定 Layout/Provider 如何产出，再定 Render 如何消费。
 3. 保持 `LayoutSnapshot` 的 Equatable 语义（用于 dirty 判断）。
 
 ## 验证
