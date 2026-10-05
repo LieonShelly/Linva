@@ -1,0 +1,46 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]: YMind连线样式线框
+    - generic [ref=f1e4]:
+      - generic [ref=f1e5] [cursor=pointer]: 切换器
+      - generic [ref=f1e6] [cursor=pointer]: 语义
+      - generic [ref=f1e7] [cursor=pointer]: 边界
+  - main [ref=f1e8]:
+    - generic [ref=f1e9]:
+      - generic [ref=f1e10]: 正交折线（默认）
+      - img [ref=f1e11]:
+        - generic [ref=f1e12]: 产品规划
+        - generic [ref=f1e15]: 需求
+        - generic [ref=f1e18]: 痛点
+        - generic [ref=f1e21]: 场景
+        - generic [ref=f1e24]: 优先级
+        - generic [ref=f1e27]: 工程
+        - generic [ref=f1e30]: 架构
+        - generic [ref=f1e33]: 性能
+        - generic [ref=f1e36]: 测试
+        - generic [ref=f1e39]: 设计
+        - generic [ref=f1e42]: 交互
+        - generic [ref=f1e45]: 视觉
+        - generic [ref=f1e48]: 原型
+        - generic [ref=f1e51]: 发布
+        - generic [ref=f1e54]: 上架
+        - generic [ref=f1e57]: 指标
+    - generic [ref=f1e76]:
+      - heading "连线样式切换器" [level=2] [ref=f1e77]
+      - paragraph [ref=f1e78]: 工具栏「连线样式」菜单：曲线 / 大括号 / 正交折线，一键切换即时重绘
+      - generic [ref=f1e79]:
+        - generic [ref=f1e80] [cursor=pointer]:
+          - generic [ref=f1e89]: 正交折线
+          - generic [ref=f1e90]: 现状默认 · 横出竖落横进
+        - generic [ref=f1e91] [cursor=pointer]:
+          - generic [ref=f1e100]: 曲线
+          - generic [ref=f1e101]: 平滑贝塞尔 · 最顺滑
+        - generic [ref=f1e102] [cursor=pointer]:
+          - generic [ref=f1e111]: 大括号
+          - generic [ref=f1e112]: "} 形 · 强表达总分从属"
+        - generic [ref=f1e113] [cursor=pointer]:
+          - generic [ref=f1e122]: 直线（非 v1）
+          - generic [ref=f1e123]: 候选 · 本期不做
+      - button "循环切换样式（⇧E）" [ref=f1e125] [cursor=pointer]
+      - paragraph [ref=f1e126]: 切换即时重绘整图；选中节点、折叠分支、相机视角全部保持。作用域 = 全局一种。
+      - generic [ref=f1e127]: 依据 FR-E1 / FR-E4 · 机会卡片 §4

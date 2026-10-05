@@ -1,0 +1,47 @@
+<style>
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>括号图 — 修正节点排布（父左子右、父对齐中间子、子各接水平直线）</h2>
+<p class="subtitle">3 子竖排一列；父对齐中间子；括号覆盖整组；每子从括号右凹侧水平直线接入。</p>
+
+<div class="card" data-choice="brace-xmind" onclick="toggleSelect(this)">
+  <div class="card-image">
+    <svg viewBox="0 0 250 340">
+      <!-- 大括号：小曲线+长直spine+中点(嘴) -->
+      <g stroke="#d69a2a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M108 82 C92 82, 88 90, 88 103 L88 162 C88 174, 76 180, 64 180"/>
+        <path d="M64 180 C76 180, 88 186, 88 198 L88 257 C88 270, 92 278, 108 278"/>
+        <!-- 父→嘴 -->
+        <path d="M56 180 H64"/>
+        <!-- 每子：从括号右凹侧水平直线接入 -->
+        <path d="M88 100 H152"/>
+        <path d="M88 180 H152"/>
+        <path d="M88 260 H152"/>
+      </g>
+      <g fill="#fff" stroke="#26221b" stroke-width="1">
+        <rect x="6" y="165" width="50" height="30" rx="7" fill="#26221b"/>
+        <rect x="152" y="86" width="56" height="28" rx="7"/>
+        <rect x="152" y="166" width="56" height="28" rx="7"/>
+        <rect x="152" y="246" width="56" height="28" rx="7"/>
+      </g>
+      <g fill="#26221b" font-size="12" text-anchor="middle">
+        <text x="31" y="185" fill="#fff">父</text>
+        <text x="180" y="104">子1</text>
+        <text x="180" y="184">子2</text>
+        <text x="180" y="264">子3</text>
+      </g>
+      <text x="180" y="325" font-size="10" fill="#9a5b1f" text-anchor="middle">父左·子右竖排；父对齐中间子；括号覆盖整组；子各接水平直线</text>
+    </svg>
+  </div>
+  <div class="card-body">
+    <h3>括号图（修正排布）</h3>
+    <p>父左子右竖排；父对齐中间子；括号覆盖整组；每子水平直线接入</p>
+    <span class="tag rec">对齐 XMind 排布</span>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选或回复。<b>这张节点排布 + 括号形状对吗？</b>确认后定进设计并更新 spec。</p>

@@ -1,0 +1,52 @@
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; }
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>大括号修正 — 小曲线 + 长直 spine + 中点(嘴)</h2>
+<p class="subtitle">按你给的参考代码：上下端小曲线，中段<b>竖直直线</b>，中点朝父的「嘴」。应用到父+2子。</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="brace-xmind" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 200 360">
+        <!-- 大括号：小曲线+长直spine+中点(嘴) -->
+        <g stroke="#d69a2a" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- 上端小曲线 + 长直spine + 折入中点 -->
+          <path d="M90 20 C74 20, 70 28, 70 45 L70 155 C70 172, 62 180, 45 180"/>
+          <!-- 折出中点 + 长直spine + 下端小曲线 -->
+          <path d="M45 180 C62 180, 70 188, 70 205 L70 315 C70 332, 74 340, 90 340"/>
+          <!-- 父→中点(嘴) -->
+          <path d="M42 180 H45"/>
+          <!-- 直线接子 (spine→子) -->
+          <path d="M70 99 H124"/>
+          <path d="M70 261 H124"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="2" y="165" width="40" height="30" rx="7" fill="#26221b"/>
+          <rect x="124" y="85" width="52" height="28" rx="7"/>
+          <rect x="124" y="247" width="52" height="28" rx="7"/>
+        </g>
+        <g fill="#26221b" font-size="12" text-anchor="middle">
+          <text x="22" y="185" fill="#fff">父</text>
+          <text x="150" y="103">子1</text>
+          <text x="150" y="265">子2</text>
+        </g>
+        <text x="150" y="350" font-size="10" fill="#9a5b1f" text-anchor="middle">小曲线+长直spine+中点(嘴)+直线接子</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号图（按参考代码）</h3>
+      <p>上下小曲线、中段竖直直线、中点朝父「嘴」、直线接子</p>
+      <span class="tag rec">对齐参考代码</span>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选或回复。<b>这张是否就是你要的 XMind 括号样式？</b>确认后我把该几何定进设计并更新 spec。</p>

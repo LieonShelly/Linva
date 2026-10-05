@@ -1,0 +1,55 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]: YMind连线样式线框 · 逻辑树
+  - main [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - generic [ref=f1e6]: 正交折线（默认）
+      - img [ref=f1e7]:
+        - generic [ref=f1e19]: 痛点
+        - generic [ref=f1e22]: 场景
+        - generic [ref=f1e25]: 优先级
+        - generic [ref=f1e28]: 需求
+        - generic [ref=f1e31]: 交互
+        - generic [ref=f1e34]: 视觉
+        - generic [ref=f1e37]: 设计
+        - generic [ref=f1e40]: 架构
+        - generic [ref=f1e43]: 性能
+        - generic [ref=f1e46]: 测试
+        - generic [ref=f1e49]: 发布
+        - generic [ref=f1e52]: 工程
+        - generic [ref=f1e55]: 产品规划
+    - generic [ref=f1e58]:
+      - heading "连线样式" [level=2] [ref=f1e59]
+      - paragraph [ref=f1e60]: 逻辑树（父左子右）下三种连线形态，一键切换。
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62] [cursor=pointer]:
+          - generic [ref=f1e71]: 正交折线
+          - generic [ref=f1e72]: 现状默认 · 横出竖落横进
+        - generic [ref=f1e73] [cursor=pointer]:
+          - generic [ref=f1e82]: 曲线
+          - generic [ref=f1e83]: 水平切向 S 曲线（对齐 XMind）
+        - generic [ref=f1e84] [cursor=pointer]:
+          - generic [ref=f1e92]: 大括号
+          - generic [ref=f1e93]: "父→嘴→一组 `}` · 子不连边"
+      - button "循环切换（⇧E）" [ref=f1e95] [cursor=pointer]
+      - paragraph [ref=f1e96]: 切换即时重绘、无损；样式随文档持久化 + ⌘Z 可撤销。大括号在任意布局下按总分树（父左子右竖排）显示，子节点不连边、靠括号分组。
+      - heading "大括号几何" [level=2] [ref=f1e97]
+      - paragraph [ref=f1e98]: 按参考 HTML 公式（spec D2/D3）：
+      - list [ref=f1e99]:
+        - listitem [ref=f1e100]: 父 → 短横线 → 括号中点（嘴），嘴朝父。
+        - listitem [ref=f1e101]:
+          - text: 括号
+          - code [ref=f1e102]: xTip
+          - text: （嘴）→
+          - code [ref=f1e103]: xStem
+          - text: （竖直直线）→
+          - code [ref=f1e104]: xRight
+          - text: ；顶部/底部小圆弧（Q）+ 中段竖直直线（L）+ 折入/折出嘴。
+        - listitem [ref=f1e105]:
+          - code [ref=f1e106]: yTop/yBottom
+          - text: = 首/末子中心；单子按节点高·0.85 张开（最小 28）。
+        - listitem [ref=f1e107]:
+          - code [ref=f1e108]: r = min(16, 跨度/4, xRight−xStem, xStem−xTip)
+          - text: 。
+        - listitem [ref=f1e109]: 父垂直对齐中间子；子竖排右、不连边；可选嘴旁小圆圈（折叠标记）。
+      - generic [ref=f1e110]: spec docs/superpowers/specs/2026-10-04-ymind-edge-style-design.md · 视觉伴侣 brace-xmind.html

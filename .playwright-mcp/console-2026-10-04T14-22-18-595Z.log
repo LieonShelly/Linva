@@ -1,0 +1,5 @@
+[      18ms] TypeError: Cannot read properties of undefined (reading 'x')
+    at edgeStartEnd (http://127.0.0.1:8791/edge-style.html:277:19)
+    at render (http://127.0.0.1:8791/edge-style.html:302:36)
+    at http://127.0.0.1:8791/edge-style.html:349:5
+[      37ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://127.0.0.1:8791/favicon.ico:0

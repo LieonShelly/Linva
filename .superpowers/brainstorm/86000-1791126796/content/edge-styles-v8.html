@@ -1,0 +1,80 @@
+<style>
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>括号树 — 按参考 HTML 的 JS 几何忠实实现</h2>
+<p class="subtitle">父左 → 括号(撑满子列) → 子竖排在右、父垂直居中；子不连边靠括号分组；嘴朝父 + 可选小圆圈。</p>
+
+<div class="cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px">
+
+  <div class="card" data-choice="brace-main" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 240 230">
+        <!-- 主括号(双色) : 首子50→末子170, yMid=110 -->
+        <g stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M116 50 Q98 50, 98 66 L98 94 Q98 110, 78 110" stroke="#FAC646"/>
+          <path d="M78 110 Q98 110, 98 126 L98 154 Q98 170, 116 170" stroke="#E36953"/>
+        </g>
+        <!-- 父→嘴 -->
+        <path d="M74 110 H78" stroke="#E36953" stroke-width="3.2" stroke-linecap="round"/>
+        <g fill="#fff" stroke="#121A5A" stroke-width="2">
+          <rect x="4" y="90" width="70" height="40" rx="10" fill="#fff"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="132" y="36" width="60" height="28" rx="8" fill="#FAC646"/>
+          <rect x="132" y="96" width="60" height="28" rx="8" fill="#E36953"/>
+          <rect x="132" y="156" width="60" height="28" rx="8" fill="#1E387B"/>
+        </g>
+        <g font-size="13" text-anchor="middle">
+          <text x="39" y="116" fill="#121A5A" font-weight="500">父</text>
+          <text x="162" y="54" fill="#1A1A1A">子1</text>
+          <text x="162" y="114" fill="#fff">子2</text>
+          <text x="162" y="174" fill="#fff">子3</text>
+        </g>
+        <text x="162" y="220" font-size="10" fill="#9a5b1f" text-anchor="middle">主括号(双色)：嘴→直spine→上下小圆弧；子竖排不连边</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>主括号（双色）</h3>
+      <p>父左、括号撑满子列、3 子竖排右侧、父垂直居中、子不连边</p>
+      <span class="tag rec">对齐参考 HTML</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-sub" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 240 240">
+        <!-- 子括号(单色) : 首子40→末子160, yMid=100, 带嘴旁小圆圈 -->
+        <g stroke="#FAC646" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M70 40 Q54 40, 54 55 L54 85 Q54 100, 40 100"/>
+          <path d="M40 100 Q54 100, 54 115 L54 145 Q54 160, 70 160"/>
+        </g>
+        <circle cx="34" cy="100" r="5" stroke="#FAC646" stroke-width="2" fill="#fff"/>
+        <path d="M60 100 H40" stroke="#FAC646" stroke-width="3" stroke-linecap="round"/>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="62" y="85" width="58" height="30" rx="8" fill="#FAC646"/>
+          <rect x="86" y="26" width="60" height="28" rx="8" fill="#fff" stroke="#FAC646" stroke-width="1.6"/>
+          <rect x="86" y="86" width="60" height="28" rx="8" fill="#fff" stroke="#FAC646" stroke-width="1.6"/>
+          <rect x="86" y="146" width="60" height="28" rx="8" fill="#fff" stroke="#FAC646" stroke-width="1.6"/>
+        </g>
+        <g font-size="12" text-anchor="middle">
+          <text x="91" y="104" fill="#1A1A1A">分支</text>
+          <text x="116" y="44" fill="#333">细1</text>
+          <text x="116" y="104" fill="#333">细2</text>
+          <text x="116" y="164" fill="#333">细3</text>
+        </g>
+        <text x="116" y="228" font-size="10" fill="#9a5b1f" text-anchor="middle">子括号(单色)+嘴旁小圆圈；细1/2/3 竖排不连边</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>子括号（单色 + 小圆圈）</h3>
+      <p>父分支 → 子括号 → 3 细分竖排右侧；嘴旁小圆圈；子不连边</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选或回复。<b>这两张（主括号 + 子括号）是否就是参考 HTML 的样子？</b>确认后我把这个几何定进设计并更新 spec，然后回到实现流程。</p>

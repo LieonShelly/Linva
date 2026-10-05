@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>花括号树状思维导图</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #ffffff;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 40px;
+    }
+
+    /* 树形结构通用容器 */
+    .tree, .tree-group {
+      display: flex;
+      align-items: center;
+    }
+
+    /* 子分支纵向排列容器 */
+    .children-list {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* 一级分支之间的垂直间距 */
+    .level-1-list {
+      gap: 36px;
+    }
+
+    /* 二级细分分支之间的垂直间距 */
+    .level-2-list {
+      gap: 12px;
+    }
+
+    /* 花括号容器 */
+    .brace-box {
+      position: relative;
+      align-self: stretch; /* 自动撑满与右侧子节点列表同高 */
+      flex-shrink: 0;
+    }
+
+    .brace-main {
+      width: 56px;
+    }
+
+    .brace-sub {
+      width: 34px;
+    }
+
+    .brace-box svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* ================= 节点样式 ================= */
+    .node {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      white-space: nowrap;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+
+    /* 1. 中心主题 */
+    .node-root {
+      padding: 16px 34px;
+      border: 2.5px solid #121A5A;
+      border-radius: 10px;
+      color: #121A5A;
+      font-size: 22px;
+      font-weight: 500;
+      background: #fff;
+    }
+
+    /* 2. 一级分支主题通用样式 */
+    .node-branch {
+      width: 145px;
+      height: 50px;
+      border-radius: 9px;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .branch-yellow {
+      background-color: #FAC646;
+      color: #1A1A1A;
+    }
+
+    .branch-red {
+      background-color: #E36953;
+      color: #FFFFFF;
+    }
+
+    .branch-blue {
+      background-color: #1E387B;
+      color: #FFFFFF;
+    }
+
+    /* 选中高亮外框效果（对应图中“分支主题 6”） */
+    .selected-wrapper {
+      padding: 3px;
+      border: 2px solid #8AD8FF;
+      border-radius: 12px;
+      display: inline-flex;
+    }
+
+    /* 3. 二级细分主题通用样式 */
+    .node-leaf {
+      padding: 7px 16px;
+      border-radius: 9px;
+      font-size: 14px;
+      background-color: #FFFFFF;
+      color: #333333;
+      border: 1.8px solid transparent;
+    }
+
+    .leaf-blue {
+      border-color: #1E387B;
+    }
+
+    .leaf-yellow {
+      border-color: #FAC646;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tree">
+    <!-- 中心主题 -->
+    <div class="node node-root">中心主题</div>
+
+    <!-- 主花括号（双色：上黄下红） -->
+    <div class="brace-box brace-main" 
+         data-type="dual" 
+         data-top-color="#FAC646" 
+         data-bottom-color="#E36953" 
+         data-stroke="3.2"></div>
+
+    <!-- 一级分支列表 -->
+    <div class="children-list level-1-list">
+      
+      <!-- 分支主题 1 -->
+      <div class="tree-group">
+        <div class="node node-branch branch-yellow">分支主题 1</div>
+      </div>
+
+      <!-- 分支主题 2 -->
+      <div class="tree-group">
+        <div class="node node-branch branch-red">分支主题 2</div>
+      </div>
+
+      <!-- 分支主题 3（含 1 个细分主题） -->
+      <div class="tree-group">
+        <div class="node node-branch branch-blue">分支主题 3</div>
+        <div class="brace-box brace-sub" 
+             data-type="single" 
+             data-color="#1E387B" 
+             data-stroke="2"></div>
+        <div class="children-list level-2-list">
+          <div class="tree-group">
+            <div class="node node-leaf leaf-blue">细分主题 1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分支主题 6（带选中外框 + 小圆圈 + 3 个细分主题） -->
+      <div class="tree-group">
+        <div class="selected-wrapper">
+          <div class="node node-branch branch-yellow">分支主题 6</div>
+        </div>
+        <div class="brace-box brace-sub" 
+             data-type="single" 
+             data-color="#FAC646" 
+             data-stroke="2" 
+             data-circle="true"></div>
+        <div class="children-list level-2-list">
+          <div class="tree-group">
+            <div class="node node-leaf leaf-yellow">细分主题 1</div>
+          </div>
+          <div class="tree-group">
+            <div class="node node-leaf leaf-yellow">细分主题 2</div>
+          </div>
+          <div class="tree-group">
+            <div class="node node-leaf leaf-yellow">细分主题 3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分支主题 4 -->
+      <div class="tree-group">
+        <div class="node node-branch branch-red">分支主题 4</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 动态计算节点位置并绘制 SVG 花括号
+     */
+    function renderBraces() {
+      const braces = document.querySelectorAll('.brace-box');
+
+      braces.forEach(brace => {
+        const list = brace.nextElementSibling;
+        if (!list || !list.children.length) return;
+
+        const braceRect = brace.getBoundingClientRect();
+        const items = list.children;
+
+        // 获取第一个和最后一个分支的文字框元素（跳过它的子级花括号）
+        const firstNode = items[0].querySelector('.node, .selected-wrapper') || items[0];
+        const lastNode = items[items.length - 1].querySelector('.node, .selected-wrapper') || items[items.length - 1];
+
+        const firstRect = firstNode.getBoundingClientRect();
+        const lastRect = lastNode.getBoundingClientRect();
+
+        // 计算顶部端点、底部端点、以及中间尖角的 Y 坐标
+        let yTop = firstRect.top + firstRect.height / 2 - braceRect.top;
+        let yBottom = lastRect.top + lastRect.height / 2 - braceRect.top;
+
+        // 如果只有一个子节点（如“分支主题 3”），让括号根据该节点高度自动张开
+        if (items.length === 1) {
+          const span = Math.max(firstRect.height * 0.85, 28);
+          yTop = (firstRect.top + firstRect.height / 2 - braceRect.top) - span / 2;
+          yBottom = (firstRect.top + firstRect.height / 2 - braceRect.top) + span / 2;
+        }
+
+        const yMid = (yTop + yBottom) / 2;
+        const w = braceRect.width;
+        const h = braceRect.height;
+
+        // 读取配置属性
+        const type = brace.dataset.type || 'single';
+        const strokeWidth = parseFloat(brace.dataset.stroke || 2.5);
+        const hasCircle = brace.dataset.circle === 'true';
+
+        // 设定 X 轴关键位置（尖角、主竖线、右侧末端）
+        const xTip = hasCircle ? 15 : 10;
+        const xStem = w * 0.54;
+        const xRight = w - 8;
+
+        // 动态计算圆角半径，防止子节点过矮时曲线变形
+        const r = Math.min(16, (yBottom - yTop) / 4, xRight - xStem, xStem - xTip);
+
+        // 上半部分路径（从右上端点 -> 竖线 -> 中间尖角）
+        const topPath = `
+          M ${xRight} ${yTop}
+          Q ${xStem} ${yTop} ${xStem} ${yTop + r}
+          L ${xStem} ${yMid - r}
+          Q ${xStem} ${yMid} ${xTip} ${yMid}
+        `;
+
+        // 下半部分路径（从中间尖角 -> 竖线 -> 右下端点）
+        const bottomPath = `
+          M ${xTip} ${yMid}
+          Q ${xStem} ${yMid} ${xStem} ${yMid + r}
+          L ${xStem} ${yBottom - r}
+          Q ${xStem} ${yBottom} ${xRight} ${yBottom}
+        `;
+
+        let svgContent = '';
+
+        if (type === 'dual') {
+          const topColor = brace.dataset.topColor || '#FAC646';
+          const bottomColor = brace.dataset.bottomColor || '#E36953';
+          svgContent = `
+            <path d="${topPath}" stroke="${topColor}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" />
+            <path d="${bottomPath}" stroke="${bottomColor}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" />
+          `;
+        } else {
+          const color = brace.dataset.color || '#333';
+          svgContent = `
+            <path d="${topPath} ${bottomPath}" stroke="${color}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          `;
+          // 绘制左侧折叠小圆圈（对应“分支主题 6”右侧的小圆圈）
+          if (hasCircle) {
+            const circleR = 4.5;
+            svgContent += `
+              <circle cx="${xTip - circleR - 1}" cy="${yMid}" r="${circleR}" stroke="${color}" stroke-width="1.5" fill="#FFFFFF" />
+            `;
+          }
+        }
+
+        brace.innerHTML = `<svg viewBox="0 0 ${w} ${h}">${svgContent}</svg>`;
+      });
+    }
+
+    // 页面加载及窗口缩放时自动绘制
+    window.addEventListener('DOMContentLoaded', renderBraces);
+    window.addEventListener('resize', renderBraces);
+  </script>
+</body>
+</html>

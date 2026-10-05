@@ -1,0 +1,86 @@
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; }
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>大括号修正 — 中点尖钩朝父 + 连续曲线无钩</h2>
+<p class="subtitle">对齐 XMind：单条连续曲线、中点朝父尖钩、上下平滑收尾、组括号包整组子、子不连边。</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="brace-symbol" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 240 260">
+        <!-- 父节点 + stem + 大括号(尖钩朝父) -->
+        <g stroke="#d69a2a" stroke-width="5" fill="none" stroke-linecap="round">
+          <path d="M150 60 C118 60, 112 122, 96 130"/>
+          <path d="M96 130 C112 138, 118 200, 150 200"/>
+          <path d="M96 130 H60"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="6" y="115" width="54" height="30" rx="7" fill="#26221b"/>
+        </g>
+        <g fill="#fff" font-size="12" text-anchor="middle">
+          <text x="33" y="135">父</text>
+        </g>
+        <text x="120" y="240" font-size="11" fill="#6e685c" text-anchor="middle">中点尖钩朝父 · 上下平滑无钩</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号符号（修正形状）</h3>
+      <p>单条连续 `}` 曲线，中点朝父尖钩，上下平滑</p>
+      <span class="tag rec">形状基准</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-xmind" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 380 320">
+        <g stroke="#d69a2a" stroke-width="2.6" fill="none" stroke-linecap="round">
+          <!-- 根：父→尖点, 一括号包 A+B -->
+          <path d="M76 160 H104"/>
+          <path d="M148 100 C116 100, 110 152, 104 160"/>
+          <path d="M104 160 C110 168, 116 220, 148 220"/>
+          <!-- A：包 a1+a2 -->
+          <path d="M208 130 H226"/>
+          <path d="M260 92 C234 92, 230 126, 226 130"/>
+          <path d="M226 130 C230 134, 234 168, 260 168"/>
+          <!-- B：包 b1+b2 -->
+          <path d="M208 210 H226"/>
+          <path d="M260 172 C234 172, 230 206, 226 210"/>
+          <path d="M226 210 C230 214, 234 248, 260 248"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="18" y="145" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="150" y="115" width="58" height="30" rx="7"/>
+          <rect x="150" y="195" width="58" height="30" rx="7"/>
+          <rect x="272" y="80" width="48" height="28" rx="6"/>
+          <rect x="272" y="118" width="48" height="28" rx="6"/>
+          <rect x="272" y="198" width="48" height="28" rx="6"/>
+          <rect x="272" y="236" width="48" height="28" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="165" fill="#fff">父</text>
+          <text x="179" y="135">A</text>
+          <text x="179" y="215">B</text>
+          <text x="296" y="98">a1</text>
+          <text x="296" y="136">a2</text>
+          <text x="296" y="216">b1</text>
+          <text x="296" y="254">b2</text>
+        </g>
+        <text x="296" y="305" font-size="10" fill="#9a5b1f" text-anchor="middle">子节点无单独连线 · 仅靠括号分组</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号图（修正：尖钩朝父 + 组括号）</h3>
+      <p>父 → 尖点；一括号包整组子；子不连边</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选，或直接回复。<b>确认：① 尖钩朝父、上下平滑无钩，形状对吗？② 开口朝子、子不连边，对吗？</b>若朝向反了请说明。</p>

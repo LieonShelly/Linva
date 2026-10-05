@@ -1,0 +1,167 @@
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; }
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>YMind 连线样式 — 我的理解（对齐 XMind）</h2>
+<p class="subtitle">逻辑图（总分树）布局下，四种连线形态。重点看<b>大括号</b>两种做法选一，并确认<b>曲线</b>观感。</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="curve" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 300">
+        <g stroke="#26221b" stroke-width="1.5" fill="none">
+          <path d="M76 150 C100 150, 94 109, 118 109"/>
+          <path d="M76 150 C100 150, 94 219, 118 219"/>
+          <path d="M168 109 C192 109, 192 77, 216 77"/>
+          <path d="M168 109 C192 109, 192 137, 216 137"/>
+          <path d="M168 219 C192 219, 192 197, 216 197"/>
+          <path d="M168 219 C192 219, 192 257, 216 257"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="118" y="95" width="50" height="28" rx="7"/>
+          <rect x="118" y="205" width="50" height="28" rx="7"/>
+          <rect x="216" y="64" width="44" height="26" rx="6"/>
+          <rect x="216" y="124" width="44" height="26" rx="6"/>
+          <rect x="216" y="184" width="44" height="26" rx="6"/>
+          <rect x="216" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="143" y="113">A</text>
+          <text x="143" y="223">B</text>
+          <text x="238" y="81">a1</text>
+          <text x="238" y="141">a2</text>
+          <text x="238" y="201">b1</text>
+          <text x="238" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>曲线</h3>
+      <p>水平切向 S 曲线——对齐 XMind「直出后缓弯」，细线无箭头</p>
+      <span class="tag rec">视觉验收基准</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-per-edge" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 300">
+        <g stroke="#b85c3a" stroke-width="1.6" fill="none">
+          <path d="M76 150 H94 M94 150 V101 M94 101 H99 M94 150 V117 M94 117 H99 M99 101 Q106 109 99 117 M99 109 H118"/>
+          <path d="M76 150 H94 M94 150 V211 M94 211 H99 M94 150 V227 M94 227 H99 M99 211 Q106 219 99 227 M99 219 H118"/>
+          <path d="M168 109 H186 M186 109 V69 M186 69 H191 M186 109 V85 M186 85 H191 M191 69 Q198 77 191 85 M191 77 H216"/>
+          <path d="M168 109 H186 M186 109 V129 M186 129 H191 M186 109 V145 M186 145 H191 M191 129 Q198 137 191 145 M191 137 H216"/>
+          <path d="M168 219 H186 M186 219 V189 M186 189 H191 M186 219 V205 M186 205 H191 M191 189 Q198 197 191 205 M191 197 H216"/>
+          <path d="M168 219 H186 M186 219 V249 M186 249 H191 M186 219 V265 M186 265 H191 M191 249 Q198 257 191 265 M191 257 H216"/>
+        </g>
+        <g fill="#fff" stroke="#b85c3a" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="118" y="95" width="50" height="28" rx="7"/>
+          <rect x="118" y="205" width="50" height="28" rx="7"/>
+          <rect x="216" y="64" width="44" height="26" rx="6"/>
+          <rect x="216" y="124" width="44" height="26" rx="6"/>
+          <rect x="216" y="184" width="44" height="26" rx="6"/>
+          <rect x="216" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="143" y="113">A</text>
+          <text x="143" y="223">B</text>
+          <text x="238" y="81">a1</text>
+          <text x="238" y="141">a2</text>
+          <text x="238" y="201">b1</text>
+          <text x="238" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>大括号 · 每条边</h3>
+      <p>每个父→子边独立一个 } / ∪ 小括号（现原型做法）</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-group" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 300">
+        <g stroke="#b85c3a" stroke-width="1.8" fill="none">
+          <!-- 根 → 一个 } 包住 A+B -->
+          <path d="M76 150 H100 M100 150 V99 M100 99 H107 M100 150 V229 M100 229 H107 M107 99 C130 99, 130 229, 107 229 M110 109 H150 M110 219 H150"/>
+          <!-- A → 一个 } 包住 a1+a2 -->
+          <path d="M200 109 H205 M205 109 V70 M205 70 H212 M205 109 V144 M205 144 H212 M212 70 C235 70, 235 144, 212 144 M215 77 H250 M215 137 H250"/>
+          <!-- B → 一个 } 包住 b1+b2 -->
+          <path d="M200 219 H205 M205 219 V190 M205 190 H212 M205 219 V264 M205 264 H212 M212 190 C235 190, 235 264, 212 264 M215 197 H250 M215 257 H250"/>
+        </g>
+        <g fill="#fff" stroke="#b85c3a" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="150" y="95" width="50" height="28" rx="7"/>
+          <rect x="150" y="205" width="50" height="28" rx="7"/>
+          <rect x="250" y="64" width="44" height="26" rx="6"/>
+          <rect x="250" y="124" width="44" height="26" rx="6"/>
+          <rect x="250" y="184" width="44" height="26" rx="6"/>
+          <rect x="250" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="175" y="113">A</text>
+          <text x="175" y="223">B</text>
+          <text x="272" y="81">a1</text>
+          <text x="272" y="141">a2</text>
+          <text x="272" y="201">b1</text>
+          <text x="272" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>大括号 · 组括号（XMind 括号图）</h3>
+      <p>每父一个 } 包住整组子（A、B 各自一个，根一个包住 A+B）</p>
+      <span class="tag rec">最像 XMind 括号图</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="elbow" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 300">
+        <g stroke="#26221b" stroke-width="1.5" fill="none">
+          <path d="M76 150 H97 V109 H118"/>
+          <path d="M76 150 H97 V219 H118"/>
+          <path d="M168 109 H192 V77 H216"/>
+          <path d="M168 109 H192 V137 H216"/>
+          <path d="M168 219 H192 V197 H216"/>
+          <path d="M168 219 H192 V257 H216"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="118" y="95" width="50" height="28" rx="7"/>
+          <rect x="118" y="205" width="50" height="28" rx="7"/>
+          <rect x="216" y="64" width="44" height="26" rx="6"/>
+          <rect x="216" y="124" width="44" height="26" rx="6"/>
+          <rect x="216" y="184" width="44" height="26" rx="6"/>
+          <rect x="216" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="143" y="113">A</text>
+          <text x="143" y="223">B</text>
+          <text x="238" y="81">a1</text>
+          <text x="238" y="141">a2</text>
+          <text x="238" y="201">b1</text>
+          <text x="238" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>正交折线</h3>
+      <p>现状默认：横出 → 竖落 → 横进</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器里点选你认可的卡片（可多点），或直接在此输入反馈。请重点告诉我：<b>大括号选哪种？曲线观感对吗？</b></p>

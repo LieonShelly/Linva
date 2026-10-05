@@ -1,0 +1,123 @@
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; }
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>大括号修正 — 带中点尖钩的真花括号</h2>
+<p class="subtitle">按你的参考图，括号应为经典花括号：竖脊柱 + <b>中点尖钩</b> + 上下对称弧。请确认形状 + 选组括号 / 每条边。</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="symbol" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 200 200">
+        <g stroke="#26221b" stroke-width="9" fill="none" stroke-linecap="round">
+          <path d="M150 30 C105 30, 105 100, 88 100"/>
+          <path d="M88 100 C105 100, 105 170, 150 170"/>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号符号（形状确认）</h3>
+      <p>竖脊柱 + 中点尖钩朝开口侧 + 上下对称弧（对齐你的参考图）</p>
+      <span class="tag rec">形状基准</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-group" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 340 300">
+        <g stroke="#b85c3a" stroke-width="2" fill="none" stroke-linecap="round">
+          <!-- 根 → 一个 } 包住 A+B -->
+          <path d="M76 150 H78"/>
+          <path d="M78 99 C102 99, 102 164, 114 164"/>
+          <path d="M114 164 C102 164, 102 229, 78 229"/>
+          <path d="M114 109 H170"/><path d="M114 219 H170"/>
+          <!-- A → } 包 a1+a2 -->
+          <path d="M168 109 H196"/>
+          <path d="M196 70 C218 70, 218 107, 228 107"/>
+          <path d="M228 107 C218 107, 218 144, 196 144"/>
+          <path d="M228 77 H272"/><path d="M228 137 H272"/>
+          <!-- B → } 包 b1+b2 -->
+          <path d="M168 219 H196"/>
+          <path d="M196 190 C218 190, 218 227, 228 227"/>
+          <path d="M228 227 C218 227, 218 264, 196 264"/>
+          <path d="M228 197 H272"/><path d="M228 257 H272"/>
+        </g>
+        <g fill="#fff" stroke="#b85c3a" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="170" y="95" width="50" height="28" rx="7"/>
+          <rect x="170" y="205" width="50" height="28" rx="7"/>
+          <rect x="272" y="64" width="44" height="26" rx="6"/>
+          <rect x="272" y="124" width="44" height="26" rx="6"/>
+          <rect x="272" y="184" width="44" height="26" rx="6"/>
+          <rect x="272" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="195" y="113">A</text>
+          <text x="195" y="223">B</text>
+          <text x="294" y="81">a1</text>
+          <text x="294" y="141">a2</text>
+          <text x="294" y="201">b1</text>
+          <text x="294" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>组括号 · 括号图（对齐 XMind）</h3>
+      <p>每父一个 } 包住整组子：根 } 包 A+B，A } 包 a1+a2，B } 包 b1+b2</p>
+      <span class="tag rec">最像 XMind 括号图</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-per-edge" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 320 300">
+        <g stroke="#b85c3a" stroke-width="1.6" fill="none" stroke-linecap="round">
+          <!-- root→A -->
+          <path d="M76 150 H97 M97 101 C104 101, 104 109, 109 109 M109 109 C104 109, 104 117, 97 117 M109 109 H118"/>
+          <!-- root→B -->
+          <path d="M76 150 H97 M97 211 C104 211, 104 219, 109 219 M109 219 C104 219, 104 227, 97 227 M109 219 H118"/>
+          <!-- A→a1 -->
+          <path d="M168 109 H186 M186 69 C193 69, 193 77, 198 77 M198 77 C193 77, 193 85, 186 85 M198 77 H216"/>
+          <!-- A→a2 -->
+          <path d="M168 109 H186 M186 129 C193 129, 193 137, 198 137 M198 137 C193 137, 193 145, 186 145 M198 137 H216"/>
+          <!-- B→b1 -->
+          <path d="M168 219 H186 M186 189 C193 189, 193 197, 198 197 M198 197 C193 197, 193 205, 186 205 M198 197 H216"/>
+          <!-- B→b2 -->
+          <path d="M168 219 H186 M186 249 C193 249, 193 257, 198 257 M198 257 C193 257, 193 265, 186 265 M198 257 H216"/>
+        </g>
+        <g fill="#fff" stroke="#b85c3a" stroke-width="1">
+          <rect x="18" y="135" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="118" y="95" width="50" height="28" rx="7"/>
+          <rect x="118" y="205" width="50" height="28" rx="7"/>
+          <rect x="216" y="64" width="44" height="26" rx="6"/>
+          <rect x="216" y="124" width="44" height="26" rx="6"/>
+          <rect x="216" y="184" width="44" height="26" rx="6"/>
+          <rect x="216" y="244" width="44" height="26" rx="6"/>
+        </g>
+        <g fill="#26221b" font-size="11" text-anchor="middle">
+          <text x="47" y="155" fill="#fff">根</text>
+          <text x="143" y="113">A</text>
+          <text x="143" y="223">B</text>
+          <text x="238" y="81">a1</text>
+          <text x="238" y="141">a2</text>
+          <text x="238" y="201">b1</text>
+          <text x="238" y="261">b2</text>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>每条边 · 小括号</h3>
+      <p>每个父→子边中段一个带尖钩的小 }（每边独立）</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选你认可的卡片，或直接在此回复。<b>重点：① 括号形状对吗？② 组括号还是每条边？</b></p>

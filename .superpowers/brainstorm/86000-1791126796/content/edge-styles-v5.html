@@ -1,0 +1,82 @@
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; }
+  .card-image svg { width: 100%; height: auto; display: block; background: #fff; border-radius: 8px; border: 1px solid #e2ddd2; }
+  svg text { font-family: -apple-system, "PingFang SC", sans-serif; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+  .tag.rec { background: #e8e3d8; color: #6e685c; }
+</style>
+
+<h2>大括号修正 — 父→尖点(嘴) + 一条 `}` 曲线 + 直线接子</h2>
+<p class="subtitle">对齐 XMind：父节点经尖点(嘴)接一条连续 `}` 曲线，每个子节点用<b>直线</b>从曲线端接入（不是纯曲线弯到节点）。</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="brace-xmind" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 400 320">
+        <g stroke="#d69a2a" stroke-width="3" fill="none" stroke-linecap="round">
+          <!-- 父 → 尖点(嘴) -->
+          <path d="M76 160 H108"/>
+          <!-- 嘴/箭头 (小尖角朝父) -->
+          <path d="M108 160 L120 154 L120 166 Z" fill="#d69a2a" stroke="none"/>
+          <!-- 一条连续 } 曲线 -->
+          <path d="M150 97 C114 97, 110 152, 110 160"/>
+          <path d="M110 160 C110 168, 114 223, 150 223"/>
+          <!-- 直线接子 (曲线端 → 子节点) -->
+          <path d="M150 97 H290"/>
+          <path d="M150 223 H290"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="18" y="145" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="290" y="82" width="56" height="30" rx="7"/>
+          <rect x="290" y="208" width="56" height="30" rx="7"/>
+        </g>
+        <g fill="#26221b" font-size="12" text-anchor="middle">
+          <text x="47" y="165" fill="#fff">父</text>
+          <text x="318" y="101">子1</text>
+          <text x="318" y="227">子2</text>
+        </g>
+        <text x="318" y="300" font-size="10" fill="#9a5b1f" text-anchor="middle">父→尖点(嘴)→`}`曲线→直线接子1/子2</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号图（曲线 + 直线）</h3>
+      <p>父→尖点(嘴) → 一条 `}` 曲线 → 直线接每个子节点</p>
+      <span class="tag rec">对齐 XMind 曲线+直线</span>
+    </div>
+  </div>
+
+  <div class="card" data-choice="brace-all-curve" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <svg viewBox="0 0 400 320">
+        <g stroke="#d69a2a" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M76 160 H108"/>
+          <path d="M150 97 C114 97, 110 152, 110 160"/>
+          <path d="M110 160 C110 168, 114 223, 150 223"/>
+          <!-- 纯曲线弯到子节点 (无直线段) -->
+          <path d="M150 97 C220 97, 250 97, 290 97"/>
+          <path d="M150 223 C220 223, 250 223, 290 223"/>
+        </g>
+        <g fill="#fff" stroke="#26221b" stroke-width="1">
+          <rect x="18" y="145" width="58" height="30" rx="7" fill="#26221b"/>
+          <rect x="290" y="82" width="56" height="30" rx="7"/>
+          <rect x="290" y="208" width="56" height="30" rx="7"/>
+        </g>
+        <g fill="#26221b" font-size="12" text-anchor="middle">
+          <text x="47" y="165" fill="#fff">父</text>
+          <text x="318" y="101">子1</text>
+          <text x="318" y="227">子2</text>
+        </g>
+        <text x="318" y="300" font-size="10" fill="#9a5b1f" text-anchor="middle">纯曲线弯到子节点（当前效果·不想要）</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>括号图（纯曲线 · 对照）</h3>
+      <p>曲线一直弯到子节点，无直线段（用户说不想要）</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:10px">在浏览器点选或回复。<b>确认：左边「曲线+直线接子」+ 父处尖点(嘴)，是否就是 XMind 的样子？</b></p>
