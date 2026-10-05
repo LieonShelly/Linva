@@ -157,8 +157,9 @@ struct ElbowProviderTests {
         #expect(grandConnector.path[3] == CGPoint(x: gf.rect.maxX, y: gf.center.y))
     }
 
-    /// 逻辑图排布下（父左子右，frame.side 全 .right）同样按中点折线。
-    @Test func logicArrangement_rightSideElbow() throws {
+    /// 逻辑图排布下（父左子右，frame.side 全 .right）：恢复 pre-feature 默认外观，
+    /// 竖折在子节点 x（to.x），而非径向的中点（PRD §6 #5 保持现状）。
+    @Test func logicArrangement_foldsAtChildX() throws {
         var doc = MindMapDocument.blank(rootText: "根")
         doc.layout = .logic
         let a = Node(text: "章")
@@ -170,9 +171,11 @@ struct ElbowProviderTests {
         let connector = try #require(connectors(doc).first)
         #expect(connector.path[0] == CGPoint(x: root.rect.maxX, y: root.center.y))
         #expect(connector.path[3] == CGPoint(x: af.rect.minX, y: af.center.y))
-        let mx = (root.rect.maxX + af.rect.minX) / 2
-        #expect(connector.path[1].x == mx)
-        #expect(connector.path[2].x == mx)
+        // 竖折段 x == 子节点 x（to.x），与 pre-feature LogicLayout 一致。
+        #expect(connector.path[1].x == af.rect.minX)
+        #expect(connector.path[2].x == af.rect.minX)
+        #expect(connector.path[1].y == root.center.y)
+        #expect(connector.path[2].y == af.center.y)
     }
 }
 

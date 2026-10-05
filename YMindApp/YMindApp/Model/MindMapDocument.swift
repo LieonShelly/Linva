@@ -51,6 +51,13 @@ struct MindMapDocument: Equatable, Codable, Sendable {
         // v4 及以下无 layout 字段 → 缺省 .radial（同 fill/image/blocks 缺省容错模式）。
         layout = try c.decodeIfPresent(LayoutKind.self, forKey: .layout) ?? .radial
         // v6 及以下无 edgeStyle 字段 → 缺省 .elbow（同 layout 缺省容错模式）。
-        edgeStyle = try c.decodeIfPresent(EdgeStyle.self, forKey: .edgeStyle) ?? .elbow
+        // 未知未来 token（如新版 app 新增的样式）→ 容错为 .elbow，不拒绝新文件
+        // （零拒绝哲学，同 Node.fill 的 rawValue 容错模式；decodeIfPresent(EdgeStyle.self)
+        // 会对未知枚举值抛 decodingFailed，导致旧 app 打不开新文件）。
+        if let raw = try c.decodeIfPresent(String.self, forKey: .edgeStyle) {
+            edgeStyle = EdgeStyle(rawValue: raw) ?? .elbow
+        } else {
+            edgeStyle = .elbow
+        }
     }
 }

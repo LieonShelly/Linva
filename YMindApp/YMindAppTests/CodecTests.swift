@@ -131,6 +131,17 @@ struct CodecTests {
         #expect(doc.edgeStyle == .elbow)
         #expect(doc.version == 7)
     }
+
+    @Test func unknownEdgeStyleToken_decodesAsElbow() throws {
+        // 未来文件：新版 app 新增的样式 token，旧 app 应零拒绝（同 fill 容错模式），
+        // 而不是 decodeIfPresent(EdgeStyle.self) 因未知枚举值抛错。
+        let futureJSON = """
+        {"version":7,"root":{"id":"00000000-0000-0000-0000-000000000001","text":"根","collapsed":false,"children":[]},"edgeStyle":"futureStyle"}
+        """
+        let doc = try YMindCodec.decode(Data(futureJSON.utf8))
+        #expect(doc.edgeStyle == .elbow)
+        #expect(doc.version == 7)
+    }
 }
 
 @Suite("Codec v3 图片字段")

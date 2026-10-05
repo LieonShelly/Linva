@@ -110,6 +110,7 @@ enum LayoutSupport {
 
     /// 每边样式的折线几何基元（spec §4.1，D1）：elbow 正交折线；curve 三次贝塞尔
     /// 切向 S 曲线采样；straight 两点直线。brace 是组样式，不走此基元（返回 []）。
+    /// elbow 折在中点 (from.x+to.x)/2 —— 径向排布的通用基元；logic 排布请用 `logicElbow`。
     static func edgePoints(from: CGPoint, to: CGPoint, style: EdgeStyle) -> [CGPoint] {
         switch style {
         case .elbow:
@@ -146,6 +147,13 @@ enum LayoutSupport {
         case .straight:
             return [from, to]
         }
+    }
+
+    /// logic（总分树）排布的肘形折线基元：竖折在子节点 x（to.x），
+    /// 即 pre-feature LogicLayout 的默认外观（PRD §6 #5「保持现状」，
+    /// refactor 前逻辑图一直折在子 x，radial 才折中点）。
+    static func logicElbow(from: CGPoint, to: CGPoint) -> [CGPoint] {
+        [from, CGPoint(x: to.x, y: from.y), CGPoint(x: to.x, y: to.y), to]
     }
 
     /// 三次贝塞尔采样（Bernstein），含两端点，共 segments+1 点。

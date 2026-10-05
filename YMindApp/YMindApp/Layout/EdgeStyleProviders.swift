@@ -9,11 +9,14 @@ private func sideDir(_ side: Side?) -> CGFloat {
 /// per-edge 样式（elbow/curve/straight）共用的父子遍历：每对有 frame 的父子产一个 Connector，
 /// 边几何按 `style` 走 LayoutSupport.edgePoints 基元。方向取子 frame.side
 /// （排布侧，孙继承父 side；模型节点 side 可为 nil）。
+/// `elbowFoldAtChildX`：logic 排布下 elbow 竖折在子节点 x（to.x），恢复 pre-feature 外观
+/// （PRD §6 #5 保持现状）；radial 走 edgePoints 中点基元。仅 ElbowProvider 传 true。
 /// internal：跨 Provider 文件共享（新 per-edge 样式直接复用，勿复制遍历）。
 func perEdgeConnectors(
     style: EdgeStyle,
     frames: [UUID: NodeFrame],
-    root: Node
+    root: Node,
+    elbowFoldAtChildX: Bool = false
 ) -> [ConnectorGeometry] {
     var out: [ConnectorGeometry] = []
     func walk(_ node: Node) {
@@ -23,9 +26,12 @@ func perEdgeConnectors(
                 let dir = sideDir(cf.side)
                 let start = CGPoint(x: pf.center.x + dir * pf.size.width / 2, y: pf.center.y)
                 let end = CGPoint(x: cf.center.x - dir * cf.size.width / 2, y: cf.center.y)
+                let path = elbowFoldAtChildX
+                    ? LayoutSupport.logicElbow(from: start, to: end)
+                    : LayoutSupport.edgePoints(from: start, to: end, style: style)
                 out.append(ConnectorGeometry(
                     id: child.id,
-                    path: LayoutSupport.edgePoints(from: start, to: end, style: style),
+                    path: path,
                     marker: nil,
                     fromId: node.id,
                     toId: child.id
@@ -38,7 +44,8 @@ func perEdgeConnectors(
     return out
 }
 
-/// 折线样式（D1）：正交折线，mx=(from.x+to.x)/2 竖折。
+/// 折线样式（D1）：正交折线。radial 竖折中点 mx=(from.x+to.x)/2；
+/// logic（总分树）竖折在子节点 x（to.x），保持 pre-feature 默认外观（PRD §6 #5）。
 struct ElbowProvider: EdgeStyleProvider {
     var requiresLogicArrangement: Bool { false }
     func connectors(
@@ -47,7 +54,12 @@ struct ElbowProvider: EdgeStyleProvider {
         root: Node,
         measure: TextMeasure
     ) -> [ConnectorGeometry] {
-        perEdgeConnectors(style: .elbow, frames: frames, root: root)
+        perEdgeConnectors(
+            style: .elbow,
+            frames: frames,
+            root: root,
+            elbowFoldAtChildX: document.layout == .logic
+        )
     }
 }
 
@@ -67,6 +79,12 @@ struct CurveProvider: EdgeStyleProvider {
 /// 大括号样式（D2/D3）：父-组连接器，每有子的父一个 "}"，子不连边。
 struct BraceProvider: EdgeStyleProvider {
     var requiresLogicArrangement: Bool { true }
+    /// 产组括号 Connector（每有子父节点一个）。
+    /// - 前置条件：`frames` 必须按逻辑树排布（父左子右、子竖排自上而下）——首子 topmost。
+    ///   `buildBrace` 取 yTop=首子 center.y、yBottom=末子 center.y，靠首末子垂直顺序
+    ///   保证 yTop ≤ yBottom（r = min(..., (yBottom−yTop)/4) 为正）；乱序会使 r 为负、弧反向。
+    /// - 该前置由 LayoutPipeline 保证：brace 的 `requiresLogicArrangement == true` 强制走
+    ///   LogicLayout 排布，再调本方法产 Connector。
     func connectors(
         document: MindMapDocument,
         frames: [UUID: NodeFrame],
