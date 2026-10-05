@@ -115,10 +115,11 @@ struct BraceProvider: EdgeStyleProvider {
         return out
     }
 
-    /// 按 spec §4.2 / 参考 HTML（brace-xmind.html）公式构建一个 "}" 组括号 Connector。
-    /// - 父 = 首末子 center.y 中点（嘴对准父）。
-    /// - 嘴朝父：path 首段 = (父右缘, yMid) → (xTip, yMid) 短直线。
-    /// - 上弧/下弧按 Q/L 段采样成折线；单 polyline 连续 → 经右缘竖线 (xRight,yTop)→(xRight,yBottom) 接续两弧。
+    /// 按参考 HTML（gemini-code-…html）构建一个开口 "}" 组括号 Connector。
+    /// - 嘴（尖角）Y 对齐父节点垂直中心（"头对齐父节点"）：yMid = parent.center.y。
+    /// - 开口不封闭：单条连续折线 右上端点 → 上弧 → spine 上段 → 嘴 → spine 下段 → 下弧 → 右下端点，
+    ///   xRight 上下两端开口，无右缘竖线、无父→嘴短直线（参考 HTML 同）。
+    /// - 上弧/下弧按 Q/L 段采样成折线；嘴为 path 内部点（非首/末）。
     /// - 根带圆圈时：xTip=mouthX+15，并产 ConnectorMarker(.circle, (xTip−4.5−1, yMid), 4.5)。
     static func buildBrace(
         id: UUID,
@@ -139,7 +140,8 @@ struct BraceProvider: EdgeStyleProvider {
             yTop = first.center.y
             yBottom = last.center.y
         }
-        let yMid = (yTop + yBottom) / 2
+        // 嘴（尖角）Y 对齐父节点垂直中心，而非首末子中点——保证 "头对齐父节点"。
+        let yMid = parent.center.y
         let w: CGFloat = isMain ? 56 : 34
         let mouthX = parent.rect.maxX
         let xTip = mouthX + (hasCircle ? 15 : 10)
@@ -148,31 +150,29 @@ struct BraceProvider: EdgeStyleProvider {
         let r = min(16, (yBottom - yTop) / 4, xRight - xStem, xStem - xTip)
 
         var pts: [CGPoint] = []
-        // 1) 父 → 嘴 短直线（path 首段）。
-        pts.append(CGPoint(x: mouthX, y: yMid))
-        pts.append(CGPoint(x: xTip, y: yMid))
-        // 2) 上弧（反向：嘴 → stem 中段 → 右上端点）。
+        // 开口 "}"：右上端点 → 上弧 → spine 上段 → 嘴 → spine 下段 → 下弧 → 右下端点（xRight 两端开口）。
+        // 参考 HTML path：
+        //   M xRight yTop Q xStem yTop, xStem yTop+r L xStem yMid−r Q xStem yMid, xTip yMid
+        //   Q xStem yMid, xStem yMid+r L xStem yBottom−r Q xStem yBottom, xRight yBottom
+        pts.append(CGPoint(x: xRight, y: yTop))
+        sampleQuad(into: &pts,
+                   from: CGPoint(x: xRight, y: yTop),
+                   control: CGPoint(x: xStem, y: yTop),
+                   to: CGPoint(x: xStem, y: yTop + r))
+        pts.append(CGPoint(x: xStem, y: yMid - r))
+        sampleQuad(into: &pts,
+                   from: CGPoint(x: xStem, y: yMid - r),
+                   control: CGPoint(x: xStem, y: yMid),
+                   to: CGPoint(x: xTip, y: yMid))
         sampleQuad(into: &pts,
                    from: CGPoint(x: xTip, y: yMid),
                    control: CGPoint(x: xStem, y: yMid),
-                   to: CGPoint(x: xStem, y: yMid - r))
-        pts.append(CGPoint(x: xStem, y: yTop + r))
+                   to: CGPoint(x: xStem, y: yMid + r))
+        pts.append(CGPoint(x: xStem, y: yBottom - r))
         sampleQuad(into: &pts,
-                   from: CGPoint(x: xStem, y: yTop + r),
-                   control: CGPoint(x: xStem, y: yTop),
-                   to: CGPoint(x: xRight, y: yTop))
-        // 3) 右缘竖线：右上 → 右下（单 polyline 连续接续下弧）。
-        pts.append(CGPoint(x: xRight, y: yBottom))
-        // 4) 下弧（反向：右下端点 → stem 下段 → 嘴）。
-        sampleQuad(into: &pts,
-                   from: CGPoint(x: xRight, y: yBottom),
+                   from: CGPoint(x: xStem, y: yBottom - r),
                    control: CGPoint(x: xStem, y: yBottom),
-                   to: CGPoint(x: xStem, y: yBottom - r))
-        pts.append(CGPoint(x: xStem, y: yMid + r))
-        sampleQuad(into: &pts,
-                   from: CGPoint(x: xStem, y: yMid + r),
-                   control: CGPoint(x: xStem, y: yMid),
-                   to: CGPoint(x: xTip, y: yMid))
+                   to: CGPoint(x: xRight, y: yBottom))
 
         let marker: ConnectorMarker? = hasCircle
             ? ConnectorMarker(kind: .circle, center: CGPoint(x: xTip - 4.5 - 1, y: yMid), radius: 4.5)

@@ -287,7 +287,8 @@ struct BraceProviderTests {
         BraceProvider().connectors(document: doc, frames: frames, root: doc.root, measure: TextMeasure())
     }
 
-    /// 多子：yTop=首子 center.y、yBottom=末子 center.y、嘴 yMid=(yTop+yBottom)/2=父 center.y。
+    /// 多子：yTop=首子 center.y、yBottom=末子 center.y；嘴 yMid = 父 center.y（头对齐父）。
+    /// 开口 "}"：path 首点=(xRight,yTop)、末点=(xRight,yBottom)，无右缘竖线、无父→嘴短直线。
     /// 根括号带圆圈 → xTip=mouthX+15。
     @Test func multiChild_mouthAlignsToParentCenter() throws {
         let (doc, frames) = multiChildDoc()
@@ -302,8 +303,8 @@ struct BraceProviderTests {
 
         let yTop = a.center.y
         let yBottom = b.center.y
-        let yMid = (yTop + yBottom) / 2
-        #expect(yMid == root.center.y)  // 等高等子：嘴对准父
+        let yMid = root.center.y  // 嘴直接对齐父节点垂直中心
+        #expect(yMid == root.center.y)
 
         let mouthX = root.rect.maxX
         let w: CGFloat = 56  // 主括号
@@ -312,11 +313,11 @@ struct BraceProviderTests {
         let xRight = mouthX + w - 8
         let r = min(16, (yBottom - yTop) / 4, xRight - xStem, xStem - xTip)
 
-        // path 首段 = 父→嘴 短直线。
-        #expect(c.path.first == CGPoint(x: mouthX, y: yMid))
+        // 开口 "}"：首点在右上端点、末点在右下端点（xRight 两端开口，不封闭）。
+        #expect(c.path.first == CGPoint(x: xRight, y: yTop))
+        #expect(c.path.last == CGPoint(x: xRight, y: yBottom))
+        // 嘴（尖角）为 path 内部点。
         #expect(c.path.contains(CGPoint(x: xTip, y: yMid)))
-        #expect(c.path.contains(CGPoint(x: xRight, y: yTop)))
-        #expect(c.path.contains(CGPoint(x: xRight, y: yBottom)))
         #expect(c.path.contains(CGPoint(x: xStem, y: yMid - r)))
         #expect(c.path.contains(CGPoint(x: xStem, y: yMid + r)))
         // 根带圆圈标记。
@@ -324,6 +325,37 @@ struct BraceProviderTests {
         #expect(marker.kind == .circle)
         #expect(marker.radius == 4.5)
         #expect(marker.center == CGPoint(x: xTip - 4.5 - 1, y: yMid))
+    }
+
+    /// 头对齐父：嘴 yMid 直接 = 父 center.y，即使父中心 ≠ 首末子中点（不等高子树）。
+    /// 开口 "}"：path 首点=(xRight,yTop)、末点=(xRight,yBottom)，无右缘竖线、无父→嘴短直线。
+    @Test func mouthAlignsToParentCenter_unequalChildSpan() throws {
+        let parent = NodeFrame(
+            id: UUID(), text: "根", center: CGPoint(x: 0, y: 90),
+            size: NodeSize(width: 120, height: 40), isRoot: true, side: nil,
+            collapsed: false, hiddenCount: 0)
+        let first = NodeFrame(
+            id: UUID(), text: "a", center: CGPoint(x: 300, y: 40),
+            size: NodeSize(width: 60, height: 30), isRoot: false, side: .right,
+            collapsed: false, hiddenCount: 0)
+        let last = NodeFrame(
+            id: UUID(), text: "b", center: CGPoint(x: 300, y: 160),
+            size: NodeSize(width: 60, height: 30), isRoot: false, side: .right,
+            collapsed: false, hiddenCount: 0)
+        let childrenMidline = (first.center.y + last.center.y) / 2  // 100
+        // 父中心 90 ≠ 子跨中线 100 → 嘴必须对齐父（90），而非子跨中线。
+        #expect(parent.center.y != childrenMidline)
+
+        let c = BraceProvider.buildBrace(
+            id: parent.id, parent: parent, first: first, last: last,
+            childCount: 2, isMain: true, hasCircle: false)
+        let mouthX = parent.rect.maxX
+        let xTip = mouthX + 10  // 无圆圈
+        // 嘴（尖角）yMid = 父 center.y（头对齐父节点）。
+        #expect(c.path.contains(CGPoint(x: xTip, y: parent.center.y)))
+        // 开口：首点右上端点、末点右下端点（xRight 两端开口，不封闭）。
+        #expect(c.path.first == CGPoint(x: mouthX + 56 - 8, y: first.center.y))
+        #expect(c.path.last == CGPoint(x: mouthX + 56 - 8, y: last.center.y))
     }
 
     /// 单子：span=max(子高·0.85, 28)，yTop=cy−span/2、yBottom=cy+span/2。
