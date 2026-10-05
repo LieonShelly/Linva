@@ -98,14 +98,11 @@ YMind 是一款 **macOS 原生**的思维导图应用：用 **SwiftUI** 做窗�
 
 核心是一条单向数据流主链路，四条纪律贯穿始终：
 
-```
-  交互（手势 / 快捷键 / 选中 / Undo / 命令）
-        ↓  MindMapCommand（CommandBus 入栈）
-     Model（单根主题树 + 文档属性）
-        ↓  DocumentSession.relayout()
-  Layout（CPU：树 → NodeFrame / 连线路径）  ──►  LayoutSnapshot（稳定接缝）
-        ↓
-   Render（Metal 只消费 LayoutSnapshot + Camera，画像素）
+```mermaid
+flowchart TD
+    UI["交互<br/>手势 · 快捷键 · 选中 · Undo"] -->|MindMapCommand / CommandBus 入栈| MODEL["Model<br/>单根主题树 · 文档属性"]
+    MODEL -->|DocumentSession.relayout()| LAYOUT["Layout（CPU）<br/>树 → NodeFrame · 连线路径"]
+    LAYOUT -->|LayoutSnapshot 稳定接缝| RENDER["Render（Metal）<br/>只消费 LayoutSnapshot + Camera<br/>描边 · 填充 · 贴文字"]
 ```
 
 **四条纪律**
@@ -117,14 +114,14 @@ YMind 是一款 **macOS 原生**的思维导图应用：用 **SwiftUI** 做窗�
 
 ### 分层目录
 
-```
-YMindApp/
-  App/         SwiftUI 壳：窗口、MainToolbar、浮层编辑、导入预览、恢复横幅
-  Commands/    MindMapCommand 枚举 + CommandBus（Undo/Redo）
-  Model/       Node 树、MindMapDocument、YMindCodec（.ymind 编解码）、导入器
-  Layout/      布局引擎（RadialLayout / LogicLayout）、LayoutSupport、LayoutSnapshot、连线 Provider
-  Session/     DocumentSession（门面）、LayoutPipeline、Persistence、Clipboard、Search
-  Render/      MetalRenderer、TextAtlas、ImageTextureCache、命中测试、PNGExporter
+```mermaid
+flowchart TD
+    ROOT["YMindApp/ 源码"] --> APP["App/<br/>SwiftUI 壳：窗口 · 工具条 · 浮层编辑 · 导入预览 · 恢复横幅"]
+    ROOT --> CMD["Commands/<br/>MindMapCommand 枚举 · CommandBus（Undo/Redo）"]
+    ROOT --> MODEL["Model/<br/>Node 树 · MindMapDocument · YMindCodec · 导入器"]
+    ROOT --> LAYOUT["Layout/<br/>RadialLayout · LogicLayout · LayoutSupport · LayoutSnapshot · 连线 Provider"]
+    ROOT --> SESS["Session/<br/>DocumentSession · LayoutPipeline · Persistence · Clipboard · Search"]
+    ROOT --> RENDER["Render/<br/>MetalRenderer · TextAtlas · ImageTextureCache · 命中测试 · PNGExporter"]
 ```
 
 ### 连线样式扩展点（核心设计之一）
@@ -145,6 +142,19 @@ protocol EdgeStyleProvider {
 enum EdgeStyleRegistry {
     static func provider(for style: EdgeStyle) -> EdgeStyleProvider { … }
 }
+```
+
+```mermaid
+flowchart LR
+    ES["EdgeStyle<br/>enum：elbow · curve · brace"] -->|switch 唯一分派| REG["EdgeStyleRegistry<br/>provider(for:)"]
+    REG --> P["EdgeStyleProvider<br/>protocol"]
+    P --> ELBOW["ElbowProvider"]
+    P --> CURVE["CurveProvider"]
+    P --> BRACE["BraceProvider<br/>requiresLogicArrangement = true"]
+    ELBOW --> CG["ConnectorGeometry<br/>id + path + marker?"]
+    CURVE --> CG
+    BRACE --> CG
+    CG --> R["Render（Metal）<br/>描边 path + 画 marker<br/>对样式零感知"]
 ```
 
 **新增一种连线样式**：`EdgeStyle` 加一个枚举值 + 新建一个 Provider 文件 + 注册表登记一行。**引擎 / 渲染 / 编解码零改动**（已用 `straight` 直线样式做了回归验证）。
@@ -192,14 +202,15 @@ enum EdgeStyleRegistry {
 
 ## 项目结构
 
-```
-├── YMindApp/              主工程（Xcode project，scheme YMindApp）
-│   └── YMindApp/          源码（App / Commands / Layout / Model / Render / Session）
-│   └── YMindAppTests/     单元测试（Swift Testing）
-├── prototype/             HTML 原型（交互 / 布局 / 连线样式对齐用）
-├── docs/                  架构文档、PRD、设计稿、屏幕截图
-├── .agents/               Agent 配置（skills / MCP / rules）
-└── scripts/               check-boundaries.sh（分层依赖边界检查）
+```mermaid
+flowchart TD
+    ROOT["/"] --> APP["YMindApp/ 主工程<br/>（Xcode project · scheme YMindApp）"]
+    APP --> SRC["YMindApp/ 源码<br/>App · Commands · Layout · Model · Render · Session"]
+    APP --> TESTS["YMindAppTests/ 单元测试<br/>（Swift Testing）"]
+    ROOT --> PROTO["prototype/<br/>HTML 原型（交互 · 布局 · 连线样式）"]
+    ROOT --> DOCS["docs/<br/>架构文档 · PRD · 设计稿 · 屏幕截图"]
+    ROOT --> AGENTS[".agents/ Agent 配置<br/>skills · MCP · rules"]
+    ROOT --> SCRIPTS["scripts/<br/>check-boundaries.sh（分层依赖边界检查）"]
 ```
 
 ## 构建与运行
