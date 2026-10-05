@@ -108,18 +108,18 @@
 
 ### 4.2 brace（组连接器，D2/D3）
 
-`BraceProvider.connectors(...)` 对每个有子父节点产一个 Connector，几何按参考 HTML 公式（产品本人逐字 HTML `brace-xmind.html`）：
+`BraceProvider.connectors(...)` 对每个有子父节点产一个 Connector，几何按参考 HTML 公式（产品提供的 `prototype/gemini-code-1791128458700.html`）：
 ```
 yTop    = 首子 center.y；yBottom = 末子 center.y
 if N == 1: span = max(子高·0.85, 28); yTop = cy−span/2; yBottom = cy+span/2
-yMid = (yTop + yBottom) / 2            // = 父 center.y（父=首末子中点，原型已修）
+yMid    = 父 center.y                   // 嘴（尖角）对齐父节点垂直中心（"头对齐父节点"）
 w = 括号宽（主 56 / 子 34，按层级）
 xTip = mouthX + (hasCircle ? 15 : 10)；xStem = mouthX + w·0.54；xRight = mouthX + w − 8
 r = min(16, (yBottom−yTop)/4, xRight−xStem, xStem−xTip)
 top:    M xRight yTop  Q xStem yTop, xStem yTop+r  L xStem yMid−r  Q xStem yMid, xTip yMid
 bottom: M xTip yMid    Q xStem yMid, xStem yMid+r  L xStem yBottom−r  Q xStem yBottom, xRight yBottom
 ```
-- 父 → 嘴：短直线 `(父右缘, yMid) → (mouthX, yMid)` 并入 path 首段。
+- **开口 "}"，不封闭**：单条连续折线 = `top` 后接 `bottom`（两弧在嘴处相接），起点右上端点 `(xRight,yTop)`、终点右下端点 `(xRight,yBottom)`——xRight 两端开口，**无右缘竖线、无父→嘴短直线**（参考 HTML 同）。
 - `hasCircle` → `ConnectorMarker(.circle, center: (xTip−r_c−1, yMid), radius: 4.5)`（折叠标记）。
 - 颜色：YMind 单一边色（edge separator），不用参考双色（那是 XMind 主题）。
 
