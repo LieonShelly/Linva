@@ -249,4 +249,4 @@ xcodebuild test -project YMindApp/YMindApp.xcodeproj -scheme YMindApp -only-test
 
 ---
 
-<sub>YMind 是个人学习与产品实验项目：macOS 原生思维导图，把「树 → 布局 → 渲染」主链路做到极致并保持可扩展。</sub>
+<sub>YMind 是个人学习与产品实验项目：macOS 原生思维导图，把「树 → 布局 → 渲染」主链路做到极致并保持可扩展。如侵权，请联系删除。</sub>
